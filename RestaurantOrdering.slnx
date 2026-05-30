@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RestaurantOrdering.Api/RestaurantOrdering.Api.csproj" Id="27feb0ff-b596-4338-adf1-a11c891a63ab" />
+    <Project Path="src/RestaurantOrdering.Application/RestaurantOrdering.Application.csproj" Id="2700c898-7644-4801-83a1-60a8304e1ee0" />
+    <Project Path="src/RestaurantOrdering.Domain/RestaurantOrdering.Domain.csproj" Id="4a30c817-5642-4ef0-b9c2-b5e51b79218a" />
+    <Project Path="src/RestaurantOrdering.Infrastructure/RestaurantOrdering.Infrastructure.csproj" Id="603f23d4-f17e-4475-9f76-acf92e2d2462" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/RestaurantOrdering.IntegrationTests/RestaurantOrdering.IntegrationTests.csproj" Id="736c34a9-f853-4af3-b837-266112969fcd" />
+    <Project Path="tests/RestaurantOrdering.UnitTests/RestaurantOrdering.UnitTests.csproj" Id="57167f3c-1d25-4c26-8746-161d495f5e16" />
+  </Folder>
+</Solution>
