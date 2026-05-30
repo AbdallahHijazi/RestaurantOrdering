@@ -1,28 +1,26 @@
 ﻿using FluentValidation;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using RestaurantOrdering.Application.Common.Behaviors;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace RestaurantOrdering.Application
+namespace RestaurantOrdering.Application;
+
+public static class DependencyInjection
 {
-    public static class DependencyInjection
+    public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        public static IServiceCollection AddApplication(this IServiceCollection services)
-        {
-            var assembly = Assembly.GetExecutingAssembly();
+        var assembly = Assembly.GetExecutingAssembly();
 
-            services.AddMediatR(cfg =>
-            {
-                cfg.RegisterServicesFromAssembly(assembly);
-            });
+        services.AddMediatR(cfg =>
+            cfg.RegisterServicesFromAssembly(assembly));
 
-            services.AddValidatorsFromAssembly(assembly);
-            services.AddAutoMapper(cfg => { }, assembly);
-            return services;
-        }
+        services.AddValidatorsFromAssembly(assembly);
+
+        services.AddTransient(
+            typeof(IPipelineBehavior<,>),
+            typeof(ValidationBehavior<,>));
+
+        return services;
     }
 }
