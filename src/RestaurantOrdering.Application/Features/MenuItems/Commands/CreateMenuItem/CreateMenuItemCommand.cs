@@ -1,0 +1,18 @@
+using MediatR;
+using RestaurantOrdering.Application.Features.MenuItems.DTOs;
+
+namespace RestaurantOrdering.Application.Features.MenuItems.Commands.CreateMenuItem;
+
+public sealed record CreateMenuItemCommand(
+    Guid RestaurantId,
+    Guid CategoryId,
+    Guid? ImageFileId,
+    string NameAr,
+    string? NameEn,
+    string? DescriptionAr,
+    string? DescriptionEn,
+    decimal Price,
+    decimal? DiscountPrice,
+    int DisplayOrder,
+    bool IsAvailable,
+    bool IsActive) : IRequest<MenuItemDto>;
