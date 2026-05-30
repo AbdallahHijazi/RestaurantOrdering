@@ -38,6 +38,8 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
             .HasForeignKey(oi => oi.MenuItemId)
             .OnDelete(DeleteBehavior.NoAction);
 
+        builder.HasQueryFilter(oi => !oi.Order.IsDeleted);
+
         builder.ToTable(t =>
         {
             t.HasCheckConstraint("CK_OrderItems_UnitPrice", "[UnitPrice] >= 0");

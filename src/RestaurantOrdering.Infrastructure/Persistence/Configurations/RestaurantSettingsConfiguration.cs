@@ -36,6 +36,8 @@ public class RestaurantSettingsConfiguration : IEntityTypeConfiguration<Restaura
             .HasForeignKey<RestaurantSettings>(s => s.RestaurantId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasQueryFilter(s => !s.Restaurant.IsDeleted);
+
         builder.ToTable(t =>
         {
             t.HasCheckConstraint("CK_RestaurantSettings_TaxRate", "[TaxRate] >= 0 AND [TaxRate] <= 100");
