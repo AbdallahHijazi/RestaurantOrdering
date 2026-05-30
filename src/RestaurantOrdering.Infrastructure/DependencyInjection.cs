@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RestaurantOrdering.Application.Common.Interfaces;
 using RestaurantOrdering.Infrastructure.Identity;
 using RestaurantOrdering.Infrastructure.Persistence;
+using RestaurantOrdering.Infrastructure.Persistence.Seed;
 using RestaurantOrdering.Infrastructure.Services;
 
 namespace RestaurantOrdering.Infrastructure;
@@ -27,6 +28,7 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
         services.AddScoped<IDateTimeService, DateTimeService>();
+        services.AddScoped<DevelopmentDataSeeder>();
 
         return services;
     }

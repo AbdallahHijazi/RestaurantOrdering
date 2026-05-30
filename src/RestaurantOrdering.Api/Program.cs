@@ -1,5 +1,6 @@
 using RestaurantOrdering.Application;
 using RestaurantOrdering.Infrastructure;
+using RestaurantOrdering.Infrastructure.Persistence.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,11 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+if (app.Environment.IsDevelopment())
+{
+    await app.Services.SeedDevelopmentDataAsync();
+}
 
 app.Run();
 public partial class Program;
