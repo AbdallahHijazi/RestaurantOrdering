@@ -85,6 +85,8 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.ToTable(t =>
         {
+            t.HasCheckConstraint("CK_Orders_OrderType", "[OrderType] IN (1, 2)");
+            t.HasCheckConstraint("CK_Orders_OrderStatus", "[OrderStatus] IN (1, 2, 3, 4, 5)");
             t.HasCheckConstraint("CK_Orders_Subtotal", "[Subtotal] >= 0");
             t.HasCheckConstraint("CK_Orders_DiscountAmount", "[DiscountAmount] >= 0");
             t.HasCheckConstraint("CK_Orders_TaxAmount", "[TaxAmount] >= 0");
