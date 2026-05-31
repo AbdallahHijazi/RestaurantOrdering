@@ -1,4 +1,5 @@
 using RestaurantOrdering.Application;
+using RestaurantOrdering.Api.Extensions;
 using RestaurantOrdering.Infrastructure;
 using RestaurantOrdering.Infrastructure.Persistence.Seed;
 
@@ -33,6 +34,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("Frontend");
+app.UseApiExceptionHandling();
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
