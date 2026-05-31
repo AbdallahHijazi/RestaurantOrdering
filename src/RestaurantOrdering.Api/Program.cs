@@ -83,6 +83,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("Frontend");
 app.UseApiExceptionHandling();
+app.UseDevelopmentOnlyAdminAccessGuard();
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
