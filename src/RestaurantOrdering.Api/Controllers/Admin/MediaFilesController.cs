@@ -28,7 +28,7 @@ public sealed class MediaFilesController : ControllerBase
     [ProducesResponseType(typeof(UploadedMediaFileResponse), StatusCodes.Status201Created)]
     public async Task<ActionResult<UploadedMediaFileResponse>> Upload(
         Guid restaurantId,
-        [FromForm] IFormFile? file,
+        IFormFile? file,
         CancellationToken cancellationToken)
     {
         if (file is null)
