@@ -36,6 +36,11 @@ public sealed class CreateMenuItemCommandValidator : AbstractValidator<CreateMen
             .GreaterThanOrEqualTo(0m)
             .When(x => x.DiscountPrice.HasValue);
 
+        RuleFor(x => x.DiscountPrice)
+            .LessThanOrEqualTo(x => x.Price)
+            .When(x => x.DiscountPrice.HasValue)
+            .WithMessage("Discount price must be less than or equal to the regular price.");
+
         RuleFor(x => x.DisplayOrder)
             .GreaterThanOrEqualTo(0);
     }

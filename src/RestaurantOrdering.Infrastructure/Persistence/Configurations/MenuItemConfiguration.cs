@@ -57,6 +57,9 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
             t.HasCheckConstraint(
                 "CK_MenuItems_DiscountPrice",
                 "[DiscountPrice] IS NULL OR [DiscountPrice] >= 0");
+            t.HasCheckConstraint(
+                "CK_MenuItems_DiscountPrice_NotGreaterThanPrice",
+                "[DiscountPrice] IS NULL OR [DiscountPrice] <= [Price]");
         });
     }
 }
