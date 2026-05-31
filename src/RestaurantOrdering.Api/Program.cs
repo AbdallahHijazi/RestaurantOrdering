@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment.ContentRootPath);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -34,6 +34,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("Frontend");
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseAuthorization();
 
