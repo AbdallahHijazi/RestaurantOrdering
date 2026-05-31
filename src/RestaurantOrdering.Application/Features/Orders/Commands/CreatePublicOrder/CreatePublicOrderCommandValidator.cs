@@ -42,7 +42,9 @@ public sealed class CreatePublicOrderCommandValidator : AbstractValidator<Create
             .When(x => !string.IsNullOrWhiteSpace(x.Notes));
 
         RuleFor(x => x.Items)
-            .NotEmpty();
+            .NotEmpty()
+            .Must(items => items is null || items.Count <= 100)
+            .WithMessage("An order cannot contain more than 100 item lines.");
 
         RuleForEach(x => x.Items).ChildRules(item =>
         {
