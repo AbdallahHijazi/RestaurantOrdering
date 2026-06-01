@@ -1,1 +1,9 @@
-<p>error-state works!</p>
+<section class="error-state" role="alert">
+  <h2>{{ resolveTitle(locale(), title()) }}</h2>
+  <p>{{ resolveMessage(locale(), message()) }}</p>
+  @if (showRetry()) {
+    <button type="button" class="error-state__retry" (click)="retry.emit()">
+      {{ locale()?.locale() === 'ar' ? 'إعادة المحاولة' : 'Try again' }}
+    </button>
+  }
+</section>

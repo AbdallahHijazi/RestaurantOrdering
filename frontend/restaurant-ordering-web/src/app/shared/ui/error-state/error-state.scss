@@ -1,0 +1,34 @@
+.error-state {
+  max-width: 36rem;
+  margin: 4rem auto;
+  padding: 2rem;
+  text-align: center;
+  background: var(--restaurant-surface);
+  border: 1px solid var(--restaurant-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+.error-state h2 {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display);
+}
+
+.error-state p {
+  margin: 0 0 1.25rem;
+  color: var(--restaurant-muted-text);
+}
+
+.error-state__retry {
+  border: none;
+  border-radius: 999px;
+  padding: 0.65rem 1.25rem;
+  background: var(--restaurant-accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+.error-state__retry:focus-visible {
+  outline: 2px solid var(--restaurant-accent);
+  outline-offset: 2px;
+}

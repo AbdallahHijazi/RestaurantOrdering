@@ -1,1 +1,88 @@
-<p>menu-item-card works!</p>
+<article
+  class="menu-item-card"
+  [class.menu-item-card--sold-out]="!item().isAvailable"
+  [class.menu-item-card--in-cart]="quantity() > 0"
+>
+  <div class="menu-item-card__media">
+    @if (imageSrc(); as src) {
+      <img
+        [src]="src"
+        [alt]="displayName()"
+        loading="lazy"
+        (error)="onImageError()"
+      />
+    } @else {
+      <div class="menu-item-card__placeholder" aria-hidden="true"></div>
+    }
+
+    <div class="menu-item-card__badges">
+      @if (item().isPopular) {
+        <span class="menu-item-card__badge">{{ labels().popular }}</span>
+      }
+      @if (item().isVegetarian) {
+        <span class="menu-item-card__badge menu-item-card__badge--soft">{{ labels().vegetarian }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="menu-item-card__body">
+    <div class="menu-item-card__header">
+      <h3>{{ displayName() }}</h3>
+      <div class="menu-item-card__prices">
+        @if (displayDiscountPrice(); as discountPrice) {
+          <span class="menu-item-card__price menu-item-card__price--discount">{{ discountPrice }}</span>
+          <span class="menu-item-card__price menu-item-card__price--original">{{ displayPrice() }}</span>
+        } @else {
+          <span class="menu-item-card__price">{{ displayPrice() }}</span>
+        }
+      </div>
+    </div>
+
+    @if (displayDescription()) {
+      <p class="menu-item-card__description">{{ displayDescription() }}</p>
+    }
+
+    <div class="menu-item-card__actions">
+      @if (!item().isAvailable) {
+        <button type="button" class="menu-item-card__btn" disabled>
+          {{ labels().soldOut }}
+        </button>
+      } @else if (quantity() > 0) {
+        <div class="menu-item-card__quantity" role="group" [attr.aria-label]="displayName()">
+          <button
+            type="button"
+            class="menu-item-card__qty-btn"
+            (click)="decrement()"
+            [attr.aria-label]="localeService.locale() === 'ar' ? 'إنقاص' : 'Decrease'"
+          >
+            −
+          </button>
+          <span class="menu-item-card__qty-value" aria-live="polite">{{ quantity() }}</span>
+          <button
+            type="button"
+            class="menu-item-card__qty-btn"
+            (click)="increment()"
+            [attr.aria-label]="localeService.locale() === 'ar' ? 'زيادة' : 'Increase'"
+          >
+            +
+          </button>
+        </div>
+      } @else {
+        <button
+          type="button"
+          class="menu-item-card__btn"
+          [class.menu-item-card__btn--added]="justAdded()"
+          (click)="addItem()"
+          [attr.aria-live]="justAdded() ? 'polite' : null"
+        >
+          @if (justAdded()) {
+            <span aria-hidden="true">✓</span>
+            {{ labels().added }}
+          } @else {
+            {{ labels().add }}
+          }
+        </button>
+      }
+    </div>
+  </div>
+</article>

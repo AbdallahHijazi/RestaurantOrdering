@@ -1,1 +1,33 @@
-<p>restaurant-cover-hero works!</p>
+<section class="restaurant-hero" aria-labelledby="restaurant-hero-title">
+  <div class="restaurant-hero__media">
+    @if (coverSrc(); as src) {
+      <img [src]="src" [alt]="displayName()" (error)="onCoverError()" />
+    } @else {
+      <div class="restaurant-hero__fallback" aria-hidden="true"></div>
+    }
+    <div class="restaurant-hero__overlay"></div>
+  </div>
+
+  <div class="restaurant-hero__content">
+    <div class="restaurant-hero__inner">
+      @if (statusLabel(); as status) {
+        <span
+          class="restaurant-hero__status"
+          [class.restaurant-hero__status--closed]="restaurant().isOpen === false"
+        >
+          {{ status }}
+        </span>
+      }
+
+      <h2 id="restaurant-hero-title">{{ displayName() }}</h2>
+
+      @if (displayDescription()) {
+        <p>{{ displayDescription() }}</p>
+      }
+
+      <button type="button" class="restaurant-hero__cta" (click)="exploreMenu.emit()">
+        {{ localeService.uiText('viewMenu') }}
+      </button>
+    </div>
+  </div>
+</section>

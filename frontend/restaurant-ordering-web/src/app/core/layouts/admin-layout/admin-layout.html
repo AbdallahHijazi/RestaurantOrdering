@@ -1,7 +1,15 @@
-<header>
-  <h1>Restaurant Admin</h1>
-</header>
+<div class="admin-shell">
+  <header class="admin-header">
+    <div class="admin-header__inner">
+      <h1 class="admin-header__title">Restaurant Admin</h1>
+      <nav class="admin-nav" aria-label="Admin navigation">
+        <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+        <a routerLink="/admin/restaurant-profile" routerLinkActive="active">Profile</a>
+      </nav>
+    </div>
+  </header>
 
-<main>
-  <router-outlet />
-</main>
+  <main class="admin-main">
+    <router-outlet />
+  </main>
+</div>

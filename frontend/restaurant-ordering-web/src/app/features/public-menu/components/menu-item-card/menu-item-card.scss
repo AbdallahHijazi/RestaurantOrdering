@@ -1,0 +1,210 @@
+.menu-item-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--restaurant-surface);
+  border: 1px solid var(--restaurant-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgb(42 33 28 / 0.04);
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.menu-item-card__media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--restaurant-alternate-surface);
+}
+
+.menu-item-card__media img,
+.menu-item-card__placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 220ms ease;
+}
+
+.menu-item-card__placeholder {
+  background: linear-gradient(135deg, var(--restaurant-alternate-surface), var(--restaurant-border));
+}
+
+.menu-item-card__badges {
+  position: absolute;
+  top: 0.75rem;
+  inset-inline-start: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.menu-item-card__badge {
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: var(--restaurant-accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.menu-item-card__badge--soft {
+  background: rgb(255 255 255 / 0.92);
+  color: var(--restaurant-accent);
+}
+
+.menu-item-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  flex: 1;
+}
+
+.menu-item-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.menu-item-card__header h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.menu-item-card__prices {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  white-space: nowrap;
+}
+
+.menu-item-card__price {
+  font-weight: 600;
+}
+
+.menu-item-card__price--discount {
+  color: var(--restaurant-accent);
+}
+
+.menu-item-card__price--original {
+  color: var(--restaurant-muted-text);
+  text-decoration: line-through;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.menu-item-card__description {
+  margin: 0;
+  color: var(--restaurant-muted-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.menu-item-card__actions {
+  margin-top: auto;
+}
+
+.menu-item-card__btn,
+.menu-item-card__qty-btn {
+  border: none;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background-color var(--transition-base),
+    opacity var(--transition-base);
+}
+
+.menu-item-card__btn {
+  width: 100%;
+  min-height: 2.75rem;
+  border-radius: 999px;
+  background: var(--restaurant-accent);
+  color: #fff;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.menu-item-card__btn:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.menu-item-card__btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.menu-item-card__btn:disabled {
+  background: #b8b0a8;
+  cursor: not-allowed;
+}
+
+.menu-item-card__btn--added {
+  background: #4a6741;
+}
+
+.menu-item-card__quantity {
+  display: grid;
+  grid-template-columns: 2.75rem 1fr 2.75rem;
+  align-items: center;
+  border: 1px solid var(--restaurant-border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--restaurant-surface);
+}
+
+.menu-item-card__qty-btn {
+  min-height: 2.75rem;
+  background: transparent;
+  color: var(--restaurant-accent);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.menu-item-card__qty-btn:focus-visible,
+.menu-item-card__btn:focus-visible {
+  outline: 2px solid var(--restaurant-accent);
+  outline-offset: 2px;
+}
+
+.menu-item-card__qty-value {
+  text-align: center;
+  font-weight: 600;
+}
+
+.menu-item-card--sold-out .menu-item-card__media img {
+  filter: saturate(0.45);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .menu-item-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .menu-item-card:hover .menu-item-card__media img {
+    transform: scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-item-card,
+  .menu-item-card__media img,
+  .menu-item-card__btn,
+  .menu-item-card__qty-btn {
+    transition: none;
+  }
+
+  .menu-item-card:hover {
+    transform: none;
+  }
+}

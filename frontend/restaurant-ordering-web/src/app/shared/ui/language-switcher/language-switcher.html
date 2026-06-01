@@ -1,1 +1,20 @@
-<p>language-switcher works!</p>
+<div class="language-switcher" role="group" aria-label="Language switcher">
+  <button
+    type="button"
+    class="language-switcher__btn"
+    [class.is-active]="localeService.locale() === 'ar'"
+    [attr.aria-pressed]="localeService.locale() === 'ar'"
+    (click)="setLocale('ar')"
+  >
+    ع
+  </button>
+  <button
+    type="button"
+    class="language-switcher__btn"
+    [class.is-active]="localeService.locale() === 'en'"
+    [attr.aria-pressed]="localeService.locale() === 'en'"
+    (click)="setLocale('en')"
+  >
+    EN
+  </button>
+</div>

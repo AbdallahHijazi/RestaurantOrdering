@@ -1,1 +1,125 @@
-<p>restaurant-live-preview works!</p>
+<section class="live-preview" aria-labelledby="live-preview-title">
+  <div class="live-preview__toolbar">
+    <h2 id="live-preview-title">{{ localeService.uiText('previewTitle') }}</h2>
+
+    <div class="live-preview__controls" role="group" aria-label="Preview controls">
+      <button type="button" [class.is-active]="viewport() === 'desktop'" (click)="setViewport('desktop')">
+        Desktop
+      </button>
+      <button type="button" [class.is-active]="viewport() === 'tablet'" (click)="setViewport('tablet')">
+        Tablet
+      </button>
+      <button type="button" [class.is-active]="viewport() === 'mobile'" (click)="setViewport('mobile')">
+        Mobile
+      </button>
+      <button type="button" [class.is-active]="previewLocale() === 'ar'" (click)="setPreviewLocale('ar')">
+        العربية
+      </button>
+      <button type="button" [class.is-active]="previewLocale() === 'en'" (click)="setPreviewLocale('en')">
+        English
+      </button>
+      <button type="button" class="live-preview__full" (click)="openFullPreview()">
+        {{ localeService.uiText('fullPreview') }}
+      </button>
+    </div>
+  </div>
+
+  <div
+    class="live-preview__frame"
+    [class.live-preview__frame--tablet]="viewport() === 'tablet'"
+    [class.live-preview__frame--mobile]="viewport() === 'mobile'"
+  >
+    <div class="live-preview__mini-header">
+      @if (restaurantProfile().logoUrl; as logo) {
+        <img [src]="logo" [alt]="restaurantProfile().nameAr" />
+      }
+      <strong>
+        {{
+          localeService.pickText(
+            { ar: restaurantProfile().nameAr, en: restaurantProfile().nameEn },
+            restaurantProfile().nameAr
+          )
+        }}
+      </strong>
+    </div>
+
+    <app-restaurant-cover-hero
+      [restaurant]="restaurantProfile()"
+      [imageFallback]="imageFallback"
+    />
+
+    <app-category-navigation
+      [categories]="previewCategories"
+      [activeCategoryId]="activeCategoryId()"
+      (categorySelected)="selectCategory($event)"
+    />
+
+    <div class="live-preview__grid">
+      @for (item of filteredPreviewItems(); track item.id) {
+        <app-menu-item-card
+          [item]="item"
+          [currencyCode]="restaurantProfile().currencyCode"
+          [countryCode]="restaurantProfile().countryCode"
+          [quantity]="quantityFor(item.id)"
+          [imageFallback]="imageFallback"
+          (quantityChange)="updatePreviewQuantity(item.id, $event)"
+        />
+      }
+    </div>
+  </div>
+</section>
+
+@if (fullPreviewOpen()) {
+  <div
+    class="live-preview__modal"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="localeService.uiText('fullPreview')"
+  >
+    <div class="live-preview__modal-panel">
+      <header class="live-preview__modal-header">
+        <strong>{{ localeService.uiText('fullPreview') }}</strong>
+        <button type="button" (click)="closeFullPreview()">
+          {{ localeService.uiText('closePreview') }}
+        </button>
+      </header>
+
+      <div class="live-preview__modal-body">
+        <app-restaurant-cover-hero
+          [restaurant]="restaurantProfile()"
+          [imageFallback]="imageFallback"
+        />
+
+        <app-category-navigation
+          [categories]="previewCategories"
+          [activeCategoryId]="activeCategoryId()"
+          (categorySelected)="selectCategory($event)"
+        />
+
+        <div class="live-preview__grid live-preview__grid--full">
+          @for (item of previewItems; track item.id) {
+            <app-menu-item-card
+              [item]="item"
+              [currencyCode]="restaurantProfile().currencyCode"
+              [countryCode]="restaurantProfile().countryCode"
+              [quantity]="quantityFor(item.id)"
+              [imageFallback]="imageFallback"
+              (quantityChange)="updatePreviewQuantity(item.id, $event)"
+            />
+          }
+        </div>
+
+        <footer class="live-preview__footer">
+          <p>
+            {{
+              localeService.pickText(
+                { ar: restaurantProfile().addressAr, en: restaurantProfile().addressEn },
+                '—'
+              )
+            }}
+          </p>
+        </footer>
+      </div>
+    </div>
+  </div>
+}

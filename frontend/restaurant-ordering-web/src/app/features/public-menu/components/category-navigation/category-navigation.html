@@ -1,1 +1,14 @@
-<p>category-navigation works!</p>
+<nav class="category-nav" aria-label="Menu categories">
+  <div class="category-nav__scroll">
+    @for (category of visibleCategories(); track category.id) {
+      <button
+        type="button"
+        class="category-nav__item"
+        [class.is-active]="category.id === activeCategoryId()"
+        (click)="categorySelected.emit(category.id)"
+      >
+        {{ labelFor(category) }}
+      </button>
+    }
+  </div>
+</nav>

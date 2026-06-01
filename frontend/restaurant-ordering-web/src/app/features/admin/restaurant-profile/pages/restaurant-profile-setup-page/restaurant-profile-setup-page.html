@@ -1,1 +1,146 @@
-<p>restaurant-profile-setup-page works!</p>
+<section class="profile-setup">
+  <header class="profile-setup__header">
+    <div>
+      <h1>{{ localeService.uiText('profileTitle') }}</h1>
+      <p>
+        {{
+          localeService.locale() === 'ar'
+            ? 'خصّص هوية مطعمك وشاهد المعاينة مباشرة.'
+            : 'Customize your restaurant identity with a live preview.'
+        }}
+      </p>
+    </div>
+    <button type="button" class="profile-setup__save" (click)="saveProfile()">
+      {{ localeService.uiText('saveProfile') }}
+    </button>
+  </header>
+
+  @if (saveNotice()) {
+    <p class="profile-setup__notice" role="status">{{ saveNotice() }}</p>
+  }
+
+  <div class="profile-setup__layout">
+    <form class="profile-setup__form" [formGroup]="form" (ngSubmit)="saveProfile()">
+      <section class="profile-setup__section">
+        <h2>{{ localeService.locale() === 'ar' ? 'هوية المطعم' : 'Restaurant identity' }}</h2>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'الاسم بالعربية' : 'Arabic name' }}</span>
+          <input type="text" formControlName="nameAr" autocomplete="organization" />
+        </label>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'الاسم بالإنجليزية' : 'English name' }}</span>
+          <input type="text" formControlName="nameEn" autocomplete="organization" />
+        </label>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'الوصف بالعربية' : 'Arabic description' }}</span>
+          <textarea rows="3" formControlName="descriptionAr"></textarea>
+        </label>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'الوصف بالإنجليزية' : 'English description' }}</span>
+          <textarea rows="3" formControlName="descriptionEn"></textarea>
+        </label>
+
+        <label>
+          <span>Slug</span>
+          <input type="text" formControlName="slug" (blur)="onSlugBlur()" spellcheck="false" />
+          @if (form.controls.slug.invalid && form.controls.slug.touched) {
+            <small>{{
+              localeService.locale() === 'ar'
+                ? 'استخدم أحرفًا صغيرة وأرقامًا وشرطات فقط.'
+                : 'Use lowercase letters, numbers, and single hyphens only.'
+            }}</small>
+          }
+        </label>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'Accent Color' : 'Accent color' }}</span>
+          <input type="text" formControlName="primaryAccentColor" spellcheck="false" />
+        </label>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'الشعار' : 'Logo' }}</span>
+          <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onLogoSelected($event)" />
+        </label>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'صورة الغلاف' : 'Cover image' }}</span>
+          <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onCoverSelected($event)" />
+        </label>
+      </section>
+
+      <section class="profile-setup__section">
+        <h2>{{ localeService.locale() === 'ar' ? 'الدولة وإعدادات اللغة' : 'Locale & region' }}</h2>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'الدولة' : 'Country code' }}</span>
+          <input type="text" formControlName="countryCode" maxlength="2" />
+        </label>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'اللغة الافتراضية' : 'Default language' }}</span>
+          <select formControlName="defaultLocale">
+            <option value="ar">العربية</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'العملة' : 'Currency' }}</span>
+          <input type="text" formControlName="currencyCode" maxlength="3" />
+        </label>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'المنطقة الزمنية' : 'Time zone' }}</span>
+          <input type="text" formControlName="timeZone" />
+        </label>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'كود الهاتف' : 'Phone country code' }}</span>
+          <input type="text" formControlName="phoneCountryCode" />
+        </label>
+      </section>
+
+      <section class="profile-setup__section">
+        <h2>{{ localeService.locale() === 'ar' ? 'معلومات التواصل' : 'Contact details' }}</h2>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'الهاتف' : 'Phone' }}</span>
+          <input type="tel" formControlName="phoneNumber" />
+        </label>
+
+        <label>
+          <span>WhatsApp</span>
+          <input type="tel" formControlName="whatsAppNumber" />
+        </label>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'البريد الإلكتروني' : 'Email' }}</span>
+          <input type="email" formControlName="email" autocomplete="email" />
+        </label>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'المدينة' : 'City' }}</span>
+          <input type="text" formControlName="city" />
+        </label>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'العنوان بالعربية' : 'Arabic address' }}</span>
+          <input type="text" formControlName="addressAr" />
+        </label>
+
+        <label>
+          <span>{{ localeService.locale() === 'ar' ? 'العنوان بالإنجليزية' : 'English address' }}</span>
+          <input type="text" formControlName="addressEn" />
+        </label>
+      </section>
+    </form>
+
+    <aside class="profile-setup__preview">
+      <app-restaurant-live-preview [preview]="previewData()" />
+    </aside>
+  </div>
+</section>

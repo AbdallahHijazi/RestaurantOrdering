@@ -1,0 +1,27 @@
+.language-switcher {
+  display: inline-flex;
+  padding: 0.2rem;
+  border-radius: 999px;
+  background: var(--restaurant-alternate-surface);
+  border: 1px solid var(--restaurant-border);
+}
+
+.language-switcher__btn {
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--restaurant-muted-text);
+  cursor: pointer;
+}
+
+.language-switcher__btn.is-active {
+  background: var(--restaurant-accent);
+  color: #fff;
+}
+
+.language-switcher__btn:focus-visible {
+  outline: 2px solid var(--restaurant-accent);
+  outline-offset: 2px;
+}

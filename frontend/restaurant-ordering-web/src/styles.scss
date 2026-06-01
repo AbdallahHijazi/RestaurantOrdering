@@ -1,1 +1,67 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@600;700&family=Be+Vietnam+Pro:wght@400;500;600&display=swap');
+
+:root {
+  --restaurant-accent: #B8663F;
+  --restaurant-background: #F6F0E7;
+  --restaurant-surface: #FFFDFC;
+  --restaurant-alternate-surface: #EEE3D6;
+  --restaurant-text: #2A211C;
+  --restaurant-muted-text: #796B61;
+  --restaurant-border: #E3D6C8;
+  --restaurant-footer: #2E2925;
+  --restaurant-footer-text: #F7F1E8;
+
+  --font-display: 'Epilogue', Georgia, serif;
+  --font-body: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --shadow-soft: 0 12px 32px rgb(42 33 28 / 0.08);
+  --transition-base: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--restaurant-text);
+  background: var(--restaurant-background);
+  line-height: 1.5;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,58 @@
+import type { PublicMenuApiDto } from './public-menu.dto';
+import type { PublicMenuPageData } from '../models/public-menu.models';
+import { MOCK_IMAGE_FALLBACK } from './public-menu-mock.data';
+
+export function mapPublicMenuApiDto(dto: PublicMenuApiDto): PublicMenuPageData {
+  const categories = [...dto.categories]
+    .sort((a, b) => a.displayOrder - b.displayOrder)
+    .map((category) => ({
+      id: category.id,
+      nameAr: category.nameAr,
+      nameEn: category.nameEn,
+      displayOrder: category.displayOrder,
+      isActive: true,
+    }));
+
+  const items = dto.categories.flatMap((category) =>
+    [...category.items]
+      .sort((a, b) => a.displayOrder - b.displayOrder)
+      .map((item) => ({
+        id: item.id,
+        categoryId: item.categoryId,
+        nameAr: item.nameAr,
+        nameEn: item.nameEn,
+        descriptionAr: item.descriptionAr,
+        descriptionEn: item.descriptionEn,
+        price: item.price,
+        discountPrice: item.discountPrice,
+        // TODO: Replace with public media URL endpoint when available.
+        imageUrl: item.imageFileId ? MOCK_IMAGE_FALLBACK : null,
+        isAvailable: true,
+        isPopular: false,
+        isVegetarian: false,
+      })),
+  );
+
+  return {
+    restaurant: {
+      slug: dto.slug,
+      nameAr: dto.nameAr,
+      nameEn: dto.nameEn,
+      descriptionAr: dto.descriptionAr,
+      descriptionEn: dto.descriptionEn,
+      logoUrl: dto.logoFileId ? MOCK_IMAGE_FALLBACK : null,
+      coverImageUrl: null,
+      primaryAccentColor: null,
+      countryCode: 'SA',
+      currencyCode: dto.currencyCode ?? 'SAR',
+      timeZone: 'Asia/Riyadh',
+      phoneNumber: dto.phoneNumber,
+      whatsAppNumber: dto.whatsAppNumber,
+      addressAr: dto.addressAr,
+      addressEn: dto.addressEn,
+      isOpen: null,
+    },
+    categories,
+    items,
+  };
+}
