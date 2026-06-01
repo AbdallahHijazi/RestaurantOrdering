@@ -187,7 +187,42 @@ public sealed class RestaurantStaffRolesTests : IClassFixture<TestWebApplication
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var payload = await response.Content.ReadFromJsonAsync<RestaurantUserResponse>(JsonOptions);
-        payload!.Role.Should().Be(ApplicationRoles.KitchenManager);
+        payload.Should().NotBeNull();
+        payload!.Email.Should().Be(email);
+        payload.RestaurantId.Should().Be(TestDataSeeder.RestaurantAId);
+        payload.Role.Should().Be(ApplicationRoles.KitchenManager);
+        payload.IsActive.Should().BeTrue();
+
+        using var scope = _factory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var createdUser = await userManager.FindByEmailAsync(email);
+        createdUser.Should().NotBeNull();
+        createdUser!.RestaurantId.Should().Be(TestDataSeeder.RestaurantAId);
+        (await userManager.IsInRoleAsync(createdUser, ApplicationRoles.KitchenManager)).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task CreateUser_AsKitchenManager_ThenLogin_ReturnsExpectedRestaurantAndRoleClaim()
+    {
+        await TestDataSeeder.SeedAsync(_factory.Services);
+        using var client = CreateHttpsClient();
+        await AuthenticateAsync(client, TestDataSeeder.OwnerAEmail, TestDataSeeder.CorrectPassword);
+
+        const string email = "login.after.kitchen.create@test.local";
+        var createResponse = await client.PostAsJsonAsync(
+            $"/api/v1/admin/restaurants/{TestDataSeeder.RestaurantAId}/users",
+            CreateUserRequest(email, TestDataSeeder.CorrectPassword, ApplicationRoles.KitchenManager));
+        createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        client.DefaultRequestHeaders.Authorization = null;
+        var loginResponse = await client.PostAsJsonAsync(
+            "/api/v1/auth/login",
+            new { Email = email, Password = TestDataSeeder.CorrectPassword });
+
+        loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await loginResponse.Content.ReadFromJsonAsync<LoginResponseModel>(JsonOptions);
+        payload!.RestaurantId.Should().Be(TestDataSeeder.RestaurantAId);
+        GetRoleClaims(payload.AccessToken).Should().Contain(ApplicationRoles.KitchenManager);
     }
 
     [Fact]
