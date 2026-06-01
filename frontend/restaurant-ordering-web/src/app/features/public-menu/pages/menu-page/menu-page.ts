@@ -23,6 +23,7 @@ import {
 } from '../../data-access/public-menu-api';
 import { MOCK_IMAGE_FALLBACK } from '../../data-access/public-menu-mock.data';
 import type { PublicMenuPageData } from '../../models/public-menu.models';
+import { readRouteParam } from './route-param.util';
 
 type PageState = 'loading' | 'success' | 'not-found' | 'error';
 
@@ -62,11 +63,27 @@ export class MenuPage {
       return '—';
     }
 
+    this.localeService.locale();
     return this.localeService.pickText(
       { ar: restaurant.nameAr, en: restaurant.nameEn },
       restaurant.nameAr,
     );
   });
+
+  protected readonly restaurantAddress = computed(() => {
+    const restaurant = this.menuData()?.restaurant;
+    if (!restaurant) {
+      return '—';
+    }
+
+    this.localeService.locale();
+    return this.localeService.pickText(
+      { ar: restaurant.addressAr, en: restaurant.addressEn },
+      '—',
+    );
+  });
+
+  protected readonly ui = this.localeService.ui;
 
   protected readonly cartCount = computed(() =>
     Object.values(this.cartQuantities()).reduce((total, qty) => total + qty, 0),
@@ -83,7 +100,7 @@ export class MenuPage {
   });
 
   constructor() {
-    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
+    const slug = readRouteParam(this.route, 'slug');
 
     if (!slug.trim()) {
       this.pageState.set('not-found');
@@ -94,7 +111,7 @@ export class MenuPage {
   }
 
   protected reload(): void {
-    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
+    const slug = readRouteParam(this.route, 'slug');
     if (slug.trim()) {
       this.loadMenu(slug);
     }

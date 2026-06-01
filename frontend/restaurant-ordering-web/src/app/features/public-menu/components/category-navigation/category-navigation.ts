@@ -21,10 +21,17 @@ export class CategoryNavigation {
       .sort((a, b) => a.displayOrder - b.displayOrder),
   );
 
-  protected labelFor(category: PublicMenuCategory): string {
-    return this.localeService.pickText(
-      { ar: category.nameAr, en: category.nameEn },
-      category.nameAr,
+  protected readonly categoryLabels = computed(() => {
+    this.localeService.locale();
+
+    return new Map(
+      this.visibleCategories().map((category) => [
+        category.id,
+        this.localeService.pickText(
+          { ar: category.nameAr, en: category.nameEn },
+          category.nameAr,
+        ),
+      ]),
     );
-  }
+  });
 }

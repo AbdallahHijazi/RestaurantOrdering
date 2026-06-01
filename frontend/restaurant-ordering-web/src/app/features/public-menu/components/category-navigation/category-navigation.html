@@ -7,7 +7,7 @@
         [class.is-active]="category.id === activeCategoryId()"
         (click)="categorySelected.emit(category.id)"
       >
-        {{ labelFor(category) }}
+        {{ categoryLabels().get(category.id) }}
       </button>
     }
   </div>

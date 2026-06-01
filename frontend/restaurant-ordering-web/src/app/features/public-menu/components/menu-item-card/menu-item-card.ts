@@ -22,27 +22,30 @@ export class MenuItemCard {
 
   protected readonly labels = computed(() => getMenuItemLabels(this.localeService.locale()));
 
-  protected readonly displayName = computed(() =>
-    this.localeService.pickText(
+  protected readonly displayName = computed(() => {
+    this.localeService.locale();
+    return this.localeService.pickText(
       { ar: this.item().nameAr, en: this.item().nameEn },
       this.item().nameAr,
-    ),
-  );
+    );
+  });
 
-  protected readonly displayDescription = computed(() =>
-    this.localeService.pickText(
+  protected readonly displayDescription = computed(() => {
+    this.localeService.locale();
+    return this.localeService.pickText(
       { ar: this.item().descriptionAr, en: this.item().descriptionEn },
       '',
-    ),
-  );
+    );
+  });
 
-  protected readonly displayPrice = computed(() =>
-    this.localeService.formatCurrency(
+  protected readonly displayPrice = computed(() => {
+    this.localeService.locale();
+    return this.localeService.formatCurrency(
       this.item().price,
       this.currencyCode(),
       this.countryCode(),
-    ),
-  );
+    );
+  });
 
   protected readonly displayDiscountPrice = computed(() => {
     const discount = this.item().discountPrice;
@@ -50,6 +53,7 @@ export class MenuItemCard {
       return null;
     }
 
+    this.localeService.locale();
     return this.localeService.formatCurrency(
       discount,
       this.currencyCode(),

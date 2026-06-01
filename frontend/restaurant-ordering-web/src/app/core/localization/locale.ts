@@ -20,6 +20,7 @@ export class LocaleService {
   readonly direction = computed<TextDirection>(() =>
     this.localeSignal() === 'ar' ? 'rtl' : 'ltr',
   );
+  readonly ui = computed(() => UI_TEXT[this.localeSignal()]);
 
   constructor() {
     this.applyDocumentAttributes(this.localeSignal());
@@ -41,11 +42,18 @@ export class LocaleService {
   }
 
   pickText(text: LocalizedText | null | undefined, fallback = '—'): string {
+    return this.pickTextForLocale(this.localeSignal(), text, fallback);
+  }
+
+  pickTextForLocale(
+    locale: SupportedLocale,
+    text: LocalizedText | null | undefined,
+    fallback = '—',
+  ): string {
     if (!text) {
       return fallback;
     }
 
-    const locale = this.localeSignal();
     const primary = locale === 'ar' ? text.ar : text.en;
     const secondary = locale === 'ar' ? text.en : text.ar;
 
@@ -73,8 +81,7 @@ export class LocaleService {
   }
 
   uiText(key: UiTextKey): string {
-    const locale = this.localeSignal();
-    return UI_TEXT[locale][key];
+    return this.ui()[key];
   }
 
   private readStoredLocale(): SupportedLocale {

@@ -16,22 +16,24 @@ export class RestaurantCoverHero {
   protected readonly localeService = inject(LocaleService);
   protected readonly coverFailed = signal(false);
 
-  protected readonly displayName = computed(() =>
-    this.localeService.pickText(
+  protected readonly displayName = computed(() => {
+    this.localeService.locale();
+    return this.localeService.pickText(
       { ar: this.restaurant().nameAr, en: this.restaurant().nameEn },
       this.restaurant().nameAr,
-    ),
-  );
+    );
+  });
 
-  protected readonly displayDescription = computed(() =>
-    this.localeService.pickText(
+  protected readonly displayDescription = computed(() => {
+    this.localeService.locale();
+    return this.localeService.pickText(
       {
         ar: this.restaurant().descriptionAr,
         en: this.restaurant().descriptionEn,
       },
       '',
-    ),
-  );
+    );
+  });
 
   protected readonly coverSrc = computed(() => {
     if (this.coverFailed()) {
@@ -47,10 +49,13 @@ export class RestaurantCoverHero {
       return null;
     }
 
+    this.localeService.locale();
     return isOpen
       ? this.localeService.uiText('openNow')
       : this.localeService.uiText('closedNow');
   });
+
+  protected readonly ui = this.localeService.ui;
 
   protected onCoverError(): void {
     this.coverFailed.set(true);

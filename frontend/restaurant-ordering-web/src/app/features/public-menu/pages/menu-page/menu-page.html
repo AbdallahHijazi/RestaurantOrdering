@@ -3,8 +3,8 @@
 } @else if (pageState() === 'not-found') {
   <app-error-state
     [locale]="localeService"
-    [title]="localeService.uiText('notFoundTitle')"
-    [message]="localeService.uiText('notFoundMessage')"
+    [title]="ui().notFoundTitle"
+    [message]="ui().notFoundMessage"
     [showRetry]="false"
   />
 } @else if (pageState() === 'error') {
@@ -27,7 +27,7 @@
 
         <div class="menu-page__actions">
           <app-language-switcher />
-          <button type="button" class="menu-page__cart" [attr.aria-label]="localeService.uiText('cart')">
+          <button type="button" class="menu-page__cart" [attr.aria-label]="ui().cart">
             <span aria-hidden="true">🛒</span>
             @if (cartCount() > 0) {
               <span class="menu-page__cart-count">{{ cartCount() }}</span>
@@ -47,13 +47,13 @@
 
         @if (data.categories.length === 0) {
           <app-empty-state
-            [title]="localeService.uiText('emptyCategories')"
+            [title]="ui().emptyCategories"
             [locale]="localeService"
           />
         } @else {
           <section #menuSection class="menu-page__menu" aria-labelledby="menu-section-title">
             <h2 id="menu-section-title" class="visually-hidden">
-              {{ localeService.uiText('menuTitle') }}
+              {{ ui().menuTitle }}
             </h2>
 
             <app-category-navigation
@@ -64,7 +64,7 @@
 
             @if (filteredItems().length === 0) {
               <app-empty-state
-                [title]="localeService.uiText('emptyItems')"
+                [title]="ui().emptyItems"
                 [locale]="localeService"
               />
             } @else {
@@ -90,29 +90,22 @@
       <div class="menu-page__container menu-page__footer-grid">
         <div>
           <h2>{{ restaurantName() }}</h2>
-          <p>
-            {{
-              localeService.pickText(
-                { ar: data.restaurant.addressAr, en: data.restaurant.addressEn },
-                '—'
-              )
-            }}
-          </p>
+          <p>{{ restaurantAddress() }}</p>
         </div>
 
         <div>
-          <h3>{{ localeService.uiText('footerContact') }}</h3>
+          <h3>{{ ui().footerContact }}</h3>
           @if (data.restaurant.phoneNumber) {
             <p>{{ data.restaurant.phoneNumber }}</p>
           }
           @if (data.restaurant.whatsAppNumber) {
-            <p>{{ localeService.uiText('whatsapp') }}: {{ data.restaurant.whatsAppNumber }}</p>
+            <p>{{ ui().whatsapp }}: {{ data.restaurant.whatsAppNumber }}</p>
           }
         </div>
 
         <div>
-          <h3>{{ localeService.uiText('footerInfo') }}</h3>
-          <p>{{ localeService.uiText('menuTitle') }}</p>
+          <h3>{{ ui().footerInfo }}</h3>
+          <p>{{ ui().menuTitle }}</p>
         </div>
       </div>
     </footer>
