@@ -1,27 +1,45 @@
 .profile-setup {
-  width: min(100% - 2rem, 72rem);
-  margin: 1.5rem auto 3rem;
+  width: min(100% - 2.5rem, 72rem);
+  margin: 0 auto 3rem;
+  padding-inline: 1.25rem;
 }
 
-.profile-setup__header {
+.profile-setup__toolbar {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  padding-block: 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.profile-setup__header h1 {
+.profile-setup__toolbar-text {
+  min-width: 0;
+}
+
+.profile-setup__breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+  color: #6b7280;
+  font-size: 0.8125rem;
+}
+
+.profile-setup__toolbar h1 {
   margin: 0 0 0.35rem;
   font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
 }
 
-.profile-setup__header p {
+.profile-setup__toolbar p {
   margin: 0;
   color: #6b7280;
 }
 
 .profile-setup__save {
+  flex-shrink: 0;
   border: none;
   border-radius: 999px;
   padding: 0.75rem 1.25rem;
@@ -62,12 +80,14 @@
   font-size: 1rem;
 }
 
-.profile-setup__section label {
+.profile-setup__section label,
+.profile-setup__field {
   display: grid;
   gap: 0.35rem;
 }
 
-.profile-setup__section span {
+.profile-setup__section span,
+.profile-setup__field > span {
   font-size: 0.875rem;
   font-weight: 600;
 }
@@ -82,8 +102,51 @@
   background: #fff;
 }
 
+.profile-setup__technical {
+  direction: ltr;
+  text-align: left;
+}
+
 .profile-setup__section small {
   color: #b45309;
+}
+
+.file-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.file-picker__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.file-picker__button {
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  background: #fff;
+  color: #111827;
+  cursor: pointer;
+}
+
+.file-picker__button:hover {
+  border-color: var(--restaurant-accent);
+  color: var(--restaurant-accent);
+}
+
+.file-picker__name {
+  color: #6b7280;
+  font-size: 0.875rem;
 }
 
 @media (min-width: 1100px) {
@@ -95,5 +158,16 @@
   .profile-setup__preview {
     position: sticky;
     top: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .profile-setup__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .profile-setup__save {
+    width: 100%;
   }
 }

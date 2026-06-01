@@ -1,6 +1,11 @@
 <section class="profile-setup">
-  <header class="profile-setup__header">
-    <div>
+  <header class="profile-setup__toolbar">
+    <div class="profile-setup__toolbar-text">
+      <nav class="profile-setup__breadcrumb" aria-label="Breadcrumb">
+        <span>{{ localeService.locale() === 'ar' ? 'الإدارة' : 'Admin' }}</span>
+        <span aria-hidden="true">/</span>
+        <span>{{ localeService.uiText('profileTitle') }}</span>
+      </nav>
       <h1>{{ localeService.uiText('profileTitle') }}</h1>
       <p>
         {{
@@ -46,7 +51,14 @@
 
         <label>
           <span>Slug</span>
-          <input type="text" formControlName="slug" (blur)="onSlugBlur()" spellcheck="false" />
+          <input
+            type="text"
+            class="profile-setup__technical"
+            dir="ltr"
+            formControlName="slug"
+            (blur)="onSlugBlur()"
+            spellcheck="false"
+          />
           @if (form.controls.slug.invalid && form.controls.slug.touched) {
             <small>{{
               localeService.locale() === 'ar'
@@ -58,18 +70,50 @@
 
         <label>
           <span>{{ localeService.locale() === 'ar' ? 'Accent Color' : 'Accent color' }}</span>
-          <input type="text" formControlName="primaryAccentColor" spellcheck="false" />
+          <input
+            type="text"
+            class="profile-setup__technical"
+            dir="ltr"
+            formControlName="primaryAccentColor"
+            spellcheck="false"
+          />
         </label>
 
-        <label>
+        <div class="profile-setup__field">
           <span>{{ localeService.locale() === 'ar' ? 'الشعار' : 'Logo' }}</span>
-          <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onLogoSelected($event)" />
-        </label>
+          <div class="file-picker">
+            <input
+              #logoInput
+              id="logo-input"
+              type="file"
+              class="file-picker__input"
+              accept="image/jpeg,image/png,image/webp"
+              (change)="onLogoSelected($event)"
+            />
+            <button type="button" class="file-picker__button" (click)="logoInput.click()">
+              {{ chooseImageLabel() }}
+            </button>
+            <span class="file-picker__name">{{ logoFileName() ?? noFileChosenLabel() }}</span>
+          </div>
+        </div>
 
-        <label>
+        <div class="profile-setup__field">
           <span>{{ localeService.locale() === 'ar' ? 'صورة الغلاف' : 'Cover image' }}</span>
-          <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onCoverSelected($event)" />
-        </label>
+          <div class="file-picker">
+            <input
+              #coverInput
+              id="cover-input"
+              type="file"
+              class="file-picker__input"
+              accept="image/jpeg,image/png,image/webp"
+              (change)="onCoverSelected($event)"
+            />
+            <button type="button" class="file-picker__button" (click)="coverInput.click()">
+              {{ chooseImageLabel() }}
+            </button>
+            <span class="file-picker__name">{{ coverFileName() ?? noFileChosenLabel() }}</span>
+          </div>
+        </div>
       </section>
 
       <section class="profile-setup__section">
@@ -77,7 +121,13 @@
 
         <label>
           <span>{{ localeService.locale() === 'ar' ? 'الدولة' : 'Country code' }}</span>
-          <input type="text" formControlName="countryCode" maxlength="2" />
+          <input
+            type="text"
+            class="profile-setup__technical"
+            dir="ltr"
+            formControlName="countryCode"
+            maxlength="2"
+          />
         </label>
 
         <label>
@@ -90,17 +140,33 @@
 
         <label>
           <span>{{ localeService.locale() === 'ar' ? 'العملة' : 'Currency' }}</span>
-          <input type="text" formControlName="currencyCode" maxlength="3" />
+          <input
+            type="text"
+            class="profile-setup__technical"
+            dir="ltr"
+            formControlName="currencyCode"
+            maxlength="3"
+          />
         </label>
 
         <label>
           <span>{{ localeService.locale() === 'ar' ? 'المنطقة الزمنية' : 'Time zone' }}</span>
-          <input type="text" formControlName="timeZone" />
+          <input
+            type="text"
+            class="profile-setup__technical"
+            dir="ltr"
+            formControlName="timeZone"
+          />
         </label>
 
         <label>
           <span>{{ localeService.locale() === 'ar' ? 'كود الهاتف' : 'Phone country code' }}</span>
-          <input type="text" formControlName="phoneCountryCode" />
+          <input
+            type="text"
+            class="profile-setup__technical"
+            dir="ltr"
+            formControlName="phoneCountryCode"
+          />
         </label>
       </section>
 
@@ -109,17 +175,33 @@
 
         <label>
           <span>{{ localeService.locale() === 'ar' ? 'الهاتف' : 'Phone' }}</span>
-          <input type="tel" formControlName="phoneNumber" />
+          <input
+            type="tel"
+            class="profile-setup__technical"
+            dir="ltr"
+            formControlName="phoneNumber"
+          />
         </label>
 
         <label>
           <span>WhatsApp</span>
-          <input type="tel" formControlName="whatsAppNumber" />
+          <input
+            type="tel"
+            class="profile-setup__technical"
+            dir="ltr"
+            formControlName="whatsAppNumber"
+          />
         </label>
 
         <label>
           <span>{{ localeService.locale() === 'ar' ? 'البريد الإلكتروني' : 'Email' }}</span>
-          <input type="email" formControlName="email" autocomplete="email" />
+          <input
+            type="email"
+            class="profile-setup__technical"
+            dir="ltr"
+            formControlName="email"
+            autocomplete="email"
+          />
         </label>
 
         <label>

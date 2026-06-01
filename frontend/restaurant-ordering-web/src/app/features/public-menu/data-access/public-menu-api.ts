@@ -9,6 +9,10 @@ import type { PublicMenuPageData } from '../models/public-menu.models';
 
 export type PublicMenuLoadError = 'not-found' | 'network' | 'unknown';
 
+export function isDemoMenuSlug(slug: string): boolean {
+  return slug.trim().toLowerCase() === DEMO_RESTAURANT_SLUG;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -22,22 +26,19 @@ export class PublicMenuApiService {
       return throwError(() => ({ type: 'not-found' satisfies PublicMenuLoadError }));
     }
 
+    if (isDemoMenuSlug(normalizedSlug)) {
+      return of(structuredClone(MOCK_PUBLIC_MENU));
+    }
+
     return this.http
       .get<PublicMenuApiDto>(`${API_BASE_URL}/api/v1/public/restaurants/${normalizedSlug}/menu`)
       .pipe(
         map(mapPublicMenuApiDto),
-        catchError((error: unknown) => this.handleError(normalizedSlug, error)),
+        catchError((error: unknown) => this.handleError(error)),
       );
   }
 
-  private handleError(slug: string, error: unknown): Observable<PublicMenuPageData> {
-    if (slug === DEMO_RESTAURANT_SLUG) {
-      if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-        console.warn('[PublicMenuApiService] Falling back to mock menu for demo slug.');
-      }
-      return of(structuredClone(MOCK_PUBLIC_MENU));
-    }
-
+  private handleError(error: unknown): Observable<PublicMenuPageData> {
     if (error instanceof HttpErrorResponse && error.status === 404) {
       return throwError(() => ({ type: 'not-found' satisfies PublicMenuLoadError }));
     }
@@ -52,5 +53,3 @@ export class PublicMenuApiService {
 
 /** @deprecated Use PublicMenuApiService */
 export { PublicMenuApiService as PublicMenuApi };
-
-declare const ngDevMode: boolean | undefined;

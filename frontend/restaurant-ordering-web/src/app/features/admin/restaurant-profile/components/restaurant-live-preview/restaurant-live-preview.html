@@ -2,7 +2,7 @@
   <div class="live-preview__toolbar">
     <h2 id="live-preview-title">{{ localeService.uiText('previewTitle') }}</h2>
 
-    <div class="live-preview__controls" role="group" aria-label="Preview controls">
+    <div class="live-preview__controls" role="group" aria-label="Viewport size">
       <button type="button" [class.is-active]="viewport() === 'desktop'" (click)="setViewport('desktop')">
         Desktop
       </button>
@@ -12,16 +12,20 @@
       <button type="button" [class.is-active]="viewport() === 'mobile'" (click)="setViewport('mobile')">
         Mobile
       </button>
+    </div>
+
+    <div class="live-preview__controls live-preview__controls--language" role="group" aria-label="Preview language">
       <button type="button" [class.is-active]="previewLocale() === 'ar'" (click)="setPreviewLocale('ar')">
         العربية
       </button>
       <button type="button" [class.is-active]="previewLocale() === 'en'" (click)="setPreviewLocale('en')">
         English
       </button>
-      <button type="button" class="live-preview__full" (click)="openFullPreview()">
-        {{ localeService.uiText('fullPreview') }}
-      </button>
     </div>
+
+    <button type="button" class="live-preview__full" (click)="openFullPreview()">
+      {{ localeService.uiText('fullPreview') }}
+    </button>
   </div>
 
   <div
@@ -43,29 +47,10 @@
       </strong>
     </div>
 
-    <app-restaurant-cover-hero
-      [restaurant]="restaurantProfile()"
-      [imageFallback]="imageFallback"
+    <ng-container
+      [ngTemplateOutlet]="previewMenuBody"
+      [ngTemplateOutletContext]="{ gridClass: '', showFooter: false }"
     />
-
-    <app-category-navigation
-      [categories]="previewCategories"
-      [activeCategoryId]="activeCategoryId()"
-      (categorySelected)="selectCategory($event)"
-    />
-
-    <div class="live-preview__grid">
-      @for (item of filteredPreviewItems(); track item.id) {
-        <app-menu-item-card
-          [item]="item"
-          [currencyCode]="restaurantProfile().currencyCode"
-          [countryCode]="restaurantProfile().countryCode"
-          [quantity]="quantityFor(item.id)"
-          [imageFallback]="imageFallback"
-          (quantityChange)="updatePreviewQuantity(item.id, $event)"
-        />
-      }
-    </div>
   </div>
 </section>
 
@@ -85,41 +70,57 @@
       </header>
 
       <div class="live-preview__modal-body">
-        <app-restaurant-cover-hero
-          [restaurant]="restaurantProfile()"
-          [imageFallback]="imageFallback"
+        <ng-container
+          [ngTemplateOutlet]="previewMenuBody"
+          [ngTemplateOutletContext]="{ gridClass: ' live-preview__grid--full', showFooter: true }"
         />
-
-        <app-category-navigation
-          [categories]="previewCategories"
-          [activeCategoryId]="activeCategoryId()"
-          (categorySelected)="selectCategory($event)"
-        />
-
-        <div class="live-preview__grid live-preview__grid--full">
-          @for (item of previewItems; track item.id) {
-            <app-menu-item-card
-              [item]="item"
-              [currencyCode]="restaurantProfile().currencyCode"
-              [countryCode]="restaurantProfile().countryCode"
-              [quantity]="quantityFor(item.id)"
-              [imageFallback]="imageFallback"
-              (quantityChange)="updatePreviewQuantity(item.id, $event)"
-            />
-          }
-        </div>
-
-        <footer class="live-preview__footer">
-          <p>
-            {{
-              localeService.pickText(
-                { ar: restaurantProfile().addressAr, en: restaurantProfile().addressEn },
-                '—'
-              )
-            }}
-          </p>
-        </footer>
       </div>
     </div>
   </div>
 }
+
+<ng-template #previewMenuBody let-gridClass="gridClass" let-showFooter="showFooter">
+  <app-restaurant-cover-hero
+    [restaurant]="restaurantProfile()"
+    [imageFallback]="imageFallback"
+  />
+
+  <app-category-navigation
+    [categories]="previewCategories"
+    [activeCategoryId]="activeCategoryId()"
+    (categorySelected)="selectCategory($event)"
+  />
+
+  @if (filteredPreviewItems().length === 0) {
+    <app-empty-state
+      [title]="localeService.uiText('emptyItems')"
+      [locale]="localeService"
+    />
+  } @else {
+    <div class="live-preview__grid{{ gridClass }}">
+      @for (item of filteredPreviewItems(); track item.id) {
+        <app-menu-item-card
+          [item]="item"
+          [currencyCode]="restaurantProfile().currencyCode"
+          [countryCode]="restaurantProfile().countryCode"
+          [quantity]="quantityFor(item.id)"
+          [imageFallback]="imageFallback"
+          (quantityChange)="updatePreviewQuantity(item.id, $event)"
+        />
+      }
+    </div>
+  }
+
+  @if (showFooter) {
+    <footer class="live-preview__footer">
+      <p>
+        {{
+          localeService.pickText(
+            { ar: restaurantProfile().addressAr, en: restaurantProfile().addressEn },
+            '—'
+          )
+        }}
+      </p>
+    </footer>
+  }
+</ng-template>

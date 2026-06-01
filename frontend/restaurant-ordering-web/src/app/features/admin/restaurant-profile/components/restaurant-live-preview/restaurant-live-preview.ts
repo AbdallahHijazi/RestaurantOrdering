@@ -1,6 +1,8 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { LocaleService, type SupportedLocale } from '../../../../../core/localization/locale';
 import { RestaurantThemeService } from '../../../../../core/theme/restaurant-theme';
+import { EmptyState } from '../../../../../shared/ui/empty-state/empty-state';
 import { CategoryNavigation } from '../../../../public-menu/components/category-navigation/category-navigation';
 import { MenuItemCard } from '../../../../public-menu/components/menu-item-card/menu-item-card';
 import { RestaurantCoverHero } from '../../../../public-menu/components/restaurant-cover-hero/restaurant-cover-hero';
@@ -18,7 +20,7 @@ type PreviewViewport = 'desktop' | 'tablet' | 'mobile';
 
 @Component({
   selector: 'app-restaurant-live-preview',
-  imports: [RestaurantCoverHero, CategoryNavigation, MenuItemCard],
+  imports: [NgTemplateOutlet, RestaurantCoverHero, CategoryNavigation, MenuItemCard, EmptyState],
   templateUrl: './restaurant-live-preview.html',
   styleUrl: './restaurant-live-preview.scss',
 })
@@ -34,9 +36,12 @@ export class RestaurantLivePreview {
   protected readonly activeCategoryId = signal(MOCK_PUBLIC_MENU.categories[0]?.id ?? '');
   protected readonly previewQuantities = signal<Record<string, number>>({});
 
-  protected readonly previewCategories = MOCK_PUBLIC_MENU.categories.slice(0, 3);
-  protected readonly previewItems = MOCK_PUBLIC_MENU.items.slice(0, 3);
+  protected readonly previewCategories = MOCK_PUBLIC_MENU.categories;
   protected readonly imageFallback = MOCK_IMAGE_FALLBACK;
+
+  protected readonly filteredPreviewItems = computed(() =>
+    MOCK_PUBLIC_MENU.items.filter((item) => item.categoryId === this.activeCategoryId()),
+  );
 
   protected readonly restaurantProfile = computed<RestaurantPublicProfile>(() => {
     const data = this.preview();
@@ -59,10 +64,6 @@ export class RestaurantLivePreview {
       isOpen: true,
     };
   });
-
-  protected readonly filteredPreviewItems = computed(() =>
-    this.previewItems.filter((item) => item.categoryId === this.activeCategoryId()),
-  );
 
   constructor() {
     effect(() => {

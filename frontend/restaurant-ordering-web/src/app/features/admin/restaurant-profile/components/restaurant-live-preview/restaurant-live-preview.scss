@@ -22,6 +22,10 @@
   gap: 0.5rem;
 }
 
+.live-preview__controls--language {
+  width: fit-content;
+}
+
 .live-preview__controls button {
   border: 1px solid #d1d5db;
   border-radius: 999px;
@@ -30,10 +34,24 @@
   cursor: pointer;
 }
 
-.live-preview__controls button.is-active,
-.live-preview__full {
+.live-preview__controls button.is-active {
   background: var(--restaurant-accent);
   border-color: var(--restaurant-accent);
+  color: #fff;
+}
+
+.live-preview__full {
+  width: fit-content;
+  border: 1px solid var(--restaurant-accent);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  background: #fff;
+  color: var(--restaurant-accent);
+  cursor: pointer;
+}
+
+.live-preview__full:hover {
+  background: var(--restaurant-accent);
   color: #fff;
 }
 

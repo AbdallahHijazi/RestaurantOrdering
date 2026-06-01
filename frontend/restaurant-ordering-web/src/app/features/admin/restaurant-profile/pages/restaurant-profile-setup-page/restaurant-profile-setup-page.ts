@@ -45,6 +45,8 @@ export class RestaurantProfileSetupPage {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly saveNotice = signal<string | null>(null);
+  protected readonly logoFileName = signal<string | null>(null);
+  protected readonly coverFileName = signal<string | null>(null);
   protected readonly logoPreviewUrl = signal<string | null>(MOCK_PUBLIC_MENU.restaurant.logoUrl ?? null);
   protected readonly coverPreviewUrl = signal<string | null>(
     MOCK_PUBLIC_MENU.restaurant.coverImageUrl ?? null,
@@ -159,17 +161,27 @@ export class RestaurantProfileSetupPage {
   }
 
   protected onLogoSelected(event: Event): void {
-    this.handleImageSelection(event, (url) => {
+    this.handleImageSelection(event, (url, fileName) => {
       revokeImagePreviewUrl(this.logoPreviewUrl());
       this.logoPreviewUrl.set(url);
+      this.logoFileName.set(fileName);
     });
   }
 
   protected onCoverSelected(event: Event): void {
-    this.handleImageSelection(event, (url) => {
+    this.handleImageSelection(event, (url, fileName) => {
       revokeImagePreviewUrl(this.coverPreviewUrl());
       this.coverPreviewUrl.set(url);
+      this.coverFileName.set(fileName);
     });
+  }
+
+  protected chooseImageLabel(): string {
+    return this.localeService.locale() === 'ar' ? 'اختر صورة' : 'Choose image';
+  }
+
+  protected noFileChosenLabel(): string {
+    return this.localeService.locale() === 'ar' ? 'لم يتم اختيار ملف' : 'No file chosen';
   }
 
   protected saveProfile(): void {
@@ -215,7 +227,10 @@ export class RestaurantProfileSetupPage {
     };
   }
 
-  private handleImageSelection(event: Event, assign: (url: string) => void): void {
+  private handleImageSelection(
+    event: Event,
+    assign: (url: string, fileName: string) => void,
+  ): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     const previewUrl = file ? createImagePreviewUrl(file) : null;
@@ -230,8 +245,8 @@ export class RestaurantProfileSetupPage {
       return;
     }
 
-    if (previewUrl) {
-      assign(previewUrl);
+    if (previewUrl && file) {
+      assign(previewUrl, file.name);
     }
 
     input.value = '';
