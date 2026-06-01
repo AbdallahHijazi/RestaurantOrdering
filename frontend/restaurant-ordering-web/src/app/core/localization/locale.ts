@@ -123,7 +123,24 @@ type UiTextKey =
   | 'saveProfile'
   | 'previewTitle'
   | 'fullPreview'
-  | 'closePreview';
+  | 'closePreview'
+  | 'loginBrand'
+  | 'loginTitle'
+  | 'loginDescription'
+  | 'loginEmailLabel'
+  | 'loginPasswordLabel'
+  | 'loginSubmit'
+  | 'loginSubmitting'
+  | 'loginShowPassword'
+  | 'loginHidePassword'
+  | 'loginInvalidCredentials'
+  | 'loginTooManyAttempts'
+  | 'loginNetworkError'
+  | 'loginEmailRequired'
+  | 'loginEmailInvalid'
+  | 'loginPasswordRequired'
+  | 'languageArabic'
+  | 'languageEnglish';
 
 const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
   ar: {
@@ -150,6 +167,23 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     previewTitle: 'معاينة مباشرة',
     fullPreview: 'معاينة كاملة',
     closePreview: 'إغلاق',
+    loginBrand: 'Restaurant Admin',
+    loginTitle: 'مرحبًا بعودتك',
+    loginDescription: 'سجّل الدخول لإدارة ملف المطعم والقائمة والإعدادات.',
+    loginEmailLabel: 'البريد الإلكتروني',
+    loginPasswordLabel: 'كلمة المرور',
+    loginSubmit: 'تسجيل الدخول',
+    loginSubmitting: 'جاري تسجيل الدخول…',
+    loginShowPassword: 'إظهار كلمة المرور',
+    loginHidePassword: 'إخفاء كلمة المرور',
+    loginInvalidCredentials: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+    loginTooManyAttempts: 'محاولات تسجيل الدخول كثيرة جدًا. حاول مرة أخرى لاحقًا.',
+    loginNetworkError: 'تعذر تسجيل الدخول حاليًا. حاول مرة أخرى.',
+    loginEmailRequired: 'البريد الإلكتروني مطلوب.',
+    loginEmailInvalid: 'أدخل بريدًا إلكترونيًا صالحًا.',
+    loginPasswordRequired: 'كلمة المرور مطلوبة.',
+    languageArabic: 'العربية',
+    languageEnglish: 'EN',
   },
   en: {
     loading: 'Loading menu…',
@@ -175,6 +209,23 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     previewTitle: 'Live preview',
     fullPreview: 'Open full preview',
     closePreview: 'Close',
+    loginBrand: 'Restaurant Admin',
+    loginTitle: 'Welcome Back',
+    loginDescription: 'Sign in to manage your restaurant profile, menu, and settings.',
+    loginEmailLabel: 'Email',
+    loginPasswordLabel: 'Password',
+    loginSubmit: 'Sign in',
+    loginSubmitting: 'Signing in…',
+    loginShowPassword: 'Show password',
+    loginHidePassword: 'Hide password',
+    loginInvalidCredentials: 'Invalid email or password.',
+    loginTooManyAttempts: 'Too many login attempts. Please try again later.',
+    loginNetworkError: 'Unable to sign in right now. Please try again.',
+    loginEmailRequired: 'Email is required.',
+    loginEmailInvalid: 'Enter a valid email address.',
+    loginPasswordRequired: 'Password is required.',
+    languageArabic: 'العربية',
+    languageEnglish: 'EN',
   },
 };
 

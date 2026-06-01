@@ -1,10 +1,16 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
     redirectTo: 'r/demo/menu',
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/pages/login/login-page').then((m) => m.LoginPage),
   },
   {
     path: 'r/:slug',
@@ -25,6 +31,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./core/layouts/admin-layout/admin-layout').then((m) => m.AdminLayout),
     children: [
@@ -41,7 +48,6 @@ export const routes: Routes = [
           ),
       },
       {
-        // TODO: Add Auth Guard after authentication is implemented.
         path: 'restaurant-profile',
         loadComponent: () =>
           import(

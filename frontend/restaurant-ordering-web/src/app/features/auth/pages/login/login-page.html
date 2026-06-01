@@ -1,0 +1,119 @@
+<div class="login-page" [attr.dir]="localeService.direction()">
+  <div class="login-page__backdrop" aria-hidden="true">
+    <span class="login-page__glow"></span>
+    <span class="login-page__botanical login-page__botanical--left"></span>
+  </div>
+
+  <main class="login-page__main">
+    <div class="login-page__toolbar">
+      <div class="login-page__lang" role="group" [attr.aria-label]="localeService.uiText('languageEnglish')">
+        <button
+          type="button"
+          class="login-page__lang-btn"
+          [class.is-active]="localeService.locale() === 'ar'"
+          [attr.aria-pressed]="localeService.locale() === 'ar'"
+          (click)="setLocale('ar')"
+        >
+          {{ localeService.uiText('languageArabic') }}
+        </button>
+        <button
+          type="button"
+          class="login-page__lang-btn"
+          [class.is-active]="localeService.locale() === 'en'"
+          [attr.aria-pressed]="localeService.locale() === 'en'"
+          (click)="setLocale('en')"
+        >
+          {{ localeService.uiText('languageEnglish') }}
+        </button>
+      </div>
+    </div>
+
+    <section class="login-page__card" aria-labelledby="login-title">
+      <div class="login-page__brand" aria-hidden="true">
+        <span class="login-page__brand-mark"></span>
+        <span class="login-page__brand-text">{{ localeService.uiText('loginBrand') }}</span>
+      </div>
+
+      <h1 id="login-title" class="login-page__title">{{ localeService.uiText('loginTitle') }}</h1>
+      <p class="login-page__description">{{ localeService.uiText('loginDescription') }}</p>
+
+      <form class="login-page__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="login-page__field">
+          <label class="login-page__label" for="login-email">
+            {{ localeService.uiText('loginEmailLabel') }}
+          </label>
+          <input
+            id="login-email"
+            class="login-page__input"
+            type="email"
+            autocomplete="email"
+            formControlName="email"
+            [attr.aria-invalid]="emailError() ? 'true' : null"
+          />
+          @if (emailError(); as message) {
+            <p class="login-page__field-error" role="alert">{{ message }}</p>
+          }
+        </div>
+
+        <div class="login-page__field">
+          <label class="login-page__label" for="login-password">
+            {{ localeService.uiText('loginPasswordLabel') }}
+          </label>
+          <div class="login-page__password-wrap">
+            <input
+              id="login-password"
+              class="login-page__input"
+              [type]="passwordVisible() ? 'text' : 'password'"
+              autocomplete="current-password"
+              formControlName="password"
+              [attr.aria-invalid]="passwordError() ? 'true' : null"
+            />
+            <button
+              type="button"
+              class="login-page__password-toggle"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="
+                passwordVisible()
+                  ? localeService.uiText('loginHidePassword')
+                  : localeService.uiText('loginShowPassword')
+              "
+              [attr.aria-pressed]="passwordVisible()"
+            >
+              {{
+                passwordVisible()
+                  ? localeService.uiText('loginHidePassword')
+                  : localeService.uiText('loginShowPassword')
+              }}
+            </button>
+          </div>
+          @if (passwordError(); as message) {
+            <p class="login-page__field-error" role="alert">{{ message }}</p>
+          }
+        </div>
+
+        <div class="login-page__error-slot" aria-live="polite">
+          @if (errorMessage(); as message) {
+            <p class="login-page__error" role="alert">{{ message }}</p>
+          }
+        </div>
+
+        <button
+          class="login-page__submit"
+          type="submit"
+          [disabled]="form.invalid || submitting()"
+        >
+          <span class="login-page__submit-label">
+            {{
+              submitting()
+                ? localeService.uiText('loginSubmitting')
+                : localeService.uiText('loginSubmit')
+            }}
+          </span>
+          @if (submitting()) {
+            <span class="login-page__spinner" aria-hidden="true"></span>
+          }
+        </button>
+      </form>
+    </section>
+  </main>
+</div>
