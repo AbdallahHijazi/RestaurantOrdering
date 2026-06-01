@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Domain.Entities;
 using RestaurantOrdering.Infrastructure.Identity;
 using RestaurantOrdering.Infrastructure.Persistence;
@@ -9,48 +11,36 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Seed;
 
 public class DevelopmentDataSeeder
 {
+    private const string AdminEmailKey = "DevelopmentSeed:AdminEmail";
+    private const string AdminPasswordKey = "DevelopmentSeed:AdminPassword";
+    private const string AdminFullNameKey = "DevelopmentSeed:AdminFullName";
+
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<DevelopmentDataSeeder> _logger;
 
     public DevelopmentDataSeeder(
         ApplicationDbContext context,
         UserManager<ApplicationUser> userManager,
+        IConfiguration configuration,
         ILogger<DevelopmentDataSeeder> logger)
     {
         _context = context;
         _userManager = userManager;
+        _configuration = configuration;
         _logger = logger;
     }
 
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
-        var owner = await _userManager.FindByIdAsync(DevelopmentSeedIds.OwnerUserId.ToString());
+        var owner = await TryEnsureDevelopmentAdminUserAsync(cancellationToken);
 
         if (owner is null)
         {
-            owner = new ApplicationUser
-            {
-                Id = DevelopmentSeedIds.OwnerUserId,
-                UserName = "dev.owner@restaurantordering.local",
-                Email = "dev.owner@restaurantordering.local",
-                EmailConfirmed = true,
-                FullName = "Development Restaurant Owner",
-                IsActive = true,
-                IsDeleted = false,
-                RestaurantId = null,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            var createResult = await _userManager.CreateAsync(owner);
-
-            if (!createResult.Succeeded)
-            {
-                throw new InvalidOperationException(
-                    $"Failed to create development owner: {FormatIdentityErrors(createResult)}");
-            }
-
-            _logger.LogInformation("Created development owner user {OwnerId}.", owner.Id);
+            _logger.LogInformation(
+                "Development admin seed skipped because local credentials are not configured.");
+            return;
         }
 
         var restaurantExists = await _context.Restaurants
@@ -81,6 +71,17 @@ public class DevelopmentDataSeeder
 
             _context.Restaurants.Add(restaurant);
             _logger.LogInformation("Created development restaurant {RestaurantId}.", restaurant.Id);
+        }
+        else
+        {
+            var restaurant = await _context.Restaurants
+                .IgnoreQueryFilters()
+                .FirstAsync(r => r.Id == DevelopmentSeedIds.RestaurantId, cancellationToken);
+
+            if (restaurant.OwnerId != DevelopmentSeedIds.OwnerUserId)
+            {
+                restaurant.OwnerId = DevelopmentSeedIds.OwnerUserId;
+            }
         }
 
         var settingsExists = await _context.RestaurantSettings
@@ -128,7 +129,147 @@ public class DevelopmentDataSeeder
                 DevelopmentSeedIds.RestaurantId);
         }
 
+        await EnsureDevelopmentOwnerRoleAsync(owner);
+
         _logger.LogInformation("Development data seed completed successfully.");
+    }
+
+    private async Task EnsureDevelopmentOwnerRoleAsync(ApplicationUser owner)
+    {
+        if (await _userManager.IsInRoleAsync(owner, ApplicationRoles.RestaurantOwner))
+        {
+            return;
+        }
+
+        var addRoleResult = await _userManager.AddToRoleAsync(owner, ApplicationRoles.RestaurantOwner);
+
+        if (!addRoleResult.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"Failed to assign development owner role: {FormatIdentityErrors(addRoleResult)}");
+        }
+
+        _logger.LogInformation("Assigned {RoleName} to development owner {OwnerId}.", ApplicationRoles.RestaurantOwner, owner.Id);
+    }
+
+    private async Task<ApplicationUser?> TryEnsureDevelopmentAdminUserAsync(
+        CancellationToken cancellationToken)
+    {
+        var configuredEmail = _configuration[AdminEmailKey];
+        var configuredPassword = _configuration[AdminPasswordKey];
+        var hasConfiguredCredentials =
+            !string.IsNullOrWhiteSpace(configuredEmail) &&
+            !string.IsNullOrWhiteSpace(configuredPassword);
+
+        var owner = await _userManager.FindByIdAsync(DevelopmentSeedIds.OwnerUserId.ToString());
+
+        if (!hasConfiguredCredentials)
+        {
+            return owner;
+        }
+
+        var email = configuredEmail!.Trim();
+        var password = configuredPassword!;
+        var fullName = _configuration[AdminFullNameKey];
+
+        if (owner is not null)
+        {
+            if (!string.Equals(owner.Email, email, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    "Development admin seed failed because the configured email does not match the existing development user.");
+            }
+
+            await EnsureDevelopmentAdminProfileAsync(owner, fullName);
+            return owner;
+        }
+
+        var existingByEmail = await _userManager.FindByEmailAsync(email);
+
+        if (existingByEmail is not null)
+        {
+            throw new InvalidOperationException(
+                "Development admin seed failed because the configured email is already assigned to a different user.");
+        }
+
+        owner = new ApplicationUser
+        {
+            Id = DevelopmentSeedIds.OwnerUserId,
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true,
+            FullName = string.IsNullOrWhiteSpace(fullName)
+                ? "Development Restaurant Owner"
+                : fullName.Trim(),
+            IsActive = true,
+            IsDeleted = false,
+            LockoutEnabled = true,
+            RestaurantId = null,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var createResult = await _userManager.CreateAsync(owner, password);
+
+        if (!createResult.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"Failed to create development admin user: {FormatIdentityErrors(createResult)}");
+        }
+
+        _logger.LogInformation("Created development admin user {OwnerId}.", owner.Id);
+        return owner;
+    }
+
+    private async Task EnsureDevelopmentAdminProfileAsync(
+        ApplicationUser owner,
+        string? fullName)
+    {
+        var requiresUpdate = false;
+
+        if (!owner.EmailConfirmed)
+        {
+            owner.EmailConfirmed = true;
+            requiresUpdate = true;
+        }
+
+        if (!owner.IsActive)
+        {
+            owner.IsActive = true;
+            requiresUpdate = true;
+        }
+
+        if (owner.IsDeleted)
+        {
+            owner.IsDeleted = false;
+            requiresUpdate = true;
+        }
+
+        if (!owner.LockoutEnabled)
+        {
+            owner.LockoutEnabled = true;
+            requiresUpdate = true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(fullName) &&
+            !string.Equals(owner.FullName, fullName.Trim(), StringComparison.Ordinal))
+        {
+            owner.FullName = fullName.Trim();
+            requiresUpdate = true;
+        }
+
+        if (!requiresUpdate)
+        {
+            return;
+        }
+
+        var updateResult = await _userManager.UpdateAsync(owner);
+
+        if (!updateResult.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"Failed to update development admin user: {FormatIdentityErrors(updateResult)}");
+        }
+
     }
 
     private static string FormatIdentityErrors(IdentityResult result) =>

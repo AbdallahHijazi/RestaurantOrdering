@@ -40,7 +40,13 @@ public sealed class UserAuthenticationService : IUserAuthenticationService
 
         await _userManager.ResetAccessFailedCountAsync(user);
 
-        return new AuthenticatedUserInfo(user.Id, user.Email ?? string.Empty, user.RestaurantId);
+        var roles = await _userManager.GetRolesAsync(user);
+
+        return new AuthenticatedUserInfo(
+            user.Id,
+            user.Email ?? string.Empty,
+            user.RestaurantId,
+            roles.ToList());
     }
 }
 

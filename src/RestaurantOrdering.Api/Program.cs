@@ -2,6 +2,8 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Hosting;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Application;
 using RestaurantOrdering.Api.Extensions;
 using RestaurantOrdering.Api.Services;
@@ -12,8 +14,6 @@ using RestaurantOrdering.Infrastructure.Persistence.Seed;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 builder.Services.AddControllers();
 builder.Services.AddApplication();
@@ -60,7 +60,22 @@ builder.Services
             ClockSkew = TimeSpan.FromSeconds(30)
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(ApplicationPolicies.RestaurantOwnerOnly, policy =>
+        policy.RequireRole(ApplicationRoles.RestaurantOwner));
+
+    options.AddPolicy(ApplicationPolicies.RestaurantDashboardAccess, policy =>
+        policy.RequireRole(
+            ApplicationRoles.RestaurantOwner,
+            ApplicationRoles.RestaurantManager));
+
+    options.AddPolicy(ApplicationPolicies.KitchenDashboardAccess, policy =>
+        policy.RequireRole(
+            ApplicationRoles.RestaurantOwner,
+            ApplicationRoles.RestaurantManager,
+            ApplicationRoles.KitchenManager));
+});
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -117,14 +132,42 @@ builder.Services.AddRateLimiter(options =>
             }));
 
     options.AddPolicy("auth-login", httpContext =>
-        RateLimitPartition.GetFixedWindowLimiter(
+    {
+        var configuration = httpContext.RequestServices.GetRequiredService<IConfiguration>();
+        var hostEnvironment = httpContext.RequestServices.GetRequiredService<IHostEnvironment>();
+        var useRelaxedTestingRateLimits =
+            hostEnvironment.IsEnvironment("Testing") &&
+            !configuration.GetValue<bool>("Testing:UseStrictRateLimits");
+
+        return RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             factory: _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 8,
+                PermitLimit = useRelaxedTestingRateLimits ? 1000 : 8,
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0
-            }));
+            });
+    });
+
+    options.AddPolicy("restaurant-user-management", httpContext =>
+    {
+        var configuration = httpContext.RequestServices.GetRequiredService<IConfiguration>();
+        var hostEnvironment = httpContext.RequestServices.GetRequiredService<IHostEnvironment>();
+        var useRelaxedTestingRateLimits =
+            hostEnvironment.IsEnvironment("Testing") &&
+            !configuration.GetValue<bool>("Testing:UseStrictRateLimits");
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                ?? "anonymous",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = useRelaxedTestingRateLimits ? 1000 : 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            });
+    });
 });
 
 builder.Services.AddCors(options =>
@@ -163,12 +206,13 @@ app.UseStaticFiles(new StaticFileOptions
     }
 });
 
-app.UseRateLimiter();
-
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 
 app.MapControllers();
+
+await app.Services.InitializeApplicationRolesAsync();
 
 if (app.Environment.IsDevelopment())
 {

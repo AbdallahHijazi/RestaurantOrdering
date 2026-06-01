@@ -17,7 +17,11 @@ public sealed class JwtTokenGenerator : IJwtTokenGenerator
         _dateTimeService = dateTimeService;
     }
 
-    public JwtTokenResult GenerateToken(Guid userId, string email, Guid? restaurantId)
+    public JwtTokenResult GenerateToken(
+        Guid userId,
+        string email,
+        Guid? restaurantId,
+        IReadOnlyList<string> roles)
     {
         var issuedAtUtc = _dateTimeService.UtcNow;
         var expiresAtUtc = issuedAtUtc.AddMinutes(_jwtOptions.AccessTokenLifetimeMinutes);
@@ -32,6 +36,11 @@ public sealed class JwtTokenGenerator : IJwtTokenGenerator
         if (restaurantId.HasValue)
         {
             claims.Add(new Claim("restaurant_id", restaurantId.Value.ToString()));
+        }
+
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
         if (!JwtSigningKeyHelper.TryGetSigningKeyBytes(_jwtOptions.SigningKey, out var signingKeyBytes))

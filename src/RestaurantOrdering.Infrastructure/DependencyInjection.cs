@@ -37,6 +37,7 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
         services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
+        services.AddScoped<IRestaurantUserManagementService, RestaurantUserManagementService>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
         services.AddScoped<IDateTimeService, DateTimeService>();
@@ -45,6 +46,7 @@ public static class DependencyInjection
                 provider.GetRequiredService<IOptions<FileStorageOptions>>(),
                 contentRootPath));
         services.AddScoped<DevelopmentDataSeeder>();
+        services.AddScoped<ApplicationRoleInitializer>();
 
         services.AddOptions<FileStorageOptions>()
             .Configure(options =>

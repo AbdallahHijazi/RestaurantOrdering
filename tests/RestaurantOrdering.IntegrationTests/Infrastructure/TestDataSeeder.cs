@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Domain.Entities;
 using RestaurantOrdering.Infrastructure.Identity;
 using RestaurantOrdering.Infrastructure.Persistence;
+using RestaurantOrdering.Infrastructure.Persistence.Seed;
 
 namespace RestaurantOrdering.IntegrationTests.Infrastructure;
 
@@ -12,6 +14,8 @@ internal static class TestDataSeeder
     internal static readonly Guid OwnerAUserId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1");
     internal static readonly Guid OwnerBUserId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2");
     internal static readonly Guid LockoutUserId = Guid.Parse("cccccccc-cccc-cccc-cccc-ccccccccccc3");
+    internal static readonly Guid ManagerAUserId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4");
+    internal static readonly Guid KitchenAUserId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5");
     internal static readonly Guid RestaurantAId = Guid.Parse("aaaaaaaa-1111-1111-1111-111111111111");
     internal static readonly Guid RestaurantBId = Guid.Parse("bbbbbbbb-2222-2222-2222-222222222222");
     internal static readonly Guid RestaurantASettingsId = Guid.Parse("aaaaaaaa-3333-3333-3333-333333333333");
@@ -21,6 +25,8 @@ internal static class TestDataSeeder
     internal const string OwnerAEmail = "owner.a@test.local";
     internal const string OwnerBEmail = "owner.b@test.local";
     internal const string LockoutEmail = "lockout.user@test.local";
+    internal const string ManagerAEmail = "manager.a@test.local";
+    internal const string KitchenAEmail = "kitchen.a@test.local";
     internal const string CorrectPassword = "P@ssw0rd!123";
 
     internal static async Task SeedAsync(IServiceProvider serviceProvider)
@@ -30,66 +36,23 @@ internal static class TestDataSeeder
 
         var dbContext = scopedProvider.GetRequiredService<ApplicationDbContext>();
         var userManager = scopedProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleInitializer = scopedProvider.GetRequiredService<ApplicationRoleInitializer>();
 
         await dbContext.Database.EnsureDeletedAsync();
         await dbContext.Database.EnsureCreatedAsync();
+        await roleInitializer.InitializeAsync();
 
-        var ownerA = new ApplicationUser
-        {
-            Id = OwnerAUserId,
-            UserName = OwnerAEmail,
-            NormalizedUserName = OwnerAEmail.ToUpperInvariant(),
-            Email = OwnerAEmail,
-            NormalizedEmail = OwnerAEmail.ToUpperInvariant(),
-            EmailConfirmed = true,
-            IsActive = true,
-            IsDeleted = false,
-            RestaurantId = RestaurantAId
-        };
+        var ownerA = CreateUser(OwnerAUserId, OwnerAEmail, RestaurantAId);
+        var ownerB = CreateUser(OwnerBUserId, OwnerBEmail, RestaurantBId);
+        var lockoutUser = CreateUser(LockoutUserId, LockoutEmail, null);
+        var managerA = CreateUser(ManagerAUserId, ManagerAEmail, RestaurantAId);
+        var kitchenA = CreateUser(KitchenAUserId, KitchenAEmail, RestaurantAId);
 
-        var ownerB = new ApplicationUser
-        {
-            Id = OwnerBUserId,
-            UserName = OwnerBEmail,
-            NormalizedUserName = OwnerBEmail.ToUpperInvariant(),
-            Email = OwnerBEmail,
-            NormalizedEmail = OwnerBEmail.ToUpperInvariant(),
-            EmailConfirmed = true,
-            IsActive = true,
-            IsDeleted = false,
-            RestaurantId = RestaurantBId
-        };
-
-        var lockoutUser = new ApplicationUser
-        {
-            Id = LockoutUserId,
-            UserName = LockoutEmail,
-            NormalizedUserName = LockoutEmail.ToUpperInvariant(),
-            Email = LockoutEmail,
-            NormalizedEmail = LockoutEmail.ToUpperInvariant(),
-            EmailConfirmed = true,
-            IsActive = true,
-            IsDeleted = false,
-            RestaurantId = null
-        };
-
-        var ownerACreateResult = await userManager.CreateAsync(ownerA, CorrectPassword);
-        if (!ownerACreateResult.Succeeded)
-        {
-            throw new InvalidOperationException($"Failed to create Owner A: {FormatErrors(ownerACreateResult)}");
-        }
-
-        var ownerBCreateResult = await userManager.CreateAsync(ownerB, CorrectPassword);
-        if (!ownerBCreateResult.Succeeded)
-        {
-            throw new InvalidOperationException($"Failed to create Owner B: {FormatErrors(ownerBCreateResult)}");
-        }
-
-        var lockoutUserCreateResult = await userManager.CreateAsync(lockoutUser, CorrectPassword);
-        if (!lockoutUserCreateResult.Succeeded)
-        {
-            throw new InvalidOperationException($"Failed to create lockout user: {FormatErrors(lockoutUserCreateResult)}");
-        }
+        await CreateUserWithRoleAsync(userManager, ownerA, ApplicationRoles.RestaurantOwner);
+        await CreateUserWithRoleAsync(userManager, ownerB, ApplicationRoles.RestaurantOwner);
+        await CreateUserWithRoleAsync(userManager, lockoutUser, ApplicationRoles.RestaurantManager);
+        await CreateUserWithRoleAsync(userManager, managerA, ApplicationRoles.RestaurantManager);
+        await CreateUserWithRoleAsync(userManager, kitchenA, ApplicationRoles.KitchenManager);
 
         dbContext.Restaurants.AddRange(
             new Restaurant
@@ -172,7 +135,39 @@ internal static class TestDataSeeder
         }
     }
 
+    private static ApplicationUser CreateUser(Guid id, string email, Guid? restaurantId) =>
+        new()
+        {
+            Id = id,
+            UserName = email,
+            NormalizedUserName = email.ToUpperInvariant(),
+            Email = email,
+            NormalizedEmail = email.ToUpperInvariant(),
+            EmailConfirmed = true,
+            IsActive = true,
+            IsDeleted = false,
+            LockoutEnabled = true,
+            RestaurantId = restaurantId
+        };
+
+    private static async Task CreateUserWithRoleAsync(
+        UserManager<ApplicationUser> userManager,
+        ApplicationUser user,
+        string role)
+    {
+        var createResult = await userManager.CreateAsync(user, CorrectPassword);
+        if (!createResult.Succeeded)
+        {
+            throw new InvalidOperationException($"Failed to create user {user.Email}: {FormatErrors(createResult)}");
+        }
+
+        var addRoleResult = await userManager.AddToRoleAsync(user, role);
+        if (!addRoleResult.Succeeded)
+        {
+            throw new InvalidOperationException($"Failed to assign role {role} to {user.Email}: {FormatErrors(addRoleResult)}");
+        }
+    }
+
     private static string FormatErrors(IdentityResult result) =>
         string.Join("; ", result.Errors.Select(error => error.Description));
 }
-

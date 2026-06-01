@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,29 +18,30 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
     private readonly string _jwtSigningKey;
     private readonly string _jwtAccessTokenLifetimeMinutes;
     private readonly string _uploadsRootPath;
+    private readonly bool _useStrictRateLimits;
 
     public string UploadsRootPath => _uploadsRootPath;
 
     public TestWebApplicationFactory()
+        : this(jwtSigningKey: null, useStrictRateLimits: false)
     {
-        _jwtIssuer = "RestaurantOrdering.Tests";
-        _jwtAudience = "RestaurantOrdering.Tests.Client";
-        _jwtSigningKey = "test-signing-key-at-least-32-characters-long!";
-        _jwtAccessTokenLifetimeMinutes = "60";
-        _uploadsRootPath = Path.Combine(Path.GetTempPath(), $"restaurant-ordering-test-uploads-{Guid.NewGuid():N}");
     }
 
-    private TestWebApplicationFactory(string jwtSigningKey)
+    private TestWebApplicationFactory(string? jwtSigningKey, bool useStrictRateLimits)
     {
+        _useStrictRateLimits = useStrictRateLimits;
         _jwtIssuer = "RestaurantOrdering.Tests";
         _jwtAudience = "RestaurantOrdering.Tests.Client";
-        _jwtSigningKey = jwtSigningKey;
+        _jwtSigningKey = jwtSigningKey ?? "test-signing-key-at-least-32-characters-long!";
         _jwtAccessTokenLifetimeMinutes = "60";
         _uploadsRootPath = Path.Combine(Path.GetTempPath(), $"restaurant-ordering-test-uploads-{Guid.NewGuid():N}");
     }
 
     public static TestWebApplicationFactory CreateWithSigningKey(string jwtSigningKey) =>
-        new(jwtSigningKey);
+        new(jwtSigningKey, useStrictRateLimits: false);
+
+    public static TestWebApplicationFactory CreateWithStrictRateLimits() =>
+        new(jwtSigningKey: null, useStrictRateLimits: true);
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -54,7 +56,8 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
                     ["Jwt:Audience"] = _jwtAudience,
                     ["Jwt:SigningKey"] = _jwtSigningKey,
                     ["Jwt:AccessTokenLifetimeMinutes"] = _jwtAccessTokenLifetimeMinutes,
-                    ["FileStorage:RootPath"] = _uploadsRootPath
+                    ["FileStorage:RootPath"] = _uploadsRootPath,
+                    ["Testing:UseStrictRateLimits"] = _useStrictRateLimits ? "true" : "false"
                 });
         });
 
@@ -65,7 +68,10 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
             services.RemoveAll<IDbContextOptionsConfiguration<ApplicationDbContext>>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase(_databaseName));
+                options
+                    .UseInMemoryDatabase(_databaseName)
+                    .ConfigureWarnings(warnings =>
+                        warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
         });
     }
 

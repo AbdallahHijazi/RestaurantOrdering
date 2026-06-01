@@ -8,5 +8,9 @@ public interface IUserAuthenticationService
         CancellationToken cancellationToken);
 }
 
-public sealed record AuthenticatedUserInfo(Guid UserId, string Email, Guid? RestaurantId);
+public sealed record AuthenticatedUserInfo(
+    Guid UserId,
+    string Email,
+    Guid? RestaurantId,
+    IReadOnlyList<string> Roles);
 

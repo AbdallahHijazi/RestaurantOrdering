@@ -128,7 +128,7 @@ public sealed class AdminSecurityBoundaryTests : IClassFixture<TestWebApplicatio
     [Fact]
     public async Task Login_ExceedingRateLimit_Returns429()
     {
-        using var isolatedFactory = new TestWebApplicationFactory();
+        using var isolatedFactory = TestWebApplicationFactory.CreateWithStrictRateLimits();
         await TestDataSeeder.SeedAsync(isolatedFactory.Services);
         using var client = CreateHttpsClient(isolatedFactory);
 
