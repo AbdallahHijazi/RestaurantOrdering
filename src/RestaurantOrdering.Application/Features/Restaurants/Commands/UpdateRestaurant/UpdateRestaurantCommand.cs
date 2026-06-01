@@ -1,4 +1,5 @@
 using MediatR;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Application.Features.Restaurants.DTOs;
 
 namespace RestaurantOrdering.Application.Features.Restaurants.Commands.UpdateRestaurant;
@@ -15,4 +16,4 @@ public sealed record UpdateRestaurantCommand(
     string? AddressAr,
     string? AddressEn,
     decimal? Latitude,
-    decimal? Longitude) : IRequest<RestaurantDto>;
+    decimal? Longitude) : IRequest<RestaurantDto>, IRestaurantScopedRequest;

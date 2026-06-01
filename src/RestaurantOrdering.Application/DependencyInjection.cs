@@ -2,6 +2,8 @@
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using RestaurantOrdering.Application.Common.Behaviors;
+using RestaurantOrdering.Application.Common.Interfaces;
+using RestaurantOrdering.Application.Common.Security;
 using System.Reflection;
 
 namespace RestaurantOrdering.Application;
@@ -20,6 +22,10 @@ public static class DependencyInjection
         services.AddTransient(
             typeof(IPipelineBehavior<,>),
             typeof(ValidationBehavior<,>));
+        services.AddTransient(
+            typeof(IPipelineBehavior<,>),
+            typeof(RestaurantOwnershipBehavior<,>));
+        services.AddScoped<IRestaurantAuthorizationService, RestaurantAuthorizationService>();
 
         return services;
     }

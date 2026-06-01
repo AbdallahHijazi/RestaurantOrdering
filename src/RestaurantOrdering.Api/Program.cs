@@ -1,10 +1,15 @@
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using RestaurantOrdering.Application;
 using RestaurantOrdering.Api.Extensions;
+using RestaurantOrdering.Api.Services;
+using RestaurantOrdering.Application.Common.Interfaces;
+using RestaurantOrdering.Infrastructure.Authentication;
 using RestaurantOrdering.Infrastructure;
 using RestaurantOrdering.Infrastructure.Persistence.Seed;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +20,47 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment.ContentRootPath);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer();
+
+builder.Services
+    .AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+    .Configure<Microsoft.Extensions.Options.IOptions<JwtOptions>>((jwtBearerOptions, jwtOptionsAccessor) =>
+    {
+        var jwtOptions = jwtOptionsAccessor.Value;
+
+        if (string.IsNullOrWhiteSpace(jwtOptions.Issuer))
+        {
+            throw new InvalidOperationException("Jwt:Issuer must be configured.");
+        }
+
+        if (string.IsNullOrWhiteSpace(jwtOptions.Audience))
+        {
+            throw new InvalidOperationException("Jwt:Audience must be configured.");
+        }
+
+        if (!JwtSigningKeyHelper.TryGetSigningKeyBytes(jwtOptions.SigningKey, out var signingKeyBytes))
+        {
+            throw new InvalidOperationException("Jwt:SigningKey must be configured with at least 32 bytes.");
+        }
+
+        jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtOptions.Issuer,
+            ValidAudience = jwtOptions.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(signingKeyBytes),
+            ClockSkew = TimeSpan.FromSeconds(30)
+        };
+    });
+builder.Services.AddAuthorization();
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -69,6 +115,16 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0
             }));
+
+    options.AddPolicy("auth-login", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 8,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
 });
 
 builder.Services.AddCors(options =>
@@ -93,7 +149,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("Frontend");
 app.UseApiExceptionHandling();
-app.UseDevelopmentOnlyAdminAccessGuard();
+if (app.Environment.IsDevelopment())
+{
+    app.UseDevelopmentOnlyAdminAccessGuard();
+}
 app.UseHttpsRedirection();
 
 app.UseStaticFiles(new StaticFileOptions
@@ -106,6 +165,7 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseRateLimiter();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

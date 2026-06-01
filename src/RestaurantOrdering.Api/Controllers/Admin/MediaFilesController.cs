@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using RestaurantOrdering.Api.Contracts.Admin.MediaFiles;
@@ -10,6 +11,7 @@ using RestaurantOrdering.Application.Features.Restaurants.DTOs;
 namespace RestaurantOrdering.Api.Controllers.Admin;
 
 [ApiController]
+[Authorize]
 [Route("api/v1/admin/restaurants/{restaurantId:guid}")]
 public sealed class MediaFilesController : ControllerBase
 {
