@@ -1,23 +1,34 @@
-import { DEFAULT_ADMIN_ROUTE, sanitizeAdminReturnUrl } from './safe-return-url.util';
+import {
+  DEFAULT_ADMIN_ROUTE,
+  DEFAULT_KITCHEN_ROUTE,
+  sanitizeAdminReturnUrl,
+  sanitizeReturnUrl,
+} from './safe-return-url.util';
 
-describe('sanitizeAdminReturnUrl', () => {
+describe('safe-return-url.util', () => {
   it('accepts internal admin paths', () => {
-    expect(sanitizeAdminReturnUrl('/admin/restaurant-profile')).toBe(
+    expect(sanitizeAdminReturnUrl('/admin')).toBe('/admin');
+    expect(sanitizeReturnUrl('/admin/restaurant-profile', '/admin')).toBe(
       '/admin/restaurant-profile',
     );
   });
 
+  it('accepts kitchen paths for kitchen role sanitization', () => {
+    expect(sanitizeReturnUrl('/kitchen', '/kitchen')).toBe('/kitchen');
+  });
+
   it('rejects external URLs', () => {
-    expect(sanitizeAdminReturnUrl('https://evil.test/admin/restaurant-profile')).toBeNull();
-    expect(sanitizeAdminReturnUrl('//evil.test/admin/restaurant-profile')).toBeNull();
+    expect(sanitizeAdminReturnUrl('https://evil.test/admin')).toBeNull();
+    expect(sanitizeReturnUrl('//evil.test/kitchen', '/kitchen')).toBeNull();
   });
 
-  it('rejects non-admin paths', () => {
+  it('rejects non-matching prefixes', () => {
     expect(sanitizeAdminReturnUrl('/r/demo/menu')).toBeNull();
-    expect(sanitizeAdminReturnUrl('/login')).toBeNull();
+    expect(sanitizeReturnUrl('/admin', '/kitchen')).toBeNull();
   });
 
-  it('exposes default admin route', () => {
-    expect(DEFAULT_ADMIN_ROUTE).toBe('/admin/restaurant-profile');
+  it('exposes default routes', () => {
+    expect(DEFAULT_ADMIN_ROUTE).toBe('/admin/dashboard');
+    expect(DEFAULT_KITCHEN_ROUTE).toBe('/kitchen');
   });
 });

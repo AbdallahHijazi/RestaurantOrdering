@@ -1,19 +1,22 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthSessionService } from './auth-session.service';
-import { sanitizeAdminReturnUrl } from './safe-return-url.util';
+import { AuthService } from './auth.service';
+import { sanitizeReturnUrl } from './safe-return-url.util';
 
-export const authGuard: CanActivateFn = (_route, state) => {
-  const session = inject(AuthSessionService);
+export const authGuard: CanActivateFn = (route, state) => {
+  const auth = inject(AuthService);
   const router = inject(Router);
 
-  if (session.hasValidSession()) {
+  if (auth.isAuthenticated()) {
     return true;
   }
 
-  session.clearSession();
+  auth.logout({ navigate: false });
 
-  const safeReturnUrl = sanitizeAdminReturnUrl(state.url);
+  const path = state.url.split('?')[0] ?? state.url;
+  const allowedPrefix = path.startsWith('/kitchen') ? '/kitchen' : '/admin';
+  const safeReturnUrl = sanitizeReturnUrl(state.url, allowedPrefix);
+
   return router.createUrlTree(
     ['/login'],
     safeReturnUrl ? { queryParams: { returnUrl: safeReturnUrl } } : {},

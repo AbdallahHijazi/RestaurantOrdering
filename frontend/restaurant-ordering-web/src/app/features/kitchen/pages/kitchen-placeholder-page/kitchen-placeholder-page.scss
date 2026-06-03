@@ -1,0 +1,25 @@
+.placeholder {
+  margin: 0 auto;
+  max-width: 40rem;
+  padding: 2.5rem 1.5rem;
+}
+
+.placeholder__eyebrow {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin: 0 0 0.5rem;
+}
+
+.placeholder__meta {
+  margin: 1.5rem 0;
+}
+
+.placeholder__logout {
+  background: #0f172a;
+  border: 0;
+  border-radius: 0.5rem;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  padding: 0.625rem 1rem;
+}

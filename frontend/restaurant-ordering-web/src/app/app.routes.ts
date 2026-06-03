@@ -1,5 +1,10 @@
 import { Routes } from '@angular/router';
+import { ApplicationRoles } from './core/auth/application-roles';
 import { authGuard } from './core/auth/auth.guard';
+import { guestGuard } from './core/auth/guest.guard';
+import { roleGuard } from './core/auth/role.guard';
+
+const adminRoles = [ApplicationRoles.RestaurantOwner, ApplicationRoles.RestaurantManager];
 
 export const routes: Routes = [
   {
@@ -9,6 +14,7 @@ export const routes: Routes = [
   },
   {
     path: 'login',
+    canActivate: [guestGuard],
     loadComponent: () =>
       import('./features/auth/pages/login/login-page').then((m) => m.LoginPage),
   },
@@ -31,7 +37,11 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard],
+    canActivateChild: [roleGuard],
+    data: {
+      roles: adminRoles,
+    },
     loadComponent: () =>
       import('./core/layouts/admin-layout/admin-layout').then((m) => m.AdminLayout),
     children: [
@@ -55,6 +65,17 @@ export const routes: Routes = [
           ).then((m) => m.RestaurantProfileSetupPage),
       },
     ],
+  },
+  {
+    path: 'kitchen',
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: [ApplicationRoles.KitchenManager],
+    },
+    loadComponent: () =>
+      import('./features/kitchen/pages/kitchen-placeholder-page/kitchen-placeholder-page').then(
+        (m) => m.KitchenPlaceholderPage,
+      ),
   },
   {
     path: '**',

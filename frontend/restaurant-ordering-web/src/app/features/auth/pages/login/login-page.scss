@@ -71,14 +71,6 @@
   justify-content: end;
 }
 
-// .login-page__lang {
-//   display: inline-flex;
-//   gap: 0.25rem;
-//   padding: 0.25rem;
-//   border: 1px dashed var(--border);
-//   border-radius: 999px;
-//   background: rgba(19, 19, 19, 0.65);
-// }
 .login-page__lang {
   display: inline-flex;
   align-items: center;
@@ -89,7 +81,6 @@
   padding: 0.25rem;
 
   border: 2px dashed var(--border);
-  // border-color:#ffb3ab53;
   border-radius: 999px;
   background: rgba(19, 19, 19, 0.65);
 }

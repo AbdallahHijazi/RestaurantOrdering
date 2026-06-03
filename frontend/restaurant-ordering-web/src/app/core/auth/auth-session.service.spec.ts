@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
+import { ApplicationRoles } from './application-roles';
 import { AuthSessionService } from './auth-session.service';
+import { createTestAccessToken, createTestSession } from './test-jwt.util';
 
 const STORAGE_KEY = 'restaurant-ordering.auth.session';
 
@@ -44,32 +46,18 @@ describe('AuthSessionService', () => {
   });
 
   it('saves session in sessionStorage', () => {
-    service.saveSession({
-      accessToken: 'token-1',
-      expiresAtUtc: new Date(Date.now() + 60_000).toISOString(),
-      restaurantId: '11111111-1111-1111-1111-111111111111',
-    });
+    const session = createTestSession(ApplicationRoles.RestaurantManager);
+    service.saveSession(session);
 
-    expect(sessionStorageMock.getItem(STORAGE_KEY)).toContain('token-1');
+    expect(sessionStorageMock.getItem(STORAGE_KEY)).toContain('accessToken');
     expect(localStorageSetItemSpy).not.toHaveBeenCalled();
   });
 
-  it('reads a valid session', () => {
-    const expiresAtUtc = new Date(Date.now() + 60_000).toISOString();
-    sessionStorageMock.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        accessToken: 'token-2',
-        expiresAtUtc,
-        restaurantId: null,
-      }),
-    );
+  it('reads a valid session with role from jwt', () => {
+    const session = createTestSession(ApplicationRoles.KitchenManager);
+    sessionStorageMock.setItem(STORAGE_KEY, JSON.stringify(session));
 
-    expect(service.readSession()).toEqual({
-      accessToken: 'token-2',
-      expiresAtUtc,
-      restaurantId: null,
-    });
+    expect(service.readSession()?.role).toBe(ApplicationRoles.KitchenManager);
   });
 
   it('clears session', () => {
@@ -79,14 +67,11 @@ describe('AuthSessionService', () => {
   });
 
   it('rejects expired session', () => {
-    sessionStorageMock.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        accessToken: 'token-expired',
-        expiresAtUtc: new Date(Date.now() - 1_000).toISOString(),
-        restaurantId: null,
-      }),
-    );
+    const expired = {
+      ...createTestSession(ApplicationRoles.RestaurantOwner),
+      expiresAtUtc: new Date(Date.now() - 1_000).toISOString(),
+    };
+    sessionStorageMock.setItem(STORAGE_KEY, JSON.stringify(expired));
 
     expect(service.hasValidSession()).toBe(false);
     expect(sessionStorageMock.getItem(STORAGE_KEY)).toBeNull();
@@ -98,13 +83,44 @@ describe('AuthSessionService', () => {
     expect(sessionStorageMock.getItem(STORAGE_KEY)).toBeNull();
   });
 
-  it('does not use localStorage', () => {
-    service.saveSession({
-      accessToken: 'token-4',
-      expiresAtUtc: new Date(Date.now() + 60_000).toISOString(),
+  it('clears malformed jwt without throwing', () => {
+    sessionStorageMock.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        accessToken: 'invalid-token',
+        expiresAtUtc: new Date(Date.now() + 60_000).toISOString(),
+        userId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        restaurantId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+        role: ApplicationRoles.RestaurantOwner,
+      }),
+    );
+
+    expect(service.readSession()).toBeNull();
+    expect(sessionStorageMock.getItem(STORAGE_KEY)).toBeNull();
+  });
+
+  it('rejects restaurant role without restaurant id in token', () => {
+    const token = createTestAccessToken({
+      role: ApplicationRoles.RestaurantOwner,
       restaurantId: null,
     });
 
+    sessionStorageMock.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        accessToken: token,
+        expiresAtUtc: new Date(Date.now() + 60_000).toISOString(),
+        userId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        restaurantId: null,
+        role: ApplicationRoles.RestaurantOwner,
+      }),
+    );
+
+    expect(service.readSession()).toBeNull();
+  });
+
+  it('does not use localStorage', () => {
+    service.saveSession(createTestSession(ApplicationRoles.RestaurantOwner));
     expect(localStorageSetItemSpy).not.toHaveBeenCalled();
   });
 });

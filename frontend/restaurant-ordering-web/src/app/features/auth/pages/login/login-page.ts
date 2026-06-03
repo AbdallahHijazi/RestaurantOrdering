@@ -9,10 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { LocaleService, type SupportedLocale } from '../../../../core/localization/locale';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { LoginError } from '../../../../core/auth/auth.models';
-import {
-  DEFAULT_ADMIN_ROUTE,
-  sanitizeAdminReturnUrl,
-} from '../../../../core/auth/safe-return-url.util';
+import { resolvePostLoginRoute } from '../../../../core/auth/safe-return-url.util';
 
 @Component({
   selector: 'app-login-page',
@@ -56,10 +53,18 @@ export class LoginPage {
       .subscribe({
         next: () => {
           this.submitting.set(false);
-          const returnUrl =
-            sanitizeAdminReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl')) ??
-            DEFAULT_ADMIN_ROUTE;
-          void this.router.navigateByUrl(returnUrl);
+          const role = this.authService.currentRole();
+          if (!role) {
+            this.authService.logout({ navigate: false });
+            this.errorMessage.set(this.localeService.uiText('loginUnsupportedRole'));
+            return;
+          }
+
+          const destination = resolvePostLoginRoute(
+            this.route.snapshot.queryParamMap.get('returnUrl'),
+            role,
+          );
+          void this.router.navigateByUrl(destination);
         },
         error: (error: unknown) => {
           this.submitting.set(false);
@@ -116,6 +121,8 @@ export class LoginPage {
           return this.localeService.uiText('loginTooManyAttempts');
         case 'network':
           return this.localeService.uiText('loginNetworkError');
+        case 'unsupported-role':
+          return this.localeService.uiText('loginUnsupportedRole');
       }
     }
 

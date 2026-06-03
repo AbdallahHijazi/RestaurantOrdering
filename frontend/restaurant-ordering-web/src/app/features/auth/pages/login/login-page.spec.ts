@@ -5,8 +5,25 @@ import { provideRouter, Router } from '@angular/router';
 import { API_BASE_URL } from '../../../../core/config/api-config';
 import { AuthSessionService } from '../../../../core/auth/auth-session.service';
 import { LocaleService } from '../../../../core/localization/locale';
+import {
+  ApplicationRoles,
+  type ApplicationRole,
+} from '../../../../core/auth/application-roles';
+import { createTestAccessToken } from '../../../../core/auth/test-jwt.util';
 import { routes } from '../../../../app.routes';
 import { LoginPage } from './login-page';
+
+function createLoginResponse(role: ApplicationRole = ApplicationRoles.RestaurantOwner) {
+  return {
+    accessToken: createTestAccessToken({
+      role,
+      restaurantId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+    }),
+    expiresAtUtc: new Date(Date.now() + 60_000).toISOString(),
+    userId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    restaurantId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+  };
+}
 
 type LoginPageHarness = {
   form: {
@@ -80,12 +97,7 @@ describe('LoginPage', () => {
     expect(submit.disabled).toBe(true);
 
     const req = httpMock.expectOne(`${API_BASE_URL}/api/v1/auth/login`);
-    req.flush({
-      accessToken: 'jwt-token',
-      expiresAtUtc: new Date(Date.now() + 60_000).toISOString(),
-      userId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-      restaurantId: null,
-    });
+    req.flush(createLoginResponse());
   });
 
   it('submits valid form to login endpoint', async () => {
@@ -102,12 +114,7 @@ describe('LoginPage', () => {
       email: 'owner@test.local',
       password: ' P@ssw0rd!123 ',
     });
-    req.flush({
-      accessToken: 'jwt-token',
-      expiresAtUtc: new Date(Date.now() + 60_000).toISOString(),
-      userId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-      restaurantId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-    });
+    req.flush(createLoginResponse());
 
     await fixture.whenStable();
   });
@@ -198,12 +205,7 @@ describe('LoginPage', () => {
     fixture.detectChanges();
 
     const req = httpMock.expectOne(`${API_BASE_URL}/api/v1/auth/login`);
-    req.flush({
-      accessToken: 'jwt-token',
-      expiresAtUtc: new Date(Date.now() + 60_000).toISOString(),
-      userId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-      restaurantId: null,
-    });
+    req.flush(createLoginResponse());
   });
 
   it('switches Arabic and English without refresh', () => {
@@ -237,16 +239,29 @@ describe('LoginPage', () => {
     page().submit();
 
     const req = httpMock.expectOne(`${API_BASE_URL}/api/v1/auth/login`);
-    req.flush({
-      accessToken: 'jwt-token',
-      expiresAtUtc: new Date(Date.now() + 60_000).toISOString(),
-      userId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-      restaurantId: null,
-    });
+    req.flush(createLoginResponse());
 
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(router.url).toContain('/admin/restaurant-profile');
+    expect(router.url).toBe('/admin/restaurant-profile');
+  });
+
+  it('navigates KitchenManager to /kitchen after login', async () => {
+    page().form.setValue({
+      email: 'kitchen@test.local',
+      password: 'P@ssw0rd!123',
+    });
+    fixture.detectChanges();
+
+    page().submit();
+
+    const req = httpMock.expectOne(`${API_BASE_URL}/api/v1/auth/login`);
+    req.flush(createLoginResponse(ApplicationRoles.KitchenManager));
+
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(router.url).toBe('/kitchen');
   });
 });

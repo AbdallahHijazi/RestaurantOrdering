@@ -139,6 +139,17 @@ type UiTextKey =
   | 'loginEmailRequired'
   | 'loginEmailInvalid'
   | 'loginPasswordRequired'
+  | 'loginUnsupportedRole'
+  | 'adminPlaceholderEyebrow'
+  | 'adminPlaceholderTitle'
+  | 'adminPlaceholderDescription'
+  | 'adminPlaceholderRoleLabel'
+  | 'adminPlaceholderLogout'
+  | 'kitchenPlaceholderEyebrow'
+  | 'kitchenPlaceholderTitle'
+  | 'kitchenPlaceholderDescription'
+  | 'kitchenPlaceholderRoleLabel'
+  | 'kitchenPlaceholderLogout'
   | 'languageArabic'
   | 'languageEnglish';
 
@@ -182,6 +193,20 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     loginEmailRequired: 'البريد الإلكتروني مطلوب.',
     loginEmailInvalid: 'أدخل بريدًا إلكترونيًا صالحًا.',
     loginPasswordRequired: 'كلمة المرور مطلوبة.',
+    loginUnsupportedRole:
+      'لا يمكن استخدام هذا الحساب هنا. تواصل مع مسؤول المطعم إذا كنت تعتقد أن هذا خطأ.',
+    adminPlaceholderEyebrow: 'إدارة المطعم',
+    adminPlaceholderTitle: 'Restaurant Administration',
+    adminPlaceholderDescription:
+      'هذه المنطقة مخصصة لمالك المطعم أو مدير المطعم. سيتم إضافة لوحة التحكم لاحقًا.',
+    adminPlaceholderRoleLabel: 'الدور الحالي',
+    adminPlaceholderLogout: 'تسجيل الخروج',
+    kitchenPlaceholderEyebrow: 'المطبخ',
+    kitchenPlaceholderTitle: 'Kitchen Dashboard',
+    kitchenPlaceholderDescription:
+      'هذه المنطقة مخصصة لمدير المطبخ. سيتم إضافة شاشة المطبخ لاحقًا.',
+    kitchenPlaceholderRoleLabel: 'الدور الحالي',
+    kitchenPlaceholderLogout: 'تسجيل الخروج',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
   },
@@ -224,6 +249,20 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     loginEmailRequired: 'Email is required.',
     loginEmailInvalid: 'Enter a valid email address.',
     loginPasswordRequired: 'Password is required.',
+    loginUnsupportedRole:
+      'This account cannot be used here. Contact your restaurant administrator if you believe this is a mistake.',
+    adminPlaceholderEyebrow: 'Restaurant admin',
+    adminPlaceholderTitle: 'Restaurant Administration',
+    adminPlaceholderDescription:
+      'This area is for the restaurant owner or manager. A full dashboard will be added later.',
+    adminPlaceholderRoleLabel: 'Current role',
+    adminPlaceholderLogout: 'Log out',
+    kitchenPlaceholderEyebrow: 'Kitchen',
+    kitchenPlaceholderTitle: 'Kitchen Dashboard',
+    kitchenPlaceholderDescription:
+      'This area is for the kitchen manager. Kitchen workflows will be added later.',
+    kitchenPlaceholderRoleLabel: 'Current role',
+    kitchenPlaceholderLogout: 'Log out',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
   },
