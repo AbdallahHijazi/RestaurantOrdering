@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Domain.Entities;
+using RestaurantOrdering.Domain.Enums;
 using RestaurantOrdering.Infrastructure.Identity;
 using RestaurantOrdering.Infrastructure.Persistence;
 using RestaurantOrdering.Infrastructure.Persistence.Seed;
@@ -21,6 +22,12 @@ internal static class TestDataSeeder
     internal static readonly Guid RestaurantASettingsId = Guid.Parse("aaaaaaaa-3333-3333-3333-333333333333");
     internal static readonly Guid RestaurantBSettingsId = Guid.Parse("bbbbbbbb-4444-4444-4444-444444444444");
     internal static readonly Guid RestaurantBMediaId = Guid.Parse("bbbbbbbb-5555-5555-5555-555555555555");
+    internal static readonly Guid CategoryAId = Guid.Parse("aaaaaaaa-6666-6666-6666-666666666666");
+    internal static readonly Guid MenuItemAId = Guid.Parse("aaaaaaaa-7777-7777-7777-777777777777");
+    internal static readonly Guid OrderAId = Guid.Parse("aaaaaaaa-8888-8888-8888-888888888888");
+    internal static readonly Guid OrderACompletedId = Guid.Parse("aaaaaaaa-9999-9999-9999-999999999999");
+    internal static readonly Guid OrderACancelledId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaa01");
+    internal static readonly Guid OrderBId = Guid.Parse("bbbbbbbb-8888-8888-8888-888888888888");
 
     internal const string OwnerAEmail = "owner.a@test.local";
     internal const string OwnerBEmail = "owner.b@test.local";
@@ -104,6 +111,7 @@ internal static class TestDataSeeder
                 IsDeliveryEnabled = true,
                 IsPickupEnabled = true,
                 CreatedAt = DateTime.UtcNow
+                
             });
 
         dbContext.MediaFiles.Add(
@@ -119,6 +127,43 @@ internal static class TestDataSeeder
                 FileSizeBytes = 128,
                 CreatedAt = DateTime.UtcNow
             });
+
+        var seededAt = DateTime.UtcNow;
+
+        dbContext.Categories.Add(
+            new Category
+            {
+                Id = CategoryAId,
+                RestaurantId = RestaurantAId,
+                NameAr = "فئة اختبار",
+                NameEn = "Test Category",
+                DisplayOrder = 1,
+                IsActive = true,
+                IsDeleted = false,
+                CreatedAt = seededAt
+            });
+
+        dbContext.MenuItems.Add(
+            new MenuItem
+            {
+                Id = MenuItemAId,
+                RestaurantId = RestaurantAId,
+                CategoryId = CategoryAId,
+                NameAr = "صنف اختبار",
+                NameEn = "Test Item",
+                Price = 25m,
+                DisplayOrder = 1,
+                IsAvailable = true,
+                IsActive = true,
+                IsDeleted = false,
+                CreatedAt = seededAt
+            });
+
+        dbContext.Orders.AddRange(
+            CreateOrder(OrderAId, RestaurantAId, OrderStatus.New, "ORD-A-NEW", seededAt),
+            CreateOrder(OrderACompletedId, RestaurantAId, OrderStatus.Completed, "ORD-A-DONE", seededAt),
+            CreateOrder(OrderACancelledId, RestaurantAId, OrderStatus.Cancelled, "ORD-A-CANC", seededAt),
+            CreateOrder(OrderBId, RestaurantBId, OrderStatus.New, "ORD-B-NEW", seededAt));
 
         await dbContext.SaveChangesAsync();
 
@@ -170,4 +215,44 @@ internal static class TestDataSeeder
 
     private static string FormatErrors(IdentityResult result) =>
         string.Join("; ", result.Errors.Select(error => error.Description));
+
+    private static Order CreateOrder(
+        Guid orderId,
+        Guid restaurantId,
+        OrderStatus status,
+        string orderNumber,
+        DateTime createdAt) =>
+        new()
+        {
+            Id = orderId,
+            RestaurantId = restaurantId,
+            OrderNumber = orderNumber,
+            GuestName = "Test Guest",
+            GuestPhone = "+10000000001",
+            OrderType = OrderType.Pickup,
+            OrderStatus = status,
+            Subtotal = 25m,
+            DiscountAmount = 0m,
+            TaxAmount = 0m,
+            DeliveryFee = 0m,
+            TotalAmount = 25m,
+            CurrencyCode = "SAR",
+            IsDeleted = false,
+            CreatedAt = createdAt,
+            OrderItems =
+            [
+                new OrderItem
+                {
+                    Id = Guid.NewGuid(),
+                    OrderId = orderId,
+                    MenuItemId = restaurantId == RestaurantAId ? MenuItemAId : null,
+                    ItemNameAr = "صنف اختبار",
+                    ItemNameEn = "Test Item",
+                    UnitPrice = 25m,
+                    Quantity = 1,
+                    TotalPrice = 25m,
+                    CreatedAt = createdAt
+                }
+            ]
+        };
 }

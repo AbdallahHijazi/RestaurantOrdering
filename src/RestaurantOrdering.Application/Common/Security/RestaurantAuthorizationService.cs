@@ -8,13 +8,16 @@ public sealed class RestaurantAuthorizationService : IRestaurantAuthorizationSer
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IUserDashboardAccessReader _userDashboardAccessReader;
 
     public RestaurantAuthorizationService(
         IApplicationDbContext context,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IUserDashboardAccessReader userDashboardAccessReader)
     {
         _context = context;
         _currentUserService = currentUserService;
+        _userDashboardAccessReader = userDashboardAccessReader;
     }
 
     public async Task EnsureCurrentUserOwnsRestaurantAsync(
@@ -33,6 +36,24 @@ public sealed class RestaurantAuthorizationService : IRestaurantAuthorizationSer
         if (!hasAccess)
         {
             // Security boundary: hide resource existence from non-owners.
+            throw new NotFoundException("Restaurant", restaurantId);
+        }
+    }
+
+    public async Task EnsureCurrentUserCanAccessRestaurantDashboardAsync(
+        Guid restaurantId,
+        CancellationToken cancellationToken)
+    {
+        var currentUserId = _currentUserService.UserId
+            ?? throw new UnauthorizedAccessException("Authentication is required.");
+
+        var hasAccess = await _userDashboardAccessReader.HasDashboardAccessAsync(
+            currentUserId,
+            restaurantId,
+            cancellationToken);
+
+        if (!hasAccess)
+        {
             throw new NotFoundException("Restaurant", restaurantId);
         }
     }

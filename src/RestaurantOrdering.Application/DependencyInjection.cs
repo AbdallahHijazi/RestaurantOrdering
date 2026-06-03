@@ -25,6 +25,9 @@ public static class DependencyInjection
         services.AddTransient(
             typeof(IPipelineBehavior<,>),
             typeof(RestaurantOwnershipBehavior<,>));
+        services.AddTransient(
+            typeof(IPipelineBehavior<,>),
+            typeof(RestaurantDashboardAccessBehavior<,>));
         services.AddScoped<IRestaurantAuthorizationService, RestaurantAuthorizationService>();
 
         return services;

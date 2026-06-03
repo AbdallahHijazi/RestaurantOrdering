@@ -1,4 +1,5 @@
 using MediatR;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Application.Features.Orders.DTOs;
 using RestaurantOrdering.Domain.Enums;
 
@@ -12,4 +13,4 @@ public sealed record GetOrdersQuery(
     DateTime? ToUtc = null,
     string? SearchTerm = null,
     int PageNumber = 1,
-    int PageSize = 20) : IRequest<GetOrdersResultDto>;
+    int PageSize = 20) : IRequest<GetOrdersResultDto>, IRestaurantDashboardScopedRequest;

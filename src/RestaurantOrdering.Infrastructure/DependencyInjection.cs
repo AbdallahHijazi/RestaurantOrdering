@@ -39,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
         services.AddScoped<IRestaurantOwnerRegistrationService, RestaurantOwnerRegistrationService>();
         services.AddScoped<IRestaurantUserManagementService, RestaurantUserManagementService>();
+        services.AddScoped<IUserDashboardAccessReader, UserDashboardAccessReader>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
         services.AddScoped<IDateTimeService, DateTimeService>();
