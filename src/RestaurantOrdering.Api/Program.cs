@@ -149,6 +149,24 @@ builder.Services.AddRateLimiter(options =>
             });
     });
 
+    options.AddPolicy("register-owner", httpContext =>
+    {
+        var configuration = httpContext.RequestServices.GetRequiredService<IConfiguration>();
+        var hostEnvironment = httpContext.RequestServices.GetRequiredService<IHostEnvironment>();
+        var useRelaxedTestingRateLimits =
+            hostEnvironment.IsEnvironment("Testing") &&
+            !configuration.GetValue<bool>("Testing:UseStrictRateLimits");
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = useRelaxedTestingRateLimits ? 1000 : 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            });
+    });
+
     options.AddPolicy("restaurant-user-management", httpContext =>
     {
         var configuration = httpContext.RequestServices.GetRequiredService<IConfiguration>();

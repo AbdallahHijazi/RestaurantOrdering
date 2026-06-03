@@ -37,6 +37,7 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
         services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
+        services.AddScoped<IRestaurantOwnerRegistrationService, RestaurantOwnerRegistrationService>();
         services.AddScoped<IRestaurantUserManagementService, RestaurantUserManagementService>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
