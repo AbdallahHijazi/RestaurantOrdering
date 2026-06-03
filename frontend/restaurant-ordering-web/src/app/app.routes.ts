@@ -64,6 +64,16 @@ export const routes: Routes = [
             './features/admin/restaurant-profile/pages/restaurant-profile-setup-page/restaurant-profile-setup-page'
           ).then((m) => m.RestaurantProfileSetupPage),
       },
+      {
+        path: 'staff',
+        data: {
+          roles: [ApplicationRoles.RestaurantOwner],
+        },
+        loadComponent: () =>
+          import('./features/admin/pages/staff-management-page/staff-management-page').then(
+            (m) => m.StaffManagementPage,
+          ),
+      },
     ],
   },
   {

@@ -144,6 +144,8 @@ type UiTextKey =
   | 'adminNavLabel'
   | 'adminNavDashboard'
   | 'adminNavRestaurantProfile'
+  | 'adminNavStaff'
+  | 'adminPageStaff'
   | 'adminLogout'
   | 'adminOpenSidebar'
   | 'adminCloseSidebar'
@@ -166,6 +168,48 @@ type UiTextKey =
   | 'adminDashboardOrdersDescription'
   | 'adminDashboardStaffTitle'
   | 'adminDashboardStaffDescription'
+  | 'staffPageTitle'
+  | 'staffPageLead'
+  | 'staffAddMember'
+  | 'staffAddFirstMember'
+  | 'staffListErrorTitle'
+  | 'staffListError'
+  | 'staffRetry'
+  | 'staffEmptyTitle'
+  | 'staffEmptyDescription'
+  | 'staffColName'
+  | 'staffColEmail'
+  | 'staffColPhone'
+  | 'staffColRole'
+  | 'staffColStatus'
+  | 'staffColActions'
+  | 'staffChangeRole'
+  | 'staffStatusActive'
+  | 'staffStatusInactive'
+  | 'staffRoleManager'
+  | 'staffRoleKitchen'
+  | 'staffCreateTitle'
+  | 'staffCreateSubmit'
+  | 'staffCreateSuccess'
+  | 'staffChangeRoleTitle'
+  | 'staffChangeRoleSubmit'
+  | 'staffRoleUpdateSuccess'
+  | 'staffCurrentRole'
+  | 'staffNewRole'
+  | 'staffFormEmail'
+  | 'staffFormPassword'
+  | 'staffFormFullName'
+  | 'staffFormPhone'
+  | 'staffFormRole'
+  | 'staffCancel'
+  | 'staffSaving'
+  | 'staffCloseModal'
+  | 'staffErrorValidation'
+  | 'staffErrorDuplicateEmail'
+  | 'staffErrorTooManyRequests'
+  | 'staffErrorGeneric'
+  | 'staffMissingContextTitle'
+  | 'staffMissingContextDescription'
   | 'kitchenPlaceholderEyebrow'
   | 'kitchenPlaceholderTitle'
   | 'kitchenPlaceholderDescription'
@@ -220,6 +264,8 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminNavLabel: 'التنقل الرئيسي',
     adminNavDashboard: 'لوحة التحكم',
     adminNavRestaurantProfile: 'ملف المطعم',
+    adminNavStaff: 'إدارة الموظفين',
+    adminPageStaff: 'إدارة الموظفين',
     adminLogout: 'تسجيل الخروج',
     adminOpenSidebar: 'فتح القائمة الجانبية',
     adminCloseSidebar: 'إغلاق القائمة الجانبية',
@@ -244,6 +290,49 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminDashboardOrdersDescription: 'ستظهر متابعة الطلبات هنا لاحقًا.',
     adminDashboardStaffTitle: 'الموظفون',
     adminDashboardStaffDescription: 'ستظهر إدارة الموظفين هنا لاحقًا.',
+    staffPageTitle: 'إدارة الموظفين',
+    staffPageLead: 'اعرض موظفي المطعم، وأضف حسابات جديدة، وحدّث أدوارهم.',
+    staffAddMember: 'إضافة موظف',
+    staffAddFirstMember: 'إضافة أول موظف',
+    staffListErrorTitle: 'تعذر تحميل الموظفين',
+    staffListError: 'حدث خطأ أثناء تحميل قائمة الموظفين. حاول مرة أخرى.',
+    staffRetry: 'إعادة المحاولة',
+    staffEmptyTitle: 'لا يوجد موظفون بعد',
+    staffEmptyDescription: 'ابدأ بإضافة مدير مطعم أو مدير مطبخ لمساعدتك في التشغيل.',
+    staffColName: 'الاسم',
+    staffColEmail: 'البريد الإلكتروني',
+    staffColPhone: 'الهاتف',
+    staffColRole: 'الدور',
+    staffColStatus: 'الحالة',
+    staffColActions: 'إجراءات',
+    staffChangeRole: 'تغيير الدور',
+    staffStatusActive: 'نشط',
+    staffStatusInactive: 'غير نشط',
+    staffRoleManager: 'مدير المطعم',
+    staffRoleKitchen: 'مدير المطبخ',
+    staffCreateTitle: 'إضافة موظف',
+    staffCreateSubmit: 'حفظ الموظف',
+    staffCreateSuccess: 'تم إنشاء الموظف بنجاح.',
+    staffChangeRoleTitle: 'تغيير دور الموظف',
+    staffChangeRoleSubmit: 'حفظ الدور',
+    staffRoleUpdateSuccess: 'تم تحديث الدور بنجاح.',
+    staffCurrentRole: 'الدور الحالي',
+    staffNewRole: 'الدور الجديد',
+    staffFormEmail: 'البريد الإلكتروني',
+    staffFormPassword: 'كلمة المرور',
+    staffFormFullName: 'الاسم الكامل',
+    staffFormPhone: 'رقم الهاتف (اختياري)',
+    staffFormRole: 'الدور',
+    staffCancel: 'إلغاء',
+    staffSaving: 'جاري الحفظ…',
+    staffCloseModal: 'إغلاق النافذة',
+    staffErrorValidation: 'تحقق من الحقول وأعد المحاولة.',
+    staffErrorDuplicateEmail: 'البريد الإلكتروني مستخدم مسبقًا.',
+    staffErrorTooManyRequests: 'عدد المحاولات كبير جدًا. حاول لاحقًا.',
+    staffErrorGeneric: 'تعذر إكمال العملية. حاول مرة أخرى.',
+    staffMissingContextTitle: 'سياق المطعم غير متوفر',
+    staffMissingContextDescription:
+      'لا يمكن إدارة الموظفين بدون معرف مطعم في الجلسة الحالية.',
     kitchenPlaceholderEyebrow: 'المطبخ',
     kitchenPlaceholderTitle: 'Kitchen Dashboard',
     kitchenPlaceholderDescription:
@@ -298,6 +387,8 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminNavLabel: 'Main navigation',
     adminNavDashboard: 'Dashboard',
     adminNavRestaurantProfile: 'Restaurant profile',
+    adminNavStaff: 'Staff management',
+    adminPageStaff: 'Staff management',
     adminLogout: 'Log out',
     adminOpenSidebar: 'Open sidebar menu',
     adminCloseSidebar: 'Close sidebar menu',
@@ -322,6 +413,50 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminDashboardOrdersDescription: 'Order tracking will appear here in a later step.',
     adminDashboardStaffTitle: 'Staff',
     adminDashboardStaffDescription: 'Staff management will appear here in a later step.',
+    staffPageTitle: 'Staff management',
+    staffPageLead: 'View restaurant staff, add new accounts, and update their roles.',
+    staffAddMember: 'Add staff member',
+    staffAddFirstMember: 'Add first staff member',
+    staffListErrorTitle: 'Unable to load staff',
+    staffListError: 'Something went wrong while loading staff. Please try again.',
+    staffRetry: 'Retry',
+    staffEmptyTitle: 'No staff members yet',
+    staffEmptyDescription:
+      'Start by adding a restaurant manager or kitchen manager to help run operations.',
+    staffColName: 'Name',
+    staffColEmail: 'Email',
+    staffColPhone: 'Phone',
+    staffColRole: 'Role',
+    staffColStatus: 'Status',
+    staffColActions: 'Actions',
+    staffChangeRole: 'Change role',
+    staffStatusActive: 'Active',
+    staffStatusInactive: 'Inactive',
+    staffRoleManager: 'Restaurant manager',
+    staffRoleKitchen: 'Kitchen manager',
+    staffCreateTitle: 'Add staff member',
+    staffCreateSubmit: 'Save staff member',
+    staffCreateSuccess: 'Staff member created successfully.',
+    staffChangeRoleTitle: 'Change staff role',
+    staffChangeRoleSubmit: 'Save role',
+    staffRoleUpdateSuccess: 'Role updated successfully.',
+    staffCurrentRole: 'Current role',
+    staffNewRole: 'New role',
+    staffFormEmail: 'Email',
+    staffFormPassword: 'Password',
+    staffFormFullName: 'Full name',
+    staffFormPhone: 'Phone number (optional)',
+    staffFormRole: 'Role',
+    staffCancel: 'Cancel',
+    staffSaving: 'Saving…',
+    staffCloseModal: 'Close dialog',
+    staffErrorValidation: 'Check the form fields and try again.',
+    staffErrorDuplicateEmail: 'This email is already in use.',
+    staffErrorTooManyRequests: 'Too many requests. Please try again later.',
+    staffErrorGeneric: 'Unable to complete the request. Please try again.',
+    staffMissingContextTitle: 'Restaurant context unavailable',
+    staffMissingContextDescription:
+      'Staff management requires a restaurant id in the current session.',
     kitchenPlaceholderEyebrow: 'Kitchen',
     kitchenPlaceholderTitle: 'Kitchen Dashboard',
     kitchenPlaceholderDescription:

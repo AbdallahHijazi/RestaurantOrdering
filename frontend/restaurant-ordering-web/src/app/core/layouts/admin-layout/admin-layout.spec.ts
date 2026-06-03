@@ -26,6 +26,7 @@ describe('AdminLayout', () => {
     router = TestBed.inject(Router);
     session.clearSession();
     session.saveSession(createTestSession(ApplicationRoles.RestaurantOwner));
+    auth.restoreSessionFromStorage();
 
     fixture = TestBed.createComponent(AdminLayout);
     fixture.detectChanges();
@@ -45,6 +46,25 @@ describe('AdminLayout', () => {
     const hrefs = navLinks().map((link) => link.getAttribute('href'));
     expect(hrefs).toContain('/admin/dashboard');
     expect(hrefs).toContain('/admin/restaurant-profile');
+    expect(hrefs).toContain('/admin/staff');
+  });
+
+  it('does not render Staff Management link for RestaurantManager', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [AdminLayout],
+      providers: [provideRouter(routes)],
+    }).compileComponents();
+
+    session = TestBed.inject(AuthSessionService);
+    session.clearSession();
+    session.saveSession(createTestSession(ApplicationRoles.RestaurantManager));
+    TestBed.inject(AuthService).restoreSessionFromStorage();
+
+    fixture = TestBed.createComponent(AdminLayout);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="admin-nav-staff"]')).toBeNull();
   });
 
   it('marks the active route link', async () => {

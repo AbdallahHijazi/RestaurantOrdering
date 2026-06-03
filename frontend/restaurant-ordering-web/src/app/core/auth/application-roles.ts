@@ -17,6 +17,17 @@ export function isApplicationRole(value: string): value is ApplicationRole {
   return (SUPPORTED_APPLICATION_ROLES as readonly string[]).includes(value);
 }
 
+export const AssignableStaffRoles = [
+  ApplicationRoles.RestaurantManager,
+  ApplicationRoles.KitchenManager,
+] as const;
+
+export type AssignableStaffRole = (typeof AssignableStaffRoles)[number];
+
+export function isAssignableStaffRole(value: string): value is AssignableStaffRole {
+  return (AssignableStaffRoles as readonly string[]).includes(value);
+}
+
 export function getDefaultRouteForRole(role: ApplicationRole): string {
   switch (role) {
     case ApplicationRoles.KitchenManager:

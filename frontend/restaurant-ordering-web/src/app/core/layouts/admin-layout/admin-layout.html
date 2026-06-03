@@ -41,6 +41,16 @@
       >
         {{ localeService.uiText('adminNavRestaurantProfile') }}
       </a>
+      @if (isOwner()) {
+        <a
+          routerLink="/admin/staff"
+          routerLinkActive="is-active"
+          data-testid="admin-nav-staff"
+          (click)="closeDrawer()"
+        >
+          {{ localeService.uiText('adminNavStaff') }}
+        </a>
+      }
     </nav>
 
     <button type="button" class="admin-layout__sidebar-logout" (click)="logout()">

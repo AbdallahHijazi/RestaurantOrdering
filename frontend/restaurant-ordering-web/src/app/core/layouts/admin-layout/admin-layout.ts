@@ -7,7 +7,7 @@ import { AuthService } from '../../auth/auth.service';
 import { LocaleService } from '../../localization/locale';
 import { ADMIN_SHELL_MOCK } from './admin-shell.config';
 
-type AdminPageKey = 'dashboard' | 'restaurantProfile';
+type AdminPageKey = 'dashboard' | 'restaurantProfile' | 'staff';
 
 @Component({
   selector: 'app-admin-layout',
@@ -33,10 +33,17 @@ export class AdminLayout {
   );
   protected readonly pageTitle = computed(() => {
     const key = this.resolvePageKey(this.currentPath());
-    return this.localeService.uiText(
-      key === 'restaurantProfile' ? 'adminPageRestaurantProfile' : 'adminPageDashboard',
-    );
+    const titleKey =
+      key === 'staff'
+        ? 'adminPageStaff'
+        : key === 'restaurantProfile'
+          ? 'adminPageRestaurantProfile'
+          : 'adminPageDashboard';
+    return this.localeService.uiText(titleKey);
   });
+  protected readonly isOwner = computed(() =>
+    this.authService.hasAnyRole(ApplicationRoles.RestaurantOwner),
+  );
   protected readonly roleLabel = computed(() => {
     const role = this.authService.currentRole();
     if (role === ApplicationRoles.RestaurantOwner) {
@@ -77,6 +84,10 @@ export class AdminLayout {
   }
 
   private resolvePageKey(url: string): AdminPageKey {
+    if (url.includes('staff')) {
+      return 'staff';
+    }
+
     return url.includes('restaurant-profile') ? 'restaurantProfile' : 'dashboard';
   }
 }

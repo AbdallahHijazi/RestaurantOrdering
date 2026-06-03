@@ -1,0 +1,291 @@
+<section class="staff-page" data-testid="staff-management-page">
+  <header class="staff-page__header">
+    <div class="staff-page__header-text">
+      <h2>{{ locale.uiText('staffPageTitle') }}</h2>
+      <p>{{ locale.uiText('staffPageLead') }}</p>
+    </div>
+    <button
+      type="button"
+      class="staff-page__primary-btn"
+      data-testid="staff-add-button"
+      [disabled]="pageState() === 'loading' || pageState() === 'missing-context'"
+      (click)="openCreateModal()"
+    >
+      {{ locale.uiText('staffAddMember') }}
+    </button>
+  </header>
+
+  @if (successMessage()) {
+    <p class="staff-page__success" role="status" data-testid="staff-success-message">
+      {{ successMessage() }}
+    </p>
+  }
+
+  @switch (pageState()) {
+    @case ('loading') {
+      <div class="staff-page__skeleton" aria-busy="true" data-testid="staff-loading">
+        @for (row of [1, 2, 3]; track row) {
+          <div class="staff-page__skeleton-row"></div>
+        }
+      </div>
+    }
+
+    @case ('missing-context') {
+      <div class="staff-page__state staff-page__state--error" data-testid="staff-missing-context">
+        <h3>{{ locale.uiText('staffMissingContextTitle') }}</h3>
+        <p>{{ locale.uiText('staffMissingContextDescription') }}</p>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="staff-page__state staff-page__state--error" data-testid="staff-error-state">
+        <h3>{{ locale.uiText('staffListErrorTitle') }}</h3>
+        <p>{{ listErrorMessage() }}</p>
+        <button type="button" class="staff-page__secondary-btn" (click)="loadStaff()">
+          {{ locale.uiText('staffRetry') }}
+        </button>
+      </div>
+    }
+
+    @case ('ready') {
+      @if (staff().length === 0) {
+        <div class="staff-page__state" data-testid="staff-empty-state">
+          <h3>{{ locale.uiText('staffEmptyTitle') }}</h3>
+          <p>{{ locale.uiText('staffEmptyDescription') }}</p>
+          <button type="button" class="staff-page__primary-btn" (click)="openCreateModal()">
+            {{ locale.uiText('staffAddFirstMember') }}
+          </button>
+        </div>
+      } @else {
+        <div class="staff-page__table-wrap" data-testid="staff-table">
+          <table class="staff-page__table">
+            <thead>
+              <tr>
+                <th scope="col">{{ locale.uiText('staffColName') }}</th>
+                <th scope="col">{{ locale.uiText('staffColEmail') }}</th>
+                <th scope="col">{{ locale.uiText('staffColPhone') }}</th>
+                <th scope="col">{{ locale.uiText('staffColRole') }}</th>
+                <th scope="col">{{ locale.uiText('staffColStatus') }}</th>
+                <th scope="col">{{ locale.uiText('staffColActions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (member of staff(); track member.id) {
+                <tr [attr.data-testid]="'staff-row-' + member.id">
+                  <td>{{ displayName(member) }}</td>
+                  <td>{{ member.email }}</td>
+                  <td>{{ member.phoneNumber || '—' }}</td>
+                  <td>{{ roleLabel(member.role) }}</td>
+                  <td>
+                    <span
+                      class="staff-page__status"
+                      [class.staff-page__status--inactive]="!member.isActive"
+                    >
+                      {{ statusLabel(member.isActive) }}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="staff-page__link-btn"
+                      [attr.data-testid]="'staff-change-role-' + member.id"
+                      (click)="openChangeRoleModal(member)"
+                    >
+                      {{ locale.uiText('staffChangeRole') }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="staff-page__cards" data-testid="staff-cards">
+          @for (member of staff(); track member.id) {
+            <article class="staff-page__card" [attr.data-testid]="'staff-card-' + member.id">
+              <header class="staff-page__card-header">
+                <h3>{{ displayName(member) }}</h3>
+                <span
+                  class="staff-page__status"
+                  [class.staff-page__status--inactive]="!member.isActive"
+                >
+                  {{ statusLabel(member.isActive) }}
+                </span>
+              </header>
+              <dl class="staff-page__card-meta">
+                <div>
+                  <dt>{{ locale.uiText('staffColEmail') }}</dt>
+                  <dd>{{ member.email }}</dd>
+                </div>
+                <div>
+                  <dt>{{ locale.uiText('staffColPhone') }}</dt>
+                  <dd>{{ member.phoneNumber || '—' }}</dd>
+                </div>
+                <div>
+                  <dt>{{ locale.uiText('staffColRole') }}</dt>
+                  <dd>{{ roleLabel(member.role) }}</dd>
+                </div>
+              </dl>
+              <button
+                type="button"
+                class="staff-page__secondary-btn"
+                (click)="openChangeRoleModal(member)"
+              >
+                {{ locale.uiText('staffChangeRole') }}
+              </button>
+            </article>
+          }
+        </div>
+      }
+    }
+  }
+</section>
+
+@if (createOpen()) {
+  <div class="staff-modal" data-testid="staff-create-modal">
+    <button
+      type="button"
+      class="staff-modal__backdrop"
+      [attr.aria-label]="locale.uiText('staffCloseModal')"
+      (click)="closeCreateModal()"
+    ></button>
+    <div
+      class="staff-modal__panel"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="'staff-create-title'"
+    >
+      <header class="staff-modal__header">
+        <h3 id="staff-create-title">{{ locale.uiText('staffCreateTitle') }}</h3>
+        <button
+          type="button"
+          class="staff-modal__close"
+          [attr.aria-label]="locale.uiText('staffCloseModal')"
+          (click)="closeCreateModal()"
+        >
+          ×
+        </button>
+      </header>
+
+      <form class="staff-modal__form" [formGroup]="createForm" (ngSubmit)="submitCreate()">
+        <label for="staff-create-email">{{ locale.uiText('staffFormEmail') }}</label>
+        <input id="staff-create-email" type="email" formControlName="email" autocomplete="email" />
+
+        <label for="staff-create-password">{{ locale.uiText('staffFormPassword') }}</label>
+        <input
+          id="staff-create-password"
+          type="password"
+          formControlName="password"
+          autocomplete="new-password"
+        />
+
+        <label for="staff-create-full-name">{{ locale.uiText('staffFormFullName') }}</label>
+        <input id="staff-create-full-name" type="text" formControlName="fullName" />
+
+        <label for="staff-create-phone">{{ locale.uiText('staffFormPhone') }}</label>
+        <input id="staff-create-phone" type="tel" formControlName="phoneNumber" />
+
+        <label for="staff-create-role">{{ locale.uiText('staffFormRole') }}</label>
+        <select id="staff-create-role" formControlName="role" data-testid="staff-create-role-select">
+          @for (role of assignableRoles; track role) {
+            <option [value]="role">{{ roleLabel(role) }}</option>
+          }
+        </select>
+
+        @if (createErrorMessage()) {
+          <p class="staff-modal__error" role="alert">{{ createErrorMessage() }}</p>
+        }
+
+        <div class="staff-modal__actions">
+          <button type="button" class="staff-page__secondary-btn" (click)="closeCreateModal()">
+            {{ locale.uiText('staffCancel') }}
+          </button>
+          <button
+            type="submit"
+            class="staff-page__primary-btn"
+            data-testid="staff-create-submit"
+            [disabled]="createSubmitting()"
+          >
+            {{
+              createSubmitting()
+                ? locale.uiText('staffSaving')
+                : locale.uiText('staffCreateSubmit')
+            }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (changeRoleOpen() && selectedStaff(); as member) {
+  <div class="staff-modal" data-testid="staff-change-role-modal">
+    <button
+      type="button"
+      class="staff-modal__backdrop"
+      [attr.aria-label]="locale.uiText('staffCloseModal')"
+      (click)="closeChangeRoleModal()"
+    ></button>
+    <div
+      class="staff-modal__panel staff-modal__panel--compact"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="'staff-change-role-title'"
+    >
+      <header class="staff-modal__header">
+        <h3 id="staff-change-role-title">{{ locale.uiText('staffChangeRoleTitle') }}</h3>
+        <button
+          type="button"
+          class="staff-modal__close"
+          [attr.aria-label]="locale.uiText('staffCloseModal')"
+          (click)="closeChangeRoleModal()"
+        >
+          ×
+        </button>
+      </header>
+
+      <p class="staff-modal__meta">
+        <strong>{{ displayName(member) }}</strong>
+      </p>
+      <p class="staff-modal__meta">
+        {{ locale.uiText('staffCurrentRole') }}:
+        <span>{{ roleLabel(member.role) }}</span>
+      </p>
+
+      <form class="staff-modal__form" [formGroup]="changeRoleForm" (ngSubmit)="submitChangeRole()">
+        <label for="staff-change-role">{{ locale.uiText('staffNewRole') }}</label>
+        <select
+          id="staff-change-role"
+          formControlName="role"
+          data-testid="staff-change-role-select"
+        >
+          @for (role of assignableRoles; track role) {
+            <option [value]="role">{{ roleLabel(role) }}</option>
+          }
+        </select>
+
+        @if (changeRoleErrorMessage()) {
+          <p class="staff-modal__error" role="alert">{{ changeRoleErrorMessage() }}</p>
+        }
+
+        <div class="staff-modal__actions">
+          <button type="button" class="staff-page__secondary-btn" (click)="closeChangeRoleModal()">
+            {{ locale.uiText('staffCancel') }}
+          </button>
+          <button
+            type="submit"
+            class="staff-page__primary-btn"
+            data-testid="staff-change-role-submit"
+            [disabled]="changeRoleSubmitting()"
+          >
+            {{
+              changeRoleSubmitting()
+                ? locale.uiText('staffSaving')
+                : locale.uiText('staffChangeRoleSubmit')
+            }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
