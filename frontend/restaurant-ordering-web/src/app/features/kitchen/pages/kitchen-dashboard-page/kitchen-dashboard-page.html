@@ -1,0 +1,349 @@
+<div class="kitchen-page" data-testid="kitchen-dashboard">
+  <header class="kitchen-page__header">
+    <div class="kitchen-page__intro">
+      <p class="kitchen-page__eyebrow">{{ locale.uiText('kitchenEyebrow') }}</p>
+      <h1>{{ locale.uiText('kitchenTitle') }}</h1>
+      <p class="kitchen-page__lead">{{ locale.uiText('kitchenLead') }}</p>
+      <p class="kitchen-page__role">
+        {{ locale.uiText('kitchenRoleLabel') }}:
+        <span>{{ currentRoleLabel() }}</span>
+      </p>
+    </div>
+
+    <div class="kitchen-page__actions">
+      <div class="kitchen-page__language" role="group" [attr.aria-label]="locale.uiText('adminLanguageGroup')">
+        <button
+          type="button"
+          class="kitchen-page__lang-btn"
+          [class.kitchen-page__lang-btn--active]="locale.locale() === 'ar'"
+          (click)="locale.setLocale('ar')"
+        >
+          {{ locale.uiText('languageArabic') }}
+        </button>
+        <button
+          type="button"
+          class="kitchen-page__lang-btn"
+          [class.kitchen-page__lang-btn--active]="locale.locale() === 'en'"
+          (click)="locale.setLocale('en')"
+        >
+          {{ locale.uiText('languageEnglish') }}
+        </button>
+      </div>
+
+      <button
+        type="button"
+        class="kitchen-page__secondary-btn"
+        data-testid="kitchen-refresh-btn"
+        [attr.aria-label]="locale.uiText('kitchenRefresh')"
+        [disabled]="pageState() === 'loading' || refreshing()"
+        (click)="refreshBoard()"
+      >
+        @if (refreshing()) {
+          {{ locale.uiText('kitchenRefreshing') }}
+        } @else {
+          {{ locale.uiText('kitchenRefresh') }}
+        }
+      </button>
+
+      <button type="button" class="kitchen-page__secondary-btn" (click)="logout()">
+        {{ locale.uiText('kitchenLogout') }}
+      </button>
+    </div>
+  </header>
+
+  @if (feedbackMessage()) {
+    <p class="kitchen-page__feedback" role="status" data-testid="kitchen-feedback">
+      {{ feedbackMessage() }}
+    </p>
+  }
+
+  @switch (pageState()) {
+    @case ('missing-context') {
+      <section class="kitchen-page__state" data-testid="kitchen-missing-context">
+        <h2>{{ locale.uiText('kitchenMissingContextTitle') }}</h2>
+        <p>{{ locale.uiText('kitchenMissingContextDescription') }}</p>
+      </section>
+    }
+
+    @case ('loading') {
+      <section class="kitchen-page__loading" data-testid="kitchen-board-loading" aria-busy="true">
+        <div class="kitchen-page__skeleton-board">
+          @for (placeholder of [1, 2, 3]; track placeholder) {
+            <div class="kitchen-page__skeleton-column"></div>
+          }
+        </div>
+      </section>
+    }
+
+    @case ('error') {
+      <section class="kitchen-page__state" data-testid="kitchen-board-error">
+        <h2>{{ locale.uiText('kitchenBoardErrorTitle') }}</h2>
+        <p>{{ boardError() }}</p>
+        <button type="button" class="kitchen-page__primary-btn" (click)="loadBoard()">
+          {{ locale.uiText('kitchenRetry') }}
+        </button>
+      </section>
+    }
+
+    @case ('ready') {
+      <nav
+        class="kitchen-page__tabs"
+        role="tablist"
+        [attr.aria-label]="locale.uiText('kitchenMobileTabsLabel')"
+        data-testid="kitchen-mobile-tabs"
+      >
+        @for (column of boardColumns; track column.key) {
+          <button
+            type="button"
+            role="tab"
+            class="kitchen-page__tab"
+            [class.kitchen-page__tab--active]="activeMobileTab() === column.key"
+            [attr.aria-selected]="activeMobileTab() === column.key"
+            (click)="setMobileTab(column.key)"
+          >
+            {{ locale.uiText(column.key === 'new' ? 'kitchenColumnNew' : column.key === 'preparing' ? 'kitchenColumnPreparing' : 'kitchenColumnReady') }}
+            <span class="kitchen-page__tab-count">{{ columns()[column.key].orders.length }}</span>
+          </button>
+        }
+      </nav>
+
+      <div class="kitchen-page__board" data-testid="kitchen-board">
+        @for (column of boardColumns; track column.key) {
+          <section
+            class="kitchen-page__column"
+            [class.kitchen-page__column--mobile-active]="activeMobileTab() === column.key"
+            [attr.data-testid]="'kitchen-column-' + column.key"
+            [attr.aria-label]="locale.uiText(column.key === 'new' ? 'kitchenColumnNew' : column.key === 'preparing' ? 'kitchenColumnPreparing' : 'kitchenColumnReady')"
+          >
+            <header class="kitchen-page__column-header">
+              <h2>
+                {{
+                  locale.uiText(
+                    column.key === 'new'
+                      ? 'kitchenColumnNew'
+                      : column.key === 'preparing'
+                        ? 'kitchenColumnPreparing'
+                        : 'kitchenColumnReady'
+                  )
+                }}
+              </h2>
+              <span class="kitchen-page__column-count">{{ columns()[column.key].orders.length }}</span>
+            </header>
+
+            @if (columns()[column.key].orders.length === 0) {
+              <p class="kitchen-page__empty" [attr.data-testid]="'kitchen-empty-' + column.key">
+                {{ locale.uiText('kitchenColumnEmpty') }}
+              </p>
+            } @else {
+              <ul class="kitchen-page__cards">
+                @for (order of columns()[column.key].orders; track order.id) {
+                  <li
+                    class="kitchen-page__card"
+                    [attr.data-testid]="'kitchen-order-' + order.id"
+                    [attr.data-order-status]="order.orderStatus"
+                  >
+                    <div class="kitchen-page__card-top">
+                      <strong class="kitchen-page__order-number">#{{ order.orderNumber }}</strong>
+                      <span class="kitchen-page__badge">{{ orderTypeLabel(order.orderType) }}</span>
+                    </div>
+
+                    <p class="kitchen-page__meta">
+                      <span>{{ formatCreatedAt(order.createdAt) }}</span>
+                    </p>
+
+                    @if (order.guestName?.trim()) {
+                      <p class="kitchen-page__guest">{{ order.guestName }}</p>
+                    }
+
+                    <div class="kitchen-page__indicators">
+                      @if (itemCount(order); as count) {
+                        <span class="kitchen-page__indicator">{{ locale.uiText('kitchenItemsCount') }}: {{ count }}</span>
+                      }
+                      @if (order.orderType === OrderType.Delivery) {
+                        <span class="kitchen-page__indicator kitchen-page__indicator--delivery">
+                          {{ locale.uiText('kitchenDeliveryIndicator') }}
+                        </span>
+                      }
+                    </div>
+
+                    <div class="kitchen-page__card-actions">
+                      <button
+                        type="button"
+                        class="kitchen-page__link-btn"
+                        [attr.data-testid]="'kitchen-details-' + order.id"
+                        (click)="openDetails(order)"
+                      >
+                        {{ locale.uiText('kitchenViewDetails') }}
+                      </button>
+
+                      @if (order.orderStatus === OrderStatus.New) {
+                        <button
+                          type="button"
+                          class="kitchen-page__primary-btn"
+                          data-testid="kitchen-action-start-preparing"
+                          [disabled]="isUpdating(order.id)"
+                          (click)="startPreparing(order)"
+                        >
+                          @if (isUpdating(order.id)) {
+                            {{ locale.uiText('kitchenUpdating') }}
+                          } @else {
+                            {{ locale.uiText('kitchenStartPreparing') }}
+                          }
+                        </button>
+                      } @else if (order.orderStatus === OrderStatus.Preparing) {
+                        <button
+                          type="button"
+                          class="kitchen-page__primary-btn"
+                          data-testid="kitchen-action-mark-ready"
+                          [disabled]="isUpdating(order.id)"
+                          (click)="markReady(order)"
+                        >
+                          @if (isUpdating(order.id)) {
+                            {{ locale.uiText('kitchenUpdating') }}
+                          } @else {
+                            {{ locale.uiText('kitchenMarkReady') }}
+                          }
+                        </button>
+                      } @else if (order.orderStatus === OrderStatus.Ready) {
+                        <p class="kitchen-page__waiting" data-testid="kitchen-ready-waiting">
+                          {{ locale.uiText('kitchenReadyWaiting') }}
+                        </p>
+                      }
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (hasMore(column.key)) {
+              <button
+                type="button"
+                class="kitchen-page__secondary-btn kitchen-page__load-more"
+                [attr.data-testid]="'kitchen-load-more-' + column.key"
+                [disabled]="columns()[column.key].loadingMore"
+                (click)="loadMore(column.key)"
+              >
+                @if (columns()[column.key].loadingMore) {
+                  {{ locale.uiText('kitchenLoadingMore') }}
+                } @else {
+                  {{ locale.uiText('kitchenLoadMore') }}
+                }
+              </button>
+            }
+          </section>
+        }
+      </div>
+    }
+  }
+
+  @if (detailsOpen()) {
+    <div class="kitchen-details" data-testid="kitchen-details-drawer">
+      <button
+        type="button"
+        class="kitchen-details__backdrop"
+        [attr.aria-label]="locale.uiText('kitchenCloseDetails')"
+        (click)="closeDetails()"
+      ></button>
+
+      <aside
+        class="kitchen-details__panel"
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-label]="locale.uiText('kitchenDetailsTitle')"
+      >
+        <header class="kitchen-details__header">
+          <h2>{{ locale.uiText('kitchenDetailsTitle') }}</h2>
+          <button
+            type="button"
+            class="kitchen-page__secondary-btn"
+            data-testid="kitchen-close-details"
+            [attr.aria-label]="locale.uiText('kitchenCloseDetails')"
+            (click)="closeDetails()"
+          >
+            {{ locale.uiText('kitchenCloseDetails') }}
+          </button>
+        </header>
+
+        @if (detailsLoading()) {
+          <p class="kitchen-details__loading" data-testid="kitchen-details-loading">
+            {{ locale.uiText('kitchenDetailsLoading') }}
+          </p>
+        } @else if (detailsError()) {
+          <div class="kitchen-page__state" data-testid="kitchen-details-error">
+            <p>{{ detailsError() }}</p>
+            <button type="button" class="kitchen-page__primary-btn" (click)="retryDetails()">
+              {{ locale.uiText('kitchenRetry') }}
+            </button>
+          </div>
+        } @else if (orderDetails(); as details) {
+          <div class="kitchen-details__body" data-testid="kitchen-details-body">
+            <dl class="kitchen-details__meta">
+              <div>
+                <dt>{{ locale.uiText('kitchenFieldOrderNumber') }}</dt>
+                <dd>#{{ details.orderNumber }}</dd>
+              </div>
+              <div>
+                <dt>{{ locale.uiText('kitchenFieldStatus') }}</dt>
+                <dd>{{ statusLabel(details.orderStatus) }}</dd>
+              </div>
+              <div>
+                <dt>{{ locale.uiText('kitchenFieldOrderType') }}</dt>
+                <dd>{{ orderTypeLabel(details.orderType) }}</dd>
+              </div>
+              <div>
+                <dt>{{ locale.uiText('kitchenFieldCreatedAt') }}</dt>
+                <dd>{{ formatCreatedAt(details.createdAt) }}</dd>
+              </div>
+              @if (details.guestName?.trim()) {
+                <div>
+                  <dt>{{ locale.uiText('kitchenFieldGuestName') }}</dt>
+                  <dd>{{ details.guestName }}</dd>
+                </div>
+              }
+              @if (details.guestPhone?.trim()) {
+                <div>
+                  <dt>{{ locale.uiText('kitchenFieldGuestPhone') }}</dt>
+                  <dd>{{ details.guestPhone }}</dd>
+                </div>
+              }
+              @if (details.orderType === OrderType.Delivery && details.deliveryAddress?.trim()) {
+                <div>
+                  <dt>{{ locale.uiText('kitchenFieldDeliveryAddress') }}</dt>
+                  <dd>{{ details.deliveryAddress }}</dd>
+                </div>
+              }
+              @if (details.notes?.trim()) {
+                <div>
+                  <dt>{{ locale.uiText('kitchenFieldOrderNotes') }}</dt>
+                  <dd>{{ details.notes }}</dd>
+                </div>
+              }
+            </dl>
+
+            <section class="kitchen-details__items">
+              <h3>{{ locale.uiText('kitchenItemsHeading') }}</h3>
+              <ul>
+                @for (item of details.items; track item.id) {
+                  <li [attr.data-testid]="'kitchen-item-' + item.id">
+                    <div class="kitchen-details__item-head">
+                      <strong>{{ itemName(item) }}</strong>
+                      <span>× {{ item.quantity }}</span>
+                    </div>
+                    @if (item.notes?.trim()) {
+                      <p class="kitchen-details__item-notes">{{ item.notes }}</p>
+                    }
+                  </li>
+                }
+              </ul>
+            </section>
+
+            <p class="kitchen-details__total">
+              {{ locale.uiText('kitchenFieldTotal') }}:
+              {{ locale.formatCurrency(details.totalAmount, details.currencyCode) }}
+            </p>
+          </div>
+        }
+      </aside>
+    </div>
+  }
+</div>

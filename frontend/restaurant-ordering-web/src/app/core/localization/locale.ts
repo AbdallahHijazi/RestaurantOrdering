@@ -210,11 +210,59 @@ type UiTextKey =
   | 'staffErrorGeneric'
   | 'staffMissingContextTitle'
   | 'staffMissingContextDescription'
-  | 'kitchenPlaceholderEyebrow'
-  | 'kitchenPlaceholderTitle'
-  | 'kitchenPlaceholderDescription'
-  | 'kitchenPlaceholderRoleLabel'
-  | 'kitchenPlaceholderLogout'
+  | 'kitchenEyebrow'
+  | 'kitchenTitle'
+  | 'kitchenLead'
+  | 'kitchenRoleLabel'
+  | 'kitchenRoleKitchenManager'
+  | 'kitchenLogout'
+  | 'kitchenRefresh'
+  | 'kitchenRefreshing'
+  | 'kitchenRetry'
+  | 'kitchenBoardErrorTitle'
+  | 'kitchenBoardError'
+  | 'kitchenColumnNew'
+  | 'kitchenColumnPreparing'
+  | 'kitchenColumnReady'
+  | 'kitchenColumnEmpty'
+  | 'kitchenMobileTabsLabel'
+  | 'kitchenOrderTypePickup'
+  | 'kitchenOrderTypeDelivery'
+  | 'kitchenStatusNew'
+  | 'kitchenStatusPreparing'
+  | 'kitchenStatusReady'
+  | 'kitchenItemsCount'
+  | 'kitchenDeliveryIndicator'
+  | 'kitchenViewDetails'
+  | 'kitchenStartPreparing'
+  | 'kitchenMarkReady'
+  | 'kitchenReadyWaiting'
+  | 'kitchenUpdating'
+  | 'kitchenLoadMore'
+  | 'kitchenLoadingMore'
+  | 'kitchenLoadMoreError'
+  | 'kitchenDetailsTitle'
+  | 'kitchenCloseDetails'
+  | 'kitchenDetailsLoading'
+  | 'kitchenDetailsError'
+  | 'kitchenFieldOrderNumber'
+  | 'kitchenFieldStatus'
+  | 'kitchenFieldOrderType'
+  | 'kitchenFieldCreatedAt'
+  | 'kitchenFieldGuestName'
+  | 'kitchenFieldGuestPhone'
+  | 'kitchenFieldDeliveryAddress'
+  | 'kitchenFieldOrderNotes'
+  | 'kitchenFieldTotal'
+  | 'kitchenItemsHeading'
+  | 'kitchenStatusUpdateSuccess'
+  | 'kitchenErrorConflict'
+  | 'kitchenErrorForbidden'
+  | 'kitchenErrorNotFound'
+  | 'kitchenErrorTooManyRequests'
+  | 'kitchenErrorGeneric'
+  | 'kitchenMissingContextTitle'
+  | 'kitchenMissingContextDescription'
   | 'languageArabic'
   | 'languageEnglish';
 
@@ -333,12 +381,60 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     staffMissingContextTitle: 'سياق المطعم غير متوفر',
     staffMissingContextDescription:
       'لا يمكن إدارة الموظفين بدون معرف مطعم في الجلسة الحالية.',
-    kitchenPlaceholderEyebrow: 'المطبخ',
-    kitchenPlaceholderTitle: 'Kitchen Dashboard',
-    kitchenPlaceholderDescription:
-      'هذه المنطقة مخصصة لمدير المطبخ. سيتم إضافة شاشة المطبخ لاحقًا.',
-    kitchenPlaceholderRoleLabel: 'الدور الحالي',
-    kitchenPlaceholderLogout: 'تسجيل الخروج',
+    kitchenEyebrow: 'المطبخ',
+    kitchenTitle: 'لوحة المطبخ',
+    kitchenLead: 'تابع الطلبات النشطة وحدّث حالة التحضير.',
+    kitchenRoleLabel: 'الدور الحالي',
+    kitchenRoleKitchenManager: 'مدير المطبخ',
+    kitchenLogout: 'تسجيل الخروج',
+    kitchenRefresh: 'تحديث',
+    kitchenRefreshing: 'جاري التحديث…',
+    kitchenRetry: 'إعادة المحاولة',
+    kitchenBoardErrorTitle: 'تعذر تحميل الطلبات',
+    kitchenBoardError: 'حدث خطأ أثناء تحميل لوحة المطبخ. حاول مرة أخرى.',
+    kitchenColumnNew: 'طلبات جديدة',
+    kitchenColumnPreparing: 'قيد التحضير',
+    kitchenColumnReady: 'جاهزة',
+    kitchenColumnEmpty: 'لا توجد طلبات في هذا العمود.',
+    kitchenMobileTabsLabel: 'أعمدة الطلبات',
+    kitchenOrderTypePickup: 'استلام',
+    kitchenOrderTypeDelivery: 'توصيل',
+    kitchenStatusNew: 'جديد',
+    kitchenStatusPreparing: 'قيد التحضير',
+    kitchenStatusReady: 'جاهز',
+    kitchenItemsCount: 'البنود',
+    kitchenDeliveryIndicator: 'توصيل',
+    kitchenViewDetails: 'عرض التفاصيل',
+    kitchenStartPreparing: 'بدء التحضير',
+    kitchenMarkReady: 'تعليم كجاهز',
+    kitchenReadyWaiting: 'بانتظار الاستلام أو التسليم',
+    kitchenUpdating: 'جاري التحديث…',
+    kitchenLoadMore: 'تحميل المزيد',
+    kitchenLoadingMore: 'جاري التحميل…',
+    kitchenLoadMoreError: 'تعذر تحميل المزيد من الطلبات.',
+    kitchenDetailsTitle: 'تفاصيل الطلب',
+    kitchenCloseDetails: 'إغلاق التفاصيل',
+    kitchenDetailsLoading: 'جاري تحميل التفاصيل…',
+    kitchenDetailsError: 'تعذر تحميل تفاصيل الطلب.',
+    kitchenFieldOrderNumber: 'رقم الطلب',
+    kitchenFieldStatus: 'الحالة',
+    kitchenFieldOrderType: 'نوع الطلب',
+    kitchenFieldCreatedAt: 'وقت الإنشاء',
+    kitchenFieldGuestName: 'اسم الضيف',
+    kitchenFieldGuestPhone: 'هاتف الضيف',
+    kitchenFieldDeliveryAddress: 'عنوان التوصيل',
+    kitchenFieldOrderNotes: 'ملاحظات الطلب',
+    kitchenFieldTotal: 'الإجمالي',
+    kitchenItemsHeading: 'البنود',
+    kitchenStatusUpdateSuccess: 'تم تحديث حالة الطلب.',
+    kitchenErrorConflict: 'تغيّرت حالة الطلب أو لم يعد الانتقال صالحًا. تم تحديث اللوحة.',
+    kitchenErrorForbidden: 'ليست لديك صلاحية لتنفيذ هذا الإجراء.',
+    kitchenErrorNotFound: 'الطلب لم يعد متاحًا. تم تحديث اللوحة.',
+    kitchenErrorTooManyRequests: 'عدد المحاولات كبير جدًا. حاول لاحقًا.',
+    kitchenErrorGeneric: 'تعذر إكمال العملية. حاول مرة أخرى.',
+    kitchenMissingContextTitle: 'سياق المطعم غير متوفر',
+    kitchenMissingContextDescription:
+      'لا يمكن عرض لوحة المطبخ بدون معرف مطعم في الجلسة الحالية.',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
   },
@@ -457,12 +553,60 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     staffMissingContextTitle: 'Restaurant context unavailable',
     staffMissingContextDescription:
       'Staff management requires a restaurant id in the current session.',
-    kitchenPlaceholderEyebrow: 'Kitchen',
-    kitchenPlaceholderTitle: 'Kitchen Dashboard',
-    kitchenPlaceholderDescription:
-      'This area is for the kitchen manager. Kitchen workflows will be added later.',
-    kitchenPlaceholderRoleLabel: 'Current role',
-    kitchenPlaceholderLogout: 'Log out',
+    kitchenEyebrow: 'Kitchen',
+    kitchenTitle: 'Kitchen Dashboard',
+    kitchenLead: 'Track active orders and update preparation status.',
+    kitchenRoleLabel: 'Current role',
+    kitchenRoleKitchenManager: 'Kitchen manager',
+    kitchenLogout: 'Log out',
+    kitchenRefresh: 'Refresh',
+    kitchenRefreshing: 'Refreshing…',
+    kitchenRetry: 'Retry',
+    kitchenBoardErrorTitle: 'Unable to load orders',
+    kitchenBoardError: 'Something went wrong while loading the kitchen board. Please try again.',
+    kitchenColumnNew: 'New orders',
+    kitchenColumnPreparing: 'Preparing',
+    kitchenColumnReady: 'Ready',
+    kitchenColumnEmpty: 'No orders in this column.',
+    kitchenMobileTabsLabel: 'Order columns',
+    kitchenOrderTypePickup: 'Pickup',
+    kitchenOrderTypeDelivery: 'Delivery',
+    kitchenStatusNew: 'New',
+    kitchenStatusPreparing: 'Preparing',
+    kitchenStatusReady: 'Ready',
+    kitchenItemsCount: 'Items',
+    kitchenDeliveryIndicator: 'Delivery',
+    kitchenViewDetails: 'View details',
+    kitchenStartPreparing: 'Start preparing',
+    kitchenMarkReady: 'Mark as ready',
+    kitchenReadyWaiting: 'Waiting for pickup or handoff',
+    kitchenUpdating: 'Updating…',
+    kitchenLoadMore: 'Load more',
+    kitchenLoadingMore: 'Loading…',
+    kitchenLoadMoreError: 'Unable to load more orders.',
+    kitchenDetailsTitle: 'Order details',
+    kitchenCloseDetails: 'Close details',
+    kitchenDetailsLoading: 'Loading details…',
+    kitchenDetailsError: 'Unable to load order details.',
+    kitchenFieldOrderNumber: 'Order number',
+    kitchenFieldStatus: 'Status',
+    kitchenFieldOrderType: 'Order type',
+    kitchenFieldCreatedAt: 'Created at',
+    kitchenFieldGuestName: 'Guest name',
+    kitchenFieldGuestPhone: 'Guest phone',
+    kitchenFieldDeliveryAddress: 'Delivery address',
+    kitchenFieldOrderNotes: 'Order notes',
+    kitchenFieldTotal: 'Total',
+    kitchenItemsHeading: 'Items',
+    kitchenStatusUpdateSuccess: 'Order status updated.',
+    kitchenErrorConflict: 'The order status changed or this transition is no longer valid. Board refreshed.',
+    kitchenErrorForbidden: 'You are not allowed to perform this action.',
+    kitchenErrorNotFound: 'This order is no longer available. Board refreshed.',
+    kitchenErrorTooManyRequests: 'Too many requests. Please try again later.',
+    kitchenErrorGeneric: 'Unable to complete the request. Please try again.',
+    kitchenMissingContextTitle: 'Restaurant context unavailable',
+    kitchenMissingContextDescription:
+      'The kitchen dashboard requires a restaurant id in the current session.',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
   },

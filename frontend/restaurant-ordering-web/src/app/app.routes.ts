@@ -83,8 +83,8 @@ export const routes: Routes = [
       roles: [ApplicationRoles.KitchenManager],
     },
     loadComponent: () =>
-      import('./features/kitchen/pages/kitchen-placeholder-page/kitchen-placeholder-page').then(
-        (m) => m.KitchenPlaceholderPage,
+      import('./features/kitchen/pages/kitchen-dashboard-page/kitchen-dashboard-page').then(
+        (m) => m.KitchenDashboardPage,
       ),
   },
   {

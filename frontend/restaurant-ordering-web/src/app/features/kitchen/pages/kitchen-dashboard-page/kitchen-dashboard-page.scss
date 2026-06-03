@@ -1,0 +1,459 @@
+.kitchen-page {
+  width: min(100%, 80rem);
+  margin-inline: auto;
+  padding: clamp(1rem, 3vw, 1.75rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.kitchen-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.kitchen-page__eyebrow {
+  margin: 0 0 0.35rem;
+  color: #7d562d;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.kitchen-page__intro h1 {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 1.85rem);
+}
+
+.kitchen-page__lead,
+.kitchen-page__role {
+  margin: 0;
+  color: #434845;
+}
+
+.kitchen-page__role span {
+  font-weight: 600;
+  color: #1a1c1a;
+}
+
+.kitchen-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.kitchen-page__language {
+  display: inline-flex;
+  border: 1px solid #e3e2e0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.kitchen-page__lang-btn {
+  border: 0;
+  background: #fffdfc;
+  color: #434845;
+  padding: 0.45rem 0.75rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.kitchen-page__lang-btn--active {
+  background: #171c19;
+  color: #faf9f6;
+}
+
+.kitchen-page__primary-btn,
+.kitchen-page__secondary-btn,
+.kitchen-page__link-btn {
+  font: inherit;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+}
+
+.kitchen-page__primary-btn {
+  border: 0;
+  padding: 0.55rem 0.95rem;
+  background: #171c19;
+  color: #faf9f6;
+  font-weight: 600;
+}
+
+.kitchen-page__primary-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.kitchen-page__secondary-btn {
+  border: 1px solid #e3e2e0;
+  padding: 0.5rem 0.9rem;
+  background: #fffdfc;
+  color: #1a1c1a;
+  font-weight: 600;
+}
+
+.kitchen-page__secondary-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.kitchen-page__link-btn {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #7d562d;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.kitchen-page__feedback {
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-md);
+  background: #efeeeb;
+  color: #1a1c1a;
+}
+
+.kitchen-page__state,
+.kitchen-details__loading {
+  padding: 1.25rem 1.35rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid #e3e2e0;
+  background: #fffdfc;
+}
+
+.kitchen-page__skeleton-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.kitchen-page__skeleton-column {
+  min-height: 18rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, #efeeeb 0%, #f4f3f1 50%, #efeeeb 100%);
+  background-size: 200% 100%;
+  animation: kitchen-skeleton 1.2s ease-in-out infinite;
+}
+
+@keyframes kitchen-skeleton {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.kitchen-page__tabs {
+  display: none;
+  gap: 0.5rem;
+}
+
+.kitchen-page__tab {
+  flex: 1;
+  border: 1px solid #e3e2e0;
+  border-radius: var(--radius-md);
+  background: #fffdfc;
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.kitchen-page__tab--active {
+  border-color: #171c19;
+  background: #171c19;
+  color: #faf9f6;
+}
+
+.kitchen-page__tab-count {
+  margin-inline-start: 0.35rem;
+  font-weight: 700;
+}
+
+.kitchen-page__board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.kitchen-page__column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.85rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid #e3e2e0;
+  background: #faf9f6;
+}
+
+.kitchen-page__column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.kitchen-page__column-header h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.kitchen-page__column-count {
+  min-width: 1.75rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: #171c19;
+  color: #faf9f6;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.kitchen-page__empty {
+  margin: 0;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background: #fffdfc;
+  color: #434845;
+  text-align: center;
+}
+
+.kitchen-page__cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.kitchen-page__card {
+  padding: 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid #e3e2e0;
+  background: #fffdfc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.kitchen-page__card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.kitchen-page__order-number {
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.kitchen-page__badge {
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: #ffca98;
+  color: #2c1600;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.kitchen-page__meta,
+.kitchen-page__guest,
+.kitchen-page__waiting {
+  margin: 0;
+  color: #434845;
+  font-size: 0.92rem;
+}
+
+.kitchen-page__indicators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.kitchen-page__indicator {
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-sm);
+  background: #efeeeb;
+  color: #434845;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.kitchen-page__indicator--delivery {
+  background: #dfe4df;
+  color: #181d1a;
+}
+
+.kitchen-page__card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.kitchen-page__load-more {
+  width: 100%;
+}
+
+.kitchen-details {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.kitchen-details__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgb(26 28 26 / 0.45);
+  cursor: pointer;
+}
+
+.kitchen-details__panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 28rem);
+  max-height: 100%;
+  overflow: auto;
+  background: #faf9f6;
+  border-inline-start: 1px solid #e3e2e0;
+  box-shadow: var(--shadow-soft);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.kitchen-details__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.kitchen-details__header h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.kitchen-details__meta {
+  margin: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.kitchen-details__meta div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.kitchen-details__meta dt {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #747875;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.kitchen-details__meta dd {
+  margin: 0;
+  color: #1a1c1a;
+}
+
+.kitchen-details__items h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.kitchen-details__items ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.kitchen-details__item-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.kitchen-details__item-notes {
+  margin: 0.25rem 0 0;
+  color: #434845;
+  font-size: 0.9rem;
+}
+
+.kitchen-details__total {
+  margin: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e3e2e0;
+  font-weight: 700;
+}
+
+@media (max-width: 960px) {
+  .kitchen-page__board {
+    grid-template-columns: repeat(3, minmax(16rem, 1fr));
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scroll-snap-type: x mandatory;
+  }
+
+  .kitchen-page__column {
+    scroll-snap-align: start;
+  }
+}
+
+@media (max-width: 720px) {
+  .kitchen-page__skeleton-board {
+    grid-template-columns: 1fr;
+  }
+
+  .kitchen-page__tabs {
+    display: flex;
+  }
+
+  .kitchen-page__board {
+    display: block;
+  }
+
+  .kitchen-page__column {
+    display: none;
+  }
+
+  .kitchen-page__column--mobile-active {
+    display: flex;
+  }
+
+  .kitchen-details__panel {
+    width: 100%;
+    max-height: 92vh;
+    align-self: flex-end;
+    border-inline-start: 0;
+    border-top: 1px solid #e3e2e0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kitchen-page__skeleton-column {
+    animation: none;
+  }
+}
