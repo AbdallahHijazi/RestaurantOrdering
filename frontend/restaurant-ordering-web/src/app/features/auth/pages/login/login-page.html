@@ -71,6 +71,7 @@
             <button
               type="button"
               class="login-page__password-toggle"
+              data-testid="login-password-toggle"
               (click)="togglePasswordVisibility()"
               [attr.aria-label]="
                 passwordVisible()
@@ -78,12 +79,53 @@
                   : localeService.uiText('loginShowPassword')
               "
               [attr.aria-pressed]="passwordVisible()"
-            >
-              {{
+              [attr.title]="
                 passwordVisible()
                   ? localeService.uiText('loginHidePassword')
                   : localeService.uiText('loginShowPassword')
-              }}
+              "
+            >
+              @if (passwordVisible()) {
+                <svg
+                  class="login-page__password-icon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path
+                    d="M3 3l18 18"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    d="M10.58 10.58A2 2 0 0 0 12 14a2 2 0 0 0 1.42-.58M9.9 5.1A10.94 10.94 0 0 1 12 5c5 0 9.27 3.11 11 7.5a11.82 11.82 0 0 1-1.56 2.74M6.72 6.72A11.6 11.6 0 0 0 1 12.5C2.73 16.89 7 20 12 20c1.05 0 2.06-.14 3-.4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              } @else {
+                <svg
+                  class="login-page__password-icon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path
+                    d="M2 12.5C3.73 8.11 8 5 13 5s9.27 3.11 11 7.5c-1.73 4.39-6 7.5-11 7.5S3.73 16.89 2 12.5Z"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <circle cx="13" cy="12.5" r="3" fill="none" stroke="currentColor" stroke-width="1.75" />
+                </svg>
+              }
             </button>
           </div>
           @if (passwordError(); as message) {

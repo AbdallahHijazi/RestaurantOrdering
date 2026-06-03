@@ -158,6 +158,10 @@ type UiTextKey =
   | 'adminDashboardWelcome'
   | 'adminDashboardLead'
   | 'adminDashboardRoleLabel'
+  | 'adminDashboardDemoNotice'
+  | 'adminDashboardStatMenuItems'
+  | 'adminDashboardStatOrders'
+  | 'adminDashboardStatStaff'
   | 'adminDashboardReadyTitle'
   | 'adminDashboardReadyDescription'
   | 'adminDashboardGoToProfile'
@@ -327,6 +331,10 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminDashboardLead:
       'هيكل لوحة التحكم جاهز. ابدأ بإعداد ملف المطعم، وستُضاف بقية الأقسام تدريجيًا.',
     adminDashboardRoleLabel: 'دورك الحالي:',
+    adminDashboardDemoNotice: 'بيانات تجريبية لمعاينة لوحة التحكم',
+    adminDashboardStatMenuItems: 'الوجبات',
+    adminDashboardStatOrders: 'الطلبات',
+    adminDashboardStatStaff: 'الموظفون',
     adminDashboardReadyTitle: 'لوحة التحكم جاهزة',
     adminDashboardReadyDescription:
       'يمكنك الآن التنقل بين الأقسام المتاحة. ابدأ بملف المطعم لضبط الهوية والمعاينة.',
@@ -498,6 +506,10 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminDashboardLead:
       'Your admin shell is ready. Start with the restaurant profile; more sections will arrive in later steps.',
     adminDashboardRoleLabel: 'Your role:',
+    adminDashboardDemoNotice: 'Demo data for dashboard preview',
+    adminDashboardStatMenuItems: 'Menu items',
+    adminDashboardStatOrders: 'Orders',
+    adminDashboardStatStaff: 'Staff',
     adminDashboardReadyTitle: 'Dashboard shell is ready',
     adminDashboardReadyDescription:
       'You can move between the available sections now. Begin with the restaurant profile to set branding and preview.',

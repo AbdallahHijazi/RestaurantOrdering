@@ -3,6 +3,11 @@ import { RouterLink } from '@angular/router';
 import { ApplicationRoles } from '../../../../core/auth/application-roles';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { LocaleService } from '../../../../core/localization/locale';
+import {
+  ADMIN_DASHBOARD_DEMO_STAT_ORDER,
+  ADMIN_DASHBOARD_DEMO_STATS,
+  type AdminDashboardDemoStatId,
+} from '../../data/admin-dashboard-demo.data';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -14,6 +19,9 @@ export class DashboardPage {
   protected readonly localeService = inject(LocaleService);
   protected readonly authService = inject(AuthService);
 
+  protected readonly demoStats = ADMIN_DASHBOARD_DEMO_STATS;
+  protected readonly demoStatOrder = ADMIN_DASHBOARD_DEMO_STAT_ORDER;
+
   protected readonly roleLabel = computed(() => {
     const role = this.authService.currentRole();
     if (role === ApplicationRoles.RestaurantOwner) {
@@ -24,4 +32,15 @@ export class DashboardPage {
     }
     return role ?? '—';
   });
+
+  protected statLabel(statId: AdminDashboardDemoStatId): string {
+    switch (statId) {
+      case 'menuItems':
+        return this.localeService.uiText('adminDashboardStatMenuItems');
+      case 'orders':
+        return this.localeService.uiText('adminDashboardStatOrders');
+      case 'staff':
+        return this.localeService.uiText('adminDashboardStatStaff');
+    }
+  }
 }

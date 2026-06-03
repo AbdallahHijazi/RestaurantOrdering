@@ -9,6 +9,19 @@
     </p>
   </header>
 
+  <p class="admin-dashboard__demo-notice" data-testid="admin-dashboard-demo-notice">
+    {{ localeService.uiText('adminDashboardDemoNotice') }}
+  </p>
+
+  <div class="admin-dashboard__stats" data-testid="admin-dashboard-stats">
+    @for (statId of demoStatOrder; track statId) {
+      <article class="admin-dashboard__stat-card" [attr.data-testid]="'admin-dashboard-stat-' + statId">
+        <p class="admin-dashboard__stat-label">{{ statLabel(statId) }}</p>
+        <p class="admin-dashboard__stat-value">{{ demoStats[statId] }}</p>
+      </article>
+    }
+  </div>
+
   <article class="admin-dashboard__ready-card">
     <h3>{{ localeService.uiText('adminDashboardReadyTitle') }}</h3>
     <p>{{ localeService.uiText('adminDashboardReadyDescription') }}</p>

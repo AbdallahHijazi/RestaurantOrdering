@@ -179,18 +179,46 @@ describe('LoginPage', () => {
   });
 
   it('toggles password visibility without changing the value', () => {
+    const locale = TestBed.inject(LocaleService);
+    locale.setLocale('en');
+    fixture.detectChanges();
+
     const passwordInput = root().querySelector('#login-password') as HTMLInputElement;
-    passwordInput.value = 'secret-value';
-    passwordInput.dispatchEvent(new Event('input'));
+    page().form.controls.password.setValue('secret-value');
     fixture.detectChanges();
 
     expect(passwordInput.type).toBe('password');
 
-    (root().querySelector('.login-page__password-toggle') as HTMLButtonElement).click();
+    const toggle = root().querySelector('[data-testid="login-password-toggle"]') as HTMLButtonElement;
+    expect(toggle.type).toBe('button');
+    expect(toggle.textContent?.trim()).toBe('');
+    expect(toggle.getAttribute('aria-label')).toBe(locale.uiText('loginShowPassword'));
+
+    toggle.click();
     fixture.detectChanges();
 
     expect(passwordInput.type).toBe('text');
     expect(passwordInput.value).toBe('secret-value');
+    expect(toggle.getAttribute('aria-label')).toBe(locale.uiText('loginHidePassword'));
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(passwordInput.type).toBe('password');
+    expect(passwordInput.value).toBe('secret-value');
+  });
+
+  it('does not submit the form when pressing the password toggle', () => {
+    page().form.setValue({
+      email: 'owner@test.local',
+      password: 'P@ssw0rd!123',
+    });
+    fixture.detectChanges();
+
+    (root().querySelector('[data-testid="login-password-toggle"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    httpMock.expectNone(`${API_BASE_URL}/api/v1/auth/login`);
   });
 
   it('submits form when Enter is pressed', () => {

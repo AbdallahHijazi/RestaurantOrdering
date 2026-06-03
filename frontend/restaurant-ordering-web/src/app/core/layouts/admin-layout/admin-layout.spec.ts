@@ -6,6 +6,7 @@ import { ApplicationRoles } from '../../auth/application-roles';
 import { AuthService } from '../../auth/auth.service';
 import { AuthSessionService } from '../../auth/auth-session.service';
 import { createTestSession } from '../../auth/test-jwt.util';
+import { LocaleService } from '../../localization/locale';
 import { routes } from '../../../app.routes';
 import { AdminLayout } from './admin-layout';
 
@@ -118,6 +119,94 @@ describe('AdminLayout', () => {
     backdrop.click();
     fixture.detectChanges();
     expect(root.classList.contains('admin-layout--drawer-open')).toBe(false);
+  });
+
+  it('keeps sidebar visible when switching locale from EN to AR on desktop layout', () => {
+    const locale = TestBed.inject(LocaleService);
+    const layout: HTMLElement = fixture.nativeElement.querySelector('.admin-layout');
+    const sidebar: HTMLElement = fixture.nativeElement.querySelector('[data-testid="admin-sidebar"]');
+
+    expect(layout.getAttribute('dir')).toBe('rtl');
+    expect(sidebar).toBeTruthy();
+
+    locale.setLocale('en');
+    fixture.detectChanges();
+    expect(layout.getAttribute('dir')).toBe('ltr');
+    expect(fixture.nativeElement.querySelector('[data-testid="admin-sidebar"]')).toBeTruthy();
+
+    locale.setLocale('ar');
+    fixture.detectChanges();
+    expect(layout.getAttribute('dir')).toBe('rtl');
+    expect(fixture.nativeElement.querySelector('[data-testid="admin-sidebar"]')).toBeTruthy();
+  });
+
+  it('opens and closes the drawer in RTL', () => {
+    const locale = TestBed.inject(LocaleService);
+    locale.setLocale('ar');
+    fixture.detectChanges();
+
+    const root: HTMLElement = fixture.nativeElement.querySelector('.admin-layout');
+    const toggle: HTMLButtonElement = fixture.nativeElement.querySelector(
+      '[data-testid="admin-menu-toggle"]',
+    );
+
+    toggle.click();
+    fixture.detectChanges();
+    expect(root.getAttribute('dir')).toBe('rtl');
+    expect(root.classList.contains('admin-layout--drawer-open')).toBe(true);
+
+    toggle.click();
+    fixture.detectChanges();
+    expect(root.classList.contains('admin-layout--drawer-open')).toBe(false);
+  });
+
+  it('opens and closes the drawer in LTR', () => {
+    const locale = TestBed.inject(LocaleService);
+    locale.setLocale('en');
+    fixture.detectChanges();
+
+    const root: HTMLElement = fixture.nativeElement.querySelector('.admin-layout');
+    const toggle: HTMLButtonElement = fixture.nativeElement.querySelector(
+      '[data-testid="admin-menu-toggle"]',
+    );
+
+    toggle.click();
+    fixture.detectChanges();
+    expect(root.getAttribute('dir')).toBe('ltr');
+    expect(root.classList.contains('admin-layout--drawer-open')).toBe(true);
+  });
+
+  it('closes the drawer after navigation', async () => {
+    @Component({ template: '<router-outlet />', imports: [RouterOutlet] })
+    class Host {}
+
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideRouter(routes)],
+    }).compileComponents();
+
+    session = TestBed.inject(AuthSessionService);
+    router = TestBed.inject(Router);
+    session.clearSession();
+    session.saveSession(createTestSession(ApplicationRoles.RestaurantOwner));
+
+    const hostFixture = TestBed.createComponent(Host);
+    await router.navigateByUrl('/admin/dashboard');
+    hostFixture.detectChanges();
+
+    const layout: HTMLElement = hostFixture.nativeElement.querySelector('.admin-layout');
+    const toggle: HTMLButtonElement = hostFixture.nativeElement.querySelector(
+      '[data-testid="admin-menu-toggle"]',
+    );
+
+    toggle.click();
+    hostFixture.detectChanges();
+    expect(layout.classList.contains('admin-layout--drawer-open')).toBe(true);
+
+    await router.navigateByUrl('/admin/restaurant-profile');
+    hostFixture.detectChanges();
+    expect(layout.classList.contains('admin-layout--drawer-open')).toBe(false);
   });
 });
 

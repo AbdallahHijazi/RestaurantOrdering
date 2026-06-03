@@ -56,9 +56,9 @@
 .login-page__main {
   flex: 1;
   display: grid;
-  gap: 1.25rem;
+  gap: 1.5rem;
   justify-items: center;
-  padding: 1.5rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
 }
 
 .login-page__toolbar,
@@ -206,7 +206,7 @@
 }
 
 .login-page__password-wrap input {
-  padding-inline-end: 5.75rem;
+  padding-inline-end: 3.25rem;
 }
 
 .login-page__password-toggle {
@@ -214,13 +214,27 @@
   inset-block: 0;
   inset-inline-end: 0.35rem;
   margin-block: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
   border: 0;
   border-radius: 0.5rem;
-  padding: 0.35rem 0.5rem;
+  padding: 0;
   background: transparent;
   color: #e7e5e4;
-  font-size: 0.75rem;
   cursor: pointer;
+}
+
+.login-page__password-toggle:hover {
+  background: rgb(255 255 255 / 0.06);
+}
+
+.login-page__password-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  display: block;
 }
 
 .login-page__field-error,
