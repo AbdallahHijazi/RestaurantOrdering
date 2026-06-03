@@ -206,6 +206,45 @@ public sealed class RestaurantUserManagementService : IRestaurantUserManagementS
         };
     }
 
+    public async Task<IReadOnlyList<RestaurantUserDto>> ListRestaurantStaffUsersAsync(
+        Guid restaurantId,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var restaurantOwnerId = await _context.Restaurants
+            .AsNoTracking()
+            .Where(restaurant => restaurant.Id == restaurantId)
+            .Select(restaurant => restaurant.OwnerId)
+            .SingleAsync(cancellationToken);
+
+        var staffRoleNames = AssignableRestaurantStaffRoles.All;
+
+        var staffUsers = await (
+            from user in _context.Users.AsNoTracking()
+            join userRole in _context.UserRoles on user.Id equals userRole.UserId
+            join role in _context.Roles on userRole.RoleId equals role.Id
+            where user.RestaurantId == restaurantId
+                && !user.IsDeleted
+                && user.Id != restaurantOwnerId
+                && role.Name != null
+                && staffRoleNames.Contains(role.Name)
+            orderby user.FullName, user.Email
+            select new RestaurantUserDto
+            {
+                Id = user.Id,
+                Email = user.Email ?? string.Empty,
+                FullName = user.FullName,
+                PhoneNumber = user.PhoneNumber,
+                RestaurantId = restaurantId,
+                Role = role.Name!,
+                IsActive = user.IsActive
+            })
+            .ToListAsync(cancellationToken);
+
+        return staffUsers;
+    }
+
     private async Task CompensateFailedUserCreationAsync(
         ApplicationUser user,
         IDbContextTransaction transaction,

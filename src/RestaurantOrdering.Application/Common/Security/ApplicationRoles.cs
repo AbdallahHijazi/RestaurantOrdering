@@ -22,5 +22,11 @@ public static class AssignableRestaurantStaffRoles
         ApplicationRoles.KitchenManager
     };
 
+    public static readonly IReadOnlyList<string> All =
+    [
+        ApplicationRoles.RestaurantManager,
+        ApplicationRoles.KitchenManager
+    ];
+
     public static bool IsAllowed(string role) => Allowed.Contains(role);
 }

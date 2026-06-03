@@ -19,4 +19,8 @@ public interface IRestaurantUserManagementService
         string role,
         Guid currentUserId,
         CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<RestaurantUserDto>> ListRestaurantStaffUsersAsync(
+        Guid restaurantId,
+        CancellationToken cancellationToken);
 }

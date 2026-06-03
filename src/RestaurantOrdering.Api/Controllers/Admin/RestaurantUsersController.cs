@@ -7,6 +7,7 @@ using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Application.Features.RestaurantUsers.Commands.CreateRestaurantUser;
 using RestaurantOrdering.Application.Features.RestaurantUsers.Commands.UpdateRestaurantUserRole;
 using RestaurantOrdering.Application.Features.RestaurantUsers.DTOs;
+using RestaurantOrdering.Application.Features.RestaurantUsers.Queries.GetRestaurantStaffUsers;
 
 namespace RestaurantOrdering.Api.Controllers.Admin;
 
@@ -20,6 +21,16 @@ public sealed class RestaurantUsersController : ControllerBase
     public RestaurantUsersController(ISender sender)
     {
         _sender = sender;
+    }
+
+    [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<RestaurantUserResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<RestaurantUserResponse>>> GetUsers(
+        Guid restaurantId,
+        CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(new GetRestaurantStaffUsersQuery(restaurantId), cancellationToken);
+        return Ok(result.Select(MapUserResponse).ToList());
     }
 
     [HttpPost]
