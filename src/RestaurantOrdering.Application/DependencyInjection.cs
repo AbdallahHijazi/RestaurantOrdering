@@ -29,6 +29,7 @@ public static class DependencyInjection
             typeof(IPipelineBehavior<,>),
             typeof(RestaurantDashboardAccessBehavior<,>));
         services.AddScoped<IRestaurantAuthorizationService, RestaurantAuthorizationService>();
+        services.AddScoped<ICurrentRequestDashboardAccess, CurrentRequestDashboardAccess>();
 
         return services;
     }

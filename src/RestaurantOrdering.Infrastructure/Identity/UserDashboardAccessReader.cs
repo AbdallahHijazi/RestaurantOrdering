@@ -21,7 +21,7 @@ public sealed class UserDashboardAccessReader : IUserDashboardAccessReader
         _context = context;
     }
 
-    public async Task<bool> HasDashboardAccessAsync(
+    public async Task<UserDashboardAccessContext?> GetDashboardAccessContextAsync(
         Guid userId,
         Guid restaurantId,
         CancellationToken cancellationToken)
@@ -42,7 +42,7 @@ public sealed class UserDashboardAccessReader : IUserDashboardAccessReader
 
         if (accessContext is null)
         {
-            return false;
+            return null;
         }
 
         var roleNames = await (
@@ -52,20 +52,34 @@ public sealed class UserDashboardAccessReader : IUserDashboardAccessReader
             select role.Name!)
             .ToListAsync(cancellationToken);
 
-        var hasDashboardRole = roleNames.Any(roleName =>
-            roleName is not null && DashboardRoles.Contains(roleName));
+        var dashboardRoles = roleNames
+            .Where(roleName => roleName is not null && DashboardRoles.Contains(roleName))
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
 
-        if (!hasDashboardRole)
+        if (dashboardRoles.Count == 0)
         {
-            return false;
+            return null;
         }
 
-        if (roleNames.Contains(ApplicationRoles.RestaurantOwner)
+        if (dashboardRoles.Contains(ApplicationRoles.RestaurantOwner)
             && accessContext.OwnerId != userId)
         {
-            return false;
+            return null;
         }
 
-        return true;
+        return new UserDashboardAccessContext
+        {
+            Roles = dashboardRoles
+        };
+    }
+
+    public async Task<bool> HasDashboardAccessAsync(
+        Guid userId,
+        Guid restaurantId,
+        CancellationToken cancellationToken)
+    {
+        var context = await GetDashboardAccessContextAsync(userId, restaurantId, cancellationToken);
+        return context is not null;
     }
 }

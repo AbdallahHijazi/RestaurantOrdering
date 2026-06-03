@@ -27,6 +27,8 @@ internal static class TestDataSeeder
     internal static readonly Guid OrderAId = Guid.Parse("aaaaaaaa-8888-8888-8888-888888888888");
     internal static readonly Guid OrderACompletedId = Guid.Parse("aaaaaaaa-9999-9999-9999-999999999999");
     internal static readonly Guid OrderACancelledId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaa01");
+    internal static readonly Guid OrderAPreparingId = Guid.Parse("aaaaaaaa-bbbb-bbbb-bbbb-bbbbbbbbbbb1");
+    internal static readonly Guid OrderAReadyId = Guid.Parse("aaaaaaaa-bbbb-bbbb-bbbb-bbbbbbbbbbb2");
     internal static readonly Guid OrderBId = Guid.Parse("bbbbbbbb-8888-8888-8888-888888888888");
 
     internal const string OwnerAEmail = "owner.a@test.local";
@@ -161,6 +163,8 @@ internal static class TestDataSeeder
 
         dbContext.Orders.AddRange(
             CreateOrder(OrderAId, RestaurantAId, OrderStatus.New, "ORD-A-NEW", seededAt),
+            CreateOrder(OrderAPreparingId, RestaurantAId, OrderStatus.Preparing, "ORD-A-PREP", seededAt),
+            CreateOrder(OrderAReadyId, RestaurantAId, OrderStatus.Ready, "ORD-A-RDY", seededAt),
             CreateOrder(OrderACompletedId, RestaurantAId, OrderStatus.Completed, "ORD-A-DONE", seededAt),
             CreateOrder(OrderACancelledId, RestaurantAId, OrderStatus.Cancelled, "ORD-A-CANC", seededAt),
             CreateOrder(OrderBId, RestaurantBId, OrderStatus.New, "ORD-B-NEW", seededAt));
