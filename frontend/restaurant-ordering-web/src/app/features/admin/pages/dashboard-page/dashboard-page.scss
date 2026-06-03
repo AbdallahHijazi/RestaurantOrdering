@@ -1,0 +1,108 @@
+.admin-dashboard {
+  width: min(100%, 72rem);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.admin-dashboard__hero {
+  padding: 1.25rem 1.35rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, #fffdfc, #f4f3f1);
+  border: 1px solid #e3e2e0;
+  box-shadow: var(--shadow-soft);
+}
+
+.admin-dashboard__eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #7d562d;
+}
+
+.admin-dashboard__hero h2 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 1.85rem);
+  line-height: 1.2;
+}
+
+.admin-dashboard__lead {
+  margin: 0;
+  color: #434845;
+  max-width: 42rem;
+}
+
+.admin-dashboard__role {
+  margin: 0.85rem 0 0;
+  font-size: 0.875rem;
+  color: #434845;
+}
+
+.admin-dashboard__role strong {
+  color: #1a1c1a;
+}
+
+.admin-dashboard__ready-card {
+  padding: 1.15rem 1.35rem;
+  border-radius: var(--radius-lg);
+  background: #171c19;
+  color: #faf9f6;
+}
+
+.admin-dashboard__ready-card h3 {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+}
+
+.admin-dashboard__ready-card p {
+  margin: 0 0 0.85rem;
+  color: #e3e2e0;
+}
+
+.admin-dashboard__cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  background: #ffca98;
+  color: #2c1600;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.admin-dashboard__placeholders {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: 1fr;
+}
+
+.admin-dashboard__placeholder-card {
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius-md);
+  border: 1px dashed #c4c7c3;
+  background: rgb(255 253 252 / 0.7);
+}
+
+.admin-dashboard__placeholder-card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-family: var(--font-display);
+}
+
+.admin-dashboard__placeholder-card p {
+  margin: 0;
+  color: #434845;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 48rem) {
+  .admin-dashboard__placeholders {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

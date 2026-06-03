@@ -140,11 +140,32 @@ type UiTextKey =
   | 'loginEmailInvalid'
   | 'loginPasswordRequired'
   | 'loginUnsupportedRole'
-  | 'adminPlaceholderEyebrow'
-  | 'adminPlaceholderTitle'
-  | 'adminPlaceholderDescription'
-  | 'adminPlaceholderRoleLabel'
-  | 'adminPlaceholderLogout'
+  | 'adminSidebarLabel'
+  | 'adminNavLabel'
+  | 'adminNavDashboard'
+  | 'adminNavRestaurantProfile'
+  | 'adminLogout'
+  | 'adminOpenSidebar'
+  | 'adminCloseSidebar'
+  | 'adminPageDashboard'
+  | 'adminPageRestaurantProfile'
+  | 'adminRoleOwner'
+  | 'adminRoleManager'
+  | 'adminLanguageGroup'
+  | 'adminDashboardEyebrow'
+  | 'adminDashboardWelcome'
+  | 'adminDashboardLead'
+  | 'adminDashboardRoleLabel'
+  | 'adminDashboardReadyTitle'
+  | 'adminDashboardReadyDescription'
+  | 'adminDashboardGoToProfile'
+  | 'adminDashboardComingSoonLabel'
+  | 'adminDashboardMenuTitle'
+  | 'adminDashboardMenuDescription'
+  | 'adminDashboardOrdersTitle'
+  | 'adminDashboardOrdersDescription'
+  | 'adminDashboardStaffTitle'
+  | 'adminDashboardStaffDescription'
   | 'kitchenPlaceholderEyebrow'
   | 'kitchenPlaceholderTitle'
   | 'kitchenPlaceholderDescription'
@@ -195,12 +216,34 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     loginPasswordRequired: 'كلمة المرور مطلوبة.',
     loginUnsupportedRole:
       'لا يمكن استخدام هذا الحساب هنا. تواصل مع مسؤول المطعم إذا كنت تعتقد أن هذا خطأ.',
-    adminPlaceholderEyebrow: 'إدارة المطعم',
-    adminPlaceholderTitle: 'Restaurant Administration',
-    adminPlaceholderDescription:
-      'هذه المنطقة مخصصة لمالك المطعم أو مدير المطعم. سيتم إضافة لوحة التحكم لاحقًا.',
-    adminPlaceholderRoleLabel: 'الدور الحالي',
-    adminPlaceholderLogout: 'تسجيل الخروج',
+    adminSidebarLabel: 'قائمة إدارة المطعم',
+    adminNavLabel: 'التنقل الرئيسي',
+    adminNavDashboard: 'لوحة التحكم',
+    adminNavRestaurantProfile: 'ملف المطعم',
+    adminLogout: 'تسجيل الخروج',
+    adminOpenSidebar: 'فتح القائمة الجانبية',
+    adminCloseSidebar: 'إغلاق القائمة الجانبية',
+    adminPageDashboard: 'لوحة التحكم',
+    adminPageRestaurantProfile: 'ملف المطعم',
+    adminRoleOwner: 'مالك المطعم',
+    adminRoleManager: 'مدير المطعم',
+    adminLanguageGroup: 'اختيار اللغة',
+    adminDashboardEyebrow: 'لوحة التحكم',
+    adminDashboardWelcome: 'مرحبًا بك في لوحة إدارة المطعم',
+    adminDashboardLead:
+      'هيكل لوحة التحكم جاهز. ابدأ بإعداد ملف المطعم، وستُضاف بقية الأقسام تدريجيًا.',
+    adminDashboardRoleLabel: 'دورك الحالي:',
+    adminDashboardReadyTitle: 'لوحة التحكم جاهزة',
+    adminDashboardReadyDescription:
+      'يمكنك الآن التنقل بين الأقسام المتاحة. ابدأ بملف المطعم لضبط الهوية والمعاينة.',
+    adminDashboardGoToProfile: 'الانتقال إلى ملف المطعم',
+    adminDashboardComingSoonLabel: 'أقسام قادمة',
+    adminDashboardMenuTitle: 'إدارة القائمة',
+    adminDashboardMenuDescription: 'ستظهر أدوات القائمة هنا لاحقًا.',
+    adminDashboardOrdersTitle: 'الطلبات',
+    adminDashboardOrdersDescription: 'ستظهر متابعة الطلبات هنا لاحقًا.',
+    adminDashboardStaffTitle: 'الموظفون',
+    adminDashboardStaffDescription: 'ستظهر إدارة الموظفين هنا لاحقًا.',
     kitchenPlaceholderEyebrow: 'المطبخ',
     kitchenPlaceholderTitle: 'Kitchen Dashboard',
     kitchenPlaceholderDescription:
@@ -251,12 +294,34 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     loginPasswordRequired: 'Password is required.',
     loginUnsupportedRole:
       'This account cannot be used here. Contact your restaurant administrator if you believe this is a mistake.',
-    adminPlaceholderEyebrow: 'Restaurant admin',
-    adminPlaceholderTitle: 'Restaurant Administration',
-    adminPlaceholderDescription:
-      'This area is for the restaurant owner or manager. A full dashboard will be added later.',
-    adminPlaceholderRoleLabel: 'Current role',
-    adminPlaceholderLogout: 'Log out',
+    adminSidebarLabel: 'Restaurant admin menu',
+    adminNavLabel: 'Main navigation',
+    adminNavDashboard: 'Dashboard',
+    adminNavRestaurantProfile: 'Restaurant profile',
+    adminLogout: 'Log out',
+    adminOpenSidebar: 'Open sidebar menu',
+    adminCloseSidebar: 'Close sidebar menu',
+    adminPageDashboard: 'Dashboard',
+    adminPageRestaurantProfile: 'Restaurant profile',
+    adminRoleOwner: 'Restaurant owner',
+    adminRoleManager: 'Restaurant manager',
+    adminLanguageGroup: 'Language selection',
+    adminDashboardEyebrow: 'Dashboard',
+    adminDashboardWelcome: 'Welcome to your restaurant dashboard',
+    adminDashboardLead:
+      'Your admin shell is ready. Start with the restaurant profile; more sections will arrive in later steps.',
+    adminDashboardRoleLabel: 'Your role:',
+    adminDashboardReadyTitle: 'Dashboard shell is ready',
+    adminDashboardReadyDescription:
+      'You can move between the available sections now. Begin with the restaurant profile to set branding and preview.',
+    adminDashboardGoToProfile: 'Go to restaurant profile',
+    adminDashboardComingSoonLabel: 'Coming soon',
+    adminDashboardMenuTitle: 'Menu management',
+    adminDashboardMenuDescription: 'Menu tools will appear here in a later step.',
+    adminDashboardOrdersTitle: 'Orders',
+    adminDashboardOrdersDescription: 'Order tracking will appear here in a later step.',
+    adminDashboardStaffTitle: 'Staff',
+    adminDashboardStaffDescription: 'Staff management will appear here in a later step.',
     kitchenPlaceholderEyebrow: 'Kitchen',
     kitchenPlaceholderTitle: 'Kitchen Dashboard',
     kitchenPlaceholderDescription:

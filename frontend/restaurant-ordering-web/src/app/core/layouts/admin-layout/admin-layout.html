@@ -1,15 +1,104 @@
-<div class="admin-shell">
-  <header class="admin-header">
-    <div class="admin-header__inner">
-      <h1 class="admin-header__title">Restaurant Admin</h1>
-      <nav class="admin-nav" aria-label="Admin navigation">
-        <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
-        <a routerLink="/admin/restaurant-profile" routerLinkActive="active">Profile</a>
-      </nav>
-    </div>
-  </header>
+<div
+  class="admin-layout"
+  [class.admin-layout--drawer-open]="drawerOpen()"
+  [attr.dir]="localeService.direction()"
+>
+  <button
+    type="button"
+    class="admin-layout__backdrop"
+    [attr.aria-hidden]="!drawerOpen()"
+    [attr.tabindex]="drawerOpen() ? 0 : -1"
+    [attr.aria-label]="localeService.uiText('adminCloseSidebar')"
+    (click)="closeDrawer()"
+  ></button>
 
-  <main class="admin-main">
-    <router-outlet />
-  </main>
+  <aside
+    id="admin-sidebar"
+    class="admin-layout__sidebar"
+    [attr.aria-label]="localeService.uiText('adminSidebarLabel')"
+  >
+    <div class="admin-layout__brand">
+      <span class="admin-layout__brand-mark" aria-hidden="true"></span>
+      <div class="admin-layout__brand-text">
+        <p class="admin-layout__system-name">{{ systemName() }}</p>
+        <p class="admin-layout__restaurant-name">{{ restaurantName() }}</p>
+      </div>
+    </div>
+
+    <nav class="admin-layout__nav" [attr.aria-label]="localeService.uiText('adminNavLabel')">
+      <a
+        routerLink="/admin/dashboard"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeDrawer()"
+      >
+        {{ localeService.uiText('adminNavDashboard') }}
+      </a>
+      <a
+        routerLink="/admin/restaurant-profile"
+        routerLinkActive="is-active"
+        (click)="closeDrawer()"
+      >
+        {{ localeService.uiText('adminNavRestaurantProfile') }}
+      </a>
+    </nav>
+
+    <button type="button" class="admin-layout__sidebar-logout" (click)="logout()">
+      {{ localeService.uiText('adminLogout') }}
+    </button>
+  </aside>
+
+  <div class="admin-layout__main">
+    <header class="admin-layout__header">
+      <div class="admin-layout__header-start">
+        <button
+          type="button"
+          class="admin-layout__menu-btn"
+          data-testid="admin-menu-toggle"
+          [attr.aria-expanded]="drawerOpen()"
+          [attr.aria-controls]="'admin-sidebar'"
+          [attr.aria-label]="localeService.uiText('adminOpenSidebar')"
+          (click)="toggleDrawer()"
+        >
+          <span class="admin-layout__menu-icon" aria-hidden="true"></span>
+        </button>
+        <h1 class="admin-layout__page-title">{{ pageTitle() }}</h1>
+      </div>
+
+      <div class="admin-layout__header-actions">
+        <span class="admin-layout__role-badge">{{ roleLabel() }}</span>
+
+        <div
+          class="admin-layout__lang"
+          role="group"
+          [attr.aria-label]="localeService.uiText('adminLanguageGroup')"
+        >
+          <button
+            type="button"
+            [class.is-active]="localeService.locale() === 'ar'"
+            [attr.aria-pressed]="localeService.locale() === 'ar'"
+            (click)="setLocale('ar')"
+          >
+            {{ localeService.uiText('languageArabic') }}
+          </button>
+          <button
+            type="button"
+            [class.is-active]="localeService.locale() === 'en'"
+            [attr.aria-pressed]="localeService.locale() === 'en'"
+            (click)="setLocale('en')"
+          >
+            {{ localeService.uiText('languageEnglish') }}
+          </button>
+        </div>
+
+        <button type="button" class="admin-layout__header-logout" (click)="logout()">
+          {{ localeService.uiText('adminLogout') }}
+        </button>
+      </div>
+    </header>
+
+    <div class="admin-layout__content">
+      <router-outlet />
+    </div>
+  </div>
 </div>

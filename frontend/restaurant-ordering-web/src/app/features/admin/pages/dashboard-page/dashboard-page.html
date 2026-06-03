@@ -1,2 +1,34 @@
-<h2>Admin Dashboard</h2>
-<p>The restaurant management dashboard will appear here.</p>
+<section class="admin-dashboard">
+  <header class="admin-dashboard__hero">
+    <p class="admin-dashboard__eyebrow">{{ localeService.uiText('adminDashboardEyebrow') }}</p>
+    <h2>{{ localeService.uiText('adminDashboardWelcome') }}</h2>
+    <p class="admin-dashboard__lead">{{ localeService.uiText('adminDashboardLead') }}</p>
+    <p class="admin-dashboard__role">
+      <span>{{ localeService.uiText('adminDashboardRoleLabel') }}</span>
+      <strong>{{ roleLabel() }}</strong>
+    </p>
+  </header>
+
+  <article class="admin-dashboard__ready-card">
+    <h3>{{ localeService.uiText('adminDashboardReadyTitle') }}</h3>
+    <p>{{ localeService.uiText('adminDashboardReadyDescription') }}</p>
+    <a routerLink="/admin/restaurant-profile" class="admin-dashboard__cta">
+      {{ localeService.uiText('adminDashboardGoToProfile') }}
+    </a>
+  </article>
+
+  <div class="admin-dashboard__placeholders" aria-label="{{ localeService.uiText('adminDashboardComingSoonLabel') }}">
+    <article class="admin-dashboard__placeholder-card">
+      <h3>{{ localeService.uiText('adminDashboardMenuTitle') }}</h3>
+      <p>{{ localeService.uiText('adminDashboardMenuDescription') }}</p>
+    </article>
+    <article class="admin-dashboard__placeholder-card">
+      <h3>{{ localeService.uiText('adminDashboardOrdersTitle') }}</h3>
+      <p>{{ localeService.uiText('adminDashboardOrdersDescription') }}</p>
+    </article>
+    <article class="admin-dashboard__placeholder-card">
+      <h3>{{ localeService.uiText('adminDashboardStaffTitle') }}</h3>
+      <p>{{ localeService.uiText('adminDashboardStaffDescription') }}</p>
+    </article>
+  </div>
+</section>
