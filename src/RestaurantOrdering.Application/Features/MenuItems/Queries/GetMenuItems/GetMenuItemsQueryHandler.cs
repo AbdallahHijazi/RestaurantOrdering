@@ -29,14 +29,10 @@ public sealed class GetMenuItemsQueryHandler
             query = query.Where(item => item.CategoryId == request.CategoryId.Value);
         }
 
-        var menuItems = await query
+        return await query
             .OrderBy(item => item.DisplayOrder)
             .ThenBy(item => item.NameAr)
+            .ProjectToDto(_context.MediaFiles.AsNoTracking())
             .ToListAsync(cancellationToken);
-
-        return menuItems
-            .Select(item => item.ToDto())
-            .ToList()
-            .AsReadOnly();
     }
 }

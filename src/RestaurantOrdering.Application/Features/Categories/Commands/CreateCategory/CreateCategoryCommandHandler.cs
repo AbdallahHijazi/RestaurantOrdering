@@ -51,6 +51,6 @@ public sealed class CreateCategoryCommandHandler
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return category.ToDto();
+        return category.ToDto(itemCount: 0);
     }
 }

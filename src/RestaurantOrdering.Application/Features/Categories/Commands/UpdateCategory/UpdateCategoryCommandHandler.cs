@@ -45,6 +45,10 @@ public sealed class UpdateCategoryCommandHandler
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return category.ToDto();
+        return await _context.Categories
+            .AsNoTracking()
+            .Where(c => c.Id == category.Id)
+            .ProjectToDto()
+            .FirstAsync(cancellationToken);
     }
 }

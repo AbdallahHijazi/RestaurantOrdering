@@ -5,7 +5,7 @@ namespace RestaurantOrdering.Application.Features.Categories.Common;
 
 public static class CategoryMappings
 {
-    public static CategoryDto ToDto(this Category category) => new()
+    public static CategoryDto ToDto(this Category category, int itemCount = 0) => new()
     {
         Id = category.Id,
         RestaurantId = category.RestaurantId,
@@ -15,6 +15,7 @@ public static class CategoryMappings
         DescriptionEn = category.DescriptionEn,
         DisplayOrder = category.DisplayOrder,
         IsActive = category.IsActive,
+        ItemCount = itemCount,
         CreatedAt = category.CreatedAt,
         UpdatedAt = category.UpdatedAt
     };

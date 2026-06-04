@@ -20,16 +20,12 @@ public sealed class GetCategoriesQueryHandler
         GetCategoriesQuery request,
         CancellationToken cancellationToken)
     {
-        var categories = await _context.Categories
+        return await _context.Categories
             .AsNoTracking()
             .Where(c => c.RestaurantId == request.RestaurantId)
             .OrderBy(c => c.DisplayOrder)
             .ThenBy(c => c.NameAr)
+            .ProjectToDto()
             .ToListAsync(cancellationToken);
-
-        return categories
-            .Select(c => c.ToDto())
-            .ToList()
-            .AsReadOnly();
     }
 }

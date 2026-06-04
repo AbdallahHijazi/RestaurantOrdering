@@ -5,6 +5,7 @@ using RestaurantOrdering.Application.Common.Interfaces;
 using RestaurantOrdering.Application.Features.PublicMenu.Common;
 using RestaurantOrdering.Application.Features.PublicMenu.DTOs;
 using RestaurantOrdering.Application.Features.Restaurants.Common;
+using RestaurantOrdering.Domain.Entities;
 
 namespace RestaurantOrdering.Application.Features.PublicMenu.Queries.GetPublicMenuBySlug;
 
@@ -59,12 +60,37 @@ public sealed class GetPublicMenuBySlugQueryHandler
             .ThenBy(item => item.NameAr)
             .ToListAsync(cancellationToken);
 
+        var imageFileIds = menuItems
+            .Where(item => item.ImageFileId.HasValue)
+            .Select(item => item.ImageFileId!.Value)
+            .Distinct()
+            .ToList();
+
+        var imageUrlsById = imageFileIds.Count == 0
+            ? new Dictionary<Guid, string>()
+            : await _context.MediaFiles
+                .AsNoTracking()
+                .Where(media => imageFileIds.Contains(media.Id))
+                .ToDictionaryAsync(media => media.Id, media => media.FileUrl, cancellationToken);
+
+        string? ResolveImageUrl(MenuItem item)
+        {
+            if (!item.ImageFileId.HasValue)
+            {
+                return null;
+            }
+
+            return imageUrlsById.TryGetValue(item.ImageFileId.Value, out var fileUrl)
+                ? fileUrl
+                : null;
+        }
+
         var itemsByCategoryId = menuItems
             .GroupBy(item => item.CategoryId)
             .ToDictionary(
                 group => group.Key,
                 group => (IReadOnlyList<PublicMenuItemDto>)group
-                    .Select(item => item.ToPublicMenuItemDto())
+                    .Select(item => item.ToPublicMenuItemDto(ResolveImageUrl(item)))
                     .ToList()
                     .AsReadOnly());
 

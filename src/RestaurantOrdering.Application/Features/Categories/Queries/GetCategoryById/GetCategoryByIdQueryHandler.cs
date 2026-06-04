@@ -23,15 +23,15 @@ public sealed class GetCategoryByIdQueryHandler
     {
         var category = await _context.Categories
             .AsNoTracking()
-            .FirstOrDefaultAsync(
-                c => c.Id == request.CategoryId && c.RestaurantId == request.RestaurantId,
-                cancellationToken);
+            .Where(c => c.Id == request.CategoryId && c.RestaurantId == request.RestaurantId)
+            .ProjectToDto()
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (category is null)
         {
             throw new NotFoundException("Category", request.CategoryId);
         }
 
-        return category.ToDto();
+        return category;
     }
 }

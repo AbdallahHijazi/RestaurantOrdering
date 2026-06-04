@@ -5,12 +5,13 @@ namespace RestaurantOrdering.Application.Features.MenuItems.Common;
 
 public static class MenuItemMappings
 {
-    public static MenuItemDto ToDto(this MenuItem menuItem) => new()
+    public static MenuItemDto ToDto(this MenuItem menuItem, string? imageUrl = null) => new()
     {
         Id = menuItem.Id,
         RestaurantId = menuItem.RestaurantId,
         CategoryId = menuItem.CategoryId,
         ImageFileId = menuItem.ImageFileId,
+        ImageUrl = imageUrl,
         NameAr = menuItem.NameAr,
         NameEn = menuItem.NameEn,
         DescriptionAr = menuItem.DescriptionAr,

@@ -73,6 +73,10 @@ public sealed class UpdateMenuItemCommandHandler
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return menuItem.ToDto();
+        return await MenuItemDtoProjections.GetProjectedDtoByIdAsync(
+            _context,
+            menuItem.Id,
+            menuItem.RestaurantId,
+            cancellationToken);
     }
 }

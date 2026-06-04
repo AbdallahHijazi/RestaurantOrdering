@@ -22,6 +22,7 @@ internal static class TestDataSeeder
     internal static readonly Guid RestaurantASettingsId = Guid.Parse("aaaaaaaa-3333-3333-3333-333333333333");
     internal static readonly Guid RestaurantBSettingsId = Guid.Parse("bbbbbbbb-4444-4444-4444-444444444444");
     internal static readonly Guid RestaurantBMediaId = Guid.Parse("bbbbbbbb-5555-5555-5555-555555555555");
+    internal static readonly Guid RestaurantAMediaId = Guid.Parse("aaaaaaaa-5555-5555-5555-555555555555");
     internal static readonly Guid CategoryAId = Guid.Parse("aaaaaaaa-6666-6666-6666-666666666666");
     internal static readonly Guid CategoryBId = Guid.Parse("bbbbbbbb-6666-6666-6666-666666666666");
     internal static readonly Guid MenuItemAId = Guid.Parse("aaaaaaaa-7777-7777-7777-777777777777");
@@ -117,7 +118,19 @@ internal static class TestDataSeeder
                 
             });
 
-        dbContext.MediaFiles.Add(
+        dbContext.MediaFiles.AddRange(
+            new MediaFile
+            {
+                Id = RestaurantAMediaId,
+                RestaurantId = RestaurantAId,
+                FileName = "menu-item-a.png",
+                StoredFileName = "menu-item-a-stored.png",
+                OriginalFileName = "menu-item-a.png",
+                FileUrl = "/uploads/test/menu-item-a-stored.png",
+                ContentType = "image/png",
+                FileSizeBytes = 256,
+                CreatedAt = DateTime.UtcNow
+            },
             new MediaFile
             {
                 Id = RestaurantBMediaId,
@@ -163,6 +176,7 @@ internal static class TestDataSeeder
                 Id = MenuItemAId,
                 RestaurantId = RestaurantAId,
                 CategoryId = CategoryAId,
+                ImageFileId = RestaurantAMediaId,
                 NameAr = "صنف اختبار",
                 NameEn = "Test Item",
                 Price = 25m,

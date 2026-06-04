@@ -5,6 +5,7 @@ public class PublicMenuItemDto
     public Guid Id { get; init; }
     public Guid CategoryId { get; init; }
     public Guid? ImageFileId { get; init; }
+    public string? ImageUrl { get; init; }
     public string NameAr { get; init; } = string.Empty;
     public string? NameEn { get; init; }
     public string? DescriptionAr { get; init; }
