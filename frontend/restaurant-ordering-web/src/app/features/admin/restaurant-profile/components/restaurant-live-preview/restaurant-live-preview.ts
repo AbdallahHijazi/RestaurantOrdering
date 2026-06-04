@@ -1,5 +1,14 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  HostListener,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { LocaleService, type SupportedLocale } from '../../../../../core/localization/locale';
 import { RestaurantThemeService } from '../../../../../core/theme/restaurant-theme';
 import { EmptyState } from '../../../../../shared/ui/empty-state/empty-state';
@@ -29,6 +38,7 @@ export class RestaurantLivePreview {
 
   protected readonly localeService = inject(LocaleService);
   private readonly themeService = inject(RestaurantThemeService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly viewport = signal<PreviewViewport>('desktop');
   protected readonly previewLocale = signal<SupportedLocale>('ar');
@@ -69,6 +79,21 @@ export class RestaurantLivePreview {
     effect(() => {
       this.themeService.applyAccent(this.preview().primaryAccentColor);
     });
+
+    effect(() => {
+      document.body.style.overflow = this.fullPreviewOpen() ? 'hidden' : '';
+    });
+
+    this.destroyRef.onDestroy(() => {
+      document.body.style.overflow = '';
+    });
+  }
+
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    if (this.fullPreviewOpen()) {
+      this.closeFullPreview();
+    }
   }
 
   protected setViewport(mode: PreviewViewport): void {

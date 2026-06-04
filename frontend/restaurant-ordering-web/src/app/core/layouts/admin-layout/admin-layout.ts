@@ -4,10 +4,11 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter } from 'rxjs';
 import { ApplicationRoles } from '../../auth/application-roles';
 import { AuthService } from '../../auth/auth.service';
+import { AdminBrandingService } from './admin-branding.service';
 import { LocaleService } from '../../localization/locale';
 import { ADMIN_SHELL_MOCK } from './admin-shell.config';
 
-type AdminPageKey = 'dashboard' | 'restaurantProfile' | 'staff';
+type AdminPageKey = 'dashboard' | 'restaurantProfile' | 'staff' | 'orders';
 
 @Component({
   selector: 'app-admin-layout',
@@ -21,6 +22,7 @@ export class AdminLayout {
 
   protected readonly localeService = inject(LocaleService);
   protected readonly authService = inject(AuthService);
+  protected readonly branding = inject(AdminBrandingService);
 
   protected readonly drawerOpen = signal(false);
   protected readonly currentPath = signal(this.router.url);
@@ -28,9 +30,11 @@ export class AdminLayout {
   protected readonly systemName = computed(
     () => ADMIN_SHELL_MOCK.systemName[this.localeService.locale()],
   );
-  protected readonly restaurantName = computed(
-    () => ADMIN_SHELL_MOCK.restaurantName[this.localeService.locale()],
+  protected readonly restaurantName = this.branding.restaurantName;
+  protected readonly brandLogoUrl = computed(() =>
+    this.branding.logoLoadFailed() ? null : this.branding.logoUrl(),
   );
+  protected readonly brandInitial = this.branding.brandInitial;
   protected readonly pageTitle = computed(() => {
     const key = this.resolvePageKey(this.currentPath());
     const titleKey =
@@ -38,7 +42,9 @@ export class AdminLayout {
         ? 'adminPageStaff'
         : key === 'restaurantProfile'
           ? 'adminPageRestaurantProfile'
-          : 'adminPageDashboard';
+          : key === 'orders'
+            ? 'adminPageOrders'
+            : 'adminPageDashboard';
     return this.localeService.uiText(titleKey);
   });
   protected readonly isOwner = computed(() =>
@@ -83,9 +89,17 @@ export class AdminLayout {
     this.authService.logout();
   }
 
+  protected onBrandLogoError(): void {
+    this.branding.onLogoError();
+  }
+
   private resolvePageKey(url: string): AdminPageKey {
     if (url.includes('staff')) {
       return 'staff';
+    }
+
+    if (url.includes('orders')) {
+      return 'orders';
     }
 
     return url.includes('restaurant-profile') ? 'restaurantProfile' : 'dashboard';

@@ -179,4 +179,41 @@ describe('RestaurantLivePreview', () => {
       true,
     );
   });
+
+  it('keeps the close button in the modal shell outside the scrollable body', () => {
+    component.openFullPreview();
+    fixture.detectChanges();
+
+    const modal = fixture.nativeElement.querySelector('[data-testid="live-preview-modal"]') as HTMLElement;
+    const closeButton = modal.querySelector('[data-testid="live-preview-close"]') as HTMLButtonElement;
+    const scrollBody = modal.querySelector('.live-preview__modal-body') as HTMLElement;
+
+    expect(closeButton).toBeTruthy();
+    expect(closeButton.closest('.live-preview__modal-header')).toBeTruthy();
+    expect(scrollBody.contains(closeButton)).toBe(false);
+  });
+
+  it('sets a translated aria-label on the close button', () => {
+    const locale = TestBed.inject(LocaleService);
+    locale.setLocale('en');
+    component.openFullPreview();
+    fixture.detectChanges();
+
+    const closeButton = fixture.nativeElement.querySelector(
+      '[data-testid="live-preview-close"]',
+    ) as HTMLButtonElement;
+
+    expect(closeButton.getAttribute('aria-label')).toBe(locale.uiText('closePreviewAria'));
+  });
+
+  it('closes the preview on Escape', () => {
+    component.openFullPreview();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-testid="live-preview-modal"]')).toBeTruthy();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="live-preview-modal"]')).toBeNull();
+  });
 });

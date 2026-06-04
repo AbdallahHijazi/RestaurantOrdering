@@ -124,6 +124,7 @@ type UiTextKey =
   | 'previewTitle'
   | 'fullPreview'
   | 'closePreview'
+  | 'closePreviewAria'
   | 'loginBrand'
   | 'loginTitle'
   | 'loginDescription'
@@ -144,8 +145,10 @@ type UiTextKey =
   | 'adminNavLabel'
   | 'adminNavDashboard'
   | 'adminNavRestaurantProfile'
+  | 'adminNavOrders'
   | 'adminNavStaff'
   | 'adminPageStaff'
+  | 'adminPageOrders'
   | 'adminLogout'
   | 'adminOpenSidebar'
   | 'adminCloseSidebar'
@@ -153,6 +156,7 @@ type UiTextKey =
   | 'adminPageRestaurantProfile'
   | 'adminRoleOwner'
   | 'adminRoleManager'
+  | 'adminRestaurantLogoAlt'
   | 'adminLanguageGroup'
   | 'adminDashboardEyebrow'
   | 'adminDashboardWelcome'
@@ -165,6 +169,7 @@ type UiTextKey =
   | 'adminDashboardReadyTitle'
   | 'adminDashboardReadyDescription'
   | 'adminDashboardGoToProfile'
+  | 'adminDashboardGoToOrders'
   | 'adminDashboardComingSoonLabel'
   | 'adminDashboardMenuTitle'
   | 'adminDashboardMenuDescription'
@@ -267,6 +272,65 @@ type UiTextKey =
   | 'kitchenErrorGeneric'
   | 'kitchenMissingContextTitle'
   | 'kitchenMissingContextDescription'
+  | 'adminOrdersEyebrow'
+  | 'adminOrdersTitle'
+  | 'adminOrdersLead'
+  | 'adminOrdersRefresh'
+  | 'adminOrdersRefreshing'
+  | 'adminOrdersRetry'
+  | 'adminOrdersLoading'
+  | 'adminOrdersListErrorTitle'
+  | 'adminOrdersListError'
+  | 'adminOrdersLoadMoreError'
+  | 'adminOrdersEmptyTitle'
+  | 'adminOrdersEmptyDescription'
+  | 'adminOrdersFiltersLabel'
+  | 'adminOrdersFilterAll'
+  | 'adminOrdersStatusNew'
+  | 'adminOrdersStatusPreparing'
+  | 'adminOrdersStatusReady'
+  | 'adminOrdersStatusCompleted'
+  | 'adminOrdersStatusCancelled'
+  | 'adminOrdersTypePickup'
+  | 'adminOrdersTypeDelivery'
+  | 'adminOrdersColNumber'
+  | 'adminOrdersColCreatedAt'
+  | 'adminOrdersColType'
+  | 'adminOrdersColGuest'
+  | 'adminOrdersColPhone'
+  | 'adminOrdersColStatus'
+  | 'adminOrdersColTotal'
+  | 'adminOrdersColActions'
+  | 'adminOrdersViewDetails'
+  | 'adminOrdersActionStartPreparing'
+  | 'adminOrdersActionMarkReady'
+  | 'adminOrdersActionComplete'
+  | 'adminOrdersActionCancel'
+  | 'adminOrdersCancelConfirmTitle'
+  | 'adminOrdersCancelConfirmMessage'
+  | 'adminOrdersCancelConfirmDismiss'
+  | 'adminOrdersDetailsTitle'
+  | 'adminOrdersCloseDetails'
+  | 'adminOrdersDetailsLoading'
+  | 'adminOrdersDetailsError'
+  | 'adminOrdersItemsHeading'
+  | 'adminOrdersFieldUpdatedAt'
+  | 'adminOrdersFieldDeliveryAddress'
+  | 'adminOrdersFieldNotes'
+  | 'adminOrdersFieldSubtotal'
+  | 'adminOrdersFieldDiscount'
+  | 'adminOrdersFieldTax'
+  | 'adminOrdersFieldDeliveryFee'
+  | 'adminOrdersFieldTotal'
+  | 'adminOrdersStatusUpdateSuccess'
+  | 'adminOrdersErrorConflict'
+  | 'adminOrdersErrorForbidden'
+  | 'adminOrdersErrorNotFound'
+  | 'adminOrdersErrorTooManyRequests'
+  | 'adminOrdersErrorGeneric'
+  | 'adminOrdersMissingContextTitle'
+  | 'adminOrdersMissingContextDescription'
+  | 'adminOrdersLoadMore'
   | 'languageArabic'
   | 'languageEnglish';
 
@@ -295,6 +359,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     previewTitle: 'معاينة مباشرة',
     fullPreview: 'معاينة كاملة',
     closePreview: 'إغلاق',
+    closePreviewAria: 'إغلاق المعاينة',
     loginBrand: 'Restaurant Admin',
     loginTitle: 'مرحبًا بعودتك',
     loginDescription: 'سجّل الدخول لإدارة ملف المطعم والقائمة والإعدادات.',
@@ -316,8 +381,10 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminNavLabel: 'التنقل الرئيسي',
     adminNavDashboard: 'لوحة التحكم',
     adminNavRestaurantProfile: 'ملف المطعم',
+    adminNavOrders: 'إدارة الطلبات',
     adminNavStaff: 'إدارة الموظفين',
     adminPageStaff: 'إدارة الموظفين',
+    adminPageOrders: 'إدارة الطلبات',
     adminLogout: 'تسجيل الخروج',
     adminOpenSidebar: 'فتح القائمة الجانبية',
     adminCloseSidebar: 'إغلاق القائمة الجانبية',
@@ -325,6 +392,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminPageRestaurantProfile: 'ملف المطعم',
     adminRoleOwner: 'مالك المطعم',
     adminRoleManager: 'مدير المطعم',
+    adminRestaurantLogoAlt: 'شعار المطعم',
     adminLanguageGroup: 'اختيار اللغة',
     adminDashboardEyebrow: 'لوحة التحكم',
     adminDashboardWelcome: 'مرحبًا بك في لوحة إدارة المطعم',
@@ -339,11 +407,12 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminDashboardReadyDescription:
       'يمكنك الآن التنقل بين الأقسام المتاحة. ابدأ بملف المطعم لضبط الهوية والمعاينة.',
     adminDashboardGoToProfile: 'الانتقال إلى ملف المطعم',
+    adminDashboardGoToOrders: 'الانتقال إلى إدارة الطلبات',
     adminDashboardComingSoonLabel: 'أقسام قادمة',
     adminDashboardMenuTitle: 'إدارة القائمة',
     adminDashboardMenuDescription: 'ستظهر أدوات القائمة هنا لاحقًا.',
     adminDashboardOrdersTitle: 'الطلبات',
-    adminDashboardOrdersDescription: 'ستظهر متابعة الطلبات هنا لاحقًا.',
+    adminDashboardOrdersDescription: 'تابع الطلبات وحدّث حالتها من صفحة إدارة الطلبات.',
     adminDashboardStaffTitle: 'الموظفون',
     adminDashboardStaffDescription: 'ستظهر إدارة الموظفين هنا لاحقًا.',
     staffPageTitle: 'إدارة الموظفين',
@@ -443,6 +512,66 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     kitchenMissingContextTitle: 'سياق المطعم غير متوفر',
     kitchenMissingContextDescription:
       'لا يمكن عرض لوحة المطبخ بدون معرف مطعم في الجلسة الحالية.',
+    adminOrdersEyebrow: 'الطلبات',
+    adminOrdersTitle: 'إدارة الطلبات',
+    adminOrdersLead: 'اعرض طلبات المطعم وحدّث حالتها من مكان واحد.',
+    adminOrdersRefresh: 'تحديث',
+    adminOrdersRefreshing: 'جاري التحديث…',
+    adminOrdersRetry: 'إعادة المحاولة',
+    adminOrdersLoading: 'جاري تحميل الطلبات…',
+    adminOrdersListErrorTitle: 'تعذر تحميل الطلبات',
+    adminOrdersListError: 'حدث خطأ أثناء تحميل الطلبات. حاول مرة أخرى.',
+    adminOrdersLoadMoreError: 'تعذر تحميل المزيد من الطلبات.',
+    adminOrdersEmptyTitle: 'لا توجد طلبات',
+    adminOrdersEmptyDescription: 'لا توجد طلبات مطابقة للتصفية الحالية.',
+    adminOrdersFiltersLabel: 'تصفية حسب الحالة',
+    adminOrdersFilterAll: 'الكل',
+    adminOrdersStatusNew: 'جديد',
+    adminOrdersStatusPreparing: 'قيد التحضير',
+    adminOrdersStatusReady: 'جاهز',
+    adminOrdersStatusCompleted: 'مكتمل',
+    adminOrdersStatusCancelled: 'ملغى',
+    adminOrdersTypePickup: 'استلام',
+    adminOrdersTypeDelivery: 'توصيل',
+    adminOrdersColNumber: 'رقم الطلب',
+    adminOrdersColCreatedAt: 'وقت الإنشاء',
+    adminOrdersColType: 'نوع الطلب',
+    adminOrdersColGuest: 'اسم الضيف',
+    adminOrdersColPhone: 'هاتف الضيف',
+    adminOrdersColStatus: 'الحالة',
+    adminOrdersColTotal: 'الإجمالي',
+    adminOrdersColActions: 'إجراءات',
+    adminOrdersViewDetails: 'عرض التفاصيل',
+    adminOrdersActionStartPreparing: 'بدء التحضير',
+    adminOrdersActionMarkReady: 'تعليم كجاهز',
+    adminOrdersActionComplete: 'تعليم كمكتمل',
+    adminOrdersActionCancel: 'إلغاء',
+    adminOrdersCancelConfirmTitle: 'تأكيد الإلغاء',
+    adminOrdersCancelConfirmMessage: 'هل تريد إلغاء هذا الطلب؟',
+    adminOrdersCancelConfirmDismiss: 'تراجع',
+    adminOrdersDetailsTitle: 'تفاصيل الطلب',
+    adminOrdersCloseDetails: 'إغلاق التفاصيل',
+    adminOrdersDetailsLoading: 'جاري تحميل التفاصيل…',
+    adminOrdersDetailsError: 'تعذر تحميل تفاصيل الطلب.',
+    adminOrdersItemsHeading: 'البنود',
+    adminOrdersFieldUpdatedAt: 'آخر تحديث',
+    adminOrdersFieldDeliveryAddress: 'عنوان التوصيل',
+    adminOrdersFieldNotes: 'ملاحظات الطلب',
+    adminOrdersFieldSubtotal: 'المجموع الفرعي',
+    adminOrdersFieldDiscount: 'الخصم',
+    adminOrdersFieldTax: 'الضريبة',
+    adminOrdersFieldDeliveryFee: 'رسوم التوصيل',
+    adminOrdersFieldTotal: 'الإجمالي',
+    adminOrdersStatusUpdateSuccess: 'تم تحديث حالة الطلب.',
+    adminOrdersErrorConflict: 'تغيّرت حالة الطلب أو لم يعد الانتقال صالحًا. تم تحديث القائمة.',
+    adminOrdersErrorForbidden: 'ليست لديك صلاحية لتنفيذ هذا الإجراء.',
+    adminOrdersErrorNotFound: 'الطلب لم يعد متاحًا. تم تحديث القائمة.',
+    adminOrdersErrorTooManyRequests: 'عدد المحاولات كبير جدًا. حاول لاحقًا.',
+    adminOrdersErrorGeneric: 'تعذر إكمال العملية. حاول مرة أخرى.',
+    adminOrdersMissingContextTitle: 'سياق المطعم غير متوفر',
+    adminOrdersMissingContextDescription:
+      'لا يمكن إدارة الطلبات بدون معرف مطعم في الجلسة الحالية.',
+    adminOrdersLoadMore: 'تحميل المزيد',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
   },
@@ -470,6 +599,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     previewTitle: 'Live preview',
     fullPreview: 'Open full preview',
     closePreview: 'Close',
+    closePreviewAria: 'Close preview',
     loginBrand: 'Restaurant Admin',
     loginTitle: 'Welcome Back',
     loginDescription: 'Sign in to manage your restaurant profile, menu, and settings.',
@@ -491,8 +621,10 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminNavLabel: 'Main navigation',
     adminNavDashboard: 'Dashboard',
     adminNavRestaurantProfile: 'Restaurant profile',
+    adminNavOrders: 'Orders management',
     adminNavStaff: 'Staff management',
     adminPageStaff: 'Staff management',
+    adminPageOrders: 'Orders management',
     adminLogout: 'Log out',
     adminOpenSidebar: 'Open sidebar menu',
     adminCloseSidebar: 'Close sidebar menu',
@@ -500,6 +632,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminPageRestaurantProfile: 'Restaurant profile',
     adminRoleOwner: 'Restaurant owner',
     adminRoleManager: 'Restaurant manager',
+    adminRestaurantLogoAlt: 'Restaurant logo',
     adminLanguageGroup: 'Language selection',
     adminDashboardEyebrow: 'Dashboard',
     adminDashboardWelcome: 'Welcome to your restaurant dashboard',
@@ -514,11 +647,12 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminDashboardReadyDescription:
       'You can move between the available sections now. Begin with the restaurant profile to set branding and preview.',
     adminDashboardGoToProfile: 'Go to restaurant profile',
+    adminDashboardGoToOrders: 'Go to orders management',
     adminDashboardComingSoonLabel: 'Coming soon',
     adminDashboardMenuTitle: 'Menu management',
     adminDashboardMenuDescription: 'Menu tools will appear here in a later step.',
     adminDashboardOrdersTitle: 'Orders',
-    adminDashboardOrdersDescription: 'Order tracking will appear here in a later step.',
+    adminDashboardOrdersDescription: 'Track orders and update their status from the orders management page.',
     adminDashboardStaffTitle: 'Staff',
     adminDashboardStaffDescription: 'Staff management will appear here in a later step.',
     staffPageTitle: 'Staff management',
@@ -619,6 +753,67 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     kitchenMissingContextTitle: 'Restaurant context unavailable',
     kitchenMissingContextDescription:
       'The kitchen dashboard requires a restaurant id in the current session.',
+    adminOrdersEyebrow: 'Orders',
+    adminOrdersTitle: 'Orders management',
+    adminOrdersLead: 'Review restaurant orders and update their status from one place.',
+    adminOrdersRefresh: 'Refresh',
+    adminOrdersRefreshing: 'Refreshing…',
+    adminOrdersRetry: 'Retry',
+    adminOrdersLoading: 'Loading orders…',
+    adminOrdersListErrorTitle: 'Unable to load orders',
+    adminOrdersListError: 'Something went wrong while loading orders. Please try again.',
+    adminOrdersLoadMoreError: 'Unable to load more orders.',
+    adminOrdersEmptyTitle: 'No orders found',
+    adminOrdersEmptyDescription: 'There are no orders for the current filter.',
+    adminOrdersFiltersLabel: 'Filter by status',
+    adminOrdersFilterAll: 'All',
+    adminOrdersStatusNew: 'New',
+    adminOrdersStatusPreparing: 'Preparing',
+    adminOrdersStatusReady: 'Ready',
+    adminOrdersStatusCompleted: 'Completed',
+    adminOrdersStatusCancelled: 'Cancelled',
+    adminOrdersTypePickup: 'Pickup',
+    adminOrdersTypeDelivery: 'Delivery',
+    adminOrdersColNumber: 'Order number',
+    adminOrdersColCreatedAt: 'Created at',
+    adminOrdersColType: 'Order type',
+    adminOrdersColGuest: 'Guest name',
+    adminOrdersColPhone: 'Guest phone',
+    adminOrdersColStatus: 'Status',
+    adminOrdersColTotal: 'Total',
+    adminOrdersColActions: 'Actions',
+    adminOrdersViewDetails: 'View details',
+    adminOrdersActionStartPreparing: 'Start preparing',
+    adminOrdersActionMarkReady: 'Mark as ready',
+    adminOrdersActionComplete: 'Mark as completed',
+    adminOrdersActionCancel: 'Cancel',
+    adminOrdersCancelConfirmTitle: 'Confirm cancellation',
+    adminOrdersCancelConfirmMessage: 'Do you want to cancel this order?',
+    adminOrdersCancelConfirmDismiss: 'Keep order',
+    adminOrdersDetailsTitle: 'Order details',
+    adminOrdersCloseDetails: 'Close details',
+    adminOrdersDetailsLoading: 'Loading details…',
+    adminOrdersDetailsError: 'Unable to load order details.',
+    adminOrdersItemsHeading: 'Items',
+    adminOrdersFieldUpdatedAt: 'Updated at',
+    adminOrdersFieldDeliveryAddress: 'Delivery address',
+    adminOrdersFieldNotes: 'Order notes',
+    adminOrdersFieldSubtotal: 'Subtotal',
+    adminOrdersFieldDiscount: 'Discount',
+    adminOrdersFieldTax: 'Tax',
+    adminOrdersFieldDeliveryFee: 'Delivery fee',
+    adminOrdersFieldTotal: 'Total',
+    adminOrdersStatusUpdateSuccess: 'Order status updated.',
+    adminOrdersErrorConflict:
+      'The order status changed or this transition is no longer valid. List refreshed.',
+    adminOrdersErrorForbidden: 'You are not allowed to perform this action.',
+    adminOrdersErrorNotFound: 'This order is no longer available. List refreshed.',
+    adminOrdersErrorTooManyRequests: 'Too many requests. Please try again later.',
+    adminOrdersErrorGeneric: 'Unable to complete the request. Please try again.',
+    adminOrdersMissingContextTitle: 'Restaurant context unavailable',
+    adminOrdersMissingContextDescription:
+      'Orders management requires a restaurant id in the current session.',
+    adminOrdersLoadMore: 'Load more',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
   },

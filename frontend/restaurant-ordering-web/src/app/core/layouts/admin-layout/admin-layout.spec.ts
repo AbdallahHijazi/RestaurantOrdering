@@ -8,6 +8,7 @@ import { AuthSessionService } from '../../auth/auth-session.service';
 import { createTestSession } from '../../auth/test-jwt.util';
 import { LocaleService } from '../../localization/locale';
 import { routes } from '../../../app.routes';
+import { AdminBrandingService } from './admin-branding.service';
 import { AdminLayout } from './admin-layout';
 
 describe('AdminLayout', () => {
@@ -47,7 +48,44 @@ describe('AdminLayout', () => {
     const hrefs = navLinks().map((link) => link.getAttribute('href'));
     expect(hrefs).toContain('/admin/dashboard');
     expect(hrefs).toContain('/admin/restaurant-profile');
+    expect(hrefs).toContain('/admin/orders');
     expect(hrefs).toContain('/admin/staff');
+  });
+
+  it('shows Orders link for RestaurantManager', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [AdminLayout],
+      providers: [provideRouter(routes)],
+    }).compileComponents();
+
+    session = TestBed.inject(AuthSessionService);
+    session.clearSession();
+    session.saveSession(createTestSession(ApplicationRoles.RestaurantManager));
+    TestBed.inject(AuthService).restoreSessionFromStorage();
+
+    fixture = TestBed.createComponent(AdminLayout);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="admin-nav-orders"]')).toBeTruthy();
+  });
+
+  it('shows logo fallback until a valid preview logo is available', () => {
+    const branding = TestBed.inject(AdminBrandingService);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="admin-sidebar-logo-fallback"]')).toBeTruthy();
+
+    branding.updateBranding({
+      logoUrl: 'blob:http://localhost/logo-preview',
+      nameAr: 'مطعم',
+      nameEn: 'Restaurant',
+    });
+    fixture.detectChanges();
+
+    const logo = fixture.nativeElement.querySelector('[data-testid="admin-sidebar-logo"]') as HTMLImageElement;
+    expect(logo).toBeTruthy();
+    expect(logo.getAttribute('src')).toBe('blob:http://localhost/logo-preview');
   });
 
   it('does not render Staff Management link for RestaurantManager', async () => {

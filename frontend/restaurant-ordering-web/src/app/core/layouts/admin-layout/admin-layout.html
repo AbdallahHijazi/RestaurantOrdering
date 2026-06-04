@@ -19,7 +19,19 @@
     [attr.aria-label]="localeService.uiText('adminSidebarLabel')"
   >
     <div class="admin-layout__brand">
-      <span class="admin-layout__brand-mark" aria-hidden="true"></span>
+      @if (brandLogoUrl(); as logoUrl) {
+        <img
+          class="admin-layout__brand-logo"
+          [src]="logoUrl"
+          [alt]="localeService.uiText('adminRestaurantLogoAlt')"
+          data-testid="admin-sidebar-logo"
+          (error)="onBrandLogoError()"
+        />
+      } @else {
+        <span class="admin-layout__brand-mark" data-testid="admin-sidebar-logo-fallback" aria-hidden="true">
+          {{ brandInitial() }}
+        </span>
+      }
       <div class="admin-layout__brand-text">
         <p class="admin-layout__system-name">{{ systemName() }}</p>
         <p class="admin-layout__restaurant-name">{{ restaurantName() }}</p>
@@ -41,6 +53,14 @@
         (click)="closeDrawer()"
       >
         {{ localeService.uiText('adminNavRestaurantProfile') }}
+      </a>
+      <a
+        routerLink="/admin/orders"
+        routerLinkActive="is-active"
+        data-testid="admin-nav-orders"
+        (click)="closeDrawer()"
+      >
+        {{ localeService.uiText('adminNavOrders') }}
       </a>
       @if (isOwner()) {
         <a

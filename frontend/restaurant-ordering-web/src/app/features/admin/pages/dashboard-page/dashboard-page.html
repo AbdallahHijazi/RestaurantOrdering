@@ -35,9 +35,12 @@
       <h3>{{ localeService.uiText('adminDashboardMenuTitle') }}</h3>
       <p>{{ localeService.uiText('adminDashboardMenuDescription') }}</p>
     </article>
-    <article class="admin-dashboard__placeholder-card">
+    <article class="admin-dashboard__placeholder-card admin-dashboard__placeholder-card--link">
       <h3>{{ localeService.uiText('adminDashboardOrdersTitle') }}</h3>
       <p>{{ localeService.uiText('adminDashboardOrdersDescription') }}</p>
+      <a routerLink="/admin/orders" class="admin-dashboard__cta" data-testid="admin-dashboard-orders-link">
+        {{ localeService.uiText('adminDashboardGoToOrders') }}
+      </a>
     </article>
     <article class="admin-dashboard__placeholder-card">
       <h3>{{ localeService.uiText('adminDashboardStaffTitle') }}</h3>

@@ -60,12 +60,26 @@
     role="dialog"
     aria-modal="true"
     [attr.aria-label]="localeService.uiText('fullPreview')"
+    data-testid="live-preview-modal"
   >
+    <button
+      type="button"
+      class="live-preview__modal-backdrop"
+      [attr.aria-label]="localeService.uiText('closePreviewAria')"
+      (click)="closeFullPreview()"
+    ></button>
+
     <div class="live-preview__modal-panel">
       <header class="live-preview__modal-header">
         <strong>{{ localeService.uiText('fullPreview') }}</strong>
-        <button type="button" (click)="closeFullPreview()">
-          {{ localeService.uiText('closePreview') }}
+        <button
+          type="button"
+          class="live-preview__modal-close"
+          data-testid="live-preview-close"
+          [attr.aria-label]="localeService.uiText('closePreviewAria')"
+          (click)="closeFullPreview()"
+        >
+          <span aria-hidden="true">&times;</span>
         </button>
       </header>
 

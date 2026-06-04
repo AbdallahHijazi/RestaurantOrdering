@@ -18,6 +18,7 @@ import {
 } from '../../../../../core/theme/restaurant-theme';
 import { LocaleService, type SupportedLocale } from '../../../../../core/localization/locale';
 import { RestaurantLivePreview } from '../../components/restaurant-live-preview/restaurant-live-preview';
+import { AdminBrandingService } from '../../../../../core/layouts/admin-layout/admin-branding.service';
 import { RestaurantProfileApiService } from '../../data-access/restaurant-profile-api';
 import {
   createImagePreviewUrl,
@@ -40,6 +41,7 @@ import type {
 export class RestaurantProfileSetupPage {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly profileApi = inject(RestaurantProfileApiService);
+  private readonly branding = inject(AdminBrandingService);
   protected readonly localeService = inject(LocaleService);
   private readonly themeService = inject(RestaurantThemeService);
   private readonly destroyRef = inject(DestroyRef);
@@ -147,6 +149,15 @@ export class RestaurantProfileSetupPage {
 
     effect(() => {
       this.themeService.applyAccent(this.previewData().primaryAccentColor);
+    });
+
+    effect(() => {
+      const data = this.previewData();
+      this.branding.updateBranding({
+        logoUrl: data.logoUrl ?? null,
+        nameAr: data.nameAr,
+        nameEn: data.nameEn ?? null,
+      });
     });
 
     this.destroyRef.onDestroy(() => {
