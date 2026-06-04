@@ -112,14 +112,22 @@ builder.Services.AddRateLimiter(options =>
             }));
 
     options.AddPolicy("public-order", httpContext =>
-        RateLimitPartition.GetFixedWindowLimiter(
+    {
+        var configuration = httpContext.RequestServices.GetRequiredService<IConfiguration>();
+        var hostEnvironment = httpContext.RequestServices.GetRequiredService<IHostEnvironment>();
+        var useRelaxedTestingRateLimits =
+            hostEnvironment.IsEnvironment("Testing") &&
+            !configuration.GetValue<bool>("Testing:UseStrictRateLimits");
+
+        return RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             factory: _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 10,
+                PermitLimit = useRelaxedTestingRateLimits ? 1000 : 10,
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0
-            }));
+            });
+    });
 
     options.AddPolicy("admin-upload", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(

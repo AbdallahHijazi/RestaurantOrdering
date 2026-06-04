@@ -43,8 +43,13 @@ public sealed class CreatePublicOrderCommandValidator : AbstractValidator<Create
 
         RuleFor(x => x.Items)
             .NotEmpty()
-            .Must(items => items is null || items.Count <= 100)
-            .WithMessage("An order cannot contain more than 100 item lines.");
+            .Must(items => items.Count <= PublicOrderLimits.MaxItemLines)
+            .WithMessage(
+                $"An order cannot contain more than {PublicOrderLimits.MaxItemLines} item lines.")
+            .Must(items =>
+                items.Select(i => i.MenuItemId).Distinct().Count() == items.Count)
+            .WithMessage(
+                "Each menu item may only appear once per order. Combine quantities on a single line.");
 
         RuleForEach(x => x.Items).ChildRules(item =>
         {
@@ -52,7 +57,12 @@ public sealed class CreatePublicOrderCommandValidator : AbstractValidator<Create
                 .NotEmpty();
 
             item.RuleFor(i => i.Quantity)
-                .GreaterThan(0);
+                .GreaterThanOrEqualTo(PublicOrderLimits.MinQuantityPerItem)
+                .WithMessage(
+                    $"Quantity must be at least {PublicOrderLimits.MinQuantityPerItem}.")
+                .LessThanOrEqualTo(PublicOrderLimits.MaxQuantityPerItem)
+                .WithMessage(
+                    $"Quantity cannot exceed {PublicOrderLimits.MaxQuantityPerItem} per item line.");
 
             item.RuleFor(i => i.Notes)
                 .MaximumLength(200)

@@ -91,6 +91,7 @@ public sealed class CreatePublicOrderCommandHandler
             .Where(item =>
                 menuItemIds.Contains(item.Id) &&
                 item.RestaurantId == restaurant.Id &&
+                !item.IsDeleted &&
                 item.IsActive &&
                 item.IsAvailable)
             .ToListAsync(cancellationToken);
