@@ -265,15 +265,13 @@
   justify-content: center;
 }
 
-.admin-orders__confirm,
-.admin-orders__details {
+.admin-orders__confirm {
   position: fixed;
   inset: 0;
   z-index: 70;
 }
 
-.admin-orders__confirm-backdrop,
-.admin-orders__details-backdrop {
+.admin-orders__confirm-backdrop {
   position: absolute;
   inset: 0;
   border: 0;
@@ -302,35 +300,7 @@
   margin-top: 1rem;
 }
 
-.admin-orders__details-panel {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-end: 0;
-  z-index: 1;
-  width: min(100%, 28rem);
-  display: flex;
-  flex-direction: column;
-  background: #fffdfc;
-  border-inline-start: 1px solid #e3e2e0;
-  box-shadow: -12px 0 32px rgb(26 28 26 / 0.08);
-}
-
-.admin-orders__details-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 1rem 1.1rem;
-  border-bottom: 1px solid #eceae6;
-}
-
-.admin-orders__details-loading,
-.admin-orders__details-body {
-  padding: 1rem 1.1rem 1.25rem;
-  overflow: auto;
-}
-
-.admin-orders__items h4 {
+.admin-orders__items-section h4 {
   margin: 0 0 0.65rem;
 }
 
@@ -366,10 +336,14 @@
   }
 }
 
-@media (max-width: 47.99rem) {
-  .admin-orders__details-panel {
-    width: 100%;
-    inset-inline: 0;
-    border-inline-start: 0;
-  }
+.admin-orders__items-section {
+  margin-top: 1rem;
+}
+
+.admin-orders__modal-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+  justify-content: flex-end;
 }

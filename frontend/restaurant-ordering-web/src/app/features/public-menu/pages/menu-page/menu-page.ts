@@ -6,7 +6,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { LocaleService } from '../../../../core/localization/locale';
 import { RestaurantThemeService } from '../../../../core/theme/restaurant-theme';
@@ -35,6 +35,7 @@ type PageState = 'loading' | 'success' | 'not-found' | 'error';
 @Component({
   selector: 'app-menu-page',
   imports: [
+    RouterLink,
     LanguageSwitcher,
     LoadingState,
     ErrorState,

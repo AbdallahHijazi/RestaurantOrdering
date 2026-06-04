@@ -39,6 +39,9 @@ describe('KitchenDashboardPage', () => {
   });
 
   afterEach(() => {
+    document.body.classList.remove('order-modal-scroll-lock');
+    document.querySelectorAll('app-order-modal-shell').forEach((node) => node.remove());
+    TestBed.inject(LocaleService).setLocale('ar');
     httpMock.verify({ ignoreCancelled: true });
     session.clearSession();
   });
@@ -195,7 +198,7 @@ describe('KitchenDashboardPage', () => {
     flushBoard();
   });
 
-  it('opens details drawer with items and localized item names', () => {
+  it('opens centered details modal with items and localized item names', () => {
     fixture.detectChanges();
     flushBoard({
       newOrders: [createSummary('order-new', OrderStatus.New, 'A-100')],
@@ -211,9 +214,11 @@ describe('KitchenDashboardPage', () => {
     detailsReq.flush(createDetails('order-new', OrderStatus.New));
     fixture.detectChanges();
 
-    expect(root().querySelector('[data-testid="kitchen-details-drawer"]')).toBeTruthy();
-    expect(root().querySelector('[data-testid="kitchen-details-body"]')).toBeTruthy();
-    expect(root().textContent).toContain('برجر');
+    expect(root().querySelector('.kitchen-details')).toBeNull();
+    expect(root().querySelector('.kitchen-details__panel')).toBeNull();
+    expect(document.body.querySelector('[data-testid="kitchen-order-details-modal"]')).toBeTruthy();
+    expect(document.body.querySelector('[data-testid="kitchen-details-body"]')).toBeTruthy();
+    expect(document.body.textContent).toContain('برجر');
   });
 
   it('shows delivery fee and address for delivery orders', () => {
@@ -237,7 +242,7 @@ describe('KitchenDashboardPage', () => {
     TestBed.inject(LocaleService).setLocale('en');
     fixture.detectChanges();
 
-    const body = root().querySelector('[data-testid="kitchen-details-body"]') as HTMLElement;
+    const body = document.body.querySelector('[data-testid="kitchen-details-body"]') as HTMLElement;
     expect(body.textContent).toContain('123 Main Street');
     expect(body.textContent).toContain('Delivery fee');
   });
@@ -273,7 +278,7 @@ describe('KitchenDashboardPage', () => {
     TestBed.inject(LocaleService).setLocale('en');
     fixture.detectChanges();
 
-    expect(root().textContent).toContain('سلطة');
+    expect(document.body.textContent).toContain('سلطة');
   });
 
   it('renders mobile tabs without breaking the board markup', () => {

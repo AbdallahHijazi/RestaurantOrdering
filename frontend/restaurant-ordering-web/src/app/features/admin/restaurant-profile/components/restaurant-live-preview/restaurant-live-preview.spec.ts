@@ -38,6 +38,13 @@ function dessertItems() {
   return MOCK_PUBLIC_MENU.items.filter((item) => item.categoryId === 'cat-desserts');
 }
 
+function getPreviewModal(fixture: ComponentFixture<RestaurantLivePreview>): HTMLElement | null {
+  return (
+    document.body.querySelector('[data-testid="live-preview-modal"]') ??
+    fixture.nativeElement.querySelector('[data-testid="live-preview-modal"]')
+  );
+}
+
 function getModalCards(modal: HTMLElement): HTMLElement[] {
   return Array.from(modal.querySelectorAll('app-menu-item-card'));
 }
@@ -75,6 +82,12 @@ describe('RestaurantLivePreview', () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => {
+    document.body.classList.remove('order-modal-scroll-lock');
+    document.querySelector('[data-testid="live-preview-overlay-host"]')?.remove();
+    TestBed.inject(LocaleService).setLocale('ar');
+  });
+
   it('renders only Arabic and English language pills', () => {
     const languageGroup = fixture.nativeElement.querySelector(
       '.live-preview__controls--language',
@@ -92,7 +105,7 @@ describe('RestaurantLivePreview', () => {
     component.openFullPreview();
     fixture.detectChanges();
 
-    const modal = fixture.nativeElement.querySelector('.live-preview__modal') as HTMLElement;
+    const modal = getPreviewModal(fixture) as HTMLElement;
     expect(modal).toBeTruthy();
 
     clickCategory(modal, 'المقبلات');
@@ -120,7 +133,7 @@ describe('RestaurantLivePreview', () => {
     component.openFullPreview();
     fixture.detectChanges();
 
-    const modal = fixture.nativeElement.querySelector('.live-preview__modal') as HTMLElement;
+    const modal = getPreviewModal(fixture) as HTMLElement;
     clickCategory(modal, 'الحلويات');
     fixture.detectChanges();
 
@@ -140,18 +153,18 @@ describe('RestaurantLivePreview', () => {
     component.openFullPreview();
     fixture.detectChanges();
 
-    let modal = fixture.nativeElement.querySelector('.live-preview__modal') as HTMLElement;
+    let modal = getPreviewModal(fixture) as HTMLElement;
     expect(component.activeCategoryId()).toBe('cat-desserts');
     expect(getModalCards(modal).length).toBe(dessertItems().length);
 
     component.closeFullPreview();
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.live-preview__modal')).toBeNull();
+    expect(getPreviewModal(fixture)).toBeNull();
 
     component.openFullPreview();
     fixture.detectChanges();
 
-    modal = fixture.nativeElement.querySelector('.live-preview__modal') as HTMLElement;
+    modal = getPreviewModal(fixture) as HTMLElement;
     expect(component.activeCategoryId()).toBe('cat-desserts');
 
     const cards = getModalCards(modal);
@@ -172,7 +185,7 @@ describe('RestaurantLivePreview', () => {
     component.openFullPreview();
     fixture.detectChanges();
 
-    const modal = fixture.nativeElement.querySelector('.live-preview__modal') as HTMLElement;
+    const modal = getPreviewModal(fixture) as HTMLElement;
     const fullPreviewCards = getModalCards(modal);
     expect(fullPreviewCards.length).toBe(embeddedCards.length);
     expect(component.filteredPreviewItems().every((item) => item.categoryId === 'cat-desserts')).toBe(
@@ -184,7 +197,7 @@ describe('RestaurantLivePreview', () => {
     component.openFullPreview();
     fixture.detectChanges();
 
-    const modal = fixture.nativeElement.querySelector('[data-testid="live-preview-modal"]') as HTMLElement;
+    const modal = getPreviewModal(fixture) as HTMLElement;
     const closeButton = modal.querySelector('[data-testid="live-preview-close"]') as HTMLButtonElement;
     const scrollBody = modal.querySelector('.live-preview__modal-body') as HTMLElement;
 
@@ -199,7 +212,7 @@ describe('RestaurantLivePreview', () => {
     component.openFullPreview();
     fixture.detectChanges();
 
-    const closeButton = fixture.nativeElement.querySelector(
+    const closeButton = getPreviewModal(fixture)!.querySelector(
       '[data-testid="live-preview-close"]',
     ) as HTMLButtonElement;
 
@@ -209,11 +222,24 @@ describe('RestaurantLivePreview', () => {
   it('closes the preview on Escape', () => {
     component.openFullPreview();
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[data-testid="live-preview-modal"]')).toBeTruthy();
+    expect(getPreviewModal(fixture)).toBeTruthy();
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('[data-testid="live-preview-modal"]')).toBeNull();
+    expect(getPreviewModal(fixture)).toBeNull();
+  });
+
+  it('portals preview overlay host to document.body with scroll lock', () => {
+    component.openFullPreview();
+    fixture.detectChanges();
+
+    const host = document.body.querySelector('[data-testid="live-preview-overlay-host"]');
+    expect(host?.parentElement).toBe(document.body);
+    expect(document.body.classList.contains('order-modal-scroll-lock')).toBe(true);
+
+    const scrollBody = host?.querySelector('.live-preview__modal-body') as HTMLElement | null;
+    expect(scrollBody).toBeTruthy();
+    expect(getComputedStyle(scrollBody!).overflowY).toBe('auto');
   });
 });

@@ -1,14 +1,18 @@
-import { NgTemplateOutlet } from '@angular/common';
+import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import {
   Component,
   DestroyRef,
+  ElementRef,
   HostListener,
   computed,
   effect,
   inject,
   input,
+  PLATFORM_ID,
   signal,
+  viewChild,
 } from '@angular/core';
+import { attachElementToBody } from '../../../../../shared/utils/overlay-body-portal';
 import { LocaleService, type SupportedLocale } from '../../../../../core/localization/locale';
 import { RestaurantThemeService } from '../../../../../core/theme/restaurant-theme';
 import { EmptyState } from '../../../../../shared/ui/empty-state/empty-state';
@@ -39,6 +43,9 @@ export class RestaurantLivePreview {
   protected readonly localeService = inject(LocaleService);
   private readonly themeService = inject(RestaurantThemeService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly previewOverlay = viewChild<ElementRef<HTMLElement>>('previewOverlay');
+  private detachPreviewPortal: (() => void) | null = null;
 
   protected readonly viewport = signal<PreviewViewport>('desktop');
   protected readonly previewLocale = signal<SupportedLocale>('ar');
@@ -81,12 +88,39 @@ export class RestaurantLivePreview {
     });
 
     effect(() => {
-      document.body.style.overflow = this.fullPreviewOpen() ? 'hidden' : '';
+      if (!isPlatformBrowser(this.platformId)) {
+        return;
+      }
+
+      const open = this.fullPreviewOpen();
+      const overlay = this.previewOverlay();
+
+      if (!open) {
+        this.teardownPreviewPortal();
+        return;
+      }
+
+      if (!overlay) {
+        return;
+      }
+
+      const host = overlay.nativeElement;
+      if (host.parentElement !== document.body) {
+        this.detachPreviewPortal?.();
+        this.detachPreviewPortal = attachElementToBody(host);
+        document.body.classList.add('order-modal-scroll-lock');
+      }
     });
 
     this.destroyRef.onDestroy(() => {
-      document.body.style.overflow = '';
+      this.teardownPreviewPortal();
     });
+  }
+
+  private teardownPreviewPortal(): void {
+    this.detachPreviewPortal?.();
+    this.detachPreviewPortal = null;
+    document.body.classList.remove('order-modal-scroll-lock');
   }
 
   @HostListener('document:keydown.escape')
@@ -111,6 +145,7 @@ export class RestaurantLivePreview {
 
   protected closeFullPreview(): void {
     this.fullPreviewOpen.set(false);
+    this.teardownPreviewPortal();
   }
 
   protected selectCategory(categoryId: string): void {

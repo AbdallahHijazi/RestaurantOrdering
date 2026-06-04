@@ -41,6 +41,9 @@ describe('AdminOrdersPage', () => {
   });
 
   afterEach(() => {
+    document.body.classList.remove('order-modal-scroll-lock');
+    document.querySelectorAll('app-order-modal-shell').forEach((node) => node.remove());
+    TestBed.inject(LocaleService).setLocale('ar');
     httpMock.verify({ ignoreCancelled: true });
     session.clearSession();
   });
@@ -105,7 +108,7 @@ describe('AdminOrdersPage', () => {
     expect(root().querySelector('[data-testid="admin-order-action-order-cancelled-5"]')).toBeNull();
   });
 
-  it('opens details drawer with items and totals', () => {
+  it('opens centered details modal with items and totals', () => {
     TestBed.inject(LocaleService).setLocale('ar');
     fixture.detectChanges();
     flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
@@ -120,9 +123,10 @@ describe('AdminOrdersPage', () => {
     detailsReq.flush(createDetails('order-new', OrderStatus.New));
     fixture.detectChanges();
 
-    expect(root().querySelector('[data-testid="admin-orders-details-body"]')).toBeTruthy();
-    expect(root().textContent).toContain('برجر');
-    expect(root().textContent).toContain('ر.س');
+    expect(root().querySelector('.kitchen-details__panel')).toBeNull();
+    expect(document.body.querySelector('[data-testid="admin-order-details-modal"]')).toBeTruthy();
+    expect(document.body.querySelector('[data-testid="admin-orders-details-body"]')).toBeTruthy();
+    expect(document.body.textContent).toContain('برجر');
   });
 
   it('falls back from itemNameEn to itemNameAr when English name is missing', () => {
@@ -154,7 +158,7 @@ describe('AdminOrdersPage', () => {
     TestBed.inject(LocaleService).setLocale('en');
     fixture.detectChanges();
 
-    expect(root().textContent).toContain('سلطة');
+    expect(document.body.textContent).toContain('سلطة');
   });
 
   it('shows conflict feedback and refreshes on 409', () => {
@@ -201,9 +205,9 @@ describe('AdminOrdersPage', () => {
     detailsReq.flush({ title: 'Not found.' }, { status: 404, statusText: 'Not Found' });
     fixture.detectChanges();
 
-    expect(root().querySelector('[data-testid="admin-orders-details-error"]')?.textContent).toContain(
-      locale.uiText('adminOrdersErrorNotFound'),
-    );
+    expect(
+      document.body.querySelector('[data-testid="admin-orders-details-error"]')?.textContent,
+    ).toContain(locale.uiText('adminOrdersErrorNotFound'));
   });
 
   it('shows empty state when there are no orders', () => {

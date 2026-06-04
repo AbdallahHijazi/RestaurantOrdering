@@ -1,4 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
+import { formatOrderCurrency } from '../../shared/orders/order-money.util';
 
 export type SupportedLocale = 'ar' | 'en';
 export type TextDirection = 'rtl' | 'ltr';
@@ -64,20 +65,10 @@ export class LocaleService {
   formatCurrency(
     amount: number,
     currencyCode = 'SAR',
-    countryCode = 'SA',
+    _countryCode = 'SA',
   ): string {
-    const localeTag = this.localeSignal() === 'ar' ? 'ar-SA' : 'en-' + countryCode;
-
-    try {
-      return new Intl.NumberFormat(localeTag, {
-        style: 'currency',
-        currency: currencyCode,
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(amount);
-    } catch {
-      return `${amount.toFixed(2)} ${currencyCode}`;
-    }
+    void _countryCode;
+    return formatOrderCurrency(amount, currencyCode);
   }
 
   uiText(key: UiTextKey): string {
@@ -138,6 +129,8 @@ type UiTextKey =
   | 'profileValidationNonNegative'
   | 'profileValidationTaxRate'
   | 'profileValidationCurrency'
+  | 'profileCurrencyCodeHelp'
+  | 'profileValidationCurrencySymbol'
   | 'previewTitle'
   | 'fullPreview'
   | 'closePreview'
@@ -477,6 +470,8 @@ type UiTextKey =
   | 'publicOrderTypePickup'
   | 'publicOrderTypeDelivery'
   | 'publicOrderStatusNew'
+  | 'publicStaffLogin'
+  | 'publicConfirmationSuccessTitle'
   | 'languageArabic'
   | 'languageEnglish';
 
@@ -519,6 +514,9 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     profileValidationNonNegative: 'يجب أن تكون القيمة صفرًا أو أكثر.',
     profileValidationTaxRate: 'نسبة الضريبة يجب أن تكون بين 0 و100.',
     profileValidationCurrency: 'أدخل رمز عملة من 3 أحرف (مثل SAR).',
+    profileCurrencyCodeHelp:
+      'أدخل رمز العملة المعياري من 3 أحرف مثل USD أو SYP. ستظهر الأسعار بالرمز المناسب تلقائيًا عند توفره.',
+    profileValidationCurrencySymbol: 'استخدم رمز عملة من 3 أحرف إنجليزية فقط (مثل USD)، وليس رمزًا مثل $.',
     previewTitle: 'معاينة مباشرة',
     fullPreview: 'معاينة كاملة',
     closePreview: 'إغلاق',
@@ -869,6 +867,8 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     publicOrderTypePickup: 'استلام',
     publicOrderTypeDelivery: 'توصيل',
     publicOrderStatusNew: 'جديد',
+    publicStaffLogin: 'دخول الإدارة',
+    publicConfirmationSuccessTitle: 'تأكيد الطلب',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
   },
@@ -910,6 +910,10 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     profileValidationNonNegative: 'Value must be zero or greater.',
     profileValidationTaxRate: 'Tax rate must be between 0 and 100.',
     profileValidationCurrency: 'Enter a 3-letter currency code (e.g. SAR).',
+    profileCurrencyCodeHelp:
+      'Enter a 3-letter ISO currency code such as USD or SYP. Prices use the appropriate symbol automatically when available.',
+    profileValidationCurrencySymbol:
+      'Use a 3-letter ISO currency code (e.g. USD), not a symbol such as $.',
     previewTitle: 'Live preview',
     fullPreview: 'Open full preview',
     closePreview: 'Close',
@@ -1264,6 +1268,8 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     publicOrderTypePickup: 'Pickup',
     publicOrderTypeDelivery: 'Delivery',
     publicOrderStatusNew: 'New',
+    publicStaffLogin: 'Staff login',
+    publicConfirmationSuccessTitle: 'Order confirmed',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
   },

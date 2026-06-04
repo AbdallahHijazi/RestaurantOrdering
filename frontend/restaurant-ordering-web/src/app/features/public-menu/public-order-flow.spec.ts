@@ -40,6 +40,9 @@ describe('Public order flow', () => {
   });
 
   afterEach(() => {
+    document.body.classList.remove('order-modal-scroll-lock');
+    document.querySelectorAll('app-order-modal-shell').forEach((node) => node.remove());
+    TestBed.inject(LocaleService).setLocale('ar');
     httpMock.verify();
     sessionStorage.clear();
   });
@@ -403,8 +406,8 @@ describe('Public order flow', () => {
     });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('ORD-99');
-    expect(fixture.nativeElement.textContent).toContain('prepared for pickup');
+    expect(document.body.textContent).toContain('ORD-99');
+    expect(document.body.textContent).toContain('prepared for pickup');
   });
 
   it('shows delivery instructions for delivery orders', async () => {
@@ -426,7 +429,7 @@ describe('Public order flow', () => {
     });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('delivery to the provided address');
+    expect(document.body.textContent).toContain('delivery to the provided address');
   });
 
   it('demo mode does not POST orders', async () => {

@@ -9,6 +9,12 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LocaleService } from '../../../../core/localization/locale';
+import { OrderModalShell } from '../../../../shared/components/order-modal-shell/order-modal-shell';
+import { shouldShowFinancialAmount } from '../../../../shared/orders/order-display.util';
+import { formatOrderDateTime } from '../../../../shared/orders/order-date-time.util';
+import { formatOrderCurrency } from '../../../../shared/orders/order-money.util';
+import { getOrderStatusLabel } from '../../../../shared/orders/order-status-label.util';
+import { getOrderTypeLabel } from '../../../../shared/orders/order-type-label.util';
 import {
   OrderStatus,
   OrderType,
@@ -41,7 +47,7 @@ const STATUS_FILTERS: readonly { key: StatusFilter; status: OrderStatus | null }
 
 @Component({
   selector: 'app-admin-orders-page',
-  imports: [],
+  imports: [OrderModalShell],
   templateUrl: './admin-orders-page.html',
   styleUrl: './admin-orders-page.scss',
 })
@@ -53,6 +59,7 @@ export class AdminOrdersPage {
   protected readonly statusFilters = STATUS_FILTERS;
   protected readonly OrderStatus = OrderStatus;
   protected readonly OrderType = OrderType;
+  protected readonly shouldShowFinancialAmount = shouldShowFinancialAmount;
 
   protected readonly pageState = signal<PageState>('loading');
   protected readonly listError = signal<string | null>(null);
@@ -186,28 +193,48 @@ export class AdminOrdersPage {
   }
 
   protected statusLabel(status: OrderStatus): string {
-    switch (status) {
-      case OrderStatus.New:
-        return this.locale.uiText('adminOrdersStatusNew');
-      case OrderStatus.Preparing:
-        return this.locale.uiText('adminOrdersStatusPreparing');
-      case OrderStatus.Ready:
-        return this.locale.uiText('adminOrdersStatusReady');
-      case OrderStatus.Completed:
-        return this.locale.uiText('adminOrdersStatusCompleted');
-      case OrderStatus.Cancelled:
-        return this.locale.uiText('adminOrdersStatusCancelled');
-    }
+    return getOrderStatusLabel(status, this.locale.locale());
   }
 
   protected orderTypeLabel(orderType: OrderType): string {
-    return orderType === OrderType.Delivery
-      ? this.locale.uiText('adminOrdersTypeDelivery')
-      : this.locale.uiText('adminOrdersTypePickup');
+    return getOrderTypeLabel(orderType, this.locale.locale());
   }
 
   protected actionsFor(order: OrderSummary): OrderAction[] {
-    switch (order.orderStatus) {
+    return this.actionsForStatus(order.orderStatus);
+  }
+
+  protected actionsForDetails(): OrderAction[] {
+    const details = this.orderDetails();
+    return details ? this.actionsForStatus(details.orderStatus) : [];
+  }
+
+  protected requestDetailsAction(action: OrderAction): void {
+    const details = this.orderDetails();
+    if (!details) {
+      return;
+    }
+
+    const summary: OrderSummary = {
+      id: details.id,
+      orderNumber: details.orderNumber,
+      restaurantId: details.restaurantId,
+      customerId: details.customerId,
+      guestName: details.guestName,
+      guestPhone: details.guestPhone,
+      orderType: details.orderType,
+      orderStatus: details.orderStatus,
+      totalAmount: details.totalAmount,
+      currencyCode: details.currencyCode,
+      createdAt: details.createdAt,
+      updatedAt: details.updatedAt,
+    };
+
+    this.requestAction(summary, action);
+  }
+
+  protected actionsForStatus(status: OrderStatus): OrderAction[] {
+    switch (status) {
       case OrderStatus.New:
         return [
           {
@@ -301,16 +328,7 @@ export class AdminOrdersPage {
   }
 
   protected formatCreatedAt(value: string): string {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return value;
-    }
-
-    const localeTag = this.locale.locale() === 'ar' ? 'ar-SA' : 'en-GB';
-    return new Intl.DateTimeFormat(localeTag, {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    }).format(date);
+    return formatOrderDateTime(value);
   }
 
   protected itemName(item: { itemNameAr: string; itemNameEn: string | null }): string {
@@ -322,7 +340,7 @@ export class AdminOrdersPage {
   }
 
   protected formatMoney(amount: number, currencyCode: string): string {
-    return this.locale.formatCurrency(amount, currencyCode);
+    return formatOrderCurrency(amount, currencyCode);
   }
 
   private applyStatusUpdate(order: OrderSummary, newStatus: OrderStatus): void {

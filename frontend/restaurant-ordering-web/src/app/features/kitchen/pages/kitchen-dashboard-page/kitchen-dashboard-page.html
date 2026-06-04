@@ -45,7 +45,12 @@
         }
       </button>
 
-      <button type="button" class="kitchen-page__secondary-btn" (click)="logout()">
+      <button
+        type="button"
+        class="button-secondary"
+        data-testid="kitchen-logout-btn"
+        (click)="logout()"
+      >
         {{ locale.uiText('kitchenLogout') }}
       </button>
     </div>
@@ -143,12 +148,19 @@
                     [attr.data-order-status]="order.orderStatus"
                   >
                     <div class="kitchen-page__card-top">
-                      <strong class="kitchen-page__order-number">#{{ order.orderNumber }}</strong>
-                      <span class="kitchen-page__badge">{{ orderTypeLabel(order.orderType) }}</span>
+                      <strong class="kitchen-page__order-number">
+                        <bdi class="identifier-ltr" dir="ltr">{{ order.orderNumber }}</bdi>
+                      </strong>
+                      <span
+                        class="order-type-chip"
+                        [class.order-type-chip--delivery]="order.orderType === OrderType.Delivery"
+                      >
+                        {{ orderTypeLabel(order.orderType) }}
+                      </span>
                     </div>
 
                     <p class="kitchen-page__meta">
-                      <span>{{ formatCreatedAt(order.createdAt) }}</span>
+                      <bdi class="numeric-ltr" dir="ltr">{{ formatCreatedAt(order.createdAt) }}</bdi>
                     </p>
 
                     @if (order.guestName?.trim()) {
@@ -169,7 +181,7 @@
                     <div class="kitchen-page__card-actions">
                       <button
                         type="button"
-                        class="kitchen-page__link-btn"
+                        class="button-ghost"
                         [attr.data-testid]="'kitchen-details-' + order.id"
                         (click)="openDetails(order)"
                       >
@@ -179,7 +191,7 @@
                       @if (order.orderStatus === OrderStatus.New) {
                         <button
                           type="button"
-                          class="kitchen-page__primary-btn"
+                          class="button-primary"
                           data-testid="kitchen-action-start-preparing"
                           [disabled]="isUpdating(order.id)"
                           (click)="startPreparing(order)"
@@ -193,7 +205,7 @@
                       } @else if (order.orderStatus === OrderStatus.Preparing) {
                         <button
                           type="button"
-                          class="kitchen-page__primary-btn"
+                          class="button-success"
                           data-testid="kitchen-action-mark-ready"
                           [disabled]="isUpdating(order.id)"
                           (click)="markReady(order)"
@@ -236,120 +248,188 @@
     }
   }
 
-  @if (detailsOpen()) {
-    <div class="kitchen-details" data-testid="kitchen-details-drawer">
-      <button
-        type="button"
-        class="kitchen-details__backdrop"
-        [attr.aria-label]="locale.uiText('kitchenCloseDetails')"
-        (click)="closeDetails()"
-      ></button>
-
-      <aside
-        class="kitchen-details__panel"
-        role="dialog"
-        aria-modal="true"
-        [attr.aria-label]="locale.uiText('kitchenDetailsTitle')"
+  <app-order-modal-shell
+    [open]="detailsOpen()"
+    [title]="locale.uiText('kitchenDetailsTitle')"
+    [closeLabel]="locale.uiText('kitchenCloseDetails')"
+    titleId="kitchen-order-details-title"
+    testId="kitchen-order-details-modal"
+    (closed)="closeDetails()"
+  >
+    @if (orderDetails(); as details) {
+      <span
+        orderModalHeaderExtra
+        class="order-status-chip"
+        [attr.data-status]="details.orderStatus"
       >
-        <header class="kitchen-details__header">
-          <h2>{{ locale.uiText('kitchenDetailsTitle') }}</h2>
+        {{ statusLabel(details.orderStatus) }}
+      </span>
+    }
+
+    @if (detailsLoading()) {
+      <p data-testid="kitchen-details-loading">{{ locale.uiText('kitchenDetailsLoading') }}</p>
+    } @else if (detailsError()) {
+      <div class="kitchen-page__state" data-testid="kitchen-details-error">
+        <p>{{ detailsError() }}</p>
+        <button type="button" class="button-primary" (click)="retryDetails()">
+          {{ locale.uiText('kitchenRetry') }}
+        </button>
+      </div>
+    } @else if (orderDetails(); as details) {
+      <div data-testid="kitchen-details-body">
+        <dl class="order-details-meta">
+          <div>
+            <dt>{{ locale.uiText('kitchenFieldOrderNumber') }}</dt>
+            <dd>
+              <bdi class="identifier-ltr" dir="ltr">{{ details.orderNumber }}</bdi>
+            </dd>
+          </div>
+          <div>
+            <dt>{{ locale.uiText('kitchenFieldOrderType') }}</dt>
+            <dd>
+              <span
+                class="order-type-chip"
+                [class.order-type-chip--delivery]="details.orderType === OrderType.Delivery"
+              >
+                {{ orderTypeLabel(details.orderType) }}
+              </span>
+            </dd>
+          </div>
+          <div>
+            <dt>{{ locale.uiText('kitchenFieldCreatedAt') }}</dt>
+            <dd>
+              <bdi class="numeric-ltr" dir="ltr">{{ formatCreatedAt(details.createdAt) }}</bdi>
+            </dd>
+          </div>
+          @if (details.guestName?.trim()) {
+            <div>
+              <dt>{{ locale.uiText('kitchenFieldGuestName') }}</dt>
+              <dd>{{ details.guestName }}</dd>
+            </div>
+          }
+          @if (details.guestPhone?.trim()) {
+            <div>
+              <dt>{{ locale.uiText('kitchenFieldGuestPhone') }}</dt>
+              <dd>
+                <bdi class="phone-ltr" dir="ltr">{{ details.guestPhone }}</bdi>
+              </dd>
+            </div>
+          }
+          @if (details.orderType === OrderType.Delivery && details.deliveryAddress?.trim()) {
+            <div>
+              <dt>{{ locale.uiText('kitchenFieldDeliveryAddress') }}</dt>
+              <dd>{{ details.deliveryAddress }}</dd>
+            </div>
+          }
+          @if (details.notes?.trim()) {
+            <div>
+              <dt>{{ locale.uiText('kitchenFieldOrderNotes') }}</dt>
+              <dd>{{ details.notes }}</dd>
+            </div>
+          }
+        </dl>
+
+        <section class="kitchen-details__items-section">
+          <h3>{{ locale.uiText('kitchenItemsHeading') }}</h3>
+          <ul class="order-items-list">
+            @for (item of details.items; track item.id) {
+              <li [attr.data-testid]="'kitchen-item-' + item.id">
+                <div class="order-items-list__head">
+                  <strong>{{ itemName(item) }}</strong>
+                  <span>× {{ item.quantity }}</span>
+                </div>
+                <p class="kitchen-details__item-price">
+                  <bdi class="currency-ltr" dir="ltr">
+                    {{ formatMoney(item.unitPrice, details.currencyCode) }}
+                  </bdi>
+                  ·
+                  <bdi class="currency-ltr" dir="ltr">
+                    {{ formatMoney(item.totalPrice, details.currencyCode) }}
+                  </bdi>
+                </p>
+                @if (item.notes?.trim()) {
+                  <p class="order-items-list__notes">{{ item.notes }}</p>
+                }
+              </li>
+            }
+          </ul>
+        </section>
+
+        <dl class="order-financial-summary">
+          <div>
+            <dt>{{ locale.uiText('adminOrdersFieldSubtotal') }}</dt>
+            <dd>
+              <bdi class="currency-ltr" dir="ltr">
+                {{ formatMoney(details.subtotal, details.currencyCode) }}
+              </bdi>
+            </dd>
+          </div>
+          @if (shouldShowFinancialAmount(details.discountAmount)) {
+            <div>
+              <dt>{{ locale.uiText('adminOrdersFieldDiscount') }}</dt>
+              <dd>
+                <bdi class="currency-ltr" dir="ltr">
+                  {{ formatMoney(details.discountAmount, details.currencyCode) }}
+                </bdi>
+              </dd>
+            </div>
+          }
+          @if (shouldShowFinancialAmount(details.taxAmount)) {
+            <div>
+              <dt>{{ locale.uiText('adminOrdersFieldTax') }}</dt>
+              <dd>
+                <bdi class="currency-ltr" dir="ltr">
+                  {{ formatMoney(details.taxAmount, details.currencyCode) }}
+                </bdi>
+              </dd>
+            </div>
+          }
+          @if (shouldShowFinancialAmount(details.deliveryFee)) {
+            <div>
+              <dt>{{ locale.uiText('kitchenFieldDeliveryFee') }}</dt>
+              <dd>
+                <bdi class="currency-ltr" dir="ltr">
+                  {{ formatMoney(details.deliveryFee, details.currencyCode) }}
+                </bdi>
+              </dd>
+            </div>
+          }
+          <div class="order-financial-summary__total">
+            <dt>{{ locale.uiText('kitchenFieldTotal') }}</dt>
+            <dd>
+              <bdi class="currency-ltr" dir="ltr">
+                {{ formatMoney(details.totalAmount, details.currencyCode) }}
+              </bdi>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    }
+
+    @if (selectedOrder(); as order) {
+      <div orderModalFooter class="kitchen-details__modal-footer">
+        @if (order.orderStatus === OrderStatus.New) {
           <button
             type="button"
-            class="kitchen-page__secondary-btn"
-            data-testid="kitchen-close-details"
-            [attr.aria-label]="locale.uiText('kitchenCloseDetails')"
-            (click)="closeDetails()"
+            class="button-primary"
+            data-testid="kitchen-modal-start-preparing"
+            [disabled]="isUpdating(order.id)"
+            (click)="startPreparing(order)"
           >
-            {{ locale.uiText('kitchenCloseDetails') }}
+            {{ locale.uiText('kitchenStartPreparing') }}
           </button>
-        </header>
-
-        @if (detailsLoading()) {
-          <p class="kitchen-details__loading" data-testid="kitchen-details-loading">
-            {{ locale.uiText('kitchenDetailsLoading') }}
-          </p>
-        } @else if (detailsError()) {
-          <div class="kitchen-page__state" data-testid="kitchen-details-error">
-            <p>{{ detailsError() }}</p>
-            <button type="button" class="kitchen-page__primary-btn" (click)="retryDetails()">
-              {{ locale.uiText('kitchenRetry') }}
-            </button>
-          </div>
-        } @else if (orderDetails(); as details) {
-          <div class="kitchen-details__body" data-testid="kitchen-details-body">
-            <dl class="kitchen-details__meta">
-              <div>
-                <dt>{{ locale.uiText('kitchenFieldOrderNumber') }}</dt>
-                <dd>#{{ details.orderNumber }}</dd>
-              </div>
-              <div>
-                <dt>{{ locale.uiText('kitchenFieldStatus') }}</dt>
-                <dd>{{ statusLabel(details.orderStatus) }}</dd>
-              </div>
-              <div>
-                <dt>{{ locale.uiText('kitchenFieldOrderType') }}</dt>
-                <dd>{{ orderTypeLabel(details.orderType) }}</dd>
-              </div>
-              <div>
-                <dt>{{ locale.uiText('kitchenFieldCreatedAt') }}</dt>
-                <dd>{{ formatCreatedAt(details.createdAt) }}</dd>
-              </div>
-              @if (details.guestName?.trim()) {
-                <div>
-                  <dt>{{ locale.uiText('kitchenFieldGuestName') }}</dt>
-                  <dd>{{ details.guestName }}</dd>
-                </div>
-              }
-              @if (details.guestPhone?.trim()) {
-                <div>
-                  <dt>{{ locale.uiText('kitchenFieldGuestPhone') }}</dt>
-                  <dd>{{ details.guestPhone }}</dd>
-                </div>
-              }
-              @if (details.orderType === OrderType.Delivery && details.deliveryAddress?.trim()) {
-                <div>
-                  <dt>{{ locale.uiText('kitchenFieldDeliveryAddress') }}</dt>
-                  <dd>{{ details.deliveryAddress }}</dd>
-                </div>
-              }
-              @if (details.orderType === OrderType.Delivery) {
-                <div>
-                  <dt>{{ locale.uiText('kitchenFieldDeliveryFee') }}</dt>
-                  <dd>{{ locale.formatCurrency(details.deliveryFee, details.currencyCode) }}</dd>
-                </div>
-              }
-              @if (details.notes?.trim()) {
-                <div>
-                  <dt>{{ locale.uiText('kitchenFieldOrderNotes') }}</dt>
-                  <dd>{{ details.notes }}</dd>
-                </div>
-              }
-            </dl>
-
-            <section class="kitchen-details__items">
-              <h3>{{ locale.uiText('kitchenItemsHeading') }}</h3>
-              <ul>
-                @for (item of details.items; track item.id) {
-                  <li [attr.data-testid]="'kitchen-item-' + item.id">
-                    <div class="kitchen-details__item-head">
-                      <strong>{{ itemName(item) }}</strong>
-                      <span>× {{ item.quantity }}</span>
-                    </div>
-                    @if (item.notes?.trim()) {
-                      <p class="kitchen-details__item-notes">{{ item.notes }}</p>
-                    }
-                  </li>
-                }
-              </ul>
-            </section>
-
-            <p class="kitchen-details__total">
-              {{ locale.uiText('kitchenFieldTotal') }}:
-              {{ locale.formatCurrency(details.totalAmount, details.currencyCode) }}
-            </p>
-          </div>
+        } @else if (order.orderStatus === OrderStatus.Preparing) {
+          <button
+            type="button"
+            class="button-success"
+            data-testid="kitchen-modal-mark-ready"
+            [disabled]="isUpdating(order.id)"
+            (click)="markReady(order)"
+          >
+            {{ locale.uiText('kitchenMarkReady') }}
+          </button>
         }
-      </aside>
-    </div>
-  }
+      </div>
+    }
+  </app-order-modal-shell>
 </div>

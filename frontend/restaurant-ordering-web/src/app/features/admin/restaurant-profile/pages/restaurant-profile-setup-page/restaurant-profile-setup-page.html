@@ -223,8 +223,9 @@
             maxlength="3"
             spellcheck="false"
           />
+          <small class="profile-setup__hint">{{ localeService.uiText('profileCurrencyCodeHelp') }}</small>
           @if (fieldError('currencyCode'); as error) {
-            <small>{{ error }}</small>
+            <small class="profile-setup__error">{{ error }}</small>
           }
         </label>
 

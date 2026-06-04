@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@600;700&family=Be+Vietnam+Pro:wght@400;500;600&display=swap');
 
 :root {
+  --z-admin-header: 100;
+  --z-modal-backdrop: 1300;
+  --z-modal-dialog: 1301;
+  --z-preview-overlay: 1400;
+
   --restaurant-accent: #B8663F;
   --restaurant-background: #F6F0E7;
   --restaurant-surface: #FFFDFC;
@@ -53,6 +58,14 @@ textarea {
 
 a {
   color: inherit;
+}
+
+@import './app/shared/styles/app-buttons.scss';
+@import './app/shared/styles/order-ltr.scss';
+@import './app/shared/styles/order-details.scss';
+
+body.order-modal-scroll-lock {
+  overflow: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {

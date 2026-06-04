@@ -1,0 +1,46 @@
+@if (open()) {
+  <div
+    class="order-modal"
+    role="presentation"
+    data-testid="order-modal-backdrop"
+    (click)="onBackdropClick($event)"
+  >
+    <section
+      class="order-modal__dialog"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="titleId()"
+      [attr.data-testid]="testId()"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="order-modal__header">
+        <div class="order-modal__header-main">
+          <h2 class="order-modal__title" [id]="titleId()">{{ title() }}</h2>
+          <ng-content select="[orderModalHeaderExtra]" />
+        </div>
+        <button
+          type="button"
+          class="button-icon order-modal__close"
+          data-testid="order-modal-close"
+          [attr.aria-label]="closeLabel()"
+          (click)="closed.emit()"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M18.3 5.71a1 1 0 0 0-1.41-1.42L12 9.17 7.11 4.29A1 1 0 0 0 5.7 5.71L10.59 10.6 5.7 15.49a1 1 0 1 0 1.41 1.42L12 12.01l4.89 4.9a1 1 0 0 0 1.41-1.42l-4.89-4.89 4.89-4.88Z"
+            />
+          </svg>
+        </button>
+      </header>
+
+      <div class="order-modal__body">
+        <ng-content />
+      </div>
+
+      <footer class="order-modal__footer">
+        <ng-content select="[orderModalFooter]" />
+      </footer>
+    </section>
+  </div>
+}

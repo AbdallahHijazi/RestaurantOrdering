@@ -11,6 +11,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { LocaleService } from '../../../../core/localization/locale';
+import { OrderModalShell } from '../../../../shared/components/order-modal-shell/order-modal-shell';
+import { shouldShowFinancialAmount } from '../../../../shared/orders/order-display.util';
+import { formatOrderDateTime } from '../../../../shared/orders/order-date-time.util';
+import { formatOrderCurrency } from '../../../../shared/orders/order-money.util';
+import { getOrderStatusLabel } from '../../../../shared/orders/order-status-label.util';
+import { getOrderTypeLabel } from '../../../../shared/orders/order-type-label.util';
 import {
   KITCHEN_BOARD_STATUSES,
   KITCHEN_ORDERS_PAGE_SIZE,
@@ -41,7 +47,7 @@ const EMPTY_COLUMN: ColumnState = {
 
 @Component({
   selector: 'app-kitchen-dashboard-page',
-  imports: [],
+  imports: [OrderModalShell],
   templateUrl: './kitchen-dashboard-page.html',
   styleUrl: './kitchen-dashboard-page.scss',
 })
@@ -73,7 +79,9 @@ export class KitchenDashboardPage {
   protected readonly detailsLoading = signal(false);
   protected readonly detailsError = signal<string | null>(null);
   protected readonly selectedOrderId = signal<string | null>(null);
+  protected readonly selectedOrder = signal<OrderSummary | null>(null);
   protected readonly orderDetails = signal<OrderDetails | null>(null);
+  protected readonly shouldShowFinancialAmount = shouldShowFinancialAmount;
   protected readonly itemCountByOrderId = signal<ReadonlyMap<string, number>>(new Map());
 
   protected readonly currentRoleLabel = computed(() =>
@@ -173,6 +181,7 @@ export class KitchenDashboardPage {
 
   protected openDetails(order: OrderSummary): void {
     this.detailsOpen.set(true);
+    this.selectedOrder.set(order);
     this.selectedOrderId.set(order.id);
     this.orderDetails.set(null);
     this.detailsError.set(null);
@@ -181,6 +190,7 @@ export class KitchenDashboardPage {
 
   protected closeDetails(): void {
     this.detailsOpen.set(false);
+    this.selectedOrder.set(null);
     this.selectedOrderId.set(null);
     this.orderDetails.set(null);
     this.detailsError.set(null);
@@ -212,22 +222,15 @@ export class KitchenDashboardPage {
   }
 
   protected orderTypeLabel(orderType: OrderType): string {
-    return orderType === OrderType.Delivery
-      ? this.locale.uiText('kitchenOrderTypeDelivery')
-      : this.locale.uiText('kitchenOrderTypePickup');
+    return getOrderTypeLabel(orderType, this.locale.locale());
   }
 
   protected statusLabel(status: OrderStatus): string {
-    switch (status) {
-      case OrderStatus.New:
-        return this.locale.uiText('kitchenStatusNew');
-      case OrderStatus.Preparing:
-        return this.locale.uiText('kitchenStatusPreparing');
-      case OrderStatus.Ready:
-        return this.locale.uiText('kitchenStatusReady');
-      default:
-        return String(status);
-    }
+    return getOrderStatusLabel(status, this.locale.locale());
+  }
+
+  protected formatMoney(amount: number, currencyCode: string): string {
+    return formatOrderCurrency(amount, currencyCode);
   }
 
   protected itemName(item: { itemNameAr: string; itemNameEn: string | null }): string {
@@ -239,16 +242,7 @@ export class KitchenDashboardPage {
   }
 
   protected formatCreatedAt(value: string): string {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return value;
-    }
-
-    const localeTag = this.locale.locale() === 'ar' ? 'ar-SA' : 'en-GB';
-    return new Intl.DateTimeFormat(localeTag, {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    }).format(date);
+    return formatOrderDateTime(value);
   }
 
   protected logout(): void {

@@ -53,6 +53,18 @@ describe('MenuPage', () => {
     fixture.detectChanges();
   }
 
+  it('shows staff login link to /login', async () => {
+    const fixture = await createPage('demo');
+    await settle(fixture);
+
+    const link = (fixture.nativeElement as HTMLElement).querySelector(
+      '[data-testid="public-staff-login"]',
+    ) as HTMLAnchorElement | null;
+
+    expect(link).toBeTruthy();
+    expect(link?.getAttribute('href')).toContain('/login');
+  });
+
   it('renders mock menu for demo slug without HTTP or not-found state', async () => {
     const fixture = await createPage('demo');
     await settle(fixture);

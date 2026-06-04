@@ -1,0 +1,178 @@
+.order-status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.3;
+  border: 1px solid transparent;
+}
+
+.order-status-chip[data-status='1'] {
+  background: rgb(59 130 246 / 0.12);
+  color: #1d4ed8;
+  border-color: rgb(59 130 246 / 0.25);
+}
+
+.order-status-chip[data-status='2'] {
+  background: rgb(217 119 6 / 0.14);
+  color: #b45309;
+  border-color: rgb(217 119 6 / 0.28);
+}
+
+.order-status-chip[data-status='3'] {
+  background: rgb(47 122 79 / 0.14);
+  color: #2f6b47;
+  border-color: rgb(47 122 79 / 0.28);
+}
+
+.order-status-chip[data-status='4'] {
+  background: rgb(100 116 139 / 0.14);
+  color: #475569;
+  border-color: rgb(100 116 139 / 0.28);
+}
+
+.order-status-chip[data-status='5'] {
+  background: rgb(176 59 59 / 0.12);
+  color: #8f2f2f;
+  border-color: rgb(176 59 59 / 0.28);
+}
+
+.order-type-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--restaurant-alternate-surface);
+  color: var(--restaurant-text);
+}
+
+.order-type-chip--delivery {
+  background: rgb(184 102 63 / 0.14);
+  color: var(--restaurant-accent);
+}
+
+.order-details-meta {
+  display: grid;
+  gap: 0.65rem 1rem;
+  margin: 0;
+}
+
+@media (min-width: 520px) {
+  .order-details-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.order-details-meta > div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.order-details-meta dt {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--restaurant-muted-text);
+}
+
+.order-details-meta dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.order-financial-summary {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.85rem;
+  border-radius: var(--radius-md);
+  background: var(--restaurant-alternate-surface);
+}
+
+.order-financial-summary > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.order-financial-summary dt {
+  margin: 0;
+  color: var(--restaurant-muted-text);
+}
+
+.order-financial-summary dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.order-financial-summary__total {
+  padding-block-start: 0.35rem;
+  border-block-start: 1px solid var(--restaurant-border);
+}
+
+.order-financial-summary__total dd {
+  font-size: 1.05rem;
+  color: var(--restaurant-accent);
+}
+
+.order-items-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.order-items-list li {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--restaurant-border);
+  border-radius: var(--radius-md);
+  background: var(--restaurant-surface);
+}
+
+.order-items-list__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.order-items-list__notes {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  color: var(--restaurant-muted-text);
+}
+
+.confirmation-success {
+  display: grid;
+  gap: 0.35rem;
+  text-align: center;
+  padding: 0.5rem 0 0.75rem;
+}
+
+.confirmation-success__icon {
+  display: inline-flex;
+  align-self: center;
+  width: 3rem;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgb(47 122 79 / 0.14);
+  color: #2f6b47;
+}
+
+.confirmation-success__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.confirmation-success__lead {
+  margin: 0;
+  color: var(--restaurant-muted-text);
+}

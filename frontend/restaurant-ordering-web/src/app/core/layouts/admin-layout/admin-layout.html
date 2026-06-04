@@ -133,7 +133,12 @@
           </button>
         </div>
 
-        <button type="button" class="admin-layout__header-logout" (click)="logout()">
+        <button
+          type="button"
+          class="button-secondary admin-layout__header-logout"
+          data-testid="admin-header-logout"
+          (click)="logout()"
+        >
           {{ localeService.uiText('adminLogout') }}
         </button>
       </div>

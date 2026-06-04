@@ -98,13 +98,29 @@
   grid-template-columns: 1fr;
 }
 
+:host {
+  display: block;
+}
+
+.live-preview__modal-host {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-preview-overlay);
+  pointer-events: none;
+}
+
+.live-preview__modal-host--open {
+  pointer-events: auto;
+}
+
 .live-preview__modal {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: var(--z-preview-overlay);
   display: grid;
   place-items: center;
-  padding: 1rem;
+  padding: clamp(0.75rem, 3vw, 1.5rem);
 }
 
 .live-preview__modal-backdrop {
@@ -119,15 +135,16 @@
 
 .live-preview__modal-panel {
   position: relative;
-  z-index: 1;
+  z-index: calc(var(--z-preview-overlay) + 1);
   display: flex;
   flex-direction: column;
-  width: min(100%, 56rem);
-  max-height: calc(100vh - 2rem);
+  width: min(92vw, 56rem);
+  max-height: min(90vh, 54rem);
   overflow: hidden;
   background: var(--restaurant-background);
   border-radius: var(--radius-lg);
   box-shadow: 0 24px 48px rgb(17 24 39 / 0.18);
+  isolation: isolate;
 }
 
 .live-preview__modal-header {
@@ -136,18 +153,17 @@
   justify-content: space-between;
   gap: 1rem;
   flex-shrink: 0;
-  padding: 1rem 1rem 0.85rem;
+  padding: 0.85rem 1rem;
   border-bottom: 1px solid var(--restaurant-border);
   background: #fff;
-  z-index: 30;
 }
 
 .live-preview__modal-close {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border: 0;
   border-radius: 999px;
   padding: 0;
@@ -156,6 +172,7 @@
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .live-preview__modal-close:focus-visible {
@@ -164,15 +181,17 @@
 }
 
 .live-preview__modal-body {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
-  overflow: auto;
+  overflow-y: auto;
   padding-bottom: 1rem;
 }
 
 .live-preview__modal-body .category-nav {
+  position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 2;
+  background: var(--restaurant-background);
 }
 
 .live-preview__footer {
@@ -193,5 +212,19 @@
 @media (min-width: 1024px) {
   .live-preview__grid--full {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .live-preview__modal {
+    place-items: end center;
+    padding: 0;
+  }
+
+  .live-preview__modal-panel {
+    width: 100%;
+    max-height: min(96vh, 54rem);
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
   }
 }

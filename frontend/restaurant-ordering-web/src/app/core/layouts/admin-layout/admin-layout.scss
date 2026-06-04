@@ -172,7 +172,7 @@
 .admin-layout__header {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: var(--z-admin-header);
   min-height: var(--admin-header-height);
   display: flex;
   align-items: center;

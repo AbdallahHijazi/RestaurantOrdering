@@ -56,6 +56,11 @@
 
 @if (fullPreviewOpen()) {
   <div
+    #previewOverlay
+    class="live-preview__modal-host live-preview__modal-host--open"
+    data-testid="live-preview-overlay-host"
+  >
+  <div
     class="live-preview__modal"
     role="dialog"
     aria-modal="true"
@@ -90,6 +95,7 @@
         />
       </div>
     </div>
+  </div>
   </div>
 }
 

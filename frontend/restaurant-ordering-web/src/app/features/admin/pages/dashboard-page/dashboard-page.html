@@ -16,8 +16,25 @@
   <div class="admin-dashboard__stats" data-testid="admin-dashboard-stats">
     @for (statId of demoStatOrder; track statId) {
       <article class="admin-dashboard__stat-card" [attr.data-testid]="'admin-dashboard-stat-' + statId">
-        <p class="admin-dashboard__stat-label">{{ statLabel(statId) }}</p>
-        <p class="admin-dashboard__stat-value">{{ demoStats[statId] }}</p>
+        <span class="admin-dashboard__stat-icon" aria-hidden="true">
+          @switch (statId) {
+            @case ('menuItems') {
+              <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M4 6h16v2H4V6Zm0 5h16v2H4v-2Zm0 5h10v2H4v-2Z"/></svg>
+            }
+            @case ('orders') {
+              <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M7 4h10l1 3h3v2H3V7h3l1-3Zm-1 7h12l-1 9H7l-1-9Z"/></svg>
+            }
+            @default {
+              <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-3.31 0-6 1.79-6 4v2h12v-2c0-2.21-2.69-4-6-4Z"/></svg>
+            }
+          }
+        </span>
+        <div>
+          <p class="admin-dashboard__stat-label">{{ statLabel(statId) }}</p>
+          <p class="admin-dashboard__stat-value">
+            <bdi class="numeric-ltr" dir="ltr">{{ demoStats[statId] }}</bdi>
+          </p>
+        </div>
       </article>
     }
   </div>
@@ -28,7 +45,7 @@
       <p>{{ localeService.uiText('adminDashboardReadyDescription') }}</p>
       <a
         routerLink="/admin/restaurant-profile"
-        class="admin-dashboard__cta"
+        class="admin-dashboard__cta button-primary"
         data-testid="admin-dashboard-profile-link"
       >
         {{ localeService.uiText('adminDashboardGoToProfile') }}
@@ -40,14 +57,14 @@
     <article class="admin-dashboard__placeholder-card admin-dashboard__placeholder-card--link">
       <h3>{{ localeService.uiText('adminDashboardMenuTitle') }}</h3>
       <p>{{ localeService.uiText('adminDashboardMenuDescription') }}</p>
-      <a routerLink="/admin/menu" class="admin-dashboard__cta" data-testid="admin-dashboard-menu-link">
+      <a routerLink="/admin/menu" class="admin-dashboard__cta button-primary" data-testid="admin-dashboard-menu-link">
         {{ localeService.uiText('adminDashboardGoToMenu') }}
       </a>
     </article>
     <article class="admin-dashboard__placeholder-card admin-dashboard__placeholder-card--link">
       <h3>{{ localeService.uiText('adminDashboardOrdersTitle') }}</h3>
       <p>{{ localeService.uiText('adminDashboardOrdersDescription') }}</p>
-      <a routerLink="/admin/orders" class="admin-dashboard__cta" data-testid="admin-dashboard-orders-link">
+      <a routerLink="/admin/orders" class="admin-dashboard__cta button-primary" data-testid="admin-dashboard-orders-link">
         {{ localeService.uiText('adminDashboardGoToOrders') }}
       </a>
     </article>

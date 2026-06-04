@@ -26,6 +26,13 @@
         </div>
 
         <div class="menu-page__actions">
+          <a
+            routerLink="/login"
+            class="menu-page__staff-login button-ghost"
+            data-testid="public-staff-login"
+          >
+            {{ ui().publicStaffLogin }}
+          </a>
           <app-language-switcher />
           <button
             type="button"

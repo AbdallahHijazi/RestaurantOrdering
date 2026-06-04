@@ -1,128 +1,30 @@
 .public-confirmation {
-  position: fixed;
-  inset: 0;
-  z-index: 70;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  background: rgb(15 12 10 / 0.45);
-  overflow: auto;
-}
-
-.public-confirmation__panel {
-  width: min(100%, 34rem);
-  max-height: min(100dvh - 2rem, 50rem);
-  overflow: auto;
-  background: var(--restaurant-surface, #fff);
-  border-radius: 1rem;
-  box-shadow: 0 16px 48px rgb(0 0 0 / 0.18);
-}
-
-.public-confirmation__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--restaurant-border, #e8dfd4);
-}
-
-.public-confirmation__header h2 {
-  margin: 0;
-}
-
-.public-confirmation__close {
-  width: 2.25rem;
-  height: 2.25rem;
-  border: 0;
-  background: transparent;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-.public-confirmation__body {
-  padding: 1rem 1.25rem;
   display: grid;
-  gap: 0.75rem;
-}
-
-.public-confirmation__success {
-  margin: 0;
-  font-weight: 600;
-}
-
-.public-confirmation__instructions {
-  margin: 0;
-  opacity: 0.9;
-}
-
-.public-confirmation__meta,
-.public-confirmation__totals {
-  margin: 0;
-}
-
-.public-confirmation__meta div,
-.public-confirmation__totals div {
-  display: flex;
-  justify-content: space-between;
   gap: 1rem;
-  padding: 0.15rem 0;
 }
 
-.public-confirmation__items {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.35rem;
+.public-confirmation__card {
+  padding: 0.85rem;
+  border: 1px solid var(--restaurant-border);
+  border-radius: var(--radius-md);
+  background: var(--restaurant-alternate-surface);
 }
 
-.public-confirmation__items li {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
+.public-confirmation__section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
 }
 
-.public-confirmation__total-row {
-  font-weight: 700;
+.public-confirmation__line-price {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  color: var(--restaurant-muted-text);
 }
 
 .public-confirmation__footer {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  padding: 0 1.25rem 1.25rem;
-}
-
-.public-confirmation__primary,
-.public-confirmation__secondary {
-  flex: 1 1 8rem;
-  border-radius: 999px;
-  padding: 0.75rem 1rem;
-  font: inherit;
-  cursor: pointer;
-}
-
-.public-confirmation__primary {
-  border: 0;
-  background: var(--restaurant-accent, #b8663f);
-  color: #fff;
-}
-
-.public-confirmation__secondary {
-  border: 1px solid var(--restaurant-border, #e8dfd4);
-  background: transparent;
-}
-
-@media (max-width: 640px) {
-  .public-confirmation {
-    align-items: flex-end;
-    padding: 0;
-  }
-
-  .public-confirmation__panel {
-    width: 100%;
-    max-height: 94dvh;
-    border-radius: 1rem 1rem 0 0;
-  }
+  width: 100%;
+  justify-content: flex-end;
 }

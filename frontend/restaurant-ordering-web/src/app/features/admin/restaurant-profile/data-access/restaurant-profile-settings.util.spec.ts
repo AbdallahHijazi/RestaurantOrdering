@@ -73,7 +73,10 @@ describe('restaurant-profile-settings.util', () => {
 
   it('validates currency code format', () => {
     expect(isCurrencyCodeValid('sar')).toBe(true);
+    expect(isCurrencyCodeValid('USD')).toBe(true);
+    expect(isCurrencyCodeValid('SYP')).toBe(true);
     expect(isCurrencyCodeValid('SA')).toBe(false);
+    expect(isCurrencyCodeValid('$')).toBe(false);
   });
 
   it('requires at least one ordering method', () => {

@@ -302,6 +302,11 @@ export class RestaurantProfileSetupPage {
     }
 
     if (controlName === 'currencyCode' && control.invalid) {
+      const raw = String(control.value ?? '');
+      if (/[$€£¥]/.test(raw) || /[^A-Za-z]/.test(raw.trim())) {
+        return this.localeService.uiText('profileValidationCurrencySymbol');
+      }
+
       return this.localeService.uiText('profileValidationCurrency');
     }
 
