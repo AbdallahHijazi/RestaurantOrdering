@@ -53,6 +53,32 @@ describe('AdminLayout', () => {
     expect(hrefs).toContain('/admin/staff');
   });
 
+  it('hides Restaurant Profile link for RestaurantManager', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [AdminLayout],
+      providers: [provideRouter(routes)],
+    }).compileComponents();
+
+    session = TestBed.inject(AuthSessionService);
+    session.clearSession();
+    session.saveSession(createTestSession(ApplicationRoles.RestaurantManager));
+    TestBed.inject(AuthService).restoreSessionFromStorage();
+
+    fixture = TestBed.createComponent(AdminLayout);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="admin-nav-restaurant-profile"]'),
+    ).toBeNull();
+  });
+
+  it('shows Restaurant Profile link for RestaurantOwner', () => {
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="admin-nav-restaurant-profile"]'),
+    ).toBeTruthy();
+  });
+
   it('shows Orders link for RestaurantManager', async () => {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
@@ -275,10 +301,10 @@ describe('Admin shell routing', () => {
     expect(router.url).toBe('/admin/dashboard');
   });
 
-  it('allows RestaurantManager to open /admin/restaurant-profile', async () => {
+  it('redirects RestaurantManager from /admin/restaurant-profile to /admin/dashboard', async () => {
     session.saveSession(createTestSession(ApplicationRoles.RestaurantManager));
     await router.navigateByUrl('/admin/restaurant-profile');
-    expect(router.url).toBe('/admin/restaurant-profile');
+    expect(router.url).toBe('/admin/dashboard');
   });
 
   it('redirects KitchenManager away from /admin routes', async () => {

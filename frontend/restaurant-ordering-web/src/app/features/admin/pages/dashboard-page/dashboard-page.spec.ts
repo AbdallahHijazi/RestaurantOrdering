@@ -24,9 +24,9 @@ describe('DashboardPage', () => {
     fixture.detectChanges();
   });
 
-  it('shows welcome content and navigation links', () => {
+  it('shows welcome content and navigation links for owner', () => {
     const profileLink: HTMLAnchorElement = fixture.nativeElement.querySelector(
-      'a[href="/admin/restaurant-profile"]',
+      '[data-testid="admin-dashboard-profile-link"]',
     );
     const menuLink: HTMLAnchorElement = fixture.nativeElement.querySelector(
       'a[data-testid="admin-dashboard-menu-link"]',
@@ -65,5 +65,24 @@ describe('DashboardPage', () => {
     expect(
       fixture.nativeElement.querySelector('[data-testid="admin-dashboard-stat-staff"]')?.textContent,
     ).toContain(String(ADMIN_DASHBOARD_DEMO_STATS.staff));
+  });
+
+  it('hides profile CTA for RestaurantManager', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [DashboardPage],
+      providers: [provideRouter([])],
+    }).compileComponents();
+
+    const session = TestBed.inject(AuthSessionService);
+    session.clearSession();
+    session.saveSession(createTestSession(ApplicationRoles.RestaurantManager));
+
+    const managerFixture = TestBed.createComponent(DashboardPage);
+    managerFixture.detectChanges();
+
+    expect(
+      managerFixture.nativeElement.querySelector('[data-testid="admin-dashboard-profile-link"]'),
+    ).toBeNull();
   });
 });

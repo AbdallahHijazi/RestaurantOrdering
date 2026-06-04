@@ -121,6 +121,23 @@ type UiTextKey =
   | 'demoSaveTitle'
   | 'profileTitle'
   | 'saveProfile'
+  | 'profileDeliverySettingsTitle'
+  | 'profileEnablePickup'
+  | 'profileEnableDelivery'
+  | 'profileDeliveryFee'
+  | 'profileMinimumOrder'
+  | 'profileTaxRate'
+  | 'profileCurrencyCode'
+  | 'profileOrderingMethodRequired'
+  | 'profileSettingsLoadError'
+  | 'profileSettingsRetry'
+  | 'profileSettingsSaved'
+  | 'profileSaveRestaurant'
+  | 'profileSaveOrderingSettings'
+  | 'profileRestaurantSaved'
+  | 'profileValidationNonNegative'
+  | 'profileValidationTaxRate'
+  | 'profileValidationCurrency'
   | 'previewTitle'
   | 'fullPreview'
   | 'closePreview'
@@ -266,6 +283,7 @@ type UiTextKey =
   | 'kitchenFieldDeliveryAddress'
   | 'kitchenFieldOrderNotes'
   | 'kitchenFieldTotal'
+  | 'kitchenFieldDeliveryFee'
   | 'kitchenItemsHeading'
   | 'kitchenStatusUpdateSuccess'
   | 'kitchenErrorConflict'
@@ -484,6 +502,23 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     demoSaveTitle: 'وضع العرض التجريبي',
     profileTitle: 'إعداد ملف المطعم',
     saveProfile: 'حفظ الإعدادات',
+    profileDeliverySettingsTitle: 'إعدادات التوصيل والطلبات',
+    profileEnablePickup: 'تفعيل الاستلام من المطعم',
+    profileEnableDelivery: 'تفعيل خدمة التوصيل',
+    profileDeliveryFee: 'رسوم التوصيل',
+    profileMinimumOrder: 'الحد الأدنى للطلب',
+    profileTaxRate: 'نسبة الضريبة',
+    profileCurrencyCode: 'رمز العملة',
+    profileOrderingMethodRequired: 'يجب تفعيل الاستلام أو التوصيل على الأقل.',
+    profileSettingsLoadError: 'تعذر تحميل إعدادات المطعم. حاول مرة أخرى.',
+    profileSettingsRetry: 'إعادة المحاولة',
+    profileSettingsSaved: 'تم حفظ إعدادات التوصيل والطلبات بنجاح.',
+    profileSaveRestaurant: 'حفظ ملف المطعم',
+    profileSaveOrderingSettings: 'حفظ إعدادات التوصيل والطلبات',
+    profileRestaurantSaved: 'تم حفظ ملف المطعم بنجاح.',
+    profileValidationNonNegative: 'يجب أن تكون القيمة صفرًا أو أكثر.',
+    profileValidationTaxRate: 'نسبة الضريبة يجب أن تكون بين 0 و100.',
+    profileValidationCurrency: 'أدخل رمز عملة من 3 أحرف (مثل SAR).',
     previewTitle: 'معاينة مباشرة',
     fullPreview: 'معاينة كاملة',
     closePreview: 'إغلاق',
@@ -633,6 +668,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     kitchenFieldDeliveryAddress: 'عنوان التوصيل',
     kitchenFieldOrderNotes: 'ملاحظات الطلب',
     kitchenFieldTotal: 'الإجمالي',
+    kitchenFieldDeliveryFee: 'رسوم التوصيل',
     kitchenItemsHeading: 'البنود',
     kitchenStatusUpdateSuccess: 'تم تحديث حالة الطلب.',
     kitchenErrorConflict: 'تغيّرت حالة الطلب أو لم يعد الانتقال صالحًا. تم تحديث اللوحة.',
@@ -857,6 +893,23 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     demoSaveTitle: 'Demo mode',
     profileTitle: 'Restaurant profile setup',
     saveProfile: 'Save settings',
+    profileDeliverySettingsTitle: 'Delivery and ordering settings',
+    profileEnablePickup: 'Enable pickup',
+    profileEnableDelivery: 'Enable delivery',
+    profileDeliveryFee: 'Delivery fee',
+    profileMinimumOrder: 'Minimum order amount',
+    profileTaxRate: 'Tax rate',
+    profileCurrencyCode: 'Currency code',
+    profileOrderingMethodRequired: 'At least one ordering method must be enabled.',
+    profileSettingsLoadError: 'Could not load restaurant settings.',
+    profileSettingsRetry: 'Retry',
+    profileSettingsSaved: 'Delivery and ordering settings saved successfully.',
+    profileSaveRestaurant: 'Save restaurant profile',
+    profileSaveOrderingSettings: 'Save delivery and ordering settings',
+    profileRestaurantSaved: 'Restaurant profile saved successfully.',
+    profileValidationNonNegative: 'Value must be zero or greater.',
+    profileValidationTaxRate: 'Tax rate must be between 0 and 100.',
+    profileValidationCurrency: 'Enter a 3-letter currency code (e.g. SAR).',
     previewTitle: 'Live preview',
     fullPreview: 'Open full preview',
     closePreview: 'Close',
@@ -1007,6 +1060,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     kitchenFieldDeliveryAddress: 'Delivery address',
     kitchenFieldOrderNotes: 'Order notes',
     kitchenFieldTotal: 'Total',
+    kitchenFieldDeliveryFee: 'Delivery fee',
     kitchenItemsHeading: 'Items',
     kitchenStatusUpdateSuccess: 'Order status updated.',
     kitchenErrorConflict: 'The order status changed or this transition is no longer valid. Board refreshed.',

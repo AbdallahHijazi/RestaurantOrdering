@@ -15,17 +15,19 @@
         }}
       </p>
     </div>
-    <button type="button" class="profile-setup__save" (click)="saveProfile()">
-      {{ localeService.uiText('saveProfile') }}
-    </button>
   </header>
 
-  @if (saveNotice()) {
-    <p class="profile-setup__notice" role="status">{{ saveNotice() }}</p>
+  @if (settingsLoadFailed()) {
+    <div class="profile-setup__alert" role="alert">
+      <p>{{ localeService.uiText('profileSettingsLoadError') }}</p>
+      <button type="button" class="profile-setup__secondary" (click)="retryLoadSettings()">
+        {{ localeService.uiText('profileSettingsRetry') }}
+      </button>
+    </div>
   }
 
   <div class="profile-setup__layout">
-    <form class="profile-setup__form" [formGroup]="form" (ngSubmit)="saveProfile()">
+    <form class="profile-setup__form" [formGroup]="form">
       <section class="profile-setup__section">
         <h2>{{ localeService.locale() === 'ar' ? 'هوية المطعم' : 'Restaurant identity' }}</h2>
 
@@ -139,14 +141,91 @@
         </label>
 
         <label>
-          <span>{{ localeService.locale() === 'ar' ? 'العملة' : 'Currency' }}</span>
+          <span>{{ localeService.locale() === 'ar' ? 'كود الهاتف' : 'Phone country code' }}</span>
+          <input
+            type="text"
+            class="profile-setup__technical"
+            dir="ltr"
+            formControlName="phoneCountryCode"
+          />
+        </label>
+      </section>
+
+      <section class="profile-setup__section" data-testid="profile-delivery-settings">
+        <h2>{{ localeService.uiText('profileDeliverySettingsTitle') }}</h2>
+
+        <label class="profile-setup__toggle">
+          <input type="checkbox" formControlName="isPickupEnabled" />
+          <span>{{ localeService.uiText('profileEnablePickup') }}</span>
+        </label>
+
+        <label class="profile-setup__toggle">
+          <input type="checkbox" formControlName="isDeliveryEnabled" />
+          <span>{{ localeService.uiText('profileEnableDelivery') }}</span>
+        </label>
+
+        <label>
+          <span>{{ localeService.uiText('profileDeliveryFee') }}</span>
+          <input
+            type="number"
+            class="profile-setup__technical"
+            dir="ltr"
+            formControlName="deliveryFee"
+            min="0"
+            step="0.01"
+            inputmode="decimal"
+          />
+          @if (fieldError('deliveryFee'); as error) {
+            <small>{{ error }}</small>
+          }
+        </label>
+
+        <label>
+          <span>{{ localeService.uiText('profileMinimumOrder') }}</span>
+          <input
+            type="number"
+            class="profile-setup__technical"
+            dir="ltr"
+            formControlName="minimumOrderAmount"
+            min="0"
+            step="0.01"
+            inputmode="decimal"
+          />
+          @if (fieldError('minimumOrderAmount'); as error) {
+            <small>{{ error }}</small>
+          }
+        </label>
+
+        <label>
+          <span>{{ localeService.uiText('profileTaxRate') }} (%)</span>
+          <input
+            type="number"
+            class="profile-setup__technical"
+            dir="ltr"
+            formControlName="taxRate"
+            min="0"
+            max="100"
+            step="0.01"
+            inputmode="decimal"
+          />
+          @if (fieldError('taxRate'); as error) {
+            <small>{{ error }}</small>
+          }
+        </label>
+
+        <label>
+          <span>{{ localeService.uiText('profileCurrencyCode') }}</span>
           <input
             type="text"
             class="profile-setup__technical"
             dir="ltr"
             formControlName="currencyCode"
             maxlength="3"
+            spellcheck="false"
           />
+          @if (fieldError('currencyCode'); as error) {
+            <small>{{ error }}</small>
+          }
         </label>
 
         <label>
@@ -159,15 +238,29 @@
           />
         </label>
 
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'كود الهاتف' : 'Phone country code' }}</span>
-          <input
-            type="text"
-            class="profile-setup__technical"
-            dir="ltr"
-            formControlName="phoneCountryCode"
-          />
-        </label>
+        @if (orderingMethodError()) {
+          <p class="profile-setup__alert" role="alert">
+            {{ localeService.uiText('profileOrderingMethodRequired') }}
+          </p>
+        }
+
+        @if (settingsSaveNotice()) {
+          <p class="profile-setup__notice" role="status">{{ settingsSaveNotice() }}</p>
+        }
+
+        <button
+          type="button"
+          class="profile-setup__save"
+          data-testid="profile-save-ordering-settings"
+          [disabled]="!canSaveSettings() || savingSettings() || settingsLoadFailed()"
+          (click)="saveOrderingSettings()"
+        >
+          {{
+            savingSettings()
+              ? localeService.uiText('adminMenuSaving')
+              : localeService.uiText('profileSaveOrderingSettings')
+          }}
+        </button>
       </section>
 
       <section class="profile-setup__section">
@@ -218,6 +311,24 @@
           <span>{{ localeService.locale() === 'ar' ? 'العنوان بالإنجليزية' : 'English address' }}</span>
           <input type="text" formControlName="addressEn" />
         </label>
+
+        @if (profileSaveNotice()) {
+          <p class="profile-setup__notice" role="status">{{ profileSaveNotice() }}</p>
+        }
+
+        <button
+          type="button"
+          class="profile-setup__save"
+          data-testid="profile-save-restaurant"
+          [disabled]="!canSaveSettings() || savingProfile()"
+          (click)="saveRestaurantProfile()"
+        >
+          {{
+            savingProfile()
+              ? localeService.uiText('adminMenuSaving')
+              : localeService.uiText('profileSaveRestaurant')
+          }}
+        </button>
       </section>
     </form>
 

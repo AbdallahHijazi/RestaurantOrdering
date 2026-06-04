@@ -60,8 +60,14 @@ describe('role-aware routing', () => {
     expect(router.url).toContain('/login');
   });
 
-  it('allows RestaurantManager to open /admin/restaurant-profile', async () => {
+  it('redirects RestaurantManager from /admin/restaurant-profile to /admin/dashboard', async () => {
     session.saveSession(createTestSession(ApplicationRoles.RestaurantManager));
+    await router.navigateByUrl('/admin/restaurant-profile');
+    expect(router.url).toBe('/admin/dashboard');
+  });
+
+  it('allows RestaurantOwner to open /admin/restaurant-profile', async () => {
+    session.saveSession(createTestSession(ApplicationRoles.RestaurantOwner));
     await router.navigateByUrl('/admin/restaurant-profile');
     expect(router.url).toBe('/admin/restaurant-profile');
   });

@@ -312,6 +312,12 @@
                   <dd>{{ details.deliveryAddress }}</dd>
                 </div>
               }
+              @if (details.orderType === OrderType.Delivery) {
+                <div>
+                  <dt>{{ locale.uiText('kitchenFieldDeliveryFee') }}</dt>
+                  <dd>{{ locale.formatCurrency(details.deliveryFee, details.currencyCode) }}</dd>
+                </div>
+              }
               @if (details.notes?.trim()) {
                 <div>
                   <dt>{{ locale.uiText('kitchenFieldOrderNotes') }}</dt>

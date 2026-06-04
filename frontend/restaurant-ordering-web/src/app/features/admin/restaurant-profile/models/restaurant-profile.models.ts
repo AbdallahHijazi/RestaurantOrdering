@@ -19,6 +19,16 @@ export interface RestaurantProfileFormValue {
   city: string;
   addressAr: string;
   addressEn: string;
+  isPickupEnabled: boolean;
+  isDeliveryEnabled: boolean;
+  deliveryFee: number;
+  minimumOrderAmount: number;
+  taxRate: number;
+}
+
+/** Fields returned by GET settings but not edited in this step. */
+export interface RestaurantSettingsSnapshot {
+  workingHoursJson: string | null;
 }
 
 export interface RestaurantProfilePreviewData {

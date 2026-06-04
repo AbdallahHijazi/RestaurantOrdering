@@ -1,18 +1,27 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, forkJoin, map, of } from 'rxjs';
 import { API_BASE_URL } from '../../../../core/config/api-config';
+import { AuthService } from '../../../../core/auth/auth.service';
 import type {
   RestaurantApiDto,
   RestaurantSettingsApiDto,
   UpdateRestaurantApiRequest,
   UpdateRestaurantSettingsApiRequest,
 } from '../../../public-menu/data-access/public-menu.dto';
-import type { RestaurantProfileFormValue } from '../models/restaurant-profile.models';
-import { DEMO_RESTAURANT_ID } from '../models/restaurant-profile.models';
+import type {
+  RestaurantProfileFormValue,
+  RestaurantSettingsSnapshot,
+} from '../models/restaurant-profile.models';
+import { buildUpdateSettingsRequest } from './restaurant-profile-settings.util';
+
+export { buildUpdateSettingsRequest } from './restaurant-profile-settings.util';
+
+export type ProfileSaveScope = 'restaurant' | 'settings';
 
 export interface ProfileSaveResult {
   mode: 'demo' | 'api';
+  scope: ProfileSaveScope;
   message: string;
 }
 
@@ -25,34 +34,58 @@ export interface ProfileSaveResult {
 })
 export class RestaurantProfileApiService {
   private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
   private demoSnapshot: RestaurantProfileFormValue | null = null;
 
-  /**
-   * TODO: Replace demo restaurant ID with authenticated tenant context.
-   * TODO: Add Auth Guard before calling admin endpoints.
-   */
-  saveProfile(formValue: RestaurantProfileFormValue): Observable<ProfileSaveResult> {
-    this.demoSnapshot = structuredClone(formValue);
+  saveRestaurantProfile(formValue: RestaurantProfileFormValue): Observable<ProfileSaveResult> {
+    const restaurantId = this.authService.restaurantId();
+    if (!restaurantId) {
+      this.demoSnapshot = structuredClone(formValue);
+      return of({
+        mode: 'demo',
+        scope: 'restaurant',
+        message: 'demo-preview-only',
+      });
+    }
 
-    const restaurantId = DEMO_RESTAURANT_ID;
     const updateRequest = this.toUpdateRestaurantRequest(formValue);
-    const settingsRequest = this.toUpdateSettingsRequest(formValue);
+    return this.updateRestaurant(restaurantId, updateRequest).pipe(
+      map(() => ({ mode: 'api' as const, scope: 'restaurant' as const, message: 'restaurant-saved' })),
+    );
+  }
 
-    // Real endpoints exist but require auth + known restaurantId.
-    // Until auth is wired, keep an in-memory demo save only.
-    void restaurantId;
-    void updateRequest;
-    void settingsRequest;
-    void this.http;
+  saveOrderingSettings(
+    formValue: RestaurantProfileFormValue,
+    settingsSnapshot: RestaurantSettingsSnapshot,
+  ): Observable<ProfileSaveResult> {
+    const restaurantId = this.authService.restaurantId();
+    if (!restaurantId) {
+      this.demoSnapshot = structuredClone(formValue);
+      return of({
+        mode: 'demo',
+        scope: 'settings',
+        message: 'demo-preview-only',
+      });
+    }
 
-    return of({
-      mode: 'demo',
-      message: 'demo-preview-only',
-    });
+    const settingsRequest = buildUpdateSettingsRequest(formValue, settingsSnapshot);
+    return this.updateSettings(restaurantId, settingsRequest).pipe(
+      map(() => ({ mode: 'api' as const, scope: 'settings' as const, message: 'settings-saved' })),
+    );
   }
 
   getDemoSnapshot(): RestaurantProfileFormValue | null {
     return this.demoSnapshot ? structuredClone(this.demoSnapshot) : null;
+  }
+
+  loadProfile(restaurantId: string): Observable<{
+    restaurant: RestaurantApiDto;
+    settings: RestaurantSettingsApiDto;
+  }> {
+    return forkJoin({
+      restaurant: this.getRestaurant(restaurantId),
+      settings: this.getSettings(restaurantId),
+    });
   }
 
   /** Real contract: GET /api/v1/admin/restaurants/{restaurantId} */
@@ -91,7 +124,7 @@ export class RestaurantProfileApiService {
     );
   }
 
-  private toUpdateRestaurantRequest(form: RestaurantProfileFormValue): UpdateRestaurantApiRequest {
+  toUpdateRestaurantRequest(form: RestaurantProfileFormValue): UpdateRestaurantApiRequest {
     return {
       slug: form.slug.trim().toLowerCase(),
       nameAr: form.nameAr.trim(),
@@ -104,21 +137,6 @@ export class RestaurantProfileApiService {
       addressEn: form.addressEn.trim() || null,
       latitude: null,
       longitude: null,
-    };
-  }
-
-  private toUpdateSettingsRequest(
-    form: RestaurantProfileFormValue,
-  ): UpdateRestaurantSettingsApiRequest {
-    return {
-      currencyCode: form.currencyCode.trim().toUpperCase(),
-      timeZone: form.timeZone.trim(),
-      taxRate: 0,
-      deliveryFee: 0,
-      minimumOrderAmount: 0,
-      isDeliveryEnabled: true,
-      isPickupEnabled: true,
-      workingHoursJson: null,
     };
   }
 }

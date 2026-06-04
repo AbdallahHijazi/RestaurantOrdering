@@ -47,13 +47,16 @@
       >
         {{ localeService.uiText('adminNavDashboard') }}
       </a>
-      <a
-        routerLink="/admin/restaurant-profile"
-        routerLinkActive="is-active"
-        (click)="closeDrawer()"
-      >
-        {{ localeService.uiText('adminNavRestaurantProfile') }}
-      </a>
+      @if (isOwner()) {
+        <a
+          routerLink="/admin/restaurant-profile"
+          routerLinkActive="is-active"
+          data-testid="admin-nav-restaurant-profile"
+          (click)="closeDrawer()"
+        >
+          {{ localeService.uiText('adminNavRestaurantProfile') }}
+        </a>
+      }
       <a
         routerLink="/admin/orders"
         routerLinkActive="is-active"

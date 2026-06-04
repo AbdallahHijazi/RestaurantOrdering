@@ -22,13 +22,19 @@
     }
   </div>
 
-  <article class="admin-dashboard__ready-card">
-    <h3>{{ localeService.uiText('adminDashboardReadyTitle') }}</h3>
-    <p>{{ localeService.uiText('adminDashboardReadyDescription') }}</p>
-    <a routerLink="/admin/restaurant-profile" class="admin-dashboard__cta">
-      {{ localeService.uiText('adminDashboardGoToProfile') }}
-    </a>
-  </article>
+  @if (isOwner()) {
+    <article class="admin-dashboard__ready-card">
+      <h3>{{ localeService.uiText('adminDashboardReadyTitle') }}</h3>
+      <p>{{ localeService.uiText('adminDashboardReadyDescription') }}</p>
+      <a
+        routerLink="/admin/restaurant-profile"
+        class="admin-dashboard__cta"
+        data-testid="admin-dashboard-profile-link"
+      >
+        {{ localeService.uiText('adminDashboardGoToProfile') }}
+      </a>
+    </article>
+  }
 
   <div class="admin-dashboard__placeholders" aria-label="{{ localeService.uiText('adminDashboardComingSoonLabel') }}">
     <article class="admin-dashboard__placeholder-card admin-dashboard__placeholder-card--link">

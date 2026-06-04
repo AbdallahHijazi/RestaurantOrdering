@@ -59,6 +59,9 @@ export const routes: Routes = [
       },
       {
         path: 'restaurant-profile',
+        data: {
+          roles: [ApplicationRoles.RestaurantOwner],
+        },
         loadComponent: () =>
           import(
             './features/admin/restaurant-profile/pages/restaurant-profile-setup-page/restaurant-profile-setup-page'

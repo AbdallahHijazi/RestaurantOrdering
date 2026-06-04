@@ -22,6 +22,10 @@ export class DashboardPage {
   protected readonly demoStats = ADMIN_DASHBOARD_DEMO_STATS;
   protected readonly demoStatOrder = ADMIN_DASHBOARD_DEMO_STAT_ORDER;
 
+  protected readonly isOwner = computed(() =>
+    this.authService.hasAnyRole(ApplicationRoles.RestaurantOwner),
+  );
+
   protected readonly roleLabel = computed(() => {
     const role = this.authService.currentRole();
     if (role === ApplicationRoles.RestaurantOwner) {

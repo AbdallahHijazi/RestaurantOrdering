@@ -48,6 +48,47 @@
   cursor: pointer;
 }
 
+.profile-setup__save:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.profile-setup__alert {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  background: #fef2f2;
+  color: #991b1b;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.profile-setup__alert p {
+  margin: 0;
+}
+
+.profile-setup__secondary {
+  justify-self: start;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  background: #fff;
+  cursor: pointer;
+}
+
+.profile-setup__toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 600;
+}
+
+.profile-setup__toggle input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--restaurant-accent, #b8663f);
+}
+
 .profile-setup__notice {
   margin: 0 0 1rem;
   padding: 0.75rem 1rem;

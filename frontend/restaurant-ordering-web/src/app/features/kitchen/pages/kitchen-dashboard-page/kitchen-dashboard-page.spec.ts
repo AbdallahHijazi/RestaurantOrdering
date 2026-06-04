@@ -216,6 +216,32 @@ describe('KitchenDashboardPage', () => {
     expect(root().textContent).toContain('برجر');
   });
 
+  it('shows delivery fee and address for delivery orders', () => {
+    fixture.detectChanges();
+    flushBoard({
+      newOrders: [createSummary('order-delivery', OrderStatus.New, 'D-100')],
+    });
+
+    root()
+      .querySelector<HTMLButtonElement>('[data-testid="kitchen-details-order-delivery"]')!
+      .click();
+
+    const detailsReq = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders/order-delivery`,
+    );
+    const details = createDetails('order-delivery', OrderStatus.New);
+    details.orderType = OrderType.Delivery;
+    details.deliveryAddress = '123 Main Street';
+    details.deliveryFee = 14;
+    detailsReq.flush(details);
+    TestBed.inject(LocaleService).setLocale('en');
+    fixture.detectChanges();
+
+    const body = root().querySelector('[data-testid="kitchen-details-body"]') as HTMLElement;
+    expect(body.textContent).toContain('123 Main Street');
+    expect(body.textContent).toContain('Delivery fee');
+  });
+
   it('falls back from itemNameEn to itemNameAr when English name is missing', () => {
     fixture.detectChanges();
     flushBoard({
