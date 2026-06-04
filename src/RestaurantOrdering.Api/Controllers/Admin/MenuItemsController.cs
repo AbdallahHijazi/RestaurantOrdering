@@ -1,5 +1,7 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Api.Contracts.Admin.MenuItems;
 using RestaurantOrdering.Application.Features.MenuItems.Commands.CreateMenuItem;
 using RestaurantOrdering.Application.Features.MenuItems.Commands.DeleteMenuItem;
@@ -11,6 +13,7 @@ using RestaurantOrdering.Application.Features.MenuItems.Queries.GetMenuItems;
 namespace RestaurantOrdering.Api.Controllers.Admin;
 
 [ApiController]
+[Authorize(Policy = ApplicationPolicies.RestaurantDashboardAccess)]
 [Route("api/v1/admin/restaurants/{restaurantId:guid}/menu-items")]
 public sealed class MenuItemsController : ControllerBase
 {

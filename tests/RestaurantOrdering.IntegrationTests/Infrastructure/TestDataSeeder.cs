@@ -23,6 +23,7 @@ internal static class TestDataSeeder
     internal static readonly Guid RestaurantBSettingsId = Guid.Parse("bbbbbbbb-4444-4444-4444-444444444444");
     internal static readonly Guid RestaurantBMediaId = Guid.Parse("bbbbbbbb-5555-5555-5555-555555555555");
     internal static readonly Guid CategoryAId = Guid.Parse("aaaaaaaa-6666-6666-6666-666666666666");
+    internal static readonly Guid CategoryBId = Guid.Parse("bbbbbbbb-6666-6666-6666-666666666666");
     internal static readonly Guid MenuItemAId = Guid.Parse("aaaaaaaa-7777-7777-7777-777777777777");
     internal static readonly Guid OrderAId = Guid.Parse("aaaaaaaa-8888-8888-8888-888888888888");
     internal static readonly Guid OrderACompletedId = Guid.Parse("aaaaaaaa-9999-9999-9999-999999999999");
@@ -132,13 +133,24 @@ internal static class TestDataSeeder
 
         var seededAt = DateTime.UtcNow;
 
-        dbContext.Categories.Add(
+        dbContext.Categories.AddRange(
             new Category
             {
                 Id = CategoryAId,
                 RestaurantId = RestaurantAId,
                 NameAr = "فئة اختبار",
                 NameEn = "Test Category",
+                DisplayOrder = 1,
+                IsActive = true,
+                IsDeleted = false,
+                CreatedAt = seededAt
+            },
+            new Category
+            {
+                Id = CategoryBId,
+                RestaurantId = RestaurantBId,
+                NameAr = "فئة ب",
+                NameEn = "Category B",
                 DisplayOrder = 1,
                 IsActive = true,
                 IsDeleted = false,

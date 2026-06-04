@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using RestaurantOrdering.Api.Contracts.Admin.MediaFiles;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Application.Features.MediaFiles.Commands.SetRestaurantLogo;
 using RestaurantOrdering.Application.Features.MediaFiles.Commands.UploadMediaFile;
 using RestaurantOrdering.Application.Features.MediaFiles.DTOs;
@@ -23,6 +24,7 @@ public sealed class MediaFilesController : ControllerBase
     }
 
     [HttpPost("media")]
+    [Authorize(Policy = ApplicationPolicies.RestaurantDashboardAccess)]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(6291456)]
     [RequestFormLimits(MultipartBodyLengthLimit = 6291456)]
