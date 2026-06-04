@@ -72,6 +72,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'menu',
+        loadComponent: () =>
+          import('./features/admin/pages/menu-management-page/menu-management-page').then(
+            (m) => m.MenuManagementPage,
+          ),
+      },
+      {
         path: 'staff',
         data: {
           roles: [ApplicationRoles.RestaurantOwner],

@@ -49,6 +49,7 @@ describe('AdminLayout', () => {
     expect(hrefs).toContain('/admin/dashboard');
     expect(hrefs).toContain('/admin/restaurant-profile');
     expect(hrefs).toContain('/admin/orders');
+    expect(hrefs).toContain('/admin/menu');
     expect(hrefs).toContain('/admin/staff');
   });
 
@@ -68,6 +69,7 @@ describe('AdminLayout', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('[data-testid="admin-nav-orders"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="admin-nav-menu"]')).toBeTruthy();
   });
 
   it('shows logo fallback until a valid preview logo is available', () => {

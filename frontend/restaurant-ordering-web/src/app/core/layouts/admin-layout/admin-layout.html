@@ -62,6 +62,14 @@
       >
         {{ localeService.uiText('adminNavOrders') }}
       </a>
+      <a
+        routerLink="/admin/menu"
+        routerLinkActive="is-active"
+        data-testid="admin-nav-menu"
+        (click)="closeDrawer()"
+      >
+        {{ localeService.uiText('adminNavMenu') }}
+      </a>
       @if (isOwner()) {
         <a
           routerLink="/admin/staff"

@@ -78,6 +78,29 @@ describe('role-aware routing', () => {
     expect(router.url).toBe('/admin/dashboard');
   });
 
+  it('allows RestaurantOwner to open /admin/menu', async () => {
+    session.saveSession(createTestSession(ApplicationRoles.RestaurantOwner));
+    await router.navigateByUrl('/admin/menu');
+    expect(router.url).toBe('/admin/menu');
+  });
+
+  it('allows RestaurantManager to open /admin/menu', async () => {
+    session.saveSession(createTestSession(ApplicationRoles.RestaurantManager));
+    await router.navigateByUrl('/admin/menu');
+    expect(router.url).toBe('/admin/menu');
+  });
+
+  it('redirects KitchenManager from /admin/menu to /kitchen', async () => {
+    session.saveSession(createTestSession(ApplicationRoles.KitchenManager));
+    await router.navigateByUrl('/admin/menu');
+    expect(router.url).toBe('/kitchen');
+  });
+
+  it('redirects guest from /admin/menu to /login', async () => {
+    await router.navigateByUrl('/admin/menu');
+    expect(router.url).toContain('/login');
+  });
+
   it('redirects KitchenManager from /admin/staff to /kitchen', async () => {
     session.saveSession(createTestSession(ApplicationRoles.KitchenManager));
     await router.navigateByUrl('/admin/staff');

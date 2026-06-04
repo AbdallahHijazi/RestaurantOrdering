@@ -43,6 +43,7 @@ export interface PublicMenuItemApiDto {
   price: number;
   discountPrice?: number | null;
   displayOrder: number;
+  imageUrl?: string | null;
 }
 
 /** Backend contract: PUT /api/v1/admin/restaurants/{restaurantId} */

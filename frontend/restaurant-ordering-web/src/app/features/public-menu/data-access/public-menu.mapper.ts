@@ -1,5 +1,6 @@
 import type { PublicMenuApiDto } from './public-menu.dto';
 import type { PublicMenuPageData } from '../models/public-menu.models';
+import { resolveApiAssetUrl } from '../../../core/config/resolve-api-asset-url';
 import { MOCK_IMAGE_FALLBACK } from './public-menu-mock.data';
 
 export function mapPublicMenuApiDto(dto: PublicMenuApiDto): PublicMenuPageData {
@@ -25,8 +26,7 @@ export function mapPublicMenuApiDto(dto: PublicMenuApiDto): PublicMenuPageData {
         descriptionEn: item.descriptionEn,
         price: item.price,
         discountPrice: item.discountPrice,
-        // TODO: Replace with public media URL endpoint when available.
-        imageUrl: item.imageFileId ? MOCK_IMAGE_FALLBACK : null,
+        imageUrl: resolveApiAssetUrl(item.imageUrl ?? null),
         isAvailable: true,
         isPopular: false,
         isVegetarian: false,

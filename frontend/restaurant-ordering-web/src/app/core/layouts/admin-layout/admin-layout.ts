@@ -8,7 +8,7 @@ import { AdminBrandingService } from './admin-branding.service';
 import { LocaleService } from '../../localization/locale';
 import { ADMIN_SHELL_MOCK } from './admin-shell.config';
 
-type AdminPageKey = 'dashboard' | 'restaurantProfile' | 'staff' | 'orders';
+type AdminPageKey = 'dashboard' | 'restaurantProfile' | 'staff' | 'orders' | 'menu';
 
 @Component({
   selector: 'app-admin-layout',
@@ -44,7 +44,9 @@ export class AdminLayout {
           ? 'adminPageRestaurantProfile'
           : key === 'orders'
             ? 'adminPageOrders'
-            : 'adminPageDashboard';
+            : key === 'menu'
+              ? 'adminPageMenu'
+              : 'adminPageDashboard';
     return this.localeService.uiText(titleKey);
   });
   protected readonly isOwner = computed(() =>
@@ -100,6 +102,10 @@ export class AdminLayout {
 
     if (url.includes('orders')) {
       return 'orders';
+    }
+
+    if (url.includes('/admin/menu')) {
+      return 'menu';
     }
 
     return url.includes('restaurant-profile') ? 'restaurantProfile' : 'dashboard';

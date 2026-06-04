@@ -31,9 +31,12 @@
   </article>
 
   <div class="admin-dashboard__placeholders" aria-label="{{ localeService.uiText('adminDashboardComingSoonLabel') }}">
-    <article class="admin-dashboard__placeholder-card">
+    <article class="admin-dashboard__placeholder-card admin-dashboard__placeholder-card--link">
       <h3>{{ localeService.uiText('adminDashboardMenuTitle') }}</h3>
       <p>{{ localeService.uiText('adminDashboardMenuDescription') }}</p>
+      <a routerLink="/admin/menu" class="admin-dashboard__cta" data-testid="admin-dashboard-menu-link">
+        {{ localeService.uiText('adminDashboardGoToMenu') }}
+      </a>
     </article>
     <article class="admin-dashboard__placeholder-card admin-dashboard__placeholder-card--link">
       <h3>{{ localeService.uiText('adminDashboardOrdersTitle') }}</h3>

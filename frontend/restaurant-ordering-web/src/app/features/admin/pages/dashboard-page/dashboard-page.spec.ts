@@ -24,11 +24,16 @@ describe('DashboardPage', () => {
     fixture.detectChanges();
   });
 
-  it('shows welcome content and a link to restaurant profile', () => {
+  it('shows welcome content and navigation links', () => {
     const profileLink: HTMLAnchorElement = fixture.nativeElement.querySelector(
       'a[href="/admin/restaurant-profile"]',
     );
+    const menuLink: HTMLAnchorElement = fixture.nativeElement.querySelector(
+      'a[data-testid="admin-dashboard-menu-link"]',
+    );
     expect(profileLink).toBeTruthy();
+    expect(menuLink).toBeTruthy();
+    expect(menuLink.getAttribute('href')).toBe('/admin/menu');
     expect(fixture.nativeElement.querySelector('.admin-dashboard__ready-card')).toBeTruthy();
     expect(fixture.nativeElement.querySelectorAll('.admin-dashboard__placeholder-card').length).toBe(
       3,

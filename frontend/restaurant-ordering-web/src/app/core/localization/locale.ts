@@ -146,9 +146,11 @@ type UiTextKey =
   | 'adminNavDashboard'
   | 'adminNavRestaurantProfile'
   | 'adminNavOrders'
+  | 'adminNavMenu'
   | 'adminNavStaff'
   | 'adminPageStaff'
   | 'adminPageOrders'
+  | 'adminPageMenu'
   | 'adminLogout'
   | 'adminOpenSidebar'
   | 'adminCloseSidebar'
@@ -170,6 +172,7 @@ type UiTextKey =
   | 'adminDashboardReadyDescription'
   | 'adminDashboardGoToProfile'
   | 'adminDashboardGoToOrders'
+  | 'adminDashboardGoToMenu'
   | 'adminDashboardComingSoonLabel'
   | 'adminDashboardMenuTitle'
   | 'adminDashboardMenuDescription'
@@ -331,6 +334,76 @@ type UiTextKey =
   | 'adminOrdersMissingContextTitle'
   | 'adminOrdersMissingContextDescription'
   | 'adminOrdersLoadMore'
+  | 'adminMenuPageTitle'
+  | 'adminMenuPageLead'
+  | 'adminMenuAddItem'
+  | 'adminMenuAddCategory'
+  | 'adminMenuAllItems'
+  | 'adminMenuCategoriesHeading'
+  | 'adminMenuItemsHeading'
+  | 'adminMenuEdit'
+  | 'adminMenuDelete'
+  | 'adminMenuActive'
+  | 'adminMenuInactive'
+  | 'adminMenuAvailable'
+  | 'adminMenuUnavailable'
+  | 'adminMenuLoading'
+  | 'adminMenuRetry'
+  | 'adminMenuEmptyItemsTitle'
+  | 'adminMenuEmptyItemsDescription'
+  | 'adminMenuListErrorTitle'
+  | 'adminMenuListError'
+  | 'adminMenuMissingContextTitle'
+  | 'adminMenuMissingContextDescription'
+  | 'adminMenuCreateCategoryTitle'
+  | 'adminMenuEditCategoryTitle'
+  | 'adminMenuCreateItemTitle'
+  | 'adminMenuEditItemTitle'
+  | 'adminMenuFormNameAr'
+  | 'adminMenuFormNameEn'
+  | 'adminMenuFormDescriptionAr'
+  | 'adminMenuFormDescriptionEn'
+  | 'adminMenuFormDisplayOrder'
+  | 'adminMenuFormIsActive'
+  | 'adminMenuFormCategory'
+  | 'adminMenuFormPrice'
+  | 'adminMenuFormDiscountPrice'
+  | 'adminMenuFormIsAvailable'
+  | 'adminMenuFormImage'
+  | 'adminMenuSave'
+  | 'adminMenuSaving'
+  | 'adminMenuCancel'
+  | 'adminMenuCloseModal'
+  | 'adminMenuCategoryCreateSuccess'
+  | 'adminMenuCategoryUpdateSuccess'
+  | 'adminMenuCategoryDeleteSuccess'
+  | 'adminMenuItemCreateSuccess'
+  | 'adminMenuItemUpdateSuccess'
+  | 'adminMenuItemDeleteSuccess'
+  | 'adminMenuDeleteCategoryTitle'
+  | 'adminMenuDeleteCategoryMessage'
+  | 'adminMenuDeleteCategoryWarning'
+  | 'adminMenuDeleteItemTitle'
+  | 'adminMenuDeleteItemMessage'
+  | 'adminMenuConfirmDelete'
+  | 'adminMenuDismissDelete'
+  | 'adminMenuDiscountLabel'
+  | 'adminMenuDiscountInvalid'
+  | 'adminMenuImageInvalidType'
+  | 'adminMenuImageInvalidSize'
+  | 'adminMenuImageInvalidEmpty'
+  | 'adminMenuImageHelp'
+  | 'adminMenuImagePreviewAlt'
+  | 'adminMenuImageFallbackAlt'
+  | 'adminMenuErrorForbidden'
+  | 'adminMenuErrorNotFound'
+  | 'adminMenuErrorConflict'
+  | 'adminMenuErrorTooManyRequests'
+  | 'adminMenuErrorGeneric'
+  | 'adminMenuErrorValidation'
+  | 'adminMenuToggleAvailable'
+  | 'adminMenuToggleAvailableBusy'
+  | 'adminMenuSelectCategory'
   | 'languageArabic'
   | 'languageEnglish';
 
@@ -382,9 +455,11 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminNavDashboard: 'لوحة التحكم',
     adminNavRestaurantProfile: 'ملف المطعم',
     adminNavOrders: 'إدارة الطلبات',
+    adminNavMenu: 'إدارة القائمة',
     adminNavStaff: 'إدارة الموظفين',
     adminPageStaff: 'إدارة الموظفين',
     adminPageOrders: 'إدارة الطلبات',
+    adminPageMenu: 'إدارة القائمة',
     adminLogout: 'تسجيل الخروج',
     adminOpenSidebar: 'فتح القائمة الجانبية',
     adminCloseSidebar: 'إغلاق القائمة الجانبية',
@@ -408,9 +483,10 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
       'يمكنك الآن التنقل بين الأقسام المتاحة. ابدأ بملف المطعم لضبط الهوية والمعاينة.',
     adminDashboardGoToProfile: 'الانتقال إلى ملف المطعم',
     adminDashboardGoToOrders: 'الانتقال إلى إدارة الطلبات',
+    adminDashboardGoToMenu: 'الانتقال إلى إدارة القائمة',
     adminDashboardComingSoonLabel: 'أقسام قادمة',
     adminDashboardMenuTitle: 'إدارة القائمة',
-    adminDashboardMenuDescription: 'ستظهر أدوات القائمة هنا لاحقًا.',
+    adminDashboardMenuDescription: 'أدر التصنيفات والوجبات وصور الأطباق من صفحة واحدة.',
     adminDashboardOrdersTitle: 'الطلبات',
     adminDashboardOrdersDescription: 'تابع الطلبات وحدّث حالتها من صفحة إدارة الطلبات.',
     adminDashboardStaffTitle: 'الموظفون',
@@ -572,6 +648,77 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminOrdersMissingContextDescription:
       'لا يمكن إدارة الطلبات بدون معرف مطعم في الجلسة الحالية.',
     adminOrdersLoadMore: 'تحميل المزيد',
+    adminMenuPageTitle: 'إدارة القائمة',
+    adminMenuPageLead: 'أدر التصنيفات والوجبات وصور الأطباق لمطعمك.',
+    adminMenuAddItem: 'إضافة وجبة',
+    adminMenuAddCategory: 'إضافة تصنيف',
+    adminMenuAllItems: 'كل الوجبات',
+    adminMenuCategoriesHeading: 'التصنيفات',
+    adminMenuItemsHeading: 'الوجبات',
+    adminMenuEdit: 'تعديل',
+    adminMenuDelete: 'حذف',
+    adminMenuActive: 'نشط',
+    adminMenuInactive: 'غير نشط',
+    adminMenuAvailable: 'متاح',
+    adminMenuUnavailable: 'غير متاح',
+    adminMenuLoading: 'جاري تحميل الوجبات…',
+    adminMenuRetry: 'إعادة المحاولة',
+    adminMenuEmptyItemsTitle: 'لا توجد وجبات',
+    adminMenuEmptyItemsDescription: 'ابدأ بإضافة أول وجبة لهذا التصنيف.',
+    adminMenuListErrorTitle: 'تعذر تحميل البيانات',
+    adminMenuListError: 'حدث خطأ أثناء تحميل بيانات القائمة. حاول مرة أخرى.',
+    adminMenuMissingContextTitle: 'سياق المطعم غير متوفر',
+    adminMenuMissingContextDescription: 'تعذر تحديد المطعم الحالي. أعد تسجيل الدخول ثم حاول مجددًا.',
+    adminMenuCreateCategoryTitle: 'إضافة تصنيف',
+    adminMenuEditCategoryTitle: 'تعديل تصنيف',
+    adminMenuCreateItemTitle: 'إضافة وجبة',
+    adminMenuEditItemTitle: 'تعديل وجبة',
+    adminMenuFormNameAr: 'الاسم بالعربية',
+    adminMenuFormNameEn: 'الاسم بالإنجليزية (اختياري)',
+    adminMenuFormDescriptionAr: 'الوصف بالعربية (اختياري)',
+    adminMenuFormDescriptionEn: 'الوصف بالإنجليزية (اختياري)',
+    adminMenuFormDisplayOrder: 'ترتيب العرض',
+    adminMenuFormIsActive: 'تصنيف نشط',
+    adminMenuFormCategory: 'التصنيف',
+    adminMenuFormPrice: 'السعر',
+    adminMenuFormDiscountPrice: 'سعر الخصم (اختياري)',
+    adminMenuFormIsAvailable: 'متاح للطلب',
+    adminMenuFormImage: 'صورة الوجبة (اختياري)',
+    adminMenuSave: 'حفظ',
+    adminMenuSaving: 'جاري الحفظ…',
+    adminMenuCancel: 'إلغاء',
+    adminMenuCloseModal: 'إغلاق النافذة',
+    adminMenuCategoryCreateSuccess: 'تم إنشاء التصنيف بنجاح.',
+    adminMenuCategoryUpdateSuccess: 'تم تحديث التصنيف بنجاح.',
+    adminMenuCategoryDeleteSuccess: 'تم حذف التصنيف.',
+    adminMenuItemCreateSuccess: 'تم إنشاء الوجبة بنجاح.',
+    adminMenuItemUpdateSuccess: 'تم تحديث الوجبة بنجاح.',
+    adminMenuItemDeleteSuccess: 'تم حذف الوجبة.',
+    adminMenuDeleteCategoryTitle: 'حذف التصنيف',
+    adminMenuDeleteCategoryMessage: 'هل تريد حذف هذا التصنيف؟',
+    adminMenuDeleteCategoryWarning:
+      'يحتوي هذا التصنيف على وجبات. قد تختفي من القائمة العامة بعد الحذف.',
+    adminMenuDeleteItemTitle: 'حذف الوجبة',
+    adminMenuDeleteItemMessage: 'هل تريد حذف هذه الوجبة؟',
+    adminMenuConfirmDelete: 'تأكيد الحذف',
+    adminMenuDismissDelete: 'تراجع',
+    adminMenuDiscountLabel: 'خصم:',
+    adminMenuDiscountInvalid: 'سعر الخصم يجب أن يكون أكبر من أو يساوي صفرًا ولا يتجاوز السعر.',
+    adminMenuImageInvalidType: 'نوع الصورة غير مدعوم. استخدم JPEG أو PNG أو WebP.',
+    adminMenuImageInvalidSize: 'حجم الصورة يتجاوز الحد المسموح (5MB).',
+    adminMenuImageInvalidEmpty: 'الملف المختار فارغ.',
+    adminMenuImageHelp: 'JPEG أو PNG أو WebP حتى 5MB. تُرفع الصورة عند الحفظ فقط.',
+    adminMenuImagePreviewAlt: 'معاينة صورة الوجبة',
+    adminMenuImageFallbackAlt: 'لا توجد صورة',
+    adminMenuErrorForbidden: 'ليست لديك صلاحية لتنفيذ هذا الإجراء.',
+    adminMenuErrorNotFound: 'العنصر لم يعد متاحًا. تم تحديث القائمة.',
+    adminMenuErrorConflict: 'تعارض في البيانات. راجع القيم وحاول مرة أخرى.',
+    adminMenuErrorTooManyRequests: 'عدد المحاولات كبير جدًا. حاول لاحقًا.',
+    adminMenuErrorGeneric: 'حدث خطأ غير متوقع. حاول مرة أخرى.',
+    adminMenuErrorValidation: 'تحقق من الحقول المطلوبة ثم حاول مرة أخرى.',
+    adminMenuToggleAvailable: 'تبديل التوفر',
+    adminMenuToggleAvailableBusy: 'جاري التحديث…',
+    adminMenuSelectCategory: 'اختر تصنيفًا',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
   },
@@ -622,9 +769,11 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminNavDashboard: 'Dashboard',
     adminNavRestaurantProfile: 'Restaurant profile',
     adminNavOrders: 'Orders management',
+    adminNavMenu: 'Menu management',
     adminNavStaff: 'Staff management',
     adminPageStaff: 'Staff management',
     adminPageOrders: 'Orders management',
+    adminPageMenu: 'Menu management',
     adminLogout: 'Log out',
     adminOpenSidebar: 'Open sidebar menu',
     adminCloseSidebar: 'Close sidebar menu',
@@ -648,9 +797,10 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
       'You can move between the available sections now. Begin with the restaurant profile to set branding and preview.',
     adminDashboardGoToProfile: 'Go to restaurant profile',
     adminDashboardGoToOrders: 'Go to orders management',
+    adminDashboardGoToMenu: 'Go to menu management',
     adminDashboardComingSoonLabel: 'Coming soon',
     adminDashboardMenuTitle: 'Menu management',
-    adminDashboardMenuDescription: 'Menu tools will appear here in a later step.',
+    adminDashboardMenuDescription: 'Manage categories, menu items, and dish photos from one page.',
     adminDashboardOrdersTitle: 'Orders',
     adminDashboardOrdersDescription: 'Track orders and update their status from the orders management page.',
     adminDashboardStaffTitle: 'Staff',
@@ -814,6 +964,78 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminOrdersMissingContextDescription:
       'Orders management requires a restaurant id in the current session.',
     adminOrdersLoadMore: 'Load more',
+    adminMenuPageTitle: 'Menu management',
+    adminMenuPageLead: 'Manage categories, menu items, and dish photos for your restaurant.',
+    adminMenuAddItem: 'Add menu item',
+    adminMenuAddCategory: 'Add category',
+    adminMenuAllItems: 'All items',
+    adminMenuCategoriesHeading: 'Categories',
+    adminMenuItemsHeading: 'Menu items',
+    adminMenuEdit: 'Edit',
+    adminMenuDelete: 'Delete',
+    adminMenuActive: 'Active',
+    adminMenuInactive: 'Inactive',
+    adminMenuAvailable: 'Available',
+    adminMenuUnavailable: 'Unavailable',
+    adminMenuLoading: 'Loading menu items…',
+    adminMenuRetry: 'Retry',
+    adminMenuEmptyItemsTitle: 'No menu items yet',
+    adminMenuEmptyItemsDescription: 'Start by adding the first item for this category.',
+    adminMenuListErrorTitle: 'Unable to load menu data',
+    adminMenuListError: 'Something went wrong while loading menu data. Please try again.',
+    adminMenuMissingContextTitle: 'Restaurant context unavailable',
+    adminMenuMissingContextDescription:
+      'The current restaurant could not be resolved. Sign in again and retry.',
+    adminMenuCreateCategoryTitle: 'Add category',
+    adminMenuEditCategoryTitle: 'Edit category',
+    adminMenuCreateItemTitle: 'Add menu item',
+    adminMenuEditItemTitle: 'Edit menu item',
+    adminMenuFormNameAr: 'Arabic name',
+    adminMenuFormNameEn: 'English name (optional)',
+    adminMenuFormDescriptionAr: 'Arabic description (optional)',
+    adminMenuFormDescriptionEn: 'English description (optional)',
+    adminMenuFormDisplayOrder: 'Display order',
+    adminMenuFormIsActive: 'Active category',
+    adminMenuFormCategory: 'Category',
+    adminMenuFormPrice: 'Price',
+    adminMenuFormDiscountPrice: 'Discount price (optional)',
+    adminMenuFormIsAvailable: 'Available for ordering',
+    adminMenuFormImage: 'Item image (optional)',
+    adminMenuSave: 'Save',
+    adminMenuSaving: 'Saving…',
+    adminMenuCancel: 'Cancel',
+    adminMenuCloseModal: 'Close dialog',
+    adminMenuCategoryCreateSuccess: 'Category created successfully.',
+    adminMenuCategoryUpdateSuccess: 'Category updated successfully.',
+    adminMenuCategoryDeleteSuccess: 'Category deleted.',
+    adminMenuItemCreateSuccess: 'Menu item created successfully.',
+    adminMenuItemUpdateSuccess: 'Menu item updated successfully.',
+    adminMenuItemDeleteSuccess: 'Menu item deleted.',
+    adminMenuDeleteCategoryTitle: 'Delete category',
+    adminMenuDeleteCategoryMessage: 'Do you want to delete this category?',
+    adminMenuDeleteCategoryWarning:
+      'This category contains menu items. They may disappear from the public menu after deletion.',
+    adminMenuDeleteItemTitle: 'Delete menu item',
+    adminMenuDeleteItemMessage: 'Do you want to delete this menu item?',
+    adminMenuConfirmDelete: 'Confirm delete',
+    adminMenuDismissDelete: 'Keep item',
+    adminMenuDiscountLabel: 'Discount:',
+    adminMenuDiscountInvalid: 'Discount must be zero or greater and must not exceed price.',
+    adminMenuImageInvalidType: 'Unsupported image type. Use JPEG, PNG, or WebP.',
+    adminMenuImageInvalidSize: 'Image exceeds the 5MB limit.',
+    adminMenuImageInvalidEmpty: 'The selected file is empty.',
+    adminMenuImageHelp: 'JPEG, PNG, or WebP up to 5MB. Upload happens on save only.',
+    adminMenuImagePreviewAlt: 'Menu item image preview',
+    adminMenuImageFallbackAlt: 'No image',
+    adminMenuErrorForbidden: 'You do not have permission to perform this action.',
+    adminMenuErrorNotFound: 'The item is no longer available. The list was refreshed.',
+    adminMenuErrorConflict: 'A data conflict occurred. Review the values and try again.',
+    adminMenuErrorTooManyRequests: 'Too many attempts. Please try again later.',
+    adminMenuErrorGeneric: 'Something went wrong. Please try again.',
+    adminMenuErrorValidation: 'Check the required fields and try again.',
+    adminMenuToggleAvailable: 'Toggle availability',
+    adminMenuToggleAvailableBusy: 'Updating…',
+    adminMenuSelectCategory: 'Select a category',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
   },
