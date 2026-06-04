@@ -1,7 +1,21 @@
 import type { PublicMenuApiDto } from './public-menu.dto';
-import type { PublicMenuPageData } from '../models/public-menu.models';
+import type {
+  PublicMenuPageData,
+  PublicRestaurantOrderSettings,
+} from '../models/public-menu.models';
 import { resolveApiAssetUrl } from '../../../core/config/resolve-api-asset-url';
 import { MOCK_IMAGE_FALLBACK } from './public-menu-mock.data';
+
+function mapOrderSettings(dto: PublicMenuApiDto): PublicRestaurantOrderSettings {
+  return {
+    currencyCode: dto.currencyCode?.trim() || 'SAR',
+    taxRate: dto.taxRate ?? 0,
+    deliveryFee: dto.deliveryFee ?? 0,
+    minimumOrderAmount: dto.minimumOrderAmount ?? 0,
+    isDeliveryEnabled: dto.isDeliveryEnabled ?? true,
+    isPickupEnabled: dto.isPickupEnabled ?? true,
+  };
+}
 
 export function mapPublicMenuApiDto(dto: PublicMenuApiDto): PublicMenuPageData {
   const categories = [...dto.categories]
@@ -33,6 +47,8 @@ export function mapPublicMenuApiDto(dto: PublicMenuApiDto): PublicMenuPageData {
       })),
   );
 
+  const orderSettings = mapOrderSettings(dto);
+
   return {
     restaurant: {
       slug: dto.slug,
@@ -44,7 +60,7 @@ export function mapPublicMenuApiDto(dto: PublicMenuApiDto): PublicMenuPageData {
       coverImageUrl: null,
       primaryAccentColor: null,
       countryCode: 'SA',
-      currencyCode: dto.currencyCode ?? 'SAR',
+      currencyCode: orderSettings.currencyCode,
       timeZone: 'Asia/Riyadh',
       phoneNumber: dto.phoneNumber,
       whatsAppNumber: dto.whatsAppNumber,
@@ -52,6 +68,7 @@ export function mapPublicMenuApiDto(dto: PublicMenuApiDto): PublicMenuPageData {
       addressEn: dto.addressEn,
       isOpen: null,
     },
+    orderSettings,
     categories,
     items,
   };

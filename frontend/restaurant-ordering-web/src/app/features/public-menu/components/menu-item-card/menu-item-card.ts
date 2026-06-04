@@ -1,6 +1,10 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { LocaleService } from '../../../../core/localization/locale';
-import { getMenuItemLabels, type PublicMenuItem } from '../../models/public-menu.models';
+import {
+  PUBLIC_CART_MAX_QUANTITY,
+  getMenuItemLabels,
+  type PublicMenuItem,
+} from '../../models/public-menu.models';
 
 @Component({
   selector: 'app-menu-item-card',
@@ -85,7 +89,8 @@ export class MenuItemCard {
   }
 
   protected increment(): void {
-    this.quantityChange.emit(this.quantity() + 1);
+    const next = Math.min(PUBLIC_CART_MAX_QUANTITY, this.quantity() + 1);
+    this.quantityChange.emit(next);
   }
 
   protected decrement(): void {

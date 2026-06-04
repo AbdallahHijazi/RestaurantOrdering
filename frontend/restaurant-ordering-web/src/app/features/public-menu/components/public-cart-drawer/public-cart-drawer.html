@@ -1,0 +1,111 @@
+@if (open()) {
+  <div
+    class="public-cart-drawer"
+    role="presentation"
+    (click)="onBackdropClick($event)"
+    (keyup.escape)="closed.emit()"
+  >
+    <aside
+      #panel
+      class="public-cart-drawer__panel"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="ui().publicCartTitle"
+      tabindex="-1"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="public-cart-drawer__header">
+        <h2>{{ ui().publicCartTitle }}</h2>
+        <button
+          type="button"
+          class="public-cart-drawer__close"
+          [attr.aria-label]="ui().publicCartCloseAria"
+          (click)="closed.emit()"
+        >
+          ×
+        </button>
+      </header>
+
+      @if (cart.isEmpty()) {
+        <div class="public-cart-drawer__empty">
+          <p>{{ ui().publicCartEmpty }}</p>
+          <button type="button" class="public-cart-drawer__secondary" (click)="closed.emit()">
+            {{ ui().publicCartClose }}
+          </button>
+        </div>
+      } @else {
+        <ul class="public-cart-drawer__list">
+          @for (line of cart.cartItems(); track line.menuItemId) {
+            <li class="public-cart-drawer__line">
+              <div class="public-cart-drawer__thumb">
+                @if (line.imageUrl) {
+                  <img [src]="line.imageUrl" [alt]="lineName(line)" loading="lazy" />
+                } @else {
+                  <img [src]="imageFallback()" [alt]="lineName(line)" loading="lazy" />
+                }
+              </div>
+
+              <div class="public-cart-drawer__line-body">
+                <div class="public-cart-drawer__line-top">
+                  <h3>{{ lineName(line) }}</h3>
+                  <button
+                    type="button"
+                    class="public-cart-drawer__remove"
+                    (click)="remove(line.menuItemId)"
+                  >
+                    {{ ui().publicCartRemove }}
+                  </button>
+                </div>
+
+                <div class="public-cart-drawer__prices">
+                  @if (line.discountPrice != null) {
+                    <span class="public-cart-drawer__price public-cart-drawer__price--sale">
+                      {{ formatMoney(line.discountPrice) }}
+                    </span>
+                    <span class="public-cart-drawer__price public-cart-drawer__price--old">
+                      {{ formatMoney(line.price) }}
+                    </span>
+                  } @else {
+                    <span class="public-cart-drawer__price">{{ formatMoney(line.price) }}</span>
+                  }
+                </div>
+
+                <div class="public-cart-drawer__qty" role="group" [attr.aria-label]="ui().publicCartQuantity">
+                  <button type="button" (click)="decrement(line.menuItemId)">−</button>
+                  <span aria-live="polite">{{ line.quantity }}</span>
+                  <button type="button" (click)="increment(line.menuItemId)">+</button>
+                </div>
+
+                <label class="public-cart-drawer__notes">
+                  <span>{{ ui().publicCartItemNotes }}</span>
+                  <textarea
+                    rows="2"
+                    [value]="line.notes ?? ''"
+                    (input)="onNotesInput(line.menuItemId, $any($event.target).value)"
+                  ></textarea>
+                </label>
+              </div>
+            </li>
+          }
+        </ul>
+
+        <footer class="public-cart-drawer__footer">
+          <dl class="public-cart-drawer__totals">
+            <div>
+              <dt>{{ ui().publicCartSubtotal }}</dt>
+              <dd>{{ formatMoney(estimate().subtotal) }}</dd>
+            </div>
+          </dl>
+          <p class="public-cart-drawer__disclaimer">{{ ui().publicCheckoutEstimatedDisclaimer }}</p>
+
+          <button type="button" class="public-cart-drawer__clear" (click)="clearCart()">
+            {{ ui().publicCartClear }}
+          </button>
+          <button type="button" class="public-cart-drawer__primary" (click)="continueCheckout.emit()">
+            {{ ui().publicCartContinueCheckout }}
+          </button>
+        </footer>
+      }
+    </aside>
+  </div>
+}

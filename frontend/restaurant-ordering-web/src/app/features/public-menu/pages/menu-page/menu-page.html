@@ -27,7 +27,12 @@
 
         <div class="menu-page__actions">
           <app-language-switcher />
-          <button type="button" class="menu-page__cart" [attr.aria-label]="ui().cart">
+          <button
+            type="button"
+            class="menu-page__cart"
+            [attr.aria-label]="ui().publicCartOpenAria"
+            (click)="openCart()"
+          >
             <span aria-hidden="true">🛒</span>
             @if (cartCount() > 0) {
               <span class="menu-page__cart-count">{{ cartCount() }}</span>
@@ -76,7 +81,7 @@
                     [countryCode]="data.restaurant.countryCode"
                     [quantity]="quantityFor(item.id)"
                     [imageFallback]="imageFallback"
-                    (quantityChange)="updateQuantity(item.id, $event)"
+                    (quantityChange)="onQuantityChange(item, $event)"
                   />
                 }
               </div>
@@ -109,5 +114,32 @@
         </div>
       </div>
     </footer>
+
+    <app-public-cart-drawer
+      [open]="cartOpen()"
+      [orderSettings]="data.orderSettings"
+      [countryCode]="data.restaurant.countryCode"
+      [imageFallback]="imageFallback"
+      (closed)="closeCart()"
+      (continueCheckout)="openCheckout()"
+    />
+
+    <app-public-checkout-panel
+      [open]="checkoutOpen()"
+      [slug]="restaurantSlug()"
+      [orderSettings]="data.orderSettings"
+      [countryCode]="data.restaurant.countryCode"
+      (closed)="closeCheckout()"
+      (orderPlaced)="onOrderPlaced($event)"
+      (menuRefreshRequested)="reload()"
+    />
+
+    <app-public-order-confirmation
+      [open]="confirmationOpen()"
+      [confirmation]="orderConfirmation()"
+      [countryCode]="data.restaurant.countryCode"
+      (closed)="closeConfirmation()"
+      (returnToMenu)="returnToMenuFromConfirmation()"
+    />
   </div>
 }

@@ -1,0 +1,137 @@
+.public-checkout {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(15 12 10 / 0.45);
+  overflow: auto;
+}
+
+.public-checkout__panel {
+  width: min(100%, 32rem);
+  max-height: min(100dvh - 2rem, 48rem);
+  overflow: auto;
+  background: var(--restaurant-surface, #fff);
+  border-radius: 1rem;
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.18);
+}
+
+.public-checkout__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--restaurant-border, #e8dfd4);
+}
+
+.public-checkout__header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.public-checkout__close {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.public-checkout__form {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.public-checkout__form label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.public-checkout__form input,
+.public-checkout__form textarea {
+  width: 100%;
+  border: 1px solid var(--restaurant-border, #e8dfd4);
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+}
+
+.public-checkout__types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.public-checkout__type {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.public-checkout__totals {
+  margin: 0.25rem 0 0;
+}
+
+.public-checkout__totals div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.15rem 0;
+}
+
+.public-checkout__total-row {
+  font-weight: 700;
+}
+
+.public-checkout__disclaimer {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.public-checkout__alert,
+.public-checkout__notice {
+  margin: 0 1.25rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.5rem;
+  background: rgb(184 102 63 / 0.12);
+  font-size: 0.9rem;
+}
+
+.public-checkout__submit {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.8rem 1rem;
+  background: var(--restaurant-accent, #b8663f);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.public-checkout__submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .public-checkout {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .public-checkout__panel {
+    width: 100%;
+    max-height: 94dvh;
+    border-radius: 1rem 1rem 0 0;
+  }
+}

@@ -81,6 +81,12 @@ describe('MenuPage', () => {
       slug: 'the-botanist',
       nameAr: 'مطعم حقيقي',
       phoneNumber: '+966500000000',
+      currencyCode: 'SAR',
+      taxRate: 15,
+      deliveryFee: 10,
+      minimumOrderAmount: 0,
+      isDeliveryEnabled: true,
+      isPickupEnabled: true,
       categories: [],
     });
 

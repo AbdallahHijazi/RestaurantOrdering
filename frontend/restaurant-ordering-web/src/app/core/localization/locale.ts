@@ -404,6 +404,61 @@ type UiTextKey =
   | 'adminMenuToggleAvailable'
   | 'adminMenuToggleAvailableBusy'
   | 'adminMenuSelectCategory'
+  | 'publicCartTitle'
+  | 'publicCartEmpty'
+  | 'publicCartRemove'
+  | 'publicCartClear'
+  | 'publicCartClearConfirm'
+  | 'publicCartQuantity'
+  | 'publicCartItemNotes'
+  | 'publicCartContinueCheckout'
+  | 'publicCartClose'
+  | 'publicCartOpenAria'
+  | 'publicCartCloseAria'
+  | 'publicCartSubtotal'
+  | 'publicCheckoutTitle'
+  | 'publicCheckoutPickup'
+  | 'publicCheckoutDelivery'
+  | 'publicCheckoutGuestName'
+  | 'publicCheckoutGuestPhone'
+  | 'publicCheckoutDeliveryAddress'
+  | 'publicCheckoutOrderNotes'
+  | 'publicCheckoutEstimatedTax'
+  | 'publicCheckoutDeliveryFee'
+  | 'publicCheckoutEstimatedTotal'
+  | 'publicCheckoutEstimatedDisclaimer'
+  | 'publicCheckoutMinimumOrder'
+  | 'publicCheckoutServiceDisabled'
+  | 'publicCheckoutAllServicesDisabled'
+  | 'publicCheckoutPreviewMode'
+  | 'publicCheckoutSubmit'
+  | 'publicCheckoutSubmitting'
+  | 'publicCheckoutSuccess'
+  | 'publicOrderErrorValidation'
+  | 'publicOrderErrorNotFound'
+  | 'publicOrderErrorConflict'
+  | 'publicOrderErrorTooManyRequests'
+  | 'publicOrderErrorGeneric'
+  | 'publicOrderErrorReviewCart'
+  | 'publicConfirmationTitle'
+  | 'publicConfirmationOrderNumber'
+  | 'publicConfirmationOrderType'
+  | 'publicConfirmationStatus'
+  | 'publicConfirmationCreatedAt'
+  | 'publicConfirmationItems'
+  | 'publicConfirmationSubtotal'
+  | 'publicConfirmationDiscount'
+  | 'publicConfirmationTax'
+  | 'publicConfirmationDeliveryFee'
+  | 'publicConfirmationTotal'
+  | 'publicConfirmationPickupInstructions'
+  | 'publicConfirmationDeliveryInstructions'
+  | 'publicConfirmationClose'
+  | 'publicConfirmationReturnMenu'
+  | 'publicConfirmationCloseAria'
+  | 'publicOrderTypePickup'
+  | 'publicOrderTypeDelivery'
+  | 'publicOrderStatusNew'
   | 'languageArabic'
   | 'languageEnglish';
 
@@ -719,6 +774,65 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminMenuToggleAvailable: 'تبديل التوفر',
     adminMenuToggleAvailableBusy: 'جاري التحديث…',
     adminMenuSelectCategory: 'اختر تصنيفًا',
+    publicCartTitle: 'سلة الطلب',
+    publicCartEmpty: 'سلتك فارغة. أضف وجبات من القائمة.',
+    publicCartRemove: 'إزالة',
+    publicCartClear: 'إفراغ السلة',
+    publicCartClearConfirm: 'هل تريد إفراغ السلة؟',
+    publicCartQuantity: 'الكمية',
+    publicCartItemNotes: 'ملاحظات على الوجبة',
+    publicCartContinueCheckout: 'متابعة إلى الدفع',
+    publicCartClose: 'إغلاق',
+    publicCartOpenAria: 'فتح سلة الطلب',
+    publicCartCloseAria: 'إغلاق النافذة',
+    publicCartSubtotal: 'المجموع الفرعي',
+    publicCheckoutTitle: 'إتمام الطلب',
+    publicCheckoutPickup: 'استلام من المطعم',
+    publicCheckoutDelivery: 'توصيل',
+    publicCheckoutGuestName: 'الاسم',
+    publicCheckoutGuestPhone: 'رقم الجوال',
+    publicCheckoutDeliveryAddress: 'عنوان التوصيل',
+    publicCheckoutOrderNotes: 'ملاحظات على الطلب (اختياري)',
+    publicCheckoutEstimatedTax: 'الضريبة التقديرية',
+    publicCheckoutDeliveryFee: 'رسوم التوصيل',
+    publicCheckoutEstimatedTotal: 'الإجمالي التقديري',
+    publicCheckoutEstimatedDisclaimer:
+      'الإجمالي التقديري — يتم تأكيد المبلغ النهائي عند إرسال الطلب',
+    publicCheckoutMinimumOrder: 'الحد الأدنى للطلب غير محقق.',
+    publicCheckoutServiceDisabled: 'هذه الخدمة غير متاحة حاليًا.',
+    publicCheckoutAllServicesDisabled: 'الطلب غير متاح حاليًا لهذا المطعم.',
+    publicCheckoutPreviewMode:
+      'وضع المعاينة — استخدم رابط مطعم فعلي لإرسال الطلب',
+    publicCheckoutSubmit: 'إرسال الطلب',
+    publicCheckoutSubmitting: 'جاري إرسال الطلب…',
+    publicCheckoutSuccess: 'تم استلام طلبك بنجاح.',
+    publicOrderErrorValidation: 'تحقق من البيانات المدخلة ثم حاول مرة أخرى.',
+    publicOrderErrorNotFound:
+      'المطعم أو إحدى الوجبات لم تعد متاحة. راجع القائمة والسلة.',
+    publicOrderErrorConflict: 'تعذر إتمام الطلب. راجع الخدمة أو الحد الأدنى.',
+    publicOrderErrorTooManyRequests: 'عدد الطلبات كبير. حاول لاحقًا.',
+    publicOrderErrorGeneric: 'تعذر إرسال الطلب. حاول مرة أخرى.',
+    publicOrderErrorReviewCart: 'راجع السلة ثم حاول مرة أخرى.',
+    publicConfirmationTitle: 'تأكيد الطلب',
+    publicConfirmationOrderNumber: 'رقم الطلب',
+    publicConfirmationOrderType: 'نوع الطلب',
+    publicConfirmationStatus: 'الحالة',
+    publicConfirmationCreatedAt: 'وقت الطلب',
+    publicConfirmationItems: 'تفاصيل الوجبات',
+    publicConfirmationSubtotal: 'المجموع الفرعي',
+    publicConfirmationDiscount: 'الخصم',
+    publicConfirmationTax: 'الضريبة',
+    publicConfirmationDeliveryFee: 'رسوم التوصيل',
+    publicConfirmationTotal: 'الإجمالي',
+    publicConfirmationPickupInstructions: 'سيتم تجهيز طلبك للاستلام من المطعم.',
+    publicConfirmationDeliveryInstructions:
+      'سيتم تجهيز طلبك للتوصيل إلى العنوان المحدد.',
+    publicConfirmationClose: 'إغلاق',
+    publicConfirmationReturnMenu: 'العودة إلى المنيو',
+    publicConfirmationCloseAria: 'إغلاق تأكيد الطلب',
+    publicOrderTypePickup: 'استلام',
+    publicOrderTypeDelivery: 'توصيل',
+    publicOrderStatusNew: 'جديد',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
   },
@@ -1036,6 +1150,66 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminMenuToggleAvailable: 'Toggle availability',
     adminMenuToggleAvailableBusy: 'Updating…',
     adminMenuSelectCategory: 'Select a category',
+    publicCartTitle: 'Your cart',
+    publicCartEmpty: 'Your cart is empty. Add dishes from the menu.',
+    publicCartRemove: 'Remove',
+    publicCartClear: 'Clear cart',
+    publicCartClearConfirm: 'Clear all items from your cart?',
+    publicCartQuantity: 'Quantity',
+    publicCartItemNotes: 'Item notes',
+    publicCartContinueCheckout: 'Continue to checkout',
+    publicCartClose: 'Close',
+    publicCartOpenAria: 'Open cart',
+    publicCartCloseAria: 'Close dialog',
+    publicCartSubtotal: 'Subtotal',
+    publicCheckoutTitle: 'Checkout',
+    publicCheckoutPickup: 'Pickup',
+    publicCheckoutDelivery: 'Delivery',
+    publicCheckoutGuestName: 'Your name',
+    publicCheckoutGuestPhone: 'Phone number',
+    publicCheckoutDeliveryAddress: 'Delivery address',
+    publicCheckoutOrderNotes: 'Order notes (optional)',
+    publicCheckoutEstimatedTax: 'Estimated tax',
+    publicCheckoutDeliveryFee: 'Delivery fee',
+    publicCheckoutEstimatedTotal: 'Estimated total',
+    publicCheckoutEstimatedDisclaimer:
+      'Estimated total — the final amount is confirmed when the order is submitted',
+    publicCheckoutMinimumOrder: 'Minimum order amount is not met.',
+    publicCheckoutServiceDisabled: 'This service is not available right now.',
+    publicCheckoutAllServicesDisabled: 'Ordering is not available for this restaurant.',
+    publicCheckoutPreviewMode:
+      'Preview mode — use a real restaurant link to place an order',
+    publicCheckoutSubmit: 'Place order',
+    publicCheckoutSubmitting: 'Placing order…',
+    publicCheckoutSuccess: 'Your order was received successfully.',
+    publicOrderErrorValidation: 'Check your details and try again.',
+    publicOrderErrorNotFound:
+      'The restaurant or a menu item is no longer available. Review the menu and your cart.',
+    publicOrderErrorConflict: 'Unable to place the order. Check service or minimum amount.',
+    publicOrderErrorTooManyRequests: 'Too many requests. Please try again later.',
+    publicOrderErrorGeneric: 'Unable to place the order. Please try again.',
+    publicOrderErrorReviewCart: 'Review your cart and try again.',
+    publicConfirmationTitle: 'Order confirmation',
+    publicConfirmationOrderNumber: 'Order number',
+    publicConfirmationOrderType: 'Order type',
+    publicConfirmationStatus: 'Status',
+    publicConfirmationCreatedAt: 'Placed at',
+    publicConfirmationItems: 'Items',
+    publicConfirmationSubtotal: 'Subtotal',
+    publicConfirmationDiscount: 'Discount',
+    publicConfirmationTax: 'Tax',
+    publicConfirmationDeliveryFee: 'Delivery fee',
+    publicConfirmationTotal: 'Total',
+    publicConfirmationPickupInstructions:
+      'Your order will be prepared for pickup.',
+    publicConfirmationDeliveryInstructions:
+      'Your order will be prepared for delivery to the provided address.',
+    publicConfirmationClose: 'Close',
+    publicConfirmationReturnMenu: 'Back to menu',
+    publicConfirmationCloseAria: 'Close order confirmation',
+    publicOrderTypePickup: 'Pickup',
+    publicOrderTypeDelivery: 'Delivery',
+    publicOrderStatusNew: 'New',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
   },

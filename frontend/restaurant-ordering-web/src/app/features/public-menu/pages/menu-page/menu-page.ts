@@ -17,12 +17,17 @@ import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { CategoryNavigation } from '../../components/category-navigation/category-navigation';
 import { MenuItemCard } from '../../components/menu-item-card/menu-item-card';
 import { RestaurantCoverHero } from '../../components/restaurant-cover-hero/restaurant-cover-hero';
+import { PublicCartDrawer } from '../../components/public-cart-drawer/public-cart-drawer';
+import { PublicCheckoutPanel } from '../../components/public-checkout-panel/public-checkout-panel';
+import { PublicOrderConfirmation } from '../../components/public-order-confirmation/public-order-confirmation';
+import { PublicCartService } from '../../data-access/public-cart.service';
 import {
   PublicMenuApiService,
   type PublicMenuLoadError,
 } from '../../data-access/public-menu-api';
+import type { PublicOrderConfirmationApiDto } from '../../data-access/public-order.dto';
 import { MOCK_IMAGE_FALLBACK } from '../../data-access/public-menu-mock.data';
-import type { PublicMenuPageData } from '../../models/public-menu.models';
+import type { PublicMenuItem, PublicMenuPageData } from '../../models/public-menu.models';
 import { readRouteParam } from './route-param.util';
 
 type PageState = 'loading' | 'success' | 'not-found' | 'error';
@@ -37,6 +42,9 @@ type PageState = 'loading' | 'success' | 'not-found' | 'error';
     CategoryNavigation,
     MenuItemCard,
     RestaurantCoverHero,
+    PublicCartDrawer,
+    PublicCheckoutPanel,
+    PublicOrderConfirmation,
   ],
   templateUrl: './menu-page.html',
   styleUrl: './menu-page.scss',
@@ -44,6 +52,7 @@ type PageState = 'loading' | 'success' | 'not-found' | 'error';
 export class MenuPage {
   private readonly route = inject(ActivatedRoute);
   private readonly menuApi = inject(PublicMenuApiService);
+  protected readonly cart = inject(PublicCartService);
   protected readonly localeService = inject(LocaleService);
   private readonly themeService = inject(RestaurantThemeService);
 
@@ -52,8 +61,13 @@ export class MenuPage {
   protected readonly pageState = signal<PageState>('loading');
   protected readonly menuData = signal<PublicMenuPageData | null>(null);
   protected readonly activeCategoryId = signal<string | null>(null);
-  protected readonly cartQuantities = signal<Record<string, number>>({});
   protected readonly logoFailed = signal(false);
+  protected readonly restaurantSlug = signal('');
+
+  protected readonly cartOpen = signal(false);
+  protected readonly checkoutOpen = signal(false);
+  protected readonly confirmationOpen = signal(false);
+  protected readonly orderConfirmation = signal<PublicOrderConfirmationApiDto | null>(null);
 
   protected readonly imageFallback = MOCK_IMAGE_FALLBACK;
 
@@ -85,8 +99,10 @@ export class MenuPage {
 
   protected readonly ui = this.localeService.ui;
 
-  protected readonly cartCount = computed(() =>
-    Object.values(this.cartQuantities()).reduce((total, qty) => total + qty, 0),
+  protected readonly cartCount = this.cart.itemCount;
+
+  protected readonly overlayOpen = computed(
+    () => this.cartOpen() || this.checkoutOpen() || this.confirmationOpen(),
   );
 
   protected readonly filteredItems = computed(() => {
@@ -125,15 +141,51 @@ export class MenuPage {
     this.menuSection()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  protected updateQuantity(itemId: string, quantity: number): void {
-    this.cartQuantities.update((current) => ({
-      ...current,
-      [itemId]: quantity,
-    }));
+  protected quantityFor(itemId: string): number {
+    return this.cart.quantityFor(itemId);
   }
 
-  protected quantityFor(itemId: string): number {
-    return this.cartQuantities()[itemId] ?? 0;
+  protected onQuantityChange(item: PublicMenuItem, quantity: number): void {
+    this.cart.setQuantity(item, quantity);
+  }
+
+  protected openCart(): void {
+    this.cartOpen.set(true);
+    this.setBodyScrollLocked(true);
+  }
+
+  protected closeCart(): void {
+    this.cartOpen.set(false);
+    this.syncBodyScrollLock();
+  }
+
+  protected openCheckout(): void {
+    this.cartOpen.set(false);
+    this.checkoutOpen.set(true);
+    this.setBodyScrollLocked(true);
+  }
+
+  protected closeCheckout(): void {
+    this.checkoutOpen.set(false);
+    this.syncBodyScrollLock();
+  }
+
+  protected onOrderPlaced(confirmation: PublicOrderConfirmationApiDto): void {
+    this.orderConfirmation.set(confirmation);
+    this.checkoutOpen.set(false);
+    this.confirmationOpen.set(true);
+    this.setBodyScrollLocked(true);
+  }
+
+  protected closeConfirmation(): void {
+    this.confirmationOpen.set(false);
+    this.orderConfirmation.set(null);
+    this.syncBodyScrollLock();
+  }
+
+  protected returnToMenuFromConfirmation(): void {
+    this.closeConfirmation();
+    this.scrollToMenu();
   }
 
   protected onLogoError(): void {
@@ -142,9 +194,12 @@ export class MenuPage {
 
   private loadMenu(slug: string): void {
     this.pageState.set('loading');
+    const normalized = slug.trim().toLowerCase();
+    this.restaurantSlug.set(normalized);
+    this.cart.initForRestaurant(normalized);
 
     this.menuApi
-      .getMenuBySlug(slug)
+      .getMenuBySlug(normalized)
       .pipe(finalize(() => undefined))
       .subscribe({
         next: (data) => {
@@ -166,6 +221,14 @@ export class MenuPage {
           this.pageState.set('error');
         },
       });
+  }
+
+  private setBodyScrollLocked(locked: boolean): void {
+    document.body.style.overflow = locked ? 'hidden' : '';
+  }
+
+  private syncBodyScrollLock(): void {
+    this.setBodyScrollLocked(this.overlayOpen());
   }
 }
 

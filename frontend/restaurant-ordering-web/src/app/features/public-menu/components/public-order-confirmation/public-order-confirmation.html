@@ -1,0 +1,89 @@
+@if (open() && confirmation(); as order) {
+  <div class="public-confirmation" role="presentation" (click)="onBackdropClick($event)">
+    <section
+      class="public-confirmation__panel"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="ui().publicConfirmationTitle"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="public-confirmation__header">
+        <h2>{{ ui().publicConfirmationTitle }}</h2>
+        <button
+          type="button"
+          class="public-confirmation__close"
+          [attr.aria-label]="ui().publicConfirmationCloseAria"
+          (click)="closed.emit()"
+        >
+          ×
+        </button>
+      </header>
+
+      <div class="public-confirmation__body">
+        <p class="public-confirmation__success">{{ ui().publicCheckoutSuccess }}</p>
+        <p class="public-confirmation__instructions">{{ instructions(order.orderType) }}</p>
+
+        <dl class="public-confirmation__meta">
+          <div>
+            <dt>{{ ui().publicConfirmationOrderNumber }}</dt>
+            <dd>{{ order.orderNumber }}</dd>
+          </div>
+          <div>
+            <dt>{{ ui().publicConfirmationOrderType }}</dt>
+            <dd>{{ orderTypeLabel(order.orderType) }}</dd>
+          </div>
+          <div>
+            <dt>{{ ui().publicConfirmationStatus }}</dt>
+            <dd>{{ statusLabel(order.orderStatus) }}</dd>
+          </div>
+          <div>
+            <dt>{{ ui().publicConfirmationCreatedAt }}</dt>
+            <dd>{{ formatCreatedAt(order.createdAt) }}</dd>
+          </div>
+        </dl>
+
+        <h3>{{ ui().publicConfirmationItems }}</h3>
+        <ul class="public-confirmation__items">
+          @for (line of order.items; track $index) {
+            <li>
+              <span>{{ lineName(line) }} × {{ line.quantity }}</span>
+              <span>{{ formatMoney(line.totalPrice, order.currencyCode) }}</span>
+            </li>
+          }
+        </ul>
+
+        <dl class="public-confirmation__totals">
+          <div>
+            <dt>{{ ui().publicConfirmationSubtotal }}</dt>
+            <dd>{{ formatMoney(order.subtotal, order.currencyCode) }}</dd>
+          </div>
+          <div>
+            <dt>{{ ui().publicConfirmationDiscount }}</dt>
+            <dd>{{ formatMoney(order.discountAmount, order.currencyCode) }}</dd>
+          </div>
+          <div>
+            <dt>{{ ui().publicConfirmationTax }}</dt>
+            <dd>{{ formatMoney(order.taxAmount, order.currencyCode) }}</dd>
+          </div>
+          <div>
+            <dt>{{ ui().publicConfirmationDeliveryFee }}</dt>
+            <dd>{{ formatMoney(order.deliveryFee, order.currencyCode) }}</dd>
+          </div>
+          <div class="public-confirmation__total-row">
+            <dt>{{ ui().publicConfirmationTotal }}</dt>
+            <dd>{{ formatMoney(order.totalAmount, order.currencyCode) }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <footer class="public-confirmation__footer">
+        <button type="button" class="public-confirmation__secondary" (click)="closed.emit()">
+          {{ ui().publicConfirmationClose }}
+        </button>
+        <button type="button" class="public-confirmation__primary" (click)="returnToMenu.emit()">
+          {{ ui().publicConfirmationReturnMenu }}
+        </button>
+      </footer>
+    </section>
+  </div>
+}

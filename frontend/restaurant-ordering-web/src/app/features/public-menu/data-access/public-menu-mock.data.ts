@@ -28,6 +28,14 @@ const IMAGE = {
 } as const;
 
 export const MOCK_PUBLIC_MENU: PublicMenuPageData = {
+  orderSettings: {
+    currencyCode: 'SAR',
+    taxRate: 15,
+    deliveryFee: 12,
+    minimumOrderAmount: 0,
+    isDeliveryEnabled: true,
+    isPickupEnabled: true,
+  },
   restaurant: {
     slug: DEMO_RESTAURANT_SLUG,
     nameAr: 'عالم النبات',
