@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestaurantOrdering.Api.Contracts.Admin.Restaurants;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Application.Features.RestaurantSettings.Commands.UpdateRestaurantSettings;
 using RestaurantOrdering.Application.Features.RestaurantSettings.DTOs;
 using RestaurantOrdering.Application.Features.RestaurantSettings.Queries.GetRestaurantSettings;
@@ -9,7 +10,7 @@ using RestaurantOrdering.Application.Features.RestaurantSettings.Queries.GetRest
 namespace RestaurantOrdering.Api.Controllers.Admin;
 
 [ApiController]
-[Authorize]
+[Authorize(Policy = ApplicationPolicies.RestaurantOwnerOnly)]
 [Route("api/v1/admin/restaurants/{restaurantId:guid}/settings")]
 public sealed class RestaurantSettingsController : ControllerBase
 {

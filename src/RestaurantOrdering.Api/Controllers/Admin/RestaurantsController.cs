@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestaurantOrdering.Api.Contracts.Admin.Restaurants;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Application.Features.Restaurants.Commands.UpdateRestaurant;
 using RestaurantOrdering.Application.Features.Restaurants.DTOs;
 using RestaurantOrdering.Application.Features.Restaurants.Queries.GetRestaurantById;
@@ -9,7 +10,7 @@ using RestaurantOrdering.Application.Features.Restaurants.Queries.GetRestaurantB
 namespace RestaurantOrdering.Api.Controllers.Admin;
 
 [ApiController]
-[Authorize]
+[Authorize(Policy = ApplicationPolicies.RestaurantOwnerOnly)]
 [Route("api/v1/admin/restaurants/{restaurantId:guid}")]
 public sealed class RestaurantsController : ControllerBase
 {
