@@ -68,6 +68,17 @@ describe('PublicMenuApiService', () => {
 
     await expect(promise).rejects.toEqual({ type: 'not-found' });
   });
+
+  it('does not fall back to mock data when a real slug returns 500', async () => {
+    const promise = lastValueFrom(service.getMenuBySlug('broken-menu'));
+
+    const req = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/public/restaurants/broken-menu/menu`,
+    );
+    req.flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+
+    await expect(promise).rejects.toMatchObject({ type: 'network' });
+  });
 });
 
 describe('MOCK_PUBLIC_MENU localization', () => {

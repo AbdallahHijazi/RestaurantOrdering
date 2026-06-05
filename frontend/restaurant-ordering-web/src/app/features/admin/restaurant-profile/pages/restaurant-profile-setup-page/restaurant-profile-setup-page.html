@@ -334,7 +334,13 @@
     </form>
 
     <aside class="profile-setup__preview">
-      <app-restaurant-live-preview [preview]="previewData()" />
+      <app-restaurant-live-preview
+        [preview]="previewData()"
+        [menuState]="previewMenuState()"
+        [categories]="previewMenuCategories()"
+        [items]="previewMenuItems()"
+        (refreshPreview)="refreshPreviewMenu()"
+      />
     </aside>
   </div>
 </section>

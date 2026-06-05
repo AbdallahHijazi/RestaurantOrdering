@@ -239,52 +239,11 @@
   animation: menu-page-shimmer 1.2s infinite;
 }
 
-.menu-page__modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgb(0 0 0 / 45%);
-  z-index: 40;
-}
-
-.menu-page__modal {
-  position: fixed;
-  inset-inline: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  max-width: 36rem;
-  margin-inline: auto;
-  max-height: min(90vh, 48rem);
-  overflow: auto;
-  background: #fffdfc;
-  border-radius: var(--radius-lg);
-  padding: 1rem;
-  z-index: 41;
-  box-shadow: 0 1rem 2rem rgb(0 0 0 / 18%);
-}
-
-.menu-page__modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.menu-page__modal-header h3 {
-  margin: 0;
-}
-
-.menu-page__icon-btn {
-  border: 0;
-  background: transparent;
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
 .menu-page__form {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .menu-page__form label {
@@ -320,6 +279,15 @@
   margin: 0;
   color: #5d635f;
   font-size: 0.85rem;
+}
+
+.menu-page__image-field {
+  min-width: 0;
+}
+
+.menu-page__image-preview {
+  max-width: 100%;
+  height: auto;
 }
 
 .menu-page__modal-actions {
@@ -359,14 +327,6 @@
 }
 
 @media (max-width: 40rem) {
-  .menu-page__modal {
-    inset: 0;
-    transform: none;
-    max-width: none;
-    max-height: none;
-    border-radius: 0;
-  }
-
   .menu-page__item-actions .menu-page__secondary-btn {
     width: 100%;
   }

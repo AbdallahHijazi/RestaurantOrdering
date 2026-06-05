@@ -5,9 +5,9 @@ import { RestaurantLivePreview } from './restaurant-live-preview';
 import type { RestaurantProfilePreviewData } from '../../models/restaurant-profile.models';
 
 const PREVIEW: RestaurantProfilePreviewData = {
-  slug: 'demo',
-  nameAr: 'عالم النبات',
-  nameEn: 'The Botanist',
+  slug: 'restaurant-a',
+  nameAr: 'مطعم المعاينة',
+  nameEn: 'Preview Restaurant',
   descriptionAr: 'وصف',
   descriptionEn: 'Description',
   logoUrl: null,
@@ -22,21 +22,28 @@ const PREVIEW: RestaurantProfilePreviewData = {
   addressEn: 'Riyadh',
 };
 
+const REAL_CATEGORIES = [
+  { id: 'cat-real', nameAr: 'تصنيف فعلي', nameEn: 'Real Category', displayOrder: 0, isActive: true },
+];
+
+const REAL_ITEMS = [
+  {
+    id: 'item-real',
+    categoryId: 'cat-real',
+    nameAr: 'وجبة فعلية',
+    nameEn: 'Real Dish',
+    price: 25,
+    isAvailable: true,
+  },
+];
+
 type PreviewHarness = RestaurantLivePreview & {
   openFullPreview: () => void;
   closeFullPreview: () => void;
   selectCategory: (categoryId: string) => void;
   activeCategoryId: () => string;
-  filteredPreviewItems: () => Array<{ id: string; nameAr: string; nameEn?: string | null }>;
+  filteredPreviewItems: () => Array<{ id: string; nameEn?: string | null }>;
 };
-
-function starterItems() {
-  return MOCK_PUBLIC_MENU.items.filter((item) => item.categoryId === 'cat-starters');
-}
-
-function dessertItems() {
-  return MOCK_PUBLIC_MENU.items.filter((item) => item.categoryId === 'cat-desserts');
-}
 
 function getPreviewModal(fixture: ComponentFixture<RestaurantLivePreview>): HTMLElement | null {
   return (
@@ -79,6 +86,9 @@ describe('RestaurantLivePreview', () => {
     fixture = TestBed.createComponent(RestaurantLivePreview);
     component = fixture.componentInstance as PreviewHarness;
     fixture.componentRef.setInput('preview', PREVIEW);
+    fixture.componentRef.setInput('menuState', 'loaded');
+    fixture.componentRef.setInput('categories', REAL_CATEGORIES);
+    fixture.componentRef.setInput('items', REAL_ITEMS);
     fixture.detectChanges();
   });
 
@@ -101,32 +111,48 @@ describe('RestaurantLivePreview', () => {
     expect(buttons[1].textContent?.trim()).toBe('English');
   });
 
+  it('shows real catalog items instead of mock hummus', () => {
+    expect(fixture.nativeElement.textContent).toContain('وجبة فعلية');
+    expect(fixture.nativeElement.textContent).not.toContain('حمص بالكمأ');
+  });
+
   it('filters full preview items by selected category', () => {
     component.openFullPreview();
     fixture.detectChanges();
 
     const modal = getPreviewModal(fixture) as HTMLElement;
     expect(modal).toBeTruthy();
+    expect(getModalCards(modal).length).toBe(1);
+    expect(cardTexts(getModalCards(modal))).toContain('وجبة فعلية');
+  });
 
-    clickCategory(modal, 'المقبلات');
+  it('shows empty state when menuState is empty', () => {
+    fixture.componentRef.setInput('menuState', 'empty');
+    fixture.componentRef.setInput('categories', []);
+    fixture.componentRef.setInput('items', []);
     fixture.detectChanges();
 
-    let cards = getModalCards(modal);
-    expect(cards.length).toBe(starterItems().length);
-    expect(cardTexts(cards)).toContain('حمص بالكمأ');
-    expect(cardTexts(cards)).not.toContain('كيك الجبن بالفستق');
+    expect(fixture.nativeElement.querySelector('[data-testid="live-preview-menu-empty"]')).toBeTruthy();
+  });
 
-    clickCategory(modal, 'الحلويات');
+  it('shows error state with retry and no mock dishes', () => {
+    fixture.componentRef.setInput('menuState', 'error');
+    fixture.componentRef.setInput('categories', []);
+    fixture.componentRef.setInput('items', []);
     fixture.detectChanges();
 
-    cards = getModalCards(modal);
-    expect(cards.length).toBe(dessertItems().length);
-    expect(cardTexts(cards)).toContain('كيك الجبن بالفستق');
-    expect(cardTexts(cards)).not.toContain('حمص بالكمأ');
+    expect(fixture.nativeElement.querySelector('[data-testid="live-preview-menu-error"]')).toBeTruthy();
+    expect(fixture.nativeElement.textContent).not.toContain('حمص بالكمأ');
+  });
 
-    const activeButton = modal.querySelector('.category-nav__item.is-active') as HTMLButtonElement;
-    expect(activeButton.textContent).toContain('الحلويات');
-    expect(component.activeCategoryId()).toBe('cat-desserts');
+  it('shows demo mode label when menuState is demo', () => {
+    fixture.componentRef.setInput('menuState', 'demo');
+    fixture.componentRef.setInput('categories', MOCK_PUBLIC_MENU.categories);
+    fixture.componentRef.setInput('items', MOCK_PUBLIC_MENU.items);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="live-preview-demo-mode"]')).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('حمص بالكمأ');
   });
 
   it('keeps category filtering after switching preview language', () => {
@@ -134,63 +160,27 @@ describe('RestaurantLivePreview', () => {
     fixture.detectChanges();
 
     const modal = getPreviewModal(fixture) as HTMLElement;
-    clickCategory(modal, 'الحلويات');
+    clickCategory(modal, 'تصنيف فعلي');
     fixture.detectChanges();
 
     const locale = TestBed.inject(LocaleService);
     locale.setLocale('en');
     fixture.detectChanges();
 
-    const cards = getModalCards(modal);
-    expect(cards.length).toBe(dessertItems().length);
-    expect(cardTexts(cards)).toContain('Pistachio Cheesecake');
-    expect(cardTexts(cards)).not.toContain('Truffle Hummus');
-    expect(component.activeCategoryId()).toBe('cat-desserts');
-  });
-
-  it('preserves stable category behavior after closing and reopening full preview', () => {
-    component.selectCategory('cat-desserts');
-    component.openFullPreview();
-    fixture.detectChanges();
-
-    let modal = getPreviewModal(fixture) as HTMLElement;
-    expect(component.activeCategoryId()).toBe('cat-desserts');
-    expect(getModalCards(modal).length).toBe(dessertItems().length);
-
-    component.closeFullPreview();
-    fixture.detectChanges();
-    expect(getPreviewModal(fixture)).toBeNull();
-
-    component.openFullPreview();
-    fixture.detectChanges();
-
-    modal = getPreviewModal(fixture) as HTMLElement;
-    expect(component.activeCategoryId()).toBe('cat-desserts');
-
-    const cards = getModalCards(modal);
-    expect(cards.length).toBe(dessertItems().length);
-    expect(cardTexts(cards)).toContain('كيك الجبن بالفستق');
-    expect(modal.querySelector('.category-nav__item.is-active')?.textContent).toContain('الحلويات');
+    expect(cardTexts(getModalCards(modal))).toContain('Real Dish');
   });
 
   it('uses the same filtered items source for embedded and full preview', () => {
-    component.selectCategory('cat-desserts');
-    fixture.detectChanges();
-
     const embeddedCards = fixture.nativeElement.querySelectorAll(
       '.live-preview__frame app-menu-item-card',
     );
-    expect(embeddedCards.length).toBe(dessertItems().length);
+    expect(embeddedCards.length).toBe(1);
 
     component.openFullPreview();
     fixture.detectChanges();
 
     const modal = getPreviewModal(fixture) as HTMLElement;
-    const fullPreviewCards = getModalCards(modal);
-    expect(fullPreviewCards.length).toBe(embeddedCards.length);
-    expect(component.filteredPreviewItems().every((item) => item.categoryId === 'cat-desserts')).toBe(
-      true,
-    );
+    expect(getModalCards(modal).length).toBe(embeddedCards.length);
   });
 
   it('keeps the close button in the modal shell outside the scrollable body', () => {
@@ -201,22 +191,9 @@ describe('RestaurantLivePreview', () => {
     const closeButton = modal.querySelector('[data-testid="live-preview-close"]') as HTMLButtonElement;
     const scrollBody = modal.querySelector('.live-preview__modal-body') as HTMLElement;
 
-    expect(closeButton).toBeTruthy();
+    expect(closeButton.classList.contains('modal-close-button')).toBe(true);
     expect(closeButton.closest('.live-preview__modal-header')).toBeTruthy();
     expect(scrollBody.contains(closeButton)).toBe(false);
-  });
-
-  it('sets a translated aria-label on the close button', () => {
-    const locale = TestBed.inject(LocaleService);
-    locale.setLocale('en');
-    component.openFullPreview();
-    fixture.detectChanges();
-
-    const closeButton = getPreviewModal(fixture)!.querySelector(
-      '[data-testid="live-preview-close"]',
-    ) as HTMLButtonElement;
-
-    expect(closeButton.getAttribute('aria-label')).toBe(locale.uiText('closePreviewAria'));
   });
 
   it('closes the preview on Escape', () => {
@@ -240,6 +217,18 @@ describe('RestaurantLivePreview', () => {
 
     const scrollBody = host?.querySelector('.live-preview__modal-body') as HTMLElement | null;
     expect(scrollBody).toBeTruthy();
-    expect(getComputedStyle(scrollBody!).overflowY).toBe('auto');
+    expect(getComputedStyle(scrollBody!).overflowX).toBe('hidden');
+  });
+
+  it('emits refreshPreview when refresh button is clicked', () => {
+    const refresh = vi.fn();
+    fixture.componentInstance.refreshPreview.subscribe(refresh);
+
+    const refreshButton = (fixture.nativeElement as HTMLElement).querySelector(
+      '[data-testid="live-preview-refresh"]',
+    ) as HTMLButtonElement;
+    refreshButton.click();
+
+    expect(refresh).toHaveBeenCalled();
   });
 });

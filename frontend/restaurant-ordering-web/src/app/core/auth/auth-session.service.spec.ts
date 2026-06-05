@@ -29,7 +29,8 @@ describe('AuthSessionService', () => {
   let sessionStorageMock: Storage;
   let localStorageSetItemSpy: ReturnType<typeof vi.spyOn>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    TestBed.resetTestingModule();
     sessionStorageMock = createSessionStorageMock();
     vi.stubGlobal('sessionStorage', sessionStorageMock);
     localStorageSetItemSpy = vi
@@ -43,6 +44,7 @@ describe('AuthSessionService', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
+    TestBed.resetTestingModule();
   });
 
   it('saves session in sessionStorage', () => {

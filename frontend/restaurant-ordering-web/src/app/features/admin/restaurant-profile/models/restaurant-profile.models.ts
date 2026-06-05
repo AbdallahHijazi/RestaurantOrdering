@@ -51,3 +51,11 @@ export interface RestaurantProfilePreviewData {
 
 /** Demo restaurant ID used until auth provides the real tenant context. */
 export const DEMO_RESTAURANT_ID = '00000000-0000-0000-0000-000000000001';
+
+export type ProfilePreviewMenuState =
+  | 'idle'
+  | 'loading'
+  | 'loaded'
+  | 'empty'
+  | 'error'
+  | 'demo';

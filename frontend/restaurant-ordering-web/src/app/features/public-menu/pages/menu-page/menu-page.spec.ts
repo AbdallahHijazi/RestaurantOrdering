@@ -81,7 +81,7 @@ describe('MenuPage', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     httpMock.expectNone(`${API_BASE_URL}/api/v1/public/restaurants/demo/menu`);
-    expect(root.textContent).toContain('المطعم غير موجود');
+    expect(root.textContent).toContain('تعذر العثور على المطعم أو القائمة غير متاحة');
   });
 
   it('requests API for a real slug and renders the response', async () => {
@@ -113,7 +113,25 @@ describe('MenuPage', () => {
     req.flush('Not found', { status: 404, statusText: 'Not Found' });
 
     await settle(fixture);
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('المطعم غير موجود');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'تعذر العثور على المطعم أو القائمة غير متاحة',
+    );
+  });
+
+  it('shows empty state for a real slug with no menu items', async () => {
+    const fixture = await createPage('empty-menu');
+
+    const req = httpMock.expectOne(`${API_BASE_URL}/api/v1/public/restaurants/empty-menu/menu`);
+    req.flush({
+      id: '11111111-1111-1111-1111-111111111111',
+      slug: 'empty-menu',
+      nameAr: 'مطعم فارغ',
+      phoneNumber: '+966500000000',
+      categories: [],
+    });
+
+    await settle(fixture);
+    expect(fixture.nativeElement.querySelector('[data-testid="public-menu-empty"]')).toBeTruthy();
   });
 
   it('shows error state with retry for a real slug network failure', async () => {
@@ -124,7 +142,7 @@ describe('MenuPage', () => {
 
     await settle(fixture);
     const root = fixture.nativeElement as HTMLElement;
-    expect(root.textContent).toContain('تعذر تحميل القائمة');
+    expect(root.textContent).toContain('تعذر تحميل القائمة حاليًا');
     expect(root.querySelector('.error-state__retry')).toBeTruthy();
   });
 

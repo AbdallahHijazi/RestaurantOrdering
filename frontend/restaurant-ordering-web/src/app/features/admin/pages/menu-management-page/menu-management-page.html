@@ -241,33 +241,27 @@
 </section>
 
 @if (modalKind()) {
-  <div class="menu-page__modal-backdrop" data-testid="menu-modal-backdrop" (click)="closeModal()"></div>
-  <div
-    class="menu-page__modal"
-    role="dialog"
-    aria-modal="true"
-    [attr.aria-labelledby]="'menu-modal-title'"
-    data-testid="menu-modal"
+  <app-modal-shell
+    [open]="true"
+    [title]="modalTitle()"
+    [closeLabel]="locale.uiText('adminMenuCloseModal')"
+    titleId="menu-modal-title"
+    testId="menu-modal"
+    [blockCloseWhileBusy]="modalSubmitting()"
+    (closed)="closeModal()"
   >
-    <header class="menu-page__modal-header">
-      <h3 id="menu-modal-title">{{ modalTitle() }}</h3>
-      <button
-        type="button"
-        class="menu-page__icon-btn"
-        [attr.aria-label]="locale.uiText('adminMenuCloseModal')"
-        (click)="closeModal()"
-      >
-        ×
-      </button>
-    </header>
-
     @if (modalErrorMessage()) {
       <p class="menu-page__modal-error" role="alert">{{ modalErrorMessage() }}</p>
     }
 
     @switch (modalKind()) {
       @case ('category') {
-        <form class="menu-page__form" [formGroup]="categoryForm" (ngSubmit)="submitCategory()">
+        <form
+          id="menu-category-form"
+          class="menu-page__form"
+          [formGroup]="categoryForm"
+          (ngSubmit)="submitCategory()"
+        >
           <label>
             {{ locale.uiText('adminMenuFormNameAr') }}
             <input type="text" formControlName="nameAr" />
@@ -292,11 +286,16 @@
             <input type="checkbox" formControlName="isActive" />
             {{ locale.uiText('adminMenuFormIsActive') }}
           </label>
-          <div class="menu-page__modal-actions">
+          <div orderModalFooter class="menu-page__modal-actions">
             <button type="button" class="menu-page__secondary-btn" (click)="closeModal()">
               {{ locale.uiText('adminMenuCancel') }}
             </button>
-            <button type="submit" class="menu-page__primary-btn" [disabled]="modalSubmitting()">
+            <button
+              type="submit"
+              class="menu-page__primary-btn"
+              form="menu-category-form"
+              [disabled]="modalSubmitting()"
+            >
               {{
                 modalSubmitting()
                   ? locale.uiText('adminMenuSaving')
@@ -308,7 +307,12 @@
       }
 
       @case ('item') {
-        <form class="menu-page__form" [formGroup]="itemForm" (ngSubmit)="submitItem()">
+        <form
+          id="menu-item-form"
+          class="menu-page__form"
+          [formGroup]="itemForm"
+          (ngSubmit)="submitItem()"
+        >
           <label>
             {{ locale.uiText('adminMenuFormCategory') }}
             <select formControlName="categoryId">
@@ -378,11 +382,16 @@
               />
             }
           </div>
-          <div class="menu-page__modal-actions">
+          <div orderModalFooter class="menu-page__modal-actions">
             <button type="button" class="menu-page__secondary-btn" (click)="closeModal()">
               {{ locale.uiText('adminMenuCancel') }}
             </button>
-            <button type="submit" class="menu-page__primary-btn" [disabled]="modalSubmitting()">
+            <button
+              type="submit"
+              class="menu-page__primary-btn"
+              form="menu-item-form"
+              [disabled]="modalSubmitting()"
+            >
               {{
                 modalSubmitting()
                   ? locale.uiText('adminMenuSaving')
@@ -401,7 +410,7 @@
               {{ locale.uiText('adminMenuDeleteCategoryWarning') }}
             </p>
           }
-          <div class="menu-page__modal-actions">
+          <div orderModalFooter class="menu-page__modal-actions">
             <button type="button" class="menu-page__secondary-btn" (click)="closeModal()">
               {{ locale.uiText('adminMenuDismissDelete') }}
             </button>
@@ -421,7 +430,7 @@
       @case ('deleteItem') {
         <div class="menu-page__confirm">
           <p>{{ locale.uiText('adminMenuDeleteItemMessage') }}</p>
-          <div class="menu-page__modal-actions">
+          <div orderModalFooter class="menu-page__modal-actions">
             <button type="button" class="menu-page__secondary-btn" (click)="closeModal()">
               {{ locale.uiText('adminMenuDismissDelete') }}
             </button>
@@ -438,5 +447,5 @@
         </div>
       }
     }
-  </div>
+  </app-modal-shell>
 }

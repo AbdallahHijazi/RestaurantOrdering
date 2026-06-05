@@ -1,0 +1,159 @@
+.modal-close-button {
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
+  background: var(--restaurant-accent);
+  color: #fff;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+
+  &:hover:not(:disabled) {
+    background: var(--restaurant-accent-strong);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+
+  &:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--restaurant-accent) 35%, white);
+    outline-offset: 3px;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.modal-close-button__icon {
+  display: block;
+  line-height: 1;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal-backdrop);
+  display: grid;
+  place-items: center;
+  padding: clamp(0.75rem, 3vw, 1.5rem);
+  background: rgb(17 24 20 / 0.46);
+  backdrop-filter: blur(2px);
+}
+
+.modal-dialog {
+  position: relative;
+  z-index: var(--z-modal-dialog);
+  display: flex;
+  flex-direction: column;
+  width: min(92vw, var(--modal-dialog-max-width, 44rem));
+  max-height: min(90vh, var(--modal-dialog-max-height, 52rem));
+  margin: auto;
+  overflow: hidden;
+  background: var(--restaurant-surface);
+  border: 1px solid var(--restaurant-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+.modal-dialog--wide {
+  --modal-dialog-max-width: 56rem;
+  --modal-dialog-max-height: 54rem;
+}
+
+.modal-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-shrink: 0;
+  padding-inline: 1.25rem;
+  padding-block: 1rem;
+  border-block-end: 1px solid var(--restaurant-border);
+  background: linear-gradient(
+    180deg,
+    rgb(255 253 252 / 1) 0%,
+    rgb(246 240 231 / 0.65) 100%
+  );
+}
+
+.modal-dialog__header-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  min-width: 0;
+}
+
+.modal-dialog__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  line-height: 1.3;
+}
+
+.modal-dialog__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem 1.25rem 1.15rem;
+}
+
+.modal-dialog__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  padding: 0.85rem 1.25rem 1rem;
+  border-block-start: 1px solid var(--restaurant-border);
+  background: var(--restaurant-surface);
+}
+
+.modal-dialog__footer:empty {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    place-items: end center;
+    padding: 0;
+  }
+
+  .modal-dialog {
+    width: 100%;
+    max-height: min(96vh, var(--modal-dialog-max-height, 52rem));
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+  }
+
+  .modal-dialog__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modal-dialog__footer .button-primary,
+  .modal-dialog__footer .button-secondary,
+  .modal-dialog__footer .button-ghost,
+  .modal-dialog__footer .button-danger,
+  .modal-dialog__footer .button-success,
+  .modal-dialog__footer .menu-page__primary-btn,
+  .modal-dialog__footer .menu-page__secondary-btn,
+  .modal-dialog__footer .staff-page__primary-btn,
+  .modal-dialog__footer .staff-page__secondary-btn {
+    width: 100%;
+  }
+}

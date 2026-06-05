@@ -34,8 +34,17 @@ import {
   revokeImagePreviewUrl,
   SLUG_PATTERN,
 } from '../../data-access/image-preview.util';
+import {
+  PublicMenuApiService,
+  type PublicMenuLoadError,
+} from '../../../../public-menu/data-access/public-menu-api';
 import { MOCK_PUBLIC_MENU } from '../../../../public-menu/data-access/public-menu-mock.data';
 import type {
+  PublicMenuCategory,
+  PublicMenuItem,
+} from '../../../../public-menu/models/public-menu.models';
+import type {
+  ProfilePreviewMenuState,
   RestaurantProfileFormValue,
   RestaurantProfilePreviewData,
   RestaurantSettingsSnapshot,
@@ -89,6 +98,7 @@ function orderingMethodsValidator(control: AbstractControl): ValidationErrors | 
 export class RestaurantProfileSetupPage {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly profileApi = inject(RestaurantProfileApiService);
+  private readonly publicMenuApi = inject(PublicMenuApiService);
   private readonly authService = inject(AuthService);
   private readonly branding = inject(AdminBrandingService);
   protected readonly localeService = inject(LocaleService);
@@ -112,6 +122,12 @@ export class RestaurantProfileSetupPage {
   private readonly settingsSnapshot = signal<RestaurantSettingsSnapshot>({
     workingHoursJson: null,
   });
+
+  private readonly catalogSlug = signal('');
+
+  protected readonly previewMenuState = signal<ProfilePreviewMenuState>('idle');
+  protected readonly previewMenuCategories = signal<PublicMenuCategory[]>([]);
+  protected readonly previewMenuItems = signal<PublicMenuItem[]>([]);
 
   protected readonly canSaveSettings = computed(
     () => this.pageState() === 'ready' || this.pageState() === 'demo',
@@ -255,6 +271,18 @@ export class RestaurantProfileSetupPage {
     this.loadProfile();
   }
 
+  protected refreshPreviewMenu(): void {
+    if (this.pageState() === 'demo') {
+      this.applyDemoPreviewCatalog();
+      return;
+    }
+
+    const slug = this.catalogSlug().trim();
+    if (slug) {
+      this.loadPreviewMenu(slug);
+    }
+  }
+
   protected onSlugBlur(): void {
     const control = this.form.controls.slug;
     control.setValue(normalizeSlugInput(control.value));
@@ -339,6 +367,11 @@ export class RestaurantProfileSetupPage {
               ? this.localeService.uiText('profileRestaurantSaved')
               : this.localeService.uiText('demoSaveNotice'),
           );
+
+          if (result.mode === 'api') {
+            this.catalogSlug.set(payload.slug);
+            this.loadPreviewMenu(payload.slug);
+          }
         },
         error: () => {
           this.savingProfile.set(false);
@@ -402,6 +435,7 @@ export class RestaurantProfileSetupPage {
     if (!restaurantId) {
       this.applyMockOrderingDefaults();
       this.pageState.set('demo');
+      this.applyDemoPreviewCatalog();
       return;
     }
 
@@ -424,12 +458,54 @@ export class RestaurantProfileSetupPage {
             ...mapSettingsDtoToFormPatch(settings),
           });
           this.settingsSnapshot.set(createSettingsSnapshot(settings));
+          this.catalogSlug.set(restaurant.slug);
           this.pageState.set('ready');
+          this.loadPreviewMenu(restaurant.slug);
         },
         error: () => {
           this.pageState.set('settings-error');
         },
       });
+  }
+
+  private loadPreviewMenu(slug: string): void {
+    const normalized = slug.trim().toLowerCase();
+    if (!normalized) {
+      this.previewMenuState.set('idle');
+      this.previewMenuCategories.set([]);
+      this.previewMenuItems.set([]);
+      return;
+    }
+
+    this.previewMenuState.set('loading');
+
+    this.publicMenuApi
+      .getMenuBySlug(normalized)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.previewMenuCategories.set(data.categories);
+          this.previewMenuItems.set(data.items);
+          this.previewMenuState.set(
+            data.categories.length === 0 || data.items.length === 0 ? 'empty' : 'loaded',
+          );
+        },
+        error: (error: { type?: PublicMenuLoadError }) => {
+          this.previewMenuCategories.set([]);
+          this.previewMenuItems.set([]);
+          this.previewMenuState.set('error');
+
+          if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+            console.error('[RestaurantProfileSetupPage] Failed to load preview menu', error);
+          }
+        },
+      });
+  }
+
+  private applyDemoPreviewCatalog(): void {
+    this.previewMenuCategories.set(structuredClone(MOCK_PUBLIC_MENU.categories));
+    this.previewMenuItems.set(structuredClone(MOCK_PUBLIC_MENU.items));
+    this.previewMenuState.set('demo');
   }
 
   private applyMockOrderingDefaults(): void {
@@ -500,3 +576,5 @@ export class RestaurantProfileSetupPage {
     input.value = '';
   }
 }
+
+declare const ngDevMode: boolean | undefined;

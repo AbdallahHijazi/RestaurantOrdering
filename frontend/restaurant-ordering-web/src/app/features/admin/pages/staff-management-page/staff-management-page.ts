@@ -2,10 +2,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   DestroyRef,
-  HostListener,
   inject,
   signal,
 } from '@angular/core';
+import { ModalShell } from '../../../../shared/components/order-modal-shell/order-modal-shell';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   NonNullableFormBuilder,
@@ -26,7 +26,7 @@ type PageState = 'loading' | 'ready' | 'error' | 'missing-context';
 
 @Component({
   selector: 'app-staff-management-page',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, ModalShell],
   templateUrl: './staff-management-page.html',
   styleUrl: './staff-management-page.scss',
 })
@@ -66,15 +66,6 @@ export class StaffManagementPage {
 
   constructor() {
     this.loadStaff();
-  }
-
-  @HostListener('document:keydown.escape')
-  protected onEscape(): void {
-    if (this.createOpen()) {
-      this.closeCreateModal();
-    } else if (this.changeRoleOpen()) {
-      this.closeChangeRoleModal();
-    }
   }
 
   protected loadStaff(): void {

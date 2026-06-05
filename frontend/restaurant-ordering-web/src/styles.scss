@@ -7,6 +7,7 @@
   --z-preview-overlay: 1400;
 
   --restaurant-accent: #B8663F;
+  --restaurant-accent-strong: #9a5534;
   --restaurant-background: #F6F0E7;
   --restaurant-surface: #FFFDFC;
   --restaurant-alternate-surface: #EEE3D6;
@@ -61,6 +62,7 @@ a {
 }
 
 @import './app/shared/styles/app-buttons.scss';
+@import './app/shared/styles/modal-shell.scss';
 @import './app/shared/styles/order-ltr.scss';
 @import './app/shared/styles/order-details.scss';
 

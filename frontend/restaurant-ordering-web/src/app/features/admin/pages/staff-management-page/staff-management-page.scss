@@ -217,68 +217,10 @@
   }
 }
 
-.staff-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-}
-
-.staff-modal__backdrop {
-  position: absolute;
-  inset: 0;
-  border: 0;
-  margin: 0;
-  padding: 0;
-  background: rgb(26 28 26 / 0.45);
-  cursor: pointer;
-}
-
-.staff-modal__panel {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 28rem);
-  max-height: min(90vh, 40rem);
-  overflow: auto;
-  padding: 1.1rem 1.25rem 1.25rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid #e3e2e0;
-  background: #fffdfc;
-  box-shadow: var(--shadow-soft);
-}
-
-.staff-modal__panel--compact {
-  width: min(100%, 24rem);
-}
-
-.staff-modal__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.85rem;
-}
-
-.staff-modal__header h3 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.125rem;
-}
-
-.staff-modal__close {
-  border: 0;
-  background: transparent;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-  color: #434845;
-}
-
 .staff-modal__form {
   display: grid;
   gap: 0.45rem;
+  min-width: 0;
 }
 
 .staff-modal__form label {

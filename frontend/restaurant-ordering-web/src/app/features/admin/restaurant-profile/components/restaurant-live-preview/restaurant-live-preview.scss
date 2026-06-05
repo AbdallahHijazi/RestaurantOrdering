@@ -11,9 +11,41 @@
   margin-bottom: 1rem;
 }
 
+.live-preview__toolbar-head {
+  display: grid;
+  gap: 0.25rem;
+}
+
 .live-preview__toolbar h2 {
   margin: 0;
   font-size: 1rem;
+}
+
+.live-preview__mode {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #5d635f;
+}
+
+.live-preview__toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.live-preview__refresh {
+  border: 1px solid var(--restaurant-border);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  background: #fff;
+  color: var(--restaurant-text);
+  cursor: pointer;
+}
+
+.live-preview__refresh:hover {
+  border-color: var(--restaurant-accent);
+  color: var(--restaurant-accent);
 }
 
 .live-preview__controls {
@@ -92,10 +124,11 @@
   display: grid;
   gap: 0.85rem;
   padding: 0 1rem 1rem;
+  min-width: 0;
 }
 
 .live-preview__grid--full {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 :host {
@@ -121,6 +154,8 @@
   display: grid;
   place-items: center;
   padding: clamp(0.75rem, 3vw, 1.5rem);
+  background: rgb(17 24 20 / 0.46);
+  backdrop-filter: blur(2px);
 }
 
 .live-preview__modal-backdrop {
@@ -129,7 +164,7 @@
   border: 0;
   margin: 0;
   padding: 0;
-  background: rgb(17 24 39 / 0.55);
+  background: transparent;
   cursor: pointer;
 }
 
@@ -158,32 +193,12 @@
   background: #fff;
 }
 
-.live-preview__modal-close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border: 0;
-  border-radius: 999px;
-  padding: 0;
-  background: var(--restaurant-accent);
-  color: #fff;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.live-preview__modal-close:focus-visible {
-  outline: 2px solid var(--restaurant-accent);
-  outline-offset: 2px;
-}
-
 .live-preview__modal-body {
   flex: 1 1 auto;
+  min-width: 0;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding-bottom: 1rem;
 }
 
@@ -203,7 +218,10 @@
 }
 
 @media (min-width: 768px) {
-  .live-preview__grid,
+  .live-preview__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .live-preview__grid--full {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

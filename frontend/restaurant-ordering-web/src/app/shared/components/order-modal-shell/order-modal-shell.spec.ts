@@ -36,7 +36,7 @@ describe('OrderModalShell', () => {
 
   afterEach(() => {
     document.body.classList.remove('order-modal-scroll-lock');
-    document.querySelectorAll('app-order-modal-shell').forEach((node) => node.remove());
+    document.querySelectorAll('app-modal-shell, app-order-modal-shell').forEach((node) => node.remove());
     TestBed.inject(LocaleService).setLocale('ar');
   });
 
@@ -73,6 +73,14 @@ describe('OrderModalShell', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.open()).toBe(false);
+  });
+
+  it('renders unified modal-close-button on the header', () => {
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+
+    const close = document.body.querySelector('[data-testid="order-modal-close"]');
+    expect(close?.classList.contains('modal-close-button')).toBe(true);
   });
 
   it('centers dialog with grid overlay styles', () => {

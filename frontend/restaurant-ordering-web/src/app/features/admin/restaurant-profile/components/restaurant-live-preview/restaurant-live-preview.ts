@@ -8,6 +8,7 @@ import {
   effect,
   inject,
   input,
+  output,
   PLATFORM_ID,
   signal,
   viewChild,
@@ -16,29 +17,45 @@ import { attachElementToBody } from '../../../../../shared/utils/overlay-body-po
 import { LocaleService, type SupportedLocale } from '../../../../../core/localization/locale';
 import { RestaurantThemeService } from '../../../../../core/theme/restaurant-theme';
 import { EmptyState } from '../../../../../shared/ui/empty-state/empty-state';
+import { ErrorState } from '../../../../../shared/ui/error-state/error-state';
+import { LoadingState } from '../../../../../shared/ui/loading-state/loading-state';
 import { CategoryNavigation } from '../../../../public-menu/components/category-navigation/category-navigation';
 import { MenuItemCard } from '../../../../public-menu/components/menu-item-card/menu-item-card';
 import { RestaurantCoverHero } from '../../../../public-menu/components/restaurant-cover-hero/restaurant-cover-hero';
-import {
-  MOCK_IMAGE_FALLBACK,
-  MOCK_PUBLIC_MENU,
-} from '../../../../public-menu/data-access/public-menu-mock.data';
+import { MOCK_IMAGE_FALLBACK } from '../../../../public-menu/data-access/public-menu-mock.data';
 import type {
   PublicMenuCategory,
+  PublicMenuItem,
   RestaurantPublicProfile,
 } from '../../../../public-menu/models/public-menu.models';
-import type { RestaurantProfilePreviewData } from '../../models/restaurant-profile.models';
+import type {
+  ProfilePreviewMenuState,
+  RestaurantProfilePreviewData,
+} from '../../models/restaurant-profile.models';
 
 type PreviewViewport = 'desktop' | 'tablet' | 'mobile';
 
 @Component({
   selector: 'app-restaurant-live-preview',
-  imports: [NgTemplateOutlet, RestaurantCoverHero, CategoryNavigation, MenuItemCard, EmptyState],
+  imports: [
+    NgTemplateOutlet,
+    RestaurantCoverHero,
+    CategoryNavigation,
+    MenuItemCard,
+    EmptyState,
+    ErrorState,
+    LoadingState,
+  ],
   templateUrl: './restaurant-live-preview.html',
   styleUrl: './restaurant-live-preview.scss',
 })
 export class RestaurantLivePreview {
   readonly preview = input.required<RestaurantProfilePreviewData>();
+  readonly menuState = input<ProfilePreviewMenuState>('idle');
+  readonly categories = input<PublicMenuCategory[]>([]);
+  readonly items = input<PublicMenuItem[]>([]);
+
+  readonly refreshPreview = output<void>();
 
   protected readonly localeService = inject(LocaleService);
   private readonly themeService = inject(RestaurantThemeService);
@@ -50,14 +67,19 @@ export class RestaurantLivePreview {
   protected readonly viewport = signal<PreviewViewport>('desktop');
   protected readonly previewLocale = signal<SupportedLocale>('ar');
   protected readonly fullPreviewOpen = signal(false);
-  protected readonly activeCategoryId = signal(MOCK_PUBLIC_MENU.categories[0]?.id ?? '');
+  protected readonly activeCategoryId = signal('');
   protected readonly previewQuantities = signal<Record<string, number>>({});
 
-  protected readonly previewCategories = MOCK_PUBLIC_MENU.categories;
   protected readonly imageFallback = MOCK_IMAGE_FALLBACK;
 
+  protected readonly previewCategories = computed(() => this.categories());
+
   protected readonly filteredPreviewItems = computed(() =>
-    MOCK_PUBLIC_MENU.items.filter((item) => item.categoryId === this.activeCategoryId()),
+    this.items().filter((item) => item.categoryId === this.activeCategoryId()),
+  );
+
+  protected readonly showMenuCatalog = computed(
+    () => this.menuState() === 'loaded' || this.menuState() === 'demo',
   );
 
   protected readonly restaurantProfile = computed<RestaurantPublicProfile>(() => {
@@ -85,6 +107,19 @@ export class RestaurantLivePreview {
   constructor() {
     effect(() => {
       this.themeService.applyAccent(this.preview().primaryAccentColor);
+    });
+
+    effect(() => {
+      const categories = this.previewCategories();
+      const current = this.activeCategoryId();
+      if (!categories.length) {
+        this.activeCategoryId.set('');
+        return;
+      }
+
+      if (!categories.some((category) => category.id === current)) {
+        this.activeCategoryId.set(categories[0]?.id ?? '');
+      }
     });
 
     effect(() => {
@@ -165,5 +200,9 @@ export class RestaurantLivePreview {
       { ar: category.nameAr, en: category.nameEn },
       category.nameAr,
     );
+  }
+
+  protected requestRefresh(): void {
+    this.refreshPreview.emit();
   }
 }

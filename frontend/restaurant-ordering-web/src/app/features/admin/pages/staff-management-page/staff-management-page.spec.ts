@@ -39,6 +39,8 @@ describe('StaffManagementPage', () => {
   });
 
   afterEach(() => {
+    document.body.classList.remove('order-modal-scroll-lock');
+    document.querySelectorAll('app-modal-shell, app-order-modal-shell').forEach((node) => node.remove());
     httpMock.verify();
     session.clearSession();
   });
@@ -112,6 +114,18 @@ describe('StaffManagementPage', () => {
 
     flushList([]);
     expect(root().querySelector('[data-testid="staff-empty-state"]')).toBeTruthy();
+  });
+
+  it('opens create modal on body with unified close button', () => {
+    flushList([]);
+    root().querySelector<HTMLButtonElement>('[data-testid="staff-add-button"]')?.click();
+    fixture.detectChanges();
+
+    expect(document.body.querySelector('[data-testid="staff-create-modal"]')).toBeTruthy();
+    expect(
+      document.body.querySelector('[data-testid="order-modal-close"]')?.classList.contains('modal-close-button'),
+    ).toBe(true);
+    expect(document.body.classList.contains('order-modal-scroll-lock')).toBe(true);
   });
 
   it('creates staff with correct POST payload and refreshes list locally', () => {
@@ -191,7 +205,7 @@ describe('StaffManagementPage', () => {
     fixture.detectChanges();
 
     const locale = TestBed.inject(LocaleService);
-    expect(root().querySelector('.staff-modal__error')?.textContent).toContain(
+    expect(document.body.querySelector('.staff-modal__error')?.textContent).toContain(
       locale.uiText('staffErrorDuplicateEmail'),
     );
   });
@@ -249,7 +263,9 @@ describe('StaffManagementPage', () => {
     fixture.detectChanges();
 
     const options = Array.from(
-      root().querySelectorAll<HTMLOptionElement>('[data-testid="staff-create-role-select"] option'),
+      document.body.querySelectorAll<HTMLOptionElement>(
+        '[data-testid="staff-create-role-select"] option',
+      ),
     ).map((option) => option.value);
 
     expect(options).toEqual([...AssignableStaffRoles]);

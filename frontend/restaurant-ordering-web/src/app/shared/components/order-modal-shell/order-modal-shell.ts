@@ -12,14 +12,14 @@ import {
 import { attachElementToBody } from '../../utils/overlay-body-portal';
 
 @Component({
-  selector: 'app-order-modal-shell',
+  selector: 'app-modal-shell, app-order-modal-shell',
   templateUrl: './order-modal-shell.html',
   styleUrl: './order-modal-shell.scss',
   host: {
-    '[class.order-modal-host--open]': 'open()',
+    '[class.modal-shell-host--open]': 'open()',
   },
 })
-export class OrderModalShell {
+export class ModalShell {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private triggerElement: HTMLElement | null = null;
@@ -30,6 +30,8 @@ export class OrderModalShell {
   readonly closeLabel = input.required<string>();
   readonly titleId = input('order-modal-title');
   readonly testId = input<string | null>(null);
+  readonly wide = input(false);
+  readonly blockCloseWhileBusy = input(false);
 
   readonly closed = output<void>();
 
@@ -66,14 +68,23 @@ export class OrderModalShell {
 
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
-    if (this.open()) {
+    if (this.open() && !this.blockCloseWhileBusy()) {
+      this.closed.emit();
+    }
+  }
+
+  protected requestClose(): void {
+    if (!this.blockCloseWhileBusy()) {
       this.closed.emit();
     }
   }
 
   protected onBackdropClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) {
+    if (event.target === event.currentTarget && !this.blockCloseWhileBusy()) {
       this.closed.emit();
     }
   }
 }
+
+/** @deprecated Import ModalShell instead. */
+export { ModalShell as OrderModalShell };

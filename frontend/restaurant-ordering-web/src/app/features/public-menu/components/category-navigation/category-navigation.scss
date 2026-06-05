@@ -13,8 +13,10 @@
   display: flex;
   gap: 0.65rem;
   overflow-x: auto;
+  overscroll-behavior-inline: contain;
   padding: 0.25rem 0.15rem;
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .category-nav__scroll::-webkit-scrollbar {

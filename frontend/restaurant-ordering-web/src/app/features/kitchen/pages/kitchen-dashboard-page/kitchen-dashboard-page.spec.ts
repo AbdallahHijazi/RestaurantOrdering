@@ -40,7 +40,7 @@ describe('KitchenDashboardPage', () => {
 
   afterEach(() => {
     document.body.classList.remove('order-modal-scroll-lock');
-    document.querySelectorAll('app-order-modal-shell').forEach((node) => node.remove());
+    document.querySelectorAll('app-modal-shell, app-order-modal-shell').forEach((node) => node.remove());
     TestBed.inject(LocaleService).setLocale('ar');
     httpMock.verify({ ignoreCancelled: true });
     session.clearSession();

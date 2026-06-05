@@ -39,6 +39,8 @@ describe('MenuManagementPage', () => {
   });
 
   afterEach(() => {
+    document.body.classList.remove('order-modal-scroll-lock');
+    document.querySelectorAll('app-modal-shell, app-order-modal-shell').forEach((node) => node.remove());
     httpMock.match(() => true).forEach((req) => req.flush([]));
     httpMock.verify();
     session.clearSession();
@@ -53,6 +55,11 @@ describe('MenuManagementPage', () => {
   it('opens add category modal and creates a category', () => {
     fixture.nativeElement.querySelector('[data-testid="menu-add-category-button"]').click();
     fixture.detectChanges();
+
+    expect(document.body.querySelector('[data-testid="menu-modal"]')).toBeTruthy();
+    expect(
+      document.body.querySelector('[data-testid="order-modal-close"]')?.classList.contains('modal-close-button'),
+    ).toBe(true);
 
     setInputValue('input[formcontrolname="nameAr"]', 'فئة جديدة');
     fixture.debugElement.query(By.css('form')).triggerEventHandler('submit', new Event('submit'));
@@ -76,7 +83,7 @@ describe('MenuManagementPage', () => {
       .querySelector(`[data-testid="menu-delete-category-${CATEGORY_ID}"]`)
       .click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[data-testid="menu-delete-category-warning"]')).toBeTruthy();
+    expect(document.body.querySelector('[data-testid="menu-delete-category-warning"]')).toBeTruthy();
   });
 
   it('renders menu item image from resolved ImageUrl', () => {
@@ -117,7 +124,7 @@ describe('MenuManagementPage', () => {
     setInputValue('input[formcontrolname="discountPrice"]', '20');
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain(
+    expect(document.body.textContent).toContain(
       TestBed.inject(LocaleService).uiText('adminMenuDiscountInvalid'),
     );
   });
@@ -133,9 +140,9 @@ describe('MenuManagementPage', () => {
     fixture.detectChanges();
 
     const file = new File([new Uint8Array([1, 2, 3])], 'dish.png', { type: 'image/png' });
-    const input: HTMLInputElement = fixture.nativeElement.querySelector(
+    const input: HTMLInputElement = document.body.querySelector(
       '[data-testid="menu-item-image-input"]',
-    );
+    )!;
     Object.defineProperty(input, 'files', { value: [file] });
     input.dispatchEvent(new Event('change'));
     fixture.detectChanges();

@@ -1,6 +1,17 @@
 <section class="live-preview" aria-labelledby="live-preview-title">
   <div class="live-preview__toolbar">
-    <h2 id="live-preview-title">{{ localeService.uiText('previewTitle') }}</h2>
+    <div class="live-preview__toolbar-head">
+      <h2 id="live-preview-title">{{ localeService.uiText('previewTitle') }}</h2>
+      @if (menuState() === 'demo') {
+        <p class="live-preview__mode" data-testid="live-preview-demo-mode">
+          {{ localeService.uiText('profilePreviewDemoMode') }}
+        </p>
+      } @else if (menuState() === 'loaded' || menuState() === 'empty') {
+        <p class="live-preview__mode" data-testid="live-preview-real-mode">
+          {{ localeService.uiText('profilePreviewRealMenu') }}
+        </p>
+      }
+    </div>
 
     <div class="live-preview__controls" role="group" aria-label="Viewport size">
       <button type="button" [class.is-active]="viewport() === 'desktop'" (click)="setViewport('desktop')">
@@ -23,9 +34,19 @@
       </button>
     </div>
 
-    <button type="button" class="live-preview__full" (click)="openFullPreview()">
-      {{ localeService.uiText('fullPreview') }}
-    </button>
+    <div class="live-preview__toolbar-actions">
+      <button
+        type="button"
+        class="live-preview__refresh"
+        data-testid="live-preview-refresh"
+        (click)="requestRefresh()"
+      >
+        {{ localeService.uiText('profilePreviewRefresh') }}
+      </button>
+      <button type="button" class="live-preview__full" (click)="openFullPreview()">
+        {{ localeService.uiText('fullPreview') }}
+      </button>
+    </div>
   </div>
 
   <div
@@ -79,12 +100,12 @@
         <strong>{{ localeService.uiText('fullPreview') }}</strong>
         <button
           type="button"
-          class="live-preview__modal-close"
+          class="modal-close-button"
           data-testid="live-preview-close"
           [attr.aria-label]="localeService.uiText('closePreviewAria')"
           (click)="closeFullPreview()"
         >
-          <span aria-hidden="true">&times;</span>
+          <span class="modal-close-button__icon" aria-hidden="true">&times;</span>
         </button>
       </header>
 
@@ -100,47 +121,71 @@
 }
 
 <ng-template #previewMenuBody let-gridClass="gridClass" let-showFooter="showFooter">
-  <app-restaurant-cover-hero
-    [restaurant]="restaurantProfile()"
-    [imageFallback]="imageFallback"
-  />
-
-  <app-category-navigation
-    [categories]="previewCategories"
-    [activeCategoryId]="activeCategoryId()"
-    (categorySelected)="selectCategory($event)"
-  />
-
-  @if (filteredPreviewItems().length === 0) {
-    <app-empty-state
-      [title]="localeService.uiText('emptyItems')"
-      [locale]="localeService"
-    />
-  } @else {
-    <div class="live-preview__grid{{ gridClass }}">
-      @for (item of filteredPreviewItems(); track item.id) {
-        <app-menu-item-card
-          [item]="item"
-          [currencyCode]="restaurantProfile().currencyCode"
-          [countryCode]="restaurantProfile().countryCode"
-          [quantity]="quantityFor(item.id)"
-          [imageFallback]="imageFallback"
-          (quantityChange)="updatePreviewQuantity(item.id, $event)"
-        />
-      }
+  @if (menuState() === 'loading') {
+    <div data-testid="live-preview-menu-loading">
+      <app-loading-state [locale]="localeService" />
     </div>
-  }
+  } @else if (menuState() === 'error') {
+    <app-error-state
+      [locale]="localeService"
+      [title]="localeService.uiText('profilePreviewErrorMenu')"
+      [message]="localeService.uiText('profilePreviewErrorMenu')"
+      [showRetry]="true"
+      data-testid="live-preview-menu-error"
+      (retry)="requestRefresh()"
+    />
+  } @else if (menuState() === 'empty') {
+    <app-empty-state
+      [title]="localeService.uiText('profilePreviewEmptyMenu')"
+      [locale]="localeService"
+      data-testid="live-preview-menu-empty"
+    />
+  } @else if (showMenuCatalog()) {
+    <app-restaurant-cover-hero
+      [restaurant]="restaurantProfile()"
+      [imageFallback]="imageFallback"
+    />
 
-  @if (showFooter) {
-    <footer class="live-preview__footer">
-      <p>
-        {{
-          localeService.pickText(
-            { ar: restaurantProfile().addressAr, en: restaurantProfile().addressEn },
-            '—'
-          )
-        }}
-      </p>
-    </footer>
+    @if (previewCategories().length > 0) {
+      <app-category-navigation
+        [categories]="previewCategories()"
+        [activeCategoryId]="activeCategoryId()"
+        (categorySelected)="selectCategory($event)"
+      />
+    }
+
+    @if (filteredPreviewItems().length === 0) {
+      <app-empty-state
+        [title]="localeService.uiText('emptyItems')"
+        [locale]="localeService"
+        data-testid="live-preview-category-empty"
+      />
+    } @else {
+      <div class="live-preview__grid{{ gridClass }}">
+        @for (item of filteredPreviewItems(); track item.id) {
+          <app-menu-item-card
+            [item]="item"
+            [currencyCode]="restaurantProfile().currencyCode"
+            [countryCode]="restaurantProfile().countryCode"
+            [quantity]="quantityFor(item.id)"
+            [imageFallback]="imageFallback"
+            (quantityChange)="updatePreviewQuantity(item.id, $event)"
+          />
+        }
+      </div>
+    }
+
+    @if (showFooter) {
+      <footer class="live-preview__footer">
+        <p>
+          {{
+            localeService.pickText(
+              { ar: restaurantProfile().addressAr, en: restaurantProfile().addressEn },
+              '—'
+            )
+          }}
+        </p>
+      </footer>
+    }
   }
 </ng-template>

@@ -4,11 +4,16 @@
   <app-error-state
     [locale]="localeService"
     [title]="ui().notFoundTitle"
-    [message]="ui().notFoundMessage"
+    [message]="ui().publicMenuNotFound"
     [showRetry]="false"
   />
 } @else if (pageState() === 'error') {
-  <app-error-state [locale]="localeService" (retry)="reload()" />
+  <app-error-state
+    [locale]="localeService"
+    [title]="ui().errorTitle"
+    [message]="ui().publicMenuUnavailable"
+    (retry)="reload()"
+  />
 } @else if (menuData(); as data) {
   <div class="menu-page">
     <header class="menu-page__header">
@@ -57,10 +62,11 @@
           (exploreMenu)="scrollToMenu()"
         />
 
-        @if (data.categories.length === 0) {
+        @if (data.categories.length === 0 || data.items.length === 0) {
           <app-empty-state
-            [title]="ui().emptyCategories"
+            [title]="ui().publicMenuEmpty"
             [locale]="localeService"
+            data-testid="public-menu-empty"
           />
         } @else {
           <section #menuSection class="menu-page__menu" aria-labelledby="menu-section-title">

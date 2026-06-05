@@ -34,9 +34,10 @@ describe('RestaurantProfileSetupPage', () => {
 
   afterEach(() => {
     httpMock.verify();
+    TestBed.resetTestingModule();
   });
 
-  function flushLoadedSettings(): void {
+  function flushLoadedSettings(menuDto?: Record<string, unknown>): void {
     const restaurantReq = httpMock.expectOne(
       `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}`,
     );
@@ -65,6 +66,20 @@ describe('RestaurantProfileSetupPage', () => {
       isPickupEnabled: false,
       workingHoursJson: '{"sat":"10-22"}',
     });
+
+    const menuReq = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`,
+    );
+    menuReq.flush(
+      menuDto ?? {
+        id: RESTAURANT_ID,
+        slug: 'restaurant-a',
+        nameAr: 'مطعم',
+        nameEn: 'Restaurant',
+        phoneNumber: '+966500000000',
+        categories: [],
+      },
+    );
 
     fixture.detectChanges();
   }
@@ -169,6 +184,18 @@ describe('RestaurantProfileSetupPage', () => {
       nameAr: 'مطعم محدث',
       phoneNumber: '+966500000000',
       isActive: true,
+    });
+
+    const menuReloadReq = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`,
+    );
+    menuReloadReq.flush({
+      id: RESTAURANT_ID,
+      slug: 'restaurant-a',
+      nameAr: 'مطعم محدث',
+      nameEn: 'Restaurant',
+      phoneNumber: '+966500000000',
+      categories: [],
     });
     fixture.detectChanges();
 

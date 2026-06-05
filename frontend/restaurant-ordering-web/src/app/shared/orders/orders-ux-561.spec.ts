@@ -52,7 +52,7 @@ describe('5F.6.1 UX fixes', () => {
 
     afterEach(() => {
       document.body.classList.remove('order-modal-scroll-lock');
-      document.querySelectorAll('app-order-modal-shell').forEach((node) => node.remove());
+      document.querySelectorAll('app-modal-shell, app-order-modal-shell').forEach((node) => node.remove());
       locale.setLocale('ar');
     });
 

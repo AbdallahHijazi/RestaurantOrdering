@@ -133,6 +133,16 @@ type UiTextKey =
   | 'profileValidationCurrencySymbol'
   | 'previewTitle'
   | 'fullPreview'
+  | 'profilePreviewLoadingMenu'
+  | 'profilePreviewEmptyMenu'
+  | 'profilePreviewErrorMenu'
+  | 'profilePreviewRetry'
+  | 'profilePreviewRefresh'
+  | 'profilePreviewRealMenu'
+  | 'profilePreviewDemoMode'
+  | 'publicMenuNotFound'
+  | 'publicMenuUnavailable'
+  | 'publicMenuEmpty'
   | 'closePreview'
   | 'closePreviewAria'
   | 'loginBrand'
@@ -519,6 +529,17 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     profileValidationCurrencySymbol: 'استخدم رمز عملة من 3 أحرف إنجليزية فقط (مثل USD)، وليس رمزًا مثل $.',
     previewTitle: 'معاينة مباشرة',
     fullPreview: 'معاينة كاملة',
+    profilePreviewLoadingMenu: 'جاري تحميل معاينة القائمة…',
+    profilePreviewEmptyMenu:
+      'لم تضف وجبات إلى قائمتك بعد. أضف تصنيفًا ووجبة من صفحة إدارة القائمة لتظهر هنا.',
+    profilePreviewErrorMenu: 'تعذر تحميل معاينة القائمة. حاول مجددًا.',
+    profilePreviewRetry: 'إعادة المحاولة',
+    profilePreviewRefresh: 'تحديث المعاينة',
+    profilePreviewRealMenu: 'معاينة القائمة الفعلية',
+    profilePreviewDemoMode: 'وضع معاينة تجريبي — بيانات قائمة تجريبية فقط',
+    publicMenuNotFound: 'تعذر العثور على المطعم أو القائمة غير متاحة.',
+    publicMenuUnavailable: 'تعذر تحميل القائمة حاليًا. حاول مجددًا.',
+    publicMenuEmpty: 'لا توجد وجبات متاحة حالياً.',
     closePreview: 'إغلاق',
     closePreviewAria: 'إغلاق المعاينة',
     loginBrand: 'Restaurant Admin',
@@ -916,6 +937,17 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
       'Use a 3-letter ISO currency code (e.g. USD), not a symbol such as $.',
     previewTitle: 'Live preview',
     fullPreview: 'Open full preview',
+    profilePreviewLoadingMenu: 'Loading menu preview…',
+    profilePreviewEmptyMenu:
+      'Your menu does not have any items yet. Add a category and a menu item from Menu Management to preview them here.',
+    profilePreviewErrorMenu: 'Failed to load the menu preview. Please try again.',
+    profilePreviewRetry: 'Retry',
+    profilePreviewRefresh: 'Refresh preview',
+    profilePreviewRealMenu: 'Real menu preview',
+    profilePreviewDemoMode: 'Demo preview mode — sample menu data only',
+    publicMenuNotFound: 'The restaurant could not be found or its menu is unavailable.',
+    publicMenuUnavailable: 'The menu could not be loaded right now. Please try again.',
+    publicMenuEmpty: 'No menu items are currently available.',
     closePreview: 'Close',
     closePreviewAria: 'Close preview',
     loginBrand: 'Restaurant Admin',

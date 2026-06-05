@@ -2,11 +2,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   DestroyRef,
-  HostListener,
   computed,
   inject,
   signal,
 } from '@angular/core';
+import { ModalShell } from '../../../../shared/components/order-modal-shell/order-modal-shell';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
@@ -39,7 +39,7 @@ type ModalKind = 'category' | 'item' | 'deleteCategory' | 'deleteItem' | null;
 
 @Component({
   selector: 'app-menu-management-page',
-  imports: [ReactiveFormsModule, DecimalPipe],
+  imports: [ReactiveFormsModule, DecimalPipe, ModalShell],
   templateUrl: './menu-management-page.html',
   styleUrl: './menu-management-page.scss',
 })
@@ -112,17 +112,6 @@ export class MenuManagementPage {
 
   constructor() {
     this.loadCategories();
-  }
-
-  @HostListener('document:keydown.escape')
-  protected onEscape(): void {
-    if (this.modalSubmitting()) {
-      return;
-    }
-
-    if (this.modalKind()) {
-      this.closeModal();
-    }
   }
 
   protected loadCategories(): void {

@@ -1,5 +1,6 @@
 @if (confirmation(); as order) {
   <app-order-modal-shell
+    [wide]="true"
     [open]="open()"
     [title]="ui().publicConfirmationSuccessTitle"
     [closeLabel]="ui().publicConfirmationCloseAria"

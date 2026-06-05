@@ -142,32 +142,21 @@
 </section>
 
 @if (createOpen()) {
-  <div class="staff-modal" data-testid="staff-create-modal">
-    <button
-      type="button"
-      class="staff-modal__backdrop"
-      [attr.aria-label]="locale.uiText('staffCloseModal')"
-      (click)="closeCreateModal()"
-    ></button>
-    <div
-      class="staff-modal__panel"
-      role="dialog"
-      aria-modal="true"
-      [attr.aria-labelledby]="'staff-create-title'"
-    >
-      <header class="staff-modal__header">
-        <h3 id="staff-create-title">{{ locale.uiText('staffCreateTitle') }}</h3>
-        <button
-          type="button"
-          class="staff-modal__close"
-          [attr.aria-label]="locale.uiText('staffCloseModal')"
-          (click)="closeCreateModal()"
-        >
-          ×
-        </button>
-      </header>
-
-      <form class="staff-modal__form" [formGroup]="createForm" (ngSubmit)="submitCreate()">
+  <app-modal-shell
+    [open]="true"
+    [title]="locale.uiText('staffCreateTitle')"
+    [closeLabel]="locale.uiText('staffCloseModal')"
+    titleId="staff-create-title"
+    testId="staff-create-modal"
+    [blockCloseWhileBusy]="createSubmitting()"
+    (closed)="closeCreateModal()"
+  >
+      <form
+        id="staff-create-form"
+        class="staff-modal__form"
+        [formGroup]="createForm"
+        (ngSubmit)="submitCreate()"
+      >
         <label for="staff-create-email">{{ locale.uiText('staffFormEmail') }}</label>
         <input id="staff-create-email" type="email" formControlName="email" autocomplete="email" />
 
@@ -196,13 +185,14 @@
           <p class="staff-modal__error" role="alert">{{ createErrorMessage() }}</p>
         }
 
-        <div class="staff-modal__actions">
+        <div orderModalFooter class="staff-modal__actions">
           <button type="button" class="staff-page__secondary-btn" (click)="closeCreateModal()">
             {{ locale.uiText('staffCancel') }}
           </button>
           <button
             type="submit"
             class="staff-page__primary-btn"
+            form="staff-create-form"
             data-testid="staff-create-submit"
             [disabled]="createSubmitting()"
           >
@@ -214,36 +204,19 @@
           </button>
         </div>
       </form>
-    </div>
-  </div>
+  </app-modal-shell>
 }
 
 @if (changeRoleOpen() && selectedStaff(); as member) {
-  <div class="staff-modal" data-testid="staff-change-role-modal">
-    <button
-      type="button"
-      class="staff-modal__backdrop"
-      [attr.aria-label]="locale.uiText('staffCloseModal')"
-      (click)="closeChangeRoleModal()"
-    ></button>
-    <div
-      class="staff-modal__panel staff-modal__panel--compact"
-      role="dialog"
-      aria-modal="true"
-      [attr.aria-labelledby]="'staff-change-role-title'"
-    >
-      <header class="staff-modal__header">
-        <h3 id="staff-change-role-title">{{ locale.uiText('staffChangeRoleTitle') }}</h3>
-        <button
-          type="button"
-          class="staff-modal__close"
-          [attr.aria-label]="locale.uiText('staffCloseModal')"
-          (click)="closeChangeRoleModal()"
-        >
-          ×
-        </button>
-      </header>
-
+  <app-modal-shell
+    [open]="true"
+    [title]="locale.uiText('staffChangeRoleTitle')"
+    [closeLabel]="locale.uiText('staffCloseModal')"
+    titleId="staff-change-role-title"
+    testId="staff-change-role-modal"
+    [blockCloseWhileBusy]="changeRoleSubmitting()"
+    (closed)="closeChangeRoleModal()"
+  >
       <p class="staff-modal__meta">
         <strong>{{ displayName(member) }}</strong>
       </p>
@@ -252,7 +225,12 @@
         <span>{{ roleLabel(member.role) }}</span>
       </p>
 
-      <form class="staff-modal__form" [formGroup]="changeRoleForm" (ngSubmit)="submitChangeRole()">
+      <form
+        id="staff-change-role-form"
+        class="staff-modal__form"
+        [formGroup]="changeRoleForm"
+        (ngSubmit)="submitChangeRole()"
+      >
         <label for="staff-change-role">{{ locale.uiText('staffNewRole') }}</label>
         <select
           id="staff-change-role"
@@ -268,13 +246,14 @@
           <p class="staff-modal__error" role="alert">{{ changeRoleErrorMessage() }}</p>
         }
 
-        <div class="staff-modal__actions">
+        <div orderModalFooter class="staff-modal__actions">
           <button type="button" class="staff-page__secondary-btn" (click)="closeChangeRoleModal()">
             {{ locale.uiText('staffCancel') }}
           </button>
           <button
             type="submit"
             class="staff-page__primary-btn"
+            form="staff-change-role-form"
             data-testid="staff-change-role-submit"
             [disabled]="changeRoleSubmitting()"
           >
@@ -286,6 +265,5 @@
           </button>
         </div>
       </form>
-    </div>
-  </div>
+  </app-modal-shell>
 }
