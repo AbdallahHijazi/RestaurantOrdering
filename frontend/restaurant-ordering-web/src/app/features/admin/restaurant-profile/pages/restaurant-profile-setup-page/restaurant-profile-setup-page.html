@@ -1,340 +1,484 @@
-<section class="profile-setup">
-  <header class="profile-setup__toolbar">
-    <div class="profile-setup__toolbar-text">
-      <nav class="profile-setup__breadcrumb" aria-label="Breadcrumb">
-        <span>{{ localeService.locale() === 'ar' ? 'الإدارة' : 'Admin' }}</span>
-        <span aria-hidden="true">/</span>
-        <span>{{ localeService.uiText('profileTitle') }}</span>
-      </nav>
-      <h1>{{ localeService.uiText('profileTitle') }}</h1>
-      <p>
-        {{
-          localeService.locale() === 'ar'
-            ? 'خصّص هوية مطعمك وشاهد المعاينة مباشرة.'
-            : 'Customize your restaurant identity with a live preview.'
-        }}
-      </p>
+<main class="profile-console__main" data-testid="profile-console-main">
+  <div class="profile-console__subheader" data-testid="profile-console-subheader">
+    <nav
+      class="profile-console__tabs"
+      role="tablist"
+      [attr.aria-label]="localeService.uiText('profileTitle')"
+      data-testid="profile-console-tabs"
+    >
+      @for (tab of workspaceTabs; track tab; let index = $index) {
+        <button
+          type="button"
+          class="profile-console__tab"
+          role="tab"
+          [id]="'profile-tab-' + tab"
+          [attr.data-testid]="'profile-tab-' + tab"
+          [attr.aria-selected]="activeWorkspaceTab() === tab"
+          [attr.aria-controls]="workspaceTabPanelId(tab)"
+          [class.is-active]="activeWorkspaceTab() === tab"
+          (click)="selectWorkspaceTab(tab)"
+          (keydown)="onWorkspaceTabKeydown($event, tab, index)"
+        >
+          <span>{{ workspaceTabLabel(tab) }}</span>
+        </button>
+      }
+    </nav>
+
+    <div class="profile-console__subheader-actions">
+      <button
+        type="button"
+        class="profile-console__publish premium-btn"
+        data-testid="profile-publish-live"
+        [disabled]="!publishAvailable"
+        [attr.aria-disabled]="!publishAvailable"
+        [attr.title]="!publishAvailable ? localeService.uiText('profilePublishUnavailable') : null"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            fill="currentColor"
+            d="M5 20h14v-2H5v2Zm7-18-7 4.5v11L12 22l7-4.5v-11L12 2Zm0 2.2 5.6 3.15L12 11 6.4 7.85 12 4.2ZM6 9.3l5 2.81v8.39l-5-2.81V9.3Zm12 0v8.39l-5 2.81v-8.39l5-2.81Z"
+          />
+        </svg>
+        <span>{{ localeService.uiText('profilePublishLive') }}</span>
+      </button>
+      @if (!publishAvailable) {
+        <p class="profile-console__publish-hint" data-testid="profile-publish-hint">
+          {{ localeService.uiText('profilePublishUnavailable') }}
+        </p>
+      }
     </div>
-  </header>
+  </div>
 
   @if (settingsLoadFailed()) {
-    <div class="profile-setup__alert" role="alert">
+    <div class="profile-console__alert" role="alert">
       <p>{{ localeService.uiText('profileSettingsLoadError') }}</p>
-      <button type="button" class="profile-setup__secondary" (click)="retryLoadSettings()">
+      <button type="button" class="profile-console__btn profile-console__btn--secondary" (click)="retryLoadSettings()">
         {{ localeService.uiText('profileSettingsRetry') }}
       </button>
     </div>
   }
 
-  <div class="profile-setup__layout">
-    <form class="profile-setup__form" [formGroup]="form">
-      <section class="profile-setup__section">
-        <h2>{{ localeService.locale() === 'ar' ? 'هوية المطعم' : 'Restaurant identity' }}</h2>
-
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'الاسم بالعربية' : 'Arabic name' }}</span>
-          <input type="text" formControlName="nameAr" autocomplete="organization" />
-        </label>
-
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'الاسم بالإنجليزية' : 'English name' }}</span>
-          <input type="text" formControlName="nameEn" autocomplete="organization" />
-        </label>
-
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'الوصف بالعربية' : 'Arabic description' }}</span>
-          <textarea rows="3" formControlName="descriptionAr"></textarea>
-        </label>
-
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'الوصف بالإنجليزية' : 'English description' }}</span>
-          <textarea rows="3" formControlName="descriptionEn"></textarea>
-        </label>
-
-        <label>
-          <span>Slug</span>
-          <input
-            type="text"
-            class="profile-setup__technical"
-            dir="ltr"
-            formControlName="slug"
-            (blur)="onSlugBlur()"
-            spellcheck="false"
-          />
-          @if (form.controls.slug.invalid && form.controls.slug.touched) {
-            <small>{{
-              localeService.locale() === 'ar'
-                ? 'استخدم أحرفًا صغيرة وأرقامًا وشرطات فقط.'
-                : 'Use lowercase letters, numbers, and single hyphens only.'
-            }}</small>
-          }
-        </label>
-
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'Accent Color' : 'Accent color' }}</span>
-          <input
-            type="text"
-            class="profile-setup__technical"
-            dir="ltr"
-            formControlName="primaryAccentColor"
-            spellcheck="false"
-          />
-        </label>
-
-        <div class="profile-setup__field">
-          <span>{{ localeService.locale() === 'ar' ? 'الشعار' : 'Logo' }}</span>
-          <div class="file-picker">
-            <input
-              #logoInput
-              id="logo-input"
-              type="file"
-              class="file-picker__input"
-              accept="image/jpeg,image/png,image/webp"
-              (change)="onLogoSelected($event)"
-            />
-            <button type="button" class="file-picker__button" (click)="logoInput.click()">
-              {{ chooseImageLabel() }}
-            </button>
-            <span class="file-picker__name">{{ logoFileName() ?? noFileChosenLabel() }}</span>
-          </div>
-        </div>
-
-        <div class="profile-setup__field">
-          <span>{{ localeService.locale() === 'ar' ? 'صورة الغلاف' : 'Cover image' }}</span>
-          <div class="file-picker">
-            <input
-              #coverInput
-              id="cover-input"
-              type="file"
-              class="file-picker__input"
-              accept="image/jpeg,image/png,image/webp"
-              (change)="onCoverSelected($event)"
-            />
-            <button type="button" class="file-picker__button" (click)="coverInput.click()">
-              {{ chooseImageLabel() }}
-            </button>
-            <span class="file-picker__name">{{ coverFileName() ?? noFileChosenLabel() }}</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="profile-setup__section">
-        <h2>{{ localeService.locale() === 'ar' ? 'الدولة وإعدادات اللغة' : 'Locale & region' }}</h2>
-
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'الدولة' : 'Country code' }}</span>
-          <input
-            type="text"
-            class="profile-setup__technical"
-            dir="ltr"
-            formControlName="countryCode"
-            maxlength="2"
-          />
-        </label>
-
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'اللغة الافتراضية' : 'Default language' }}</span>
-          <select formControlName="defaultLocale">
-            <option value="ar">العربية</option>
-            <option value="en">English</option>
-          </select>
-        </label>
-
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'كود الهاتف' : 'Phone country code' }}</span>
-          <input
-            type="text"
-            class="profile-setup__technical"
-            dir="ltr"
-            formControlName="phoneCountryCode"
-          />
-        </label>
-      </section>
-
-      <section class="profile-setup__section" data-testid="profile-delivery-settings">
-        <h2>{{ localeService.uiText('profileDeliverySettingsTitle') }}</h2>
-
-        <label class="profile-setup__toggle">
-          <input type="checkbox" formControlName="isPickupEnabled" />
-          <span>{{ localeService.uiText('profileEnablePickup') }}</span>
-        </label>
-
-        <label class="profile-setup__toggle">
-          <input type="checkbox" formControlName="isDeliveryEnabled" />
-          <span>{{ localeService.uiText('profileEnableDelivery') }}</span>
-        </label>
-
-        <label>
-          <span>{{ localeService.uiText('profileDeliveryFee') }}</span>
-          <input
-            type="number"
-            class="profile-setup__technical"
-            dir="ltr"
-            formControlName="deliveryFee"
-            min="0"
-            step="0.01"
-            inputmode="decimal"
-          />
-          @if (fieldError('deliveryFee'); as error) {
-            <small>{{ error }}</small>
-          }
-        </label>
-
-        <label>
-          <span>{{ localeService.uiText('profileMinimumOrder') }}</span>
-          <input
-            type="number"
-            class="profile-setup__technical"
-            dir="ltr"
-            formControlName="minimumOrderAmount"
-            min="0"
-            step="0.01"
-            inputmode="decimal"
-          />
-          @if (fieldError('minimumOrderAmount'); as error) {
-            <small>{{ error }}</small>
-          }
-        </label>
-
-        <label>
-          <span>{{ localeService.uiText('profileTaxRate') }} (%)</span>
-          <input
-            type="number"
-            class="profile-setup__technical"
-            dir="ltr"
-            formControlName="taxRate"
-            min="0"
-            max="100"
-            step="0.01"
-            inputmode="decimal"
-          />
-          @if (fieldError('taxRate'); as error) {
-            <small>{{ error }}</small>
-          }
-        </label>
-
-        <label>
-          <span>{{ localeService.uiText('profileCurrencyCode') }}</span>
-          <input
-            type="text"
-            class="profile-setup__technical"
-            dir="ltr"
-            formControlName="currencyCode"
-            maxlength="3"
-            spellcheck="false"
-          />
-          <small class="profile-setup__hint">{{ localeService.uiText('profileCurrencyCodeHelp') }}</small>
-          @if (fieldError('currencyCode'); as error) {
-            <small class="profile-setup__error">{{ error }}</small>
-          }
-        </label>
-
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'المنطقة الزمنية' : 'Time zone' }}</span>
-          <input
-            type="text"
-            class="profile-setup__technical"
-            dir="ltr"
-            formControlName="timeZone"
-          />
-        </label>
-
-        @if (orderingMethodError()) {
-          <p class="profile-setup__alert" role="alert">
-            {{ localeService.uiText('profileOrderingMethodRequired') }}
-          </p>
-        }
-
-        @if (settingsSaveNotice()) {
-          <p class="profile-setup__notice" role="status">{{ settingsSaveNotice() }}</p>
-        }
-
-        <button
-          type="button"
-          class="profile-setup__save"
-          data-testid="profile-save-ordering-settings"
-          [disabled]="!canSaveSettings() || savingSettings() || settingsLoadFailed()"
-          (click)="saveOrderingSettings()"
+  <div class="profile-console__workspace">
+    <div class="profile-console__editor">
+      <form class="profile-console__form" [formGroup]="form">
+        @if (activeWorkspaceTab() === 'identity') {
+        <section
+          class="profile-console__panel"
+          role="tabpanel"
+          [id]="workspaceTabPanelId('identity')"
+          [attr.aria-labelledby]="'profile-tab-identity'"
+          data-testid="profile-tabpanel-identity"
         >
-          {{
-            savingSettings()
-              ? localeService.uiText('adminMenuSaving')
-              : localeService.uiText('profileSaveOrderingSettings')
-          }}
-        </button>
-      </section>
+          <header class="profile-console__panel-heading">
+            <h2>{{ localeService.uiText('profileTabIdentity') }}</h2>
+            <p>{{ localeService.uiText('profileIdentitySectionDesc') }}</p>
+          </header>
 
-      <section class="profile-setup__section">
-        <h2>{{ localeService.locale() === 'ar' ? 'معلومات التواصل' : 'Contact details' }}</h2>
+          <div class="profile-console__field-grid">
+            <label class="profile-console__field">
+              <span>{{ localeService.locale() === 'ar' ? 'الاسم بالعربية' : 'Arabic name' }}</span>
+              <input type="text" formControlName="nameAr" autocomplete="organization" />
+            </label>
 
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'الهاتف' : 'Phone' }}</span>
-          <input
-            type="tel"
-            class="profile-setup__technical"
-            dir="ltr"
-            formControlName="phoneNumber"
-          />
-        </label>
+            <label class="profile-console__field">
+              <span>{{ localeService.locale() === 'ar' ? 'الاسم بالإنجليزية' : 'English name' }}</span>
+              <input type="text" formControlName="nameEn" autocomplete="organization" />
+            </label>
+          </div>
 
-        <label>
-          <span>WhatsApp</span>
-          <input
-            type="tel"
-            class="profile-setup__technical"
-            dir="ltr"
-            formControlName="whatsAppNumber"
-          />
-        </label>
+          <label class="profile-console__field">
+            <span>{{ localeService.locale() === 'ar' ? 'الوصف بالعربية' : 'Arabic description' }}</span>
+            <textarea rows="3" formControlName="descriptionAr"></textarea>
+          </label>
 
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'البريد الإلكتروني' : 'Email' }}</span>
-          <input
-            type="email"
-            class="profile-setup__technical"
-            dir="ltr"
-            formControlName="email"
-            autocomplete="email"
-          />
-        </label>
+          <label class="profile-console__field">
+            <span>{{ localeService.locale() === 'ar' ? 'الوصف بالإنجليزية' : 'English description' }}</span>
+            <textarea rows="3" formControlName="descriptionEn"></textarea>
+          </label>
 
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'المدينة' : 'City' }}</span>
-          <input type="text" formControlName="city" />
-        </label>
+          <label class="profile-console__field">
+            <span>Slug</span>
+            <bdi dir="ltr">
+              <input
+                type="text"
+                class="profile-console__technical"
+                formControlName="slug"
+                (blur)="onSlugBlur()"
+                spellcheck="false"
+              />
+            </bdi>
+            @if (form.controls.slug.invalid && form.controls.slug.touched) {
+              <small class="profile-console__error">{{
+                localeService.locale() === 'ar'
+                  ? 'استخدم أحرفًا صغيرة وأرقامًا وشرطات فقط.'
+                  : 'Use lowercase letters, numbers, and single hyphens only.'
+              }}</small>
+            }
+          </label>
 
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'العنوان بالعربية' : 'Arabic address' }}</span>
-          <input type="text" formControlName="addressAr" />
-        </label>
+          <div class="profile-console__field">
+            <span>{{ localeService.locale() === 'ar' ? 'Accent Color' : 'Accent color' }}</span>
+            <div class="profile-console__accent">
+              <input
+                type="color"
+                class="profile-console__color-input"
+                [value]="accentColorPickerValue()"
+                [attr.aria-label]="localeService.locale() === 'ar' ? 'Accent Color' : 'Accent color'"
+                (input)="onAccentColorPicked($event)"
+              />
+              <bdi dir="ltr">
+                <input
+                  type="text"
+                  class="profile-console__technical"
+                  formControlName="primaryAccentColor"
+                  spellcheck="false"
+                />
+              </bdi>
+            </div>
+            @if (form.controls.primaryAccentColor.invalid && form.controls.primaryAccentColor.touched) {
+              <small class="profile-console__error">{{ localeService.uiText('profileInvalidAccentColor') }}</small>
+            }
+          </div>
 
-        <label>
-          <span>{{ localeService.locale() === 'ar' ? 'العنوان بالإنجليزية' : 'English address' }}</span>
-          <input type="text" formControlName="addressEn" />
-        </label>
+          <div class="profile-console__upload-grid">
+            <div class="profile-console__upload-card">
+              <span>{{ localeService.locale() === 'ar' ? 'الشعار' : 'Logo' }}</span>
+              @if (logoPreviewUrl(); as logoUrl) {
+                <img class="profile-console__upload-thumb" [src]="logoUrl" alt="" />
+              } @else {
+                <div class="profile-console__upload-placeholder" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path fill="currentColor" d="M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm0 2v10h14V7H5Zm3 2h8l-2.5 3-2-2.5L9 13l-1-1Z"/></svg>
+                </div>
+              }
+              <input
+                #logoInput
+                id="logo-input"
+                type="file"
+                class="profile-console__file-input"
+                accept="image/jpeg,image/png,image/webp"
+                (change)="onLogoSelected($event)"
+              />
+              <button type="button" class="profile-console__btn profile-console__btn--secondary" (click)="logoInput.click()">
+                {{ chooseImageLabel() }}
+              </button>
+              <span class="profile-console__file-name">{{ logoFileName() ?? noFileChosenLabel() }}</span>
+              @if (isUploadingBranding() && profileSavePhase() === 'uploading-logo') {
+                <span class="profile-console__upload-status">{{ localeService.uiText('profileUploadingLogo') }}</span>
+              }
+            </div>
 
-        @if (profileSaveNotice()) {
-          <p class="profile-setup__notice" role="status">{{ profileSaveNotice() }}</p>
+            <div class="profile-console__upload-card">
+              <span>{{ localeService.locale() === 'ar' ? 'صورة الغلاف' : 'Cover image' }}</span>
+              @if (coverPreviewUrl(); as coverUrl) {
+                <img class="profile-console__upload-thumb profile-console__upload-thumb--cover" [src]="coverUrl" alt="" />
+              } @else {
+                <div class="profile-console__upload-placeholder profile-console__upload-placeholder--cover" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm1 2v10h14V7H5Zm2.5 2 2.5 3 2-2 1.5 2H7.5Z"/></svg>
+                </div>
+              }
+              <input
+                #coverInput
+                id="cover-input"
+                type="file"
+                class="profile-console__file-input"
+                accept="image/jpeg,image/png,image/webp"
+                (change)="onCoverSelected($event)"
+              />
+              <button type="button" class="profile-console__btn profile-console__btn--secondary" (click)="coverInput.click()">
+                {{ chooseImageLabel() }}
+              </button>
+              <span class="profile-console__file-name">{{ coverFileName() ?? noFileChosenLabel() }}</span>
+              @if (isUploadingBranding() && profileSavePhase() === 'uploading-cover') {
+                <span class="profile-console__upload-status">{{ localeService.uiText('profileUploadingCoverImage') }}</span>
+              }
+            </div>
+          </div>
+
+          @if (profileSaveNotice()) {
+            <p class="profile-console__notice" role="status">{{ profileSaveNotice() }}</p>
+          }
+
+          <button
+            type="button"
+            class="profile-console__btn profile-console__btn--primary profile-console__btn--panel-save premium-btn"
+            data-testid="profile-save-identity"
+            [disabled]="!canSaveSettings() || savingProfile()"
+            (click)="saveRestaurantProfile()"
+          >
+            @if (savingProfile()) {
+              <span class="profile-console__spinner" aria-hidden="true"></span>
+            }
+            {{
+              savingProfile()
+                ? localeService.uiText('profileSavingRestaurant')
+                : localeService.uiText('profileSaveIdentityChanges')
+            }}
+          </button>
+        </section>
         }
 
-        <button
-          type="button"
-          class="profile-setup__save"
-          data-testid="profile-save-restaurant"
-          [disabled]="!canSaveSettings() || savingProfile()"
-          (click)="saveRestaurantProfile()"
+        @if (activeWorkspaceTab() === 'localization') {
+        <section
+          class="profile-console__panel"
+          role="tabpanel"
+          [id]="workspaceTabPanelId('localization')"
+          [attr.aria-labelledby]="'profile-tab-localization'"
+          data-testid="profile-tabpanel-localization"
         >
-          {{
-            savingProfile()
-              ? localeService.uiText('adminMenuSaving')
-              : localeService.uiText('profileSaveRestaurant')
-          }}
-        </button>
-      </section>
-    </form>
+          <header class="profile-console__panel-heading">
+            <h2>{{ localeService.uiText('profileTabLocalization') }}</h2>
+            <p>{{ localeService.uiText('profileLocalizationSectionDesc') }}</p>
+          </header>
 
-    <aside class="profile-setup__preview">
+          <div class="profile-console__field-grid">
+            <label class="profile-console__field">
+              <span>{{ localeService.locale() === 'ar' ? 'الدولة' : 'Country code' }}</span>
+              <bdi dir="ltr">
+                <input type="text" class="profile-console__technical" formControlName="countryCode" maxlength="2" />
+              </bdi>
+            </label>
+
+            <label class="profile-console__field">
+              <span>{{ localeService.locale() === 'ar' ? 'اللغة الافتراضية' : 'Default language' }}</span>
+              <select formControlName="defaultLocale">
+                <option value="ar">العربية</option>
+                <option value="en">English</option>
+              </select>
+            </label>
+
+            <label class="profile-console__field">
+              <span>{{ localeService.locale() === 'ar' ? 'كود الهاتف' : 'Phone country code' }}</span>
+              <bdi dir="ltr">
+                <input type="text" class="profile-console__technical" formControlName="phoneCountryCode" />
+              </bdi>
+            </label>
+
+            <label class="profile-console__field">
+              <span>{{ localeService.locale() === 'ar' ? 'المنطقة الزمنية' : 'Time zone' }}</span>
+              <bdi dir="ltr">
+                <input type="text" class="profile-console__technical" formControlName="timeZone" />
+              </bdi>
+            </label>
+          </div>
+
+          <button
+            type="button"
+            class="profile-console__btn profile-console__btn--primary profile-console__btn--panel-save premium-btn"
+            data-testid="profile-save-localization"
+            [disabled]="!canSaveSettings() || savingProfile()"
+            (click)="saveRestaurantProfile()"
+          >
+            @if (savingProfile()) {
+              <span class="profile-console__spinner" aria-hidden="true"></span>
+            }
+            {{
+              savingProfile()
+                ? localeService.uiText('profileSavingRestaurant')
+                : localeService.uiText('profileSaveLocalization')
+            }}
+          </button>
+        </section>
+        }
+
+        @if (activeWorkspaceTab() === 'contact') {
+        <section
+          class="profile-console__panel"
+          role="tabpanel"
+          [id]="workspaceTabPanelId('contact')"
+          [attr.aria-labelledby]="'profile-tab-contact'"
+          data-testid="profile-tabpanel-contact"
+        >
+          <header class="profile-console__panel-heading">
+            <h2>{{ localeService.uiText('profileTabContact') }}</h2>
+            <p>{{ localeService.uiText('profileContactSectionDesc') }}</p>
+          </header>
+
+          <div class="profile-console__field-grid">
+            <label class="profile-console__field">
+              <span>{{ localeService.locale() === 'ar' ? 'الهاتف' : 'Phone' }}</span>
+              <bdi dir="ltr">
+                <input type="tel" class="profile-console__technical" formControlName="phoneNumber" />
+              </bdi>
+            </label>
+
+            <label class="profile-console__field">
+              <span>WhatsApp</span>
+              <bdi dir="ltr">
+                <input type="tel" class="profile-console__technical" formControlName="whatsAppNumber" />
+              </bdi>
+            </label>
+
+            <label class="profile-console__field">
+              <span>{{ localeService.locale() === 'ar' ? 'البريد الإلكتروني' : 'Email' }}</span>
+              <bdi dir="ltr">
+                <input type="email" class="profile-console__technical" formControlName="email" autocomplete="email" />
+              </bdi>
+            </label>
+
+            <label class="profile-console__field">
+              <span>{{ localeService.locale() === 'ar' ? 'المدينة' : 'City' }}</span>
+              <input type="text" formControlName="city" />
+            </label>
+          </div>
+
+          <label class="profile-console__field">
+            <span>{{ localeService.locale() === 'ar' ? 'العنوان بالعربية' : 'Arabic address' }}</span>
+            <input type="text" formControlName="addressAr" />
+          </label>
+
+          <label class="profile-console__field">
+            <span>{{ localeService.locale() === 'ar' ? 'العنوان بالإنجليزية' : 'English address' }}</span>
+            <input type="text" formControlName="addressEn" />
+          </label>
+
+          <button
+            type="button"
+            class="profile-console__btn profile-console__btn--primary profile-console__btn--panel-save premium-btn"
+            data-testid="profile-save-contact"
+            [disabled]="!canSaveSettings() || savingProfile()"
+            (click)="saveRestaurantProfile()"
+          >
+            @if (savingProfile()) {
+              <span class="profile-console__spinner" aria-hidden="true"></span>
+            }
+            {{
+              savingProfile()
+                ? localeService.uiText('profileSavingRestaurant')
+                : localeService.uiText('profileSaveContactInfo')
+            }}
+          </button>
+        </section>
+        }
+
+        @if (activeWorkspaceTab() === 'delivery') {
+        <section
+          class="profile-console__panel"
+          role="tabpanel"
+          [id]="workspaceTabPanelId('delivery')"
+          [attr.aria-labelledby]="'profile-tab-delivery'"
+          data-testid="profile-delivery-settings"
+        >
+          <header class="profile-console__panel-heading">
+            <h2>{{ localeService.uiText('profileTabDelivery') }}</h2>
+            <p>{{ localeService.uiText('profileDeliverySectionDesc') }}</p>
+          </header>
+
+          <label class="profile-console__toggle">
+            <input type="checkbox" formControlName="isPickupEnabled" />
+            <span>{{ localeService.uiText('profileEnablePickup') }}</span>
+          </label>
+
+          <label class="profile-console__toggle">
+            <input type="checkbox" formControlName="isDeliveryEnabled" />
+            <span>{{ localeService.uiText('profileEnableDelivery') }}</span>
+          </label>
+
+          <div class="profile-console__field-grid">
+            <label class="profile-console__field">
+              <span>{{ localeService.uiText('profileDeliveryFee') }}</span>
+              <bdi dir="ltr">
+                <input
+                  type="number"
+                  class="profile-console__technical"
+                  formControlName="deliveryFee"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                />
+              </bdi>
+              @if (fieldError('deliveryFee'); as error) {
+                <small class="profile-console__error">{{ error }}</small>
+              }
+            </label>
+
+            <label class="profile-console__field">
+              <span>{{ localeService.uiText('profileMinimumOrder') }}</span>
+              <bdi dir="ltr">
+                <input
+                  type="number"
+                  class="profile-console__technical"
+                  formControlName="minimumOrderAmount"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                />
+              </bdi>
+              @if (fieldError('minimumOrderAmount'); as error) {
+                <small class="profile-console__error">{{ error }}</small>
+              }
+            </label>
+
+            <label class="profile-console__field">
+              <span>{{ localeService.uiText('profileTaxRate') }} (%)</span>
+              <bdi dir="ltr">
+                <input
+                  type="number"
+                  class="profile-console__technical"
+                  formControlName="taxRate"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  inputmode="decimal"
+                />
+              </bdi>
+              @if (fieldError('taxRate'); as error) {
+                <small class="profile-console__error">{{ error }}</small>
+              }
+            </label>
+
+            <label class="profile-console__field">
+              <span>{{ localeService.uiText('profileCurrencyCode') }}</span>
+              <bdi dir="ltr">
+                <input
+                  type="text"
+                  class="profile-console__technical"
+                  formControlName="currencyCode"
+                  maxlength="3"
+                  spellcheck="false"
+                />
+              </bdi>
+              <small class="profile-console__hint">{{ localeService.uiText('profileCurrencyCodeHelp') }}</small>
+              @if (fieldError('currencyCode'); as error) {
+                <small class="profile-console__error">{{ error }}</small>
+              }
+            </label>
+          </div>
+
+          @if (orderingMethodError()) {
+            <p class="profile-console__alert" role="alert">
+              {{ localeService.uiText('profileOrderingMethodRequired') }}
+            </p>
+          }
+
+          @if (settingsSaveNotice()) {
+            <p class="profile-console__notice" role="status">{{ settingsSaveNotice() }}</p>
+          }
+
+          <button
+            type="button"
+            class="profile-console__btn profile-console__btn--primary profile-console__btn--panel-save premium-btn"
+            data-testid="profile-save-ordering-settings"
+            [disabled]="!canSaveSettings() || savingSettings() || settingsLoadFailed()"
+            (click)="saveOrderingSettings()"
+          >
+            @if (savingSettings()) {
+              <span class="profile-console__spinner" aria-hidden="true"></span>
+            }
+            {{
+              savingSettings()
+                ? localeService.uiText('adminMenuSaving')
+                : localeService.uiText('profileSaveOrderingSettings')
+            }}
+          </button>
+        </section>
+        }
+      </form>
+    </div>
+
+    <aside class="profile-console__preview-studio" data-testid="profile-preview-studio">
       <app-restaurant-live-preview
+        variant="studio"
+        [previewSyncStatus]="previewSyncStatus()"
         [preview]="previewData()"
         [menuState]="previewMenuState()"
         [categories]="previewMenuCategories()"
@@ -343,4 +487,4 @@
       />
     </aside>
   </div>
-</section>
+</main>

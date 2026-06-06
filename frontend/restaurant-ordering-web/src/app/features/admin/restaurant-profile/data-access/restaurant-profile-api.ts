@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, forkJoin, map, of } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, switchMap, throwError } from 'rxjs';
 import { API_BASE_URL } from '../../../../core/config/api-config';
 import { AuthService } from '../../../../core/auth/auth.service';
+import type { UploadedMediaFile } from '../../data-access/admin-menu.models';
 import type {
   RestaurantApiDto,
   RestaurantSettingsApiDto,
@@ -24,6 +25,34 @@ export interface ProfileSaveResult {
   scope: ProfileSaveScope;
   message: string;
 }
+
+export interface SetRestaurantLogoApiRequest {
+  mediaFileId: string;
+}
+
+export interface SetRestaurantCoverImageApiRequest {
+  mediaFileId: string;
+}
+
+export interface BrandingSaveContext {
+  pendingLogoFile: File | null;
+  pendingCoverFile: File | null;
+  uploadedLogo: UploadedMediaFile | null;
+  uploadedCover: UploadedMediaFile | null;
+}
+
+export interface BrandingSaveResult {
+  mode: 'api';
+  restaurant: RestaurantApiDto;
+  uploadedLogo: UploadedMediaFile | null;
+  uploadedCover: UploadedMediaFile | null;
+}
+
+export type BrandingSaveError =
+  | 'logo-upload'
+  | 'cover-upload'
+  | 'profile-save'
+  | 'profile-reload';
 
 /**
  * Backend validation and ownership enforcement are required for production saves.
@@ -51,6 +80,70 @@ export class RestaurantProfileApiService {
     const updateRequest = this.toUpdateRestaurantRequest(formValue);
     return this.updateRestaurant(restaurantId, updateRequest).pipe(
       map(() => ({ mode: 'api' as const, scope: 'restaurant' as const, message: 'restaurant-saved' })),
+    );
+  }
+
+  saveRestaurantProfileWithBranding(
+    formValue: RestaurantProfileFormValue,
+    branding: BrandingSaveContext,
+  ): Observable<BrandingSaveResult | ProfileSaveResult> {
+    const restaurantId = this.authService.restaurantId();
+    if (!restaurantId) {
+      this.demoSnapshot = structuredClone(formValue);
+      return of({
+        mode: 'demo',
+        scope: 'restaurant',
+        message: 'demo-preview-only',
+      });
+    }
+
+    return this.uploadPendingMedia(restaurantId, branding.pendingLogoFile, branding.uploadedLogo).pipe(
+      catchError(() => throwError(() => ({ type: 'logo-upload' satisfies BrandingSaveError }))),
+      switchMap((uploadedLogo) =>
+        this.uploadPendingMedia(restaurantId, branding.pendingCoverFile, branding.uploadedCover).pipe(
+          catchError(() => throwError(() => ({ type: 'cover-upload' satisfies BrandingSaveError }))),
+          switchMap((uploadedCover) => {
+            const updateRequest = this.toUpdateRestaurantRequest(formValue);
+            return this.updateRestaurant(restaurantId, updateRequest).pipe(
+              catchError(() => throwError(() => ({ type: 'profile-save' satisfies BrandingSaveError }))),
+              switchMap((restaurant) => {
+                const logoLink$ = uploadedLogo
+                  ? this.setRestaurantLogo(restaurantId, uploadedLogo.id).pipe(
+                      catchError(() =>
+                        throwError(() => ({ type: 'profile-save' satisfies BrandingSaveError })),
+                      ),
+                    )
+                  : of(restaurant);
+
+                return logoLink$.pipe(
+                  switchMap((afterLogo) => {
+                    if (!uploadedCover) {
+                      return of({
+                        mode: 'api' as const,
+                        restaurant: afterLogo,
+                        uploadedLogo,
+                        uploadedCover,
+                      });
+                    }
+
+                    return this.setRestaurantCoverImage(restaurantId, uploadedCover.id).pipe(
+                      catchError(() =>
+                        throwError(() => ({ type: 'profile-save' satisfies BrandingSaveError })),
+                      ),
+                      map((afterCover) => ({
+                        mode: 'api' as const,
+                        restaurant: afterCover,
+                        uploadedLogo,
+                        uploadedCover,
+                      })),
+                    );
+                  }),
+                );
+              }),
+            );
+          }),
+        ),
+      ),
     );
   }
 
@@ -124,6 +217,54 @@ export class RestaurantProfileApiService {
     );
   }
 
+  uploadMedia(restaurantId: string, file: File): Observable<UploadedMediaFile> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+
+    return this.http.post<UploadedMediaFile>(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/media`,
+      formData,
+    );
+  }
+
+  setRestaurantLogo(
+    restaurantId: string,
+    mediaFileId: string,
+  ): Observable<RestaurantApiDto> {
+    const body: SetRestaurantLogoApiRequest = { mediaFileId };
+    return this.http.put<RestaurantApiDto>(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/logo`,
+      body,
+    );
+  }
+
+  setRestaurantCoverImage(
+    restaurantId: string,
+    mediaFileId: string,
+  ): Observable<RestaurantApiDto> {
+    const body: SetRestaurantCoverImageApiRequest = { mediaFileId };
+    return this.http.put<RestaurantApiDto>(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/cover-image`,
+      body,
+    );
+  }
+
+  private uploadPendingMedia(
+    restaurantId: string,
+    pendingFile: File | null,
+    uploaded: UploadedMediaFile | null,
+  ): Observable<UploadedMediaFile | null> {
+    if (uploaded) {
+      return of(uploaded);
+    }
+
+    if (!pendingFile) {
+      return of(null);
+    }
+
+    return this.uploadMedia(restaurantId, pendingFile);
+  }
+
   toUpdateRestaurantRequest(form: RestaurantProfileFormValue): UpdateRestaurantApiRequest {
     return {
       slug: form.slug.trim().toLowerCase(),
@@ -137,6 +278,7 @@ export class RestaurantProfileApiService {
       addressEn: form.addressEn.trim() || null,
       latitude: null,
       longitude: null,
+      accentColor: form.primaryAccentColor.trim(),
     };
   }
 }

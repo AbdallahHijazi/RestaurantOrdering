@@ -1,5 +1,5 @@
 import { Component, computed, inject, input, output } from '@angular/core';
-import { LocaleService } from '../../../../core/localization/locale';
+import { LocaleService, type SupportedLocale } from '../../../../core/localization/locale';
 import type { PublicMenuCategory } from '../../models/public-menu.models';
 
 @Component({
@@ -10,10 +10,15 @@ import type { PublicMenuCategory } from '../../models/public-menu.models';
 export class CategoryNavigation {
   readonly categories = input.required<PublicMenuCategory[]>();
   readonly activeCategoryId = input.required<string>();
+  readonly displayLocale = input<SupportedLocale | null>(null);
 
   readonly categorySelected = output<string>();
 
   protected readonly localeService = inject(LocaleService);
+
+  protected readonly activeLocale = computed(
+    () => this.displayLocale() ?? this.localeService.locale(),
+  );
 
   protected readonly visibleCategories = computed(() =>
     [...this.categories()]
@@ -22,12 +27,13 @@ export class CategoryNavigation {
   );
 
   protected readonly categoryLabels = computed(() => {
-    this.localeService.locale();
+    const locale = this.activeLocale();
 
     return new Map(
       this.visibleCategories().map((category) => [
         category.id,
-        this.localeService.pickText(
+        this.localeService.pickTextForLocale(
+          locale,
           { ar: category.nameAr, en: category.nameEn },
           category.nameAr,
         ),

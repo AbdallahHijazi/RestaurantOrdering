@@ -42,8 +42,6 @@ export const routes: Routes = [
     data: {
       roles: adminRoles,
     },
-    loadComponent: () =>
-      import('./core/layouts/admin-layout/admin-layout').then((m) => m.AdminLayout),
     children: [
       {
         path: '',
@@ -51,45 +49,54 @@ export const routes: Routes = [
         redirectTo: 'dashboard',
       },
       {
-        path: 'dashboard',
+        path: '',
         loadComponent: () =>
-          import('./features/admin/pages/dashboard-page/dashboard-page').then(
-            (m) => m.DashboardPage,
+          import('./core/layouts/profile-console-layout/profile-console-layout').then(
+            (m) => m.ProfileConsoleLayout,
           ),
-      },
-      {
-        path: 'restaurant-profile',
-        data: {
-          roles: [ApplicationRoles.RestaurantOwner],
-        },
-        loadComponent: () =>
-          import(
-            './features/admin/restaurant-profile/pages/restaurant-profile-setup-page/restaurant-profile-setup-page'
-          ).then((m) => m.RestaurantProfileSetupPage),
-      },
-      {
-        path: 'orders',
-        loadComponent: () =>
-          import('./features/admin/pages/admin-orders-page/admin-orders-page').then(
-            (m) => m.AdminOrdersPage,
-          ),
-      },
-      {
-        path: 'menu',
-        loadComponent: () =>
-          import('./features/admin/pages/menu-management-page/menu-management-page').then(
-            (m) => m.MenuManagementPage,
-          ),
-      },
-      {
-        path: 'staff',
-        data: {
-          roles: [ApplicationRoles.RestaurantOwner],
-        },
-        loadComponent: () =>
-          import('./features/admin/pages/staff-management-page/staff-management-page').then(
-            (m) => m.StaffManagementPage,
-          ),
+        children: [
+          {
+            path: 'dashboard',
+            loadComponent: () =>
+              import('./features/admin/pages/dashboard-page/dashboard-page').then(
+                (m) => m.DashboardPage,
+              ),
+          },
+          {
+            path: 'restaurant-profile',
+            data: {
+              roles: [ApplicationRoles.RestaurantOwner],
+            },
+            loadComponent: () =>
+              import(
+                './features/admin/restaurant-profile/pages/restaurant-profile-setup-page/restaurant-profile-setup-page'
+              ).then((m) => m.RestaurantProfileSetupPage),
+          },
+          {
+            path: 'orders',
+            loadComponent: () =>
+              import('./features/admin/pages/admin-orders-page/admin-orders-page').then(
+                (m) => m.AdminOrdersPage,
+              ),
+          },
+          {
+            path: 'menu',
+            loadComponent: () =>
+              import('./features/admin/pages/menu-management-page/menu-management-page').then(
+                (m) => m.MenuManagementPage,
+              ),
+          },
+          {
+            path: 'staff',
+            data: {
+              roles: [ApplicationRoles.RestaurantOwner],
+            },
+            loadComponent: () =>
+              import('./features/admin/pages/staff-management-page/staff-management-page').then(
+                (m) => m.StaffManagementPage,
+              ),
+          },
+        ],
       },
     ],
   },

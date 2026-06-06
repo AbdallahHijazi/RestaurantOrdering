@@ -35,7 +35,16 @@ export class RestaurantThemeService {
   applyAccent(value: string | null | undefined): string {
     const sanitized = this.sanitizeAccentColor(value);
     this.appliedAccent = sanitized;
-    document.documentElement.style.setProperty('--restaurant-accent', sanitized);
+    const root = document.documentElement.style;
+    root.setProperty('--restaurant-accent', sanitized);
+    root.setProperty(
+      '--restaurant-accent-strong',
+      `color-mix(in srgb, ${sanitized} 82%, black)`,
+    );
+    root.setProperty(
+      '--restaurant-accent-soft',
+      `color-mix(in srgb, ${sanitized} 18%, white)`,
+    );
     return sanitized;
   }
 

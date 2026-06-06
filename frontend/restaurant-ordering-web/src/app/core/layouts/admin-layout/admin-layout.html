@@ -85,9 +85,17 @@
       }
     </nav>
 
-    <button type="button" class="admin-layout__sidebar-logout" (click)="logout()">
-      {{ localeService.uiText('adminLogout') }}
-    </button>
+    <footer class="admin-layout__sidebar-footer" data-testid="admin-sidebar-footer">
+      <span class="admin-layout__sidebar-role">{{ roleLabel() }}</span>
+      <button
+        type="button"
+        class="admin-layout__sidebar-logout"
+        data-testid="admin-sidebar-logout"
+        (click)="logout()"
+      >
+        {{ localeService.uiText('adminLogout') }}
+      </button>
+    </footer>
   </aside>
 
   <div class="admin-layout__main">
@@ -132,15 +140,6 @@
             {{ localeService.uiText('languageEnglish') }}
           </button>
         </div>
-
-        <button
-          type="button"
-          class="button-secondary admin-layout__header-logout"
-          data-testid="admin-header-logout"
-          (click)="logout()"
-        >
-          {{ localeService.uiText('adminLogout') }}
-        </button>
       </div>
     </header>
 

@@ -48,12 +48,17 @@ type PreviewViewport = 'desktop' | 'tablet' | 'mobile';
   ],
   templateUrl: './restaurant-live-preview.html',
   styleUrl: './restaurant-live-preview.scss',
+  host: {
+    '[class.live-preview-host--studio]': 'variant() === "studio"',
+  },
 })
 export class RestaurantLivePreview {
   readonly preview = input.required<RestaurantProfilePreviewData>();
   readonly menuState = input<ProfilePreviewMenuState>('idle');
   readonly categories = input<PublicMenuCategory[]>([]);
   readonly items = input<PublicMenuItem[]>([]);
+  readonly variant = input<'default' | 'studio'>('default');
+  readonly previewSyncStatus = input<'synced' | 'unsaved'>('synced');
 
   readonly refreshPreview = output<void>();
 
@@ -171,7 +176,13 @@ export class RestaurantLivePreview {
 
   protected setPreviewLocale(locale: SupportedLocale): void {
     this.previewLocale.set(locale);
-    this.localeService.setLocale(locale);
+  }
+
+  protected pickPreviewText(
+    text: { ar?: string | null; en?: string | null } | null | undefined,
+    fallback = '—',
+  ): string {
+    return this.localeService.pickTextForLocale(this.previewLocale(), text, fallback);
   }
 
   protected openFullPreview(): void {
@@ -196,7 +207,7 @@ export class RestaurantLivePreview {
   }
 
   protected labelForCategory(category: PublicMenuCategory): string {
-    return this.localeService.pickText(
+    return this.pickPreviewText(
       { ar: category.nameAr, en: category.nameEn },
       category.nameAr,
     );

@@ -106,6 +106,7 @@ describe('AdminLayout', () => {
 
     branding.updateBranding({
       logoUrl: 'blob:http://localhost/logo-preview',
+      coverImageUrl: null,
       nameAr: 'مطعم',
       nameEn: 'Restaurant',
     });
@@ -135,20 +136,30 @@ describe('AdminLayout', () => {
   });
 
   it('marks the active route link', async () => {
+    @Component({ template: '' })
+    class StubPage {}
+
     @Component({ template: '<router-outlet />', imports: [RouterOutlet] })
     class Host {}
 
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [Host],
-      providers: [provideRouter(routes)],
+      providers: [
+        provideRouter([
+          {
+            path: 'admin',
+            component: AdminLayout,
+            children: [
+              { path: 'dashboard', component: StubPage },
+              { path: 'orders', component: StubPage },
+            ],
+          },
+        ]),
+      ],
     }).compileComponents();
 
-    session = TestBed.inject(AuthSessionService);
-    router = TestBed.inject(Router);
-    session.clearSession();
-    session.saveSession(createTestSession(ApplicationRoles.RestaurantOwner));
-
+    const router = TestBed.inject(Router);
     const hostFixture = TestBed.createComponent(Host);
     await router.navigateByUrl('/admin/dashboard');
     await hostFixture.whenStable();
@@ -163,10 +174,17 @@ describe('AdminLayout', () => {
 
   it('calls AuthService.logout when logout is triggered', () => {
     const logoutSpy = vi.spyOn(auth, 'logout');
-    const sidebarLogout: HTMLButtonElement =
-      fixture.nativeElement.querySelector('.admin-layout__sidebar-logout');
+    const sidebarLogout: HTMLButtonElement = fixture.nativeElement.querySelector(
+      '[data-testid="admin-sidebar-logout"]',
+    );
     sidebarLogout.click();
     expect(logoutSpy).toHaveBeenCalled();
+  });
+
+  it('keeps logout in sidebar footer and not in desktop header', () => {
+    expect(fixture.nativeElement.querySelector('[data-testid="admin-sidebar-footer"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="admin-sidebar-logout"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="admin-header-logout"]')).toBeNull();
   });
 
   it('opens and closes the mobile sidebar drawer', () => {
@@ -243,20 +261,30 @@ describe('AdminLayout', () => {
   });
 
   it('closes the drawer after navigation', async () => {
+    @Component({ template: '' })
+    class StubPage {}
+
     @Component({ template: '<router-outlet />', imports: [RouterOutlet] })
     class Host {}
 
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [Host],
-      providers: [provideRouter(routes)],
+      providers: [
+        provideRouter([
+          {
+            path: 'admin',
+            component: AdminLayout,
+            children: [
+              { path: 'dashboard', component: StubPage },
+              { path: 'orders', component: StubPage },
+            ],
+          },
+        ]),
+      ],
     }).compileComponents();
 
-    session = TestBed.inject(AuthSessionService);
-    router = TestBed.inject(Router);
-    session.clearSession();
-    session.saveSession(createTestSession(ApplicationRoles.RestaurantOwner));
-
+    const router = TestBed.inject(Router);
     const hostFixture = TestBed.createComponent(Host);
     await router.navigateByUrl('/admin/dashboard');
     hostFixture.detectChanges();
@@ -270,7 +298,7 @@ describe('AdminLayout', () => {
     hostFixture.detectChanges();
     expect(layout.classList.contains('admin-layout--drawer-open')).toBe(true);
 
-    await router.navigateByUrl('/admin/restaurant-profile');
+    await router.navigateByUrl('/admin/orders');
     hostFixture.detectChanges();
     expect(layout.classList.contains('admin-layout--drawer-open')).toBe(false);
   });
@@ -295,10 +323,45 @@ describe('Admin shell routing', () => {
     session.clearSession();
   });
 
-  it('allows RestaurantOwner to open /admin/dashboard inside AdminLayout', async () => {
+  it('allows RestaurantOwner to open /admin/dashboard inside profile console layout', async () => {
     session.saveSession(createTestSession(ApplicationRoles.RestaurantOwner));
     await router.navigateByUrl('/admin/dashboard');
     expect(router.url).toBe('/admin/dashboard');
+  });
+
+  it('renders unified top bar for all main admin routes without legacy sidebar', async () => {
+    @Component({ template: '<router-outlet />', imports: [RouterOutlet] })
+    class Host {}
+
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideRouter(routes)],
+    }).compileComponents();
+
+    session = TestBed.inject(AuthSessionService);
+    router = TestBed.inject(Router);
+    session.clearSession();
+    session.saveSession(createTestSession(ApplicationRoles.RestaurantOwner));
+
+    const hostFixture = TestBed.createComponent(Host);
+    const adminPaths = [
+      '/admin/dashboard',
+      '/admin/restaurant-profile',
+      '/admin/orders',
+      '/admin/menu',
+      '/admin/staff',
+    ];
+
+    for (const path of adminPaths) {
+      await router.navigateByUrl(path);
+      hostFixture.detectChanges();
+
+      expect(hostFixture.nativeElement.querySelector('app-admin-layout')).toBeNull();
+      expect(hostFixture.nativeElement.querySelector('[data-testid="profile-console"]')).toBeTruthy();
+      expect(hostFixture.nativeElement.querySelector('[data-testid="admin-sidebar"]')).toBeNull();
+      expect(hostFixture.nativeElement.querySelectorAll('[data-testid="profile-console-header"]').length).toBe(1);
+    }
   });
 
   it('redirects RestaurantManager from /admin/restaurant-profile to /admin/dashboard', async () => {
@@ -313,7 +376,7 @@ describe('Admin shell routing', () => {
     expect(router.url).toBe('/kitchen');
   });
 
-  it('renders RestaurantProfileSetupPage inside the admin layout outlet', async () => {
+  it('renders RestaurantProfileSetupPage in profile console layout without admin sidebar', async () => {
     @Component({ template: '<router-outlet />', imports: [RouterOutlet] })
     class Host {}
 
@@ -332,7 +395,9 @@ describe('Admin shell routing', () => {
     await router.navigateByUrl('/admin/restaurant-profile');
     hostFixture.detectChanges();
 
-    expect(hostFixture.nativeElement.querySelector('app-admin-layout')).toBeTruthy();
-    expect(hostFixture.nativeElement.querySelector('.profile-setup')).toBeTruthy();
+    expect(hostFixture.nativeElement.querySelector('app-admin-layout')).toBeNull();
+    expect(hostFixture.nativeElement.querySelector('[data-testid="profile-console"]')).toBeTruthy();
+    expect(hostFixture.nativeElement.querySelector('[data-testid="admin-sidebar"]')).toBeNull();
+    expect(hostFixture.nativeElement.querySelector('[data-testid="profile-console-main"]')).toBeTruthy();
   });
 });

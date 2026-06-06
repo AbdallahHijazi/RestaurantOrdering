@@ -119,32 +119,19 @@ describe('Profile preview menu (5F.6.3)', () => {
       flushProfileAndMenu();
       httpMock.expectNone(`${API_BASE_URL}/api/v1/public/restaurants/demo/menu`);
       expect(fixture.componentInstance['previewMenuState']()).toBe('loaded');
-      expect(fixture.nativeElement.textContent).toContain('Real Dish');
+      expect(fixture.nativeElement.textContent).toContain('وجبة فعلية');
       expect(fixture.nativeElement.textContent).not.toContain('Truffle Hummus');
     });
 
-    it('reloads preview catalog on Refresh preview', () => {
+    it('does not render refresh preview button in studio toolbar', () => {
       flushProfileAndMenu();
-
-      (fixture.nativeElement as HTMLElement)
-        .querySelector('[data-testid="live-preview-refresh"]')!
-        .dispatchEvent(new Event('click'));
-      fixture.detectChanges();
-
-      httpMock
-        .expectOne(`${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`)
-        .flush(REAL_MENU_DTO);
-      fixture.detectChanges();
-
-      expect(fixture.nativeElement.textContent).toContain('Real Dish');
+      expect(fixture.nativeElement.querySelector('[data-testid="live-preview-refresh"]')).toBeNull();
     });
 
     it('shows empty preview state without mock dishes', () => {
       flushProfileAndMenu();
 
-      (fixture.nativeElement as HTMLElement)
-        .querySelector('[data-testid="live-preview-refresh"]')!
-        .dispatchEvent(new Event('click'));
+      fixture.componentInstance['refreshPreviewMenu']();
       fixture.detectChanges();
 
       httpMock
@@ -162,9 +149,7 @@ describe('Profile preview menu (5F.6.3)', () => {
     it('shows error preview state without mock fallback', () => {
       flushProfileAndMenu();
 
-      (fixture.nativeElement as HTMLElement)
-        .querySelector('[data-testid="live-preview-refresh"]')!
-        .dispatchEvent(new Event('click'));
+      fixture.componentInstance['refreshPreviewMenu']();
       fixture.detectChanges();
 
       httpMock
@@ -210,12 +195,12 @@ describe('Profile preview menu (5F.6.3)', () => {
       ]);
       fixture.detectChanges();
 
-      expect(fixture.nativeElement.textContent).toContain('Real Dish');
+      expect(fixture.nativeElement.textContent).toContain('وجبة فعلية');
 
       (fixture.componentInstance as RestaurantLivePreview & { openFullPreview(): void }).openFullPreview();
       fixture.detectChanges();
 
-      expect(document.body.textContent).toContain('Real Dish');
+      expect(document.body.textContent).toContain('وجبة فعلية');
       expect(document.body.textContent).not.toContain('Truffle Hummus');
     });
   });

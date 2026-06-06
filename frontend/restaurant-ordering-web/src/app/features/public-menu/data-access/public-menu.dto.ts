@@ -7,6 +7,9 @@ export interface PublicMenuApiDto {
   descriptionAr?: string | null;
   descriptionEn?: string | null;
   logoFileId?: string | null;
+  logoUrl?: string | null;
+  coverImageUrl?: string | null;
+  accentColor?: string | null;
   phoneNumber: string;
   whatsAppNumber?: string | null;
   addressAr?: string | null;
@@ -59,6 +62,7 @@ export interface UpdateRestaurantApiRequest {
   addressEn?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  accentColor: string;
 }
 
 /** Backend contract: GET/PUT settings */
@@ -95,6 +99,10 @@ export interface RestaurantApiDto {
   descriptionAr?: string | null;
   descriptionEn?: string | null;
   logoFileId?: string | null;
+  logoUrl?: string | null;
+  coverImageFileId?: string | null;
+  coverImageUrl?: string | null;
+  accentColor?: string;
   phoneNumber: string;
   whatsAppNumber?: string | null;
   addressAr?: string | null;

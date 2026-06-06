@@ -1,77 +1,148 @@
-<section class="live-preview" aria-labelledby="live-preview-title">
-  <div class="live-preview__toolbar">
-    <div class="live-preview__toolbar-head">
-      <h2 id="live-preview-title">{{ localeService.uiText('previewTitle') }}</h2>
-      @if (menuState() === 'demo') {
-        <p class="live-preview__mode" data-testid="live-preview-demo-mode">
-          {{ localeService.uiText('profilePreviewDemoMode') }}
+<section
+  class="live-preview"
+  [class.live-preview--studio]="variant() === 'studio'"
+  [attr.aria-label]="variant() === 'studio' ? localeService.uiText('profilePreviewStudio') : null"
+  [attr.aria-labelledby]="variant() === 'studio' ? null : 'live-preview-title'"
+>
+  @if (variant() === 'studio') {
+    <div class="live-preview__studio-toolbar">
+      <div class="live-preview__toolbar-start">
+        <div class="live-preview__toolbar-group" role="group" [attr.aria-label]="localeService.uiText('profilePreviewDeviceLabel')">
+          <span class="live-preview__group-label">{{ localeService.uiText('profilePreviewDeviceLabel') }}</span>
+          <div class="live-preview__device-group">
+            <button
+              type="button"
+              class="live-preview__device-btn"
+              [class.is-active]="viewport() === 'desktop'"
+              data-testid="live-preview-device-desktop"
+              (click)="setViewport('desktop')"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21 2H3a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h7v2H7v2h10v-2h-4v-2h7a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1Z"/></svg>
+            </button>
+            <button
+              type="button"
+              class="live-preview__device-btn"
+              [class.is-active]="viewport() === 'tablet'"
+              data-testid="live-preview-device-tablet"
+              (click)="setViewport('tablet')"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18 0H6a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2ZM8 22H6v-2h2v2Zm4 0h-2v-2h2v2Zm4 0h-2v-2h2v2Zm2-4H6V4h12v14Z"/></svg>
+            </button>
+            <button
+              type="button"
+              class="live-preview__device-btn"
+              [class.is-active]="viewport() === 'mobile'"
+              data-testid="live-preview-device-mobile"
+              (click)="setViewport('mobile')"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 1H8a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-2 19h-4v-1h4v1Zm2-3H8V4h8v13Z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="button" class="live-preview__full" data-testid="live-preview-full" (click)="openFullPreview()">
+          {{ localeService.uiText('fullPreview') }}
+        </button>
+      </div>
+
+      <div class="live-preview__toolbar-end">
+        <div class="live-preview__toolbar-group" role="group" aria-label="Preview language">
+          <span class="live-preview__group-label">{{ localeService.uiText('profilePreviewLang') }}</span>
+          <div class="live-preview__lang-toggle">
+            <button type="button" [class.is-active]="previewLocale() === 'ar'" (click)="setPreviewLocale('ar')">
+              العربية
+            </button>
+            <button type="button" [class.is-active]="previewLocale() === 'en'" (click)="setPreviewLocale('en')">
+              English
+            </button>
+          </div>
+        </div>
+
+        <p
+          class="live-preview__sync-capsule"
+          role="status"
+          data-testid="live-preview-sync-status"
+          [class.live-preview__sync-capsule--unsaved]="previewSyncStatus() === 'unsaved'"
+        >
+          <span class="live-preview__sync-dot" aria-hidden="true"></span>
+          {{
+            previewSyncStatus() === 'unsaved'
+              ? localeService.uiText('profileUnsavedChanges')
+              : localeService.uiText('profileLiveSync')
+          }}
         </p>
-      } @else if (menuState() === 'loaded' || menuState() === 'empty') {
-        <p class="live-preview__mode" data-testid="live-preview-real-mode">
-          {{ localeService.uiText('profilePreviewRealMenu') }}
-        </p>
-      }
+      </div>
     </div>
+  } @else {
+    <div class="live-preview__toolbar">
+      <div class="live-preview__toolbar-head">
+        <h2 id="live-preview-title">{{ localeService.uiText('previewTitle') }}</h2>
+        @if (menuState() === 'demo') {
+          <p class="live-preview__mode" data-testid="live-preview-demo-mode">
+            {{ localeService.uiText('profilePreviewDemoMode') }}
+          </p>
+        } @else if (menuState() === 'loaded' || menuState() === 'empty') {
+          <p class="live-preview__mode" data-testid="live-preview-real-mode">
+            {{ localeService.uiText('profilePreviewRealMenu') }}
+          </p>
+        }
+      </div>
 
-    <div class="live-preview__controls" role="group" aria-label="Viewport size">
-      <button type="button" [class.is-active]="viewport() === 'desktop'" (click)="setViewport('desktop')">
-        Desktop
-      </button>
-      <button type="button" [class.is-active]="viewport() === 'tablet'" (click)="setViewport('tablet')">
-        Tablet
-      </button>
-      <button type="button" [class.is-active]="viewport() === 'mobile'" (click)="setViewport('mobile')">
-        Mobile
-      </button>
+      <div class="live-preview__controls" role="group" aria-label="Viewport size">
+        <button type="button" [class.is-active]="viewport() === 'desktop'" (click)="setViewport('desktop')">
+          Desktop
+        </button>
+        <button type="button" [class.is-active]="viewport() === 'tablet'" (click)="setViewport('tablet')">
+          Tablet
+        </button>
+        <button type="button" [class.is-active]="viewport() === 'mobile'" (click)="setViewport('mobile')">
+          Mobile
+        </button>
+      </div>
+
+      <div class="live-preview__controls live-preview__controls--language" role="group" aria-label="Preview language">
+        <button type="button" [class.is-active]="previewLocale() === 'ar'" (click)="setPreviewLocale('ar')">
+          العربية
+        </button>
+        <button type="button" [class.is-active]="previewLocale() === 'en'" (click)="setPreviewLocale('en')">
+          English
+        </button>
+      </div>
+
+      <div class="live-preview__toolbar-actions">
+        <button type="button" class="live-preview__full" (click)="openFullPreview()">
+          {{ localeService.uiText('fullPreview') }}
+        </button>
+      </div>
     </div>
+  }
 
-    <div class="live-preview__controls live-preview__controls--language" role="group" aria-label="Preview language">
-      <button type="button" [class.is-active]="previewLocale() === 'ar'" (click)="setPreviewLocale('ar')">
-        العربية
-      </button>
-      <button type="button" [class.is-active]="previewLocale() === 'en'" (click)="setPreviewLocale('en')">
-        English
-      </button>
-    </div>
-
-    <div class="live-preview__toolbar-actions">
-      <button
-        type="button"
-        class="live-preview__refresh"
-        data-testid="live-preview-refresh"
-        (click)="requestRefresh()"
+  <div class="live-preview__frame-wrapper">
+    <div class="live-preview__canvas">
+      <div
+        class="live-preview__frame"
+        [class.live-preview__frame--desktop]="viewport() === 'desktop'"
+        [class.live-preview__frame--tablet]="viewport() === 'tablet'"
+        [class.live-preview__frame--mobile]="viewport() === 'mobile'"
+        [attr.dir]="previewLocale() === 'ar' ? 'rtl' : 'ltr'"
       >
-        {{ localeService.uiText('profilePreviewRefresh') }}
-      </button>
-      <button type="button" class="live-preview__full" (click)="openFullPreview()">
-        {{ localeService.uiText('fullPreview') }}
-      </button>
-    </div>
-  </div>
+        <div class="live-preview__mini-header">
+          @if (restaurantProfile().logoUrl; as logo) {
+            <img [src]="logo" [alt]="restaurantProfile().nameAr" />
+          }
+          <strong>
+            {{ pickPreviewText({ ar: restaurantProfile().nameAr, en: restaurantProfile().nameEn }, restaurantProfile().nameAr) }}
+          </strong>
+        </div>
 
-  <div
-    class="live-preview__frame"
-    [class.live-preview__frame--tablet]="viewport() === 'tablet'"
-    [class.live-preview__frame--mobile]="viewport() === 'mobile'"
-  >
-    <div class="live-preview__mini-header">
-      @if (restaurantProfile().logoUrl; as logo) {
-        <img [src]="logo" [alt]="restaurantProfile().nameAr" />
-      }
-      <strong>
-        {{
-          localeService.pickText(
-            { ar: restaurantProfile().nameAr, en: restaurantProfile().nameEn },
-            restaurantProfile().nameAr
-          )
-        }}
-      </strong>
+        <div class="live-preview__viewport" data-testid="live-preview-viewport">
+          <ng-container
+            [ngTemplateOutlet]="previewMenuBody"
+            [ngTemplateOutletContext]="{ gridClass: '', showFooter: false }"
+          />
+        </div>
+      </div>
     </div>
-
-    <ng-container
-      [ngTemplateOutlet]="previewMenuBody"
-      [ngTemplateOutletContext]="{ gridClass: '', showFooter: false }"
-    />
   </div>
 </section>
 
@@ -109,7 +180,10 @@
         </button>
       </header>
 
-      <div class="live-preview__modal-body">
+      <div
+        class="live-preview__modal-body"
+        [attr.dir]="previewLocale() === 'ar' ? 'rtl' : 'ltr'"
+      >
         <ng-container
           [ngTemplateOutlet]="previewMenuBody"
           [ngTemplateOutletContext]="{ gridClass: ' live-preview__grid--full', showFooter: true }"
@@ -144,12 +218,14 @@
     <app-restaurant-cover-hero
       [restaurant]="restaurantProfile()"
       [imageFallback]="imageFallback"
+      [displayLocale]="previewLocale()"
     />
 
     @if (previewCategories().length > 0) {
       <app-category-navigation
         [categories]="previewCategories()"
         [activeCategoryId]="activeCategoryId()"
+        [displayLocale]="previewLocale()"
         (categorySelected)="selectCategory($event)"
       />
     }
@@ -169,6 +245,7 @@
             [countryCode]="restaurantProfile().countryCode"
             [quantity]="quantityFor(item.id)"
             [imageFallback]="imageFallback"
+            [displayLocale]="previewLocale()"
             (quantityChange)="updatePreviewQuantity(item.id, $event)"
           />
         }
@@ -179,7 +256,7 @@
       <footer class="live-preview__footer">
         <p>
           {{
-            localeService.pickText(
+            pickPreviewText(
               { ar: restaurantProfile().addressAr, en: restaurantProfile().addressEn },
               '—'
             )

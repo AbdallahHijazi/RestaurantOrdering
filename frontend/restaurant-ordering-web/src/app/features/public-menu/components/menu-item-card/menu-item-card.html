@@ -53,7 +53,7 @@
             type="button"
             class="menu-item-card__qty-btn"
             (click)="decrement()"
-            [attr.aria-label]="localeService.locale() === 'ar' ? 'إنقاص' : 'Decrease'"
+            [attr.aria-label]="quantityAriaLabel('decrease')"
           >
             −
           </button>
@@ -62,7 +62,7 @@
             type="button"
             class="menu-item-card__qty-btn"
             (click)="increment()"
-            [attr.aria-label]="localeService.locale() === 'ar' ? 'زيادة' : 'Increase'"
+            [attr.aria-label]="quantityAriaLabel('increase')"
           >
             +
           </button>

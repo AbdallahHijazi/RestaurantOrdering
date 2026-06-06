@@ -75,6 +75,10 @@ export class LocaleService {
     return this.ui()[key];
   }
 
+  uiTextForLocale(locale: SupportedLocale, key: UiTextKey): string {
+    return UI_TEXT[locale][key];
+  }
+
   private readStoredLocale(): SupportedLocale {
     try {
       const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
@@ -111,6 +115,30 @@ type UiTextKey =
   | 'demoSaveNotice'
   | 'demoSaveTitle'
   | 'profileTitle'
+  | 'adminConsoleTitle'
+  | 'profileNavProfileSetup'
+  | 'profileNavMenuBuilder'
+  | 'profileNavOrderDashboard'
+  | 'profileIdentitySectionDesc'
+  | 'profileLocalizationSectionDesc'
+  | 'profileContactSectionDesc'
+  | 'profileDeliverySectionDesc'
+  | 'profileSaveIdentityChanges'
+  | 'profileSaveLocalization'
+  | 'profileSaveContactInfo'
+  | 'profileLiveSync'
+  | 'profilePreviewLang'
+  | 'profilePreviewDeviceLabel'
+  | 'profileWorkspaceSubtitle'
+  | 'profileTabIdentity'
+  | 'profileTabLocalization'
+  | 'profileTabContact'
+  | 'profileTabDelivery'
+  | 'profilePublishLive'
+  | 'profilePublishUnavailable'
+  | 'profilePreviewSynced'
+  | 'profileUnsavedChanges'
+  | 'profilePreviewStudio'
   | 'saveProfile'
   | 'profileDeliverySettingsTitle'
   | 'profileEnablePickup'
@@ -124,6 +152,16 @@ type UiTextKey =
   | 'profileSettingsRetry'
   | 'profileSettingsSaved'
   | 'profileSaveRestaurant'
+  | 'profileSavingRestaurant'
+  | 'profileUploadingLogo'
+  | 'profileUploadingCoverImage'
+  | 'profileLogoUploadFailed'
+  | 'profileCoverUploadFailed'
+  | 'profileUnsupportedImageType'
+  | 'profileImageTooLarge'
+  | 'profileInvalidAccentColor'
+  | 'profileUnsavedBrandingPreview'
+  | 'profileReloadFailed'
   | 'profileSaveOrderingSettings'
   | 'profileRestaurantSaved'
   | 'profileValidationNonNegative'
@@ -180,6 +218,8 @@ type UiTextKey =
   | 'adminRoleManager'
   | 'adminRestaurantLogoAlt'
   | 'adminLanguageGroup'
+  | 'adminSwitchToEnglish'
+  | 'adminSwitchToArabic'
   | 'adminDashboardEyebrow'
   | 'adminDashboardWelcome'
   | 'adminDashboardLead'
@@ -506,6 +546,32 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     demoSaveNotice: 'المعاينة التجريبية فقط — لم يتم الحفظ على الخادم.',
     demoSaveTitle: 'وضع العرض التجريبي',
     profileTitle: 'إعداد ملف المطعم',
+    adminConsoleTitle: 'إدارة المطعم',
+    profileNavProfileSetup: 'إعداد الملف',
+    profileNavMenuBuilder: 'بناء القائمة',
+    profileNavOrderDashboard: 'لوحة الطلبات',
+    profileIdentitySectionDesc: 'عرّف هوية مطعمك الرقمية ومظهره.',
+    profileLocalizationSectionDesc: 'إدارة الإعدادات الخاصة بالمنطقة واللغة.',
+    profileContactSectionDesc: 'كيف يتواصل الزبائن معك وأين يجدونك.',
+    profileDeliverySectionDesc: 'اضبط توفر الخدمة وقواعد الطلب.',
+    profileSaveIdentityChanges: 'حفظ تغييرات الهوية',
+    profileSaveLocalization: 'حفظ الإعدادات المحلية',
+    profileSaveContactInfo: 'حفظ بيانات التواصل',
+    profileLiveSync: 'مزامنة مباشرة',
+    profilePreviewLang: 'لغة المعاينة',
+    profilePreviewDeviceLabel: 'الجهاز',
+    profileWorkspaceSubtitle:
+      'خصّص هوية مطعمك وإعداداته ومعاينة تجربة الزبون.',
+    profileTabIdentity: 'هوية المطعم',
+    profileTabLocalization: 'الدولة وإعدادات اللغة',
+    profileTabContact: 'معلومات التواصل',
+    profileTabDelivery: 'التوصيل والطلبات',
+    profilePublishLive: 'نشر مباشر',
+    profilePublishUnavailable:
+      'ميزة النشر المباشر ستتاح بعد ربط خدمة النشر. التغييرات المحفوظة تظهر حاليًا في رابط المطعم العام.',
+    profilePreviewSynced: 'تمت مزامنة المعاينة',
+    profileUnsavedChanges: 'تغييرات غير محفوظة',
+    profilePreviewStudio: 'استوديو المعاينة',
     saveProfile: 'حفظ الإعدادات',
     profileDeliverySettingsTitle: 'إعدادات التوصيل والطلبات',
     profileEnablePickup: 'تفعيل الاستلام من المطعم',
@@ -519,6 +585,16 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     profileSettingsRetry: 'إعادة المحاولة',
     profileSettingsSaved: 'تم حفظ إعدادات التوصيل والطلبات بنجاح.',
     profileSaveRestaurant: 'حفظ ملف المطعم',
+    profileSavingRestaurant: 'جاري حفظ ملف المطعم…',
+    profileUploadingLogo: 'جاري رفع الشعار…',
+    profileUploadingCoverImage: 'جاري رفع صورة الغلاف…',
+    profileLogoUploadFailed: 'تعذر رفع الشعار. حاول مجددًا.',
+    profileCoverUploadFailed: 'تعذر رفع صورة الغلاف. حاول مجددًا.',
+    profileUnsupportedImageType: 'نوع الصورة غير مدعوم. استخدم JPEG أو PNG أو WebP.',
+    profileImageTooLarge: 'حجم الصورة كبير جدًا. الحد الأقصى 5 ميجابايت.',
+    profileInvalidAccentColor: 'لون Accent غير صالح. استخدم صيغة مثل #B8663F.',
+    profileUnsavedBrandingPreview: 'معاينة الهوية غير محفوظة — اضغط حفظ ملف المطعم للاحتفاظ بالتغييرات.',
+    profileReloadFailed: 'تم الحفظ لكن تعذر إعادة تحميل الملف. حاول تحديث الصفحة.',
     profileSaveOrderingSettings: 'حفظ إعدادات التوصيل والطلبات',
     profileRestaurantSaved: 'تم حفظ ملف المطعم بنجاح.',
     profileValidationNonNegative: 'يجب أن تكون القيمة صفرًا أو أكثر.',
@@ -578,6 +654,8 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminRoleManager: 'مدير المطعم',
     adminRestaurantLogoAlt: 'شعار المطعم',
     adminLanguageGroup: 'اختيار اللغة',
+    adminSwitchToEnglish: 'تبديل لغة الواجهة إلى الإنجليزية',
+    adminSwitchToArabic: 'تبديل لغة الواجهة إلى العربية',
     adminDashboardEyebrow: 'لوحة التحكم',
     adminDashboardWelcome: 'مرحبًا بك في لوحة إدارة المطعم',
     adminDashboardLead:
@@ -913,6 +991,32 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     demoSaveNotice: 'Demo preview only — not saved to the server.',
     demoSaveTitle: 'Demo mode',
     profileTitle: 'Restaurant profile setup',
+    adminConsoleTitle: 'Admin Console',
+    profileNavProfileSetup: 'Profile Setup',
+    profileNavMenuBuilder: 'Menu Builder',
+    profileNavOrderDashboard: 'Order Dashboard',
+    profileIdentitySectionDesc: "Define your brand's digital presence and appearance.",
+    profileLocalizationSectionDesc: 'Manage region-specific settings and operational defaults.',
+    profileContactSectionDesc: 'How customers can reach you and where to find you.',
+    profileDeliverySectionDesc: 'Configure your service availability and ordering rules.',
+    profileSaveIdentityChanges: 'Save identity changes',
+    profileSaveLocalization: 'Save localization',
+    profileSaveContactInfo: 'Save contact info',
+    profileLiveSync: 'Live sync',
+    profilePreviewLang: 'Preview lang',
+    profilePreviewDeviceLabel: 'Device',
+    profileWorkspaceSubtitle:
+      'Customize your restaurant identity, settings, and customer experience.',
+    profileTabIdentity: 'Restaurant identity',
+    profileTabLocalization: 'Localization & settings',
+    profileTabContact: 'Contact details',
+    profileTabDelivery: 'Delivery & ordering',
+    profilePublishLive: 'Publish live',
+    profilePublishUnavailable:
+      'Live publishing will be available after publishing-service integration. Saved changes currently appear through the public restaurant link.',
+    profilePreviewSynced: 'Preview synced',
+    profileUnsavedChanges: 'Unsaved changes',
+    profilePreviewStudio: 'Preview studio',
     saveProfile: 'Save settings',
     profileDeliverySettingsTitle: 'Delivery and ordering settings',
     profileEnablePickup: 'Enable pickup',
@@ -926,6 +1030,17 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     profileSettingsRetry: 'Retry',
     profileSettingsSaved: 'Delivery and ordering settings saved successfully.',
     profileSaveRestaurant: 'Save restaurant profile',
+    profileSavingRestaurant: 'Saving restaurant profile…',
+    profileUploadingLogo: 'Uploading logo…',
+    profileUploadingCoverImage: 'Uploading cover image…',
+    profileLogoUploadFailed: 'The logo could not be uploaded. Please try again.',
+    profileCoverUploadFailed: 'The cover image could not be uploaded. Please try again.',
+    profileUnsupportedImageType: 'Unsupported image type. Use JPEG, PNG, or WebP.',
+    profileImageTooLarge: 'The image is too large. Maximum size is 5 MB.',
+    profileInvalidAccentColor: 'Invalid accent color. Use a value like #B8663F.',
+    profileUnsavedBrandingPreview:
+      'Branding preview is unsaved — click Save restaurant profile to keep your changes.',
+    profileReloadFailed: 'Saved, but the profile could not be reloaded. Try refreshing the page.',
     profileSaveOrderingSettings: 'Save delivery and ordering settings',
     profileRestaurantSaved: 'Restaurant profile saved successfully.',
     profileValidationNonNegative: 'Value must be zero or greater.',
@@ -986,6 +1101,8 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminRoleManager: 'Restaurant manager',
     adminRestaurantLogoAlt: 'Restaurant logo',
     adminLanguageGroup: 'Language selection',
+    adminSwitchToEnglish: 'Switch interface language to English',
+    adminSwitchToArabic: 'Switch interface language to Arabic',
     adminDashboardEyebrow: 'Dashboard',
     adminDashboardWelcome: 'Welcome to your restaurant dashboard',
     adminDashboardLead:

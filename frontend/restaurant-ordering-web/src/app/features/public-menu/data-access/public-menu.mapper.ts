@@ -4,7 +4,6 @@ import type {
   PublicRestaurantOrderSettings,
 } from '../models/public-menu.models';
 import { resolveApiAssetUrl } from '../../../core/config/resolve-api-asset-url';
-import { MOCK_IMAGE_FALLBACK } from './public-menu-mock.data';
 
 function mapOrderSettings(dto: PublicMenuApiDto): PublicRestaurantOrderSettings {
   return {
@@ -56,9 +55,9 @@ export function mapPublicMenuApiDto(dto: PublicMenuApiDto): PublicMenuPageData {
       nameEn: dto.nameEn,
       descriptionAr: dto.descriptionAr,
       descriptionEn: dto.descriptionEn,
-      logoUrl: dto.logoFileId ? MOCK_IMAGE_FALLBACK : null,
-      coverImageUrl: null,
-      primaryAccentColor: null,
+      logoUrl: resolveApiAssetUrl(dto.logoUrl ?? null),
+      coverImageUrl: resolveApiAssetUrl(dto.coverImageUrl ?? null),
+      primaryAccentColor: dto.accentColor ?? null,
       countryCode: 'SA',
       currencyCode: orderSettings.currencyCode,
       timeZone: 'Asia/Riyadh',

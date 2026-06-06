@@ -63,4 +63,19 @@ describe('MenuItemCard', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Dish');
   });
+
+  it('uses displayLocale for labels without changing admin locale', () => {
+    const locale = TestBed.inject(LocaleService);
+    locale.setLocale('en');
+    fixture.componentRef.setInput('displayLocale', 'ar');
+    fixture.componentRef.setInput('quantity', 1);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('طبق');
+    const decreaseButton = fixture.nativeElement.querySelector(
+      '.menu-item-card__qty-btn:first-child',
+    ) as HTMLButtonElement;
+    expect(decreaseButton.getAttribute('aria-label')).toBe('إنقاص');
+    expect(locale.locale()).toBe('en');
+  });
 });

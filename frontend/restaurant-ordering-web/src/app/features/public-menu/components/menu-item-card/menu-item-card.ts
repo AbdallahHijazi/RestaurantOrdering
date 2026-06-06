@@ -1,5 +1,5 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
-import { LocaleService } from '../../../../core/localization/locale';
+import { LocaleService, type SupportedLocale } from '../../../../core/localization/locale';
 import {
   PUBLIC_CART_MAX_QUANTITY,
   getMenuItemLabels,
@@ -17,6 +17,7 @@ export class MenuItemCard {
   readonly countryCode = input('SA');
   readonly quantity = input(0);
   readonly imageFallback = input<string | null>(null);
+  readonly displayLocale = input<SupportedLocale | null>(null);
 
   readonly quantityChange = output<number>();
 
@@ -24,26 +25,31 @@ export class MenuItemCard {
   protected readonly imageFailed = signal(false);
   protected readonly justAdded = signal(false);
 
-  protected readonly labels = computed(() => getMenuItemLabels(this.localeService.locale()));
+  protected readonly activeLocale = computed(
+    () => this.displayLocale() ?? this.localeService.locale(),
+  );
+
+  protected readonly labels = computed(() => getMenuItemLabels(this.activeLocale()));
 
   protected readonly displayName = computed(() => {
-    this.localeService.locale();
-    return this.localeService.pickText(
+    const locale = this.activeLocale();
+    return this.localeService.pickTextForLocale(
+      locale,
       { ar: this.item().nameAr, en: this.item().nameEn },
       this.item().nameAr,
     );
   });
 
   protected readonly displayDescription = computed(() => {
-    this.localeService.locale();
-    return this.localeService.pickText(
+    const locale = this.activeLocale();
+    return this.localeService.pickTextForLocale(
+      locale,
       { ar: this.item().descriptionAr, en: this.item().descriptionEn },
       '',
     );
   });
 
   protected readonly displayPrice = computed(() => {
-    this.localeService.locale();
     return this.localeService.formatCurrency(
       this.item().price,
       this.currencyCode(),
@@ -57,7 +63,6 @@ export class MenuItemCard {
       return null;
     }
 
-    this.localeService.locale();
     return this.localeService.formatCurrency(
       discount,
       this.currencyCode(),
@@ -75,6 +80,16 @@ export class MenuItemCard {
 
   protected onImageError(): void {
     this.imageFailed.set(true);
+  }
+
+  protected quantityAriaLabel(action: 'decrease' | 'increase'): string {
+    return this.activeLocale() === 'ar'
+      ? action === 'decrease'
+        ? 'إنقاص'
+        : 'زيادة'
+      : action === 'decrease'
+        ? 'Decrease'
+        : 'Increase';
   }
 
   protected addItem(): void {

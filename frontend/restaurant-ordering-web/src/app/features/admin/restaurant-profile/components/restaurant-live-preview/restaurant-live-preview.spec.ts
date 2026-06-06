@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
 import { LocaleService } from '../../../../../core/localization/locale';
 import { MOCK_PUBLIC_MENU } from '../../../../public-menu/data-access/public-menu-mock.data';
 import { RestaurantLivePreview } from './restaurant-live-preview';
@@ -43,6 +44,8 @@ type PreviewHarness = RestaurantLivePreview & {
   selectCategory: (categoryId: string) => void;
   activeCategoryId: () => string;
   filteredPreviewItems: () => Array<{ id: string; nameEn?: string | null }>;
+  previewLocale: () => 'ar' | 'en';
+  setPreviewLocale: (locale: 'ar' | 'en') => void;
 };
 
 function getPreviewModal(fixture: ComponentFixture<RestaurantLivePreview>): HTMLElement | null {
@@ -163,8 +166,14 @@ describe('RestaurantLivePreview', () => {
     clickCategory(modal, 'تصنيف فعلي');
     fixture.detectChanges();
 
-    const locale = TestBed.inject(LocaleService);
-    locale.setLocale('en');
+    const buttons = Array.from(
+      fixture.nativeElement.querySelectorAll('.live-preview__lang-toggle button'),
+    ) as HTMLButtonElement[];
+    if (buttons.length === 0) {
+      component.setPreviewLocale('en');
+    } else {
+      buttons.find((button) => button.textContent?.includes('English'))?.click();
+    }
     fixture.detectChanges();
 
     expect(cardTexts(getModalCards(modal))).toContain('Real Dish');
@@ -220,15 +229,133 @@ describe('RestaurantLivePreview', () => {
     expect(getComputedStyle(scrollBody!).overflowX).toBe('hidden');
   });
 
-  it('emits refreshPreview when refresh button is clicked', () => {
+  it('emits refreshPreview when error state retry is clicked', () => {
     const refresh = vi.fn();
     fixture.componentInstance.refreshPreview.subscribe(refresh);
 
-    const refreshButton = (fixture.nativeElement as HTMLElement).querySelector(
-      '[data-testid="live-preview-refresh"]',
-    ) as HTMLButtonElement;
-    refreshButton.click();
+    fixture.componentRef.setInput('menuState', 'error');
+    fixture.componentRef.setInput('categories', []);
+    fixture.componentRef.setInput('items', []);
+    fixture.detectChanges();
+
+    (
+      fixture.nativeElement.querySelector('.error-state__retry') as HTMLButtonElement
+    ).click();
 
     expect(refresh).toHaveBeenCalled();
+  });
+
+  it('does not render refresh preview button in studio variant', () => {
+    fixture.componentRef.setInput('variant', 'studio');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="live-preview-refresh"]')).toBeNull();
+  });
+
+  it('orders studio toolbar with device modes and full preview at start', () => {
+    fixture.componentRef.setInput('variant', 'studio');
+    fixture.detectChanges();
+
+    const toolbar = fixture.nativeElement.querySelector('.live-preview__studio-toolbar') as HTMLElement;
+    const start = toolbar.querySelector('.live-preview__toolbar-start') as HTMLElement;
+    const end = toolbar.querySelector('.live-preview__toolbar-end') as HTMLElement;
+
+    expect(start.querySelector('[data-testid="live-preview-device-desktop"]')).toBeTruthy();
+    expect(start.querySelector('[data-testid="live-preview-full"]')).toBeTruthy();
+    expect(end.querySelector('.live-preview__lang-toggle')).toBeTruthy();
+    expect(end.querySelector('[data-testid="live-preview-sync-status"]')).toBeTruthy();
+  });
+
+  it('exposes scrollable preview viewport with hidden horizontal overflow', () => {
+    fixture.componentRef.setInput('variant', 'studio');
+    fixture.detectChanges();
+
+    const frameWrapper = fixture.nativeElement.querySelector('.live-preview__frame-wrapper') as HTMLElement;
+    const viewport = fixture.nativeElement.querySelector('[data-testid="live-preview-viewport"]') as HTMLElement;
+
+    expect(frameWrapper).toBeTruthy();
+    expect(viewport).toBeTruthy();
+    expect(getComputedStyle(frameWrapper).minHeight).toMatch(/^0(px)?$/);
+    expect(getComputedStyle(viewport).overflowY).toBe('auto');
+    expect(getComputedStyle(viewport).overflowX).toBe('hidden');
+  });
+
+  it('shows studio sync status in studio variant', () => {
+    TestBed.inject(LocaleService).setLocale('en');
+    fixture.componentRef.setInput('variant', 'studio');
+    fixture.componentRef.setInput('previewSyncStatus', 'synced');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Live sync');
+    expect(fixture.nativeElement.querySelector('[data-testid="live-preview-sync-status"]')).toBeTruthy();
+  });
+
+  it('applies tablet and mobile viewport frame classes', () => {
+    const frame = fixture.nativeElement.querySelector('.live-preview__frame') as HTMLElement;
+    const viewportButtons = fixture.nativeElement.querySelectorAll(
+      '.live-preview__controls button',
+    ) as NodeListOf<HTMLButtonElement>;
+
+    viewportButtons[1].click();
+    fixture.detectChanges();
+    expect(frame.classList.contains('live-preview__frame--tablet')).toBe(true);
+
+    viewportButtons[2].click();
+    fixture.detectChanges();
+    expect(frame.classList.contains('live-preview__frame--mobile')).toBe(true);
+  });
+
+  it('changes preview locale without changing admin interface locale', () => {
+    const locale = TestBed.inject(LocaleService);
+    locale.setLocale('en');
+    fixture.componentRef.setInput('variant', 'studio');
+    fixture.detectChanges();
+
+    const buttons = Array.from(
+      fixture.nativeElement.querySelectorAll('.live-preview__lang-toggle button'),
+    ) as HTMLButtonElement[];
+
+    buttons.find((button) => button.textContent?.includes('English'))?.click();
+    fixture.detectChanges();
+    expect(component.previewLocale()).toBe('en');
+    expect(locale.locale()).toBe('en');
+
+    buttons.find((button) => button.textContent?.includes('العربية'))?.click();
+    fixture.detectChanges();
+    expect(component.previewLocale()).toBe('ar');
+    expect(locale.locale()).toBe('en');
+  });
+
+  it('applies studio device frame classes from toolbar buttons', () => {
+    fixture.componentRef.setInput('variant', 'studio');
+    fixture.detectChanges();
+
+    const frame = fixture.nativeElement.querySelector('.live-preview__frame') as HTMLElement;
+    (
+      fixture.nativeElement.querySelector('[data-testid="live-preview-device-tablet"]') as HTMLButtonElement
+    ).click();
+    fixture.detectChanges();
+    expect(frame.classList.contains('live-preview__frame--tablet')).toBe(true);
+  });
+
+  it('applies preview locale direction to full preview modal body', () => {
+    component.setPreviewLocale('en');
+    component.openFullPreview();
+    fixture.detectChanges();
+
+    const modalBody = (getPreviewModal(fixture) as HTMLElement).querySelector(
+      '.live-preview__modal-body',
+    ) as HTMLElement;
+    expect(modalBody.getAttribute('dir')).toBe('ltr');
+
+    component.closeFullPreview();
+    component.setPreviewLocale('ar');
+    component.openFullPreview();
+    fixture.detectChanges();
+
+    const rtlModalBody = (getPreviewModal(fixture) as HTMLElement).querySelector(
+      '.live-preview__modal-body',
+    ) as HTMLElement;
+    expect(rtlModalBody.getAttribute('dir')).toBe('rtl');
   });
 });

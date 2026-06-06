@@ -1,0 +1,106 @@
+<div class="profile-console" data-testid="profile-console" [attr.dir]="localeService.direction()">
+  <header class="profile-console__header profile-console__header--compact" data-testid="profile-console-header">
+    <div
+      class="profile-console__header-start"
+      data-testid="profile-console-header-start"
+    >
+      <button
+        type="button"
+        class="profile-console__header-action profile-console__language-toggle"
+        data-testid="profile-console-language-toggle"
+        [attr.aria-label]="adminLanguageAriaLabel()"
+        [attr.title]="adminLanguageAriaLabel()"
+        (click)="toggleInterfaceLocale()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            fill="currentColor"
+            d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm7.93 9h-3.18a15.7 15.7 0 0 0-1.07-4.02A8.02 8.02 0 0 1 19.93 11ZM12 4c.95 1.6 1.6 3.4 1.93 5.36H10.07C10.4 7.4 11.05 5.6 12 4ZM8.32 6.98A15.7 15.7 0 0 0 7.25 11H4.07a8.02 8.02 0 0 1 4.25-4.02ZM4.07 13h3.18c.23 1.4.66 2.74 1.25 4.02A8.02 8.02 0 0 1 4.07 13Zm7.93 7c-.95-1.6-1.6-3.4-1.93-5.36h3.86C13.6 16.6 12.95 18.4 12 21Zm3.68-2.02c.59-1.28 1.02-2.62 1.25-4.02h3.18a8.02 8.02 0 0 1-4.43 4.02ZM16.75 13h3.18a8.02 8.02 0 0 1-4.25 4.02c.59-1.28 1.02-2.62 1.25-4.02Z"
+          />
+        </svg>
+        <span class="profile-console__language-label" data-testid="profile-console-language-label">{{
+          adminTargetLanguageLabel()
+        }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="profile-console__header-action profile-console__logout"
+        data-testid="profile-console-logout"
+        [attr.aria-label]="localeService.uiText('adminLogout')"
+        [attr.title]="localeService.uiText('adminLogout')"
+        (click)="logout()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            fill="currentColor"
+            d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5ZM4 5h8V3H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8v-2H4V5Z"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <nav
+      class="profile-console__nav profile-console__header-nav"
+      data-testid="profile-console-nav"
+      [attr.aria-label]="localeService.uiText('adminNavLabel')"
+    >
+      <a
+        routerLink="/admin/dashboard"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        data-testid="profile-console-nav-dashboard"
+      >
+        {{ localeService.uiText('adminNavDashboard') }}
+      </a>
+      @if (isOwner()) {
+        <a
+          routerLink="/admin/restaurant-profile"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          data-testid="profile-console-nav-profile"
+        >
+          {{ localeService.uiText('adminNavRestaurantProfile') }}
+        </a>
+      }
+      <a routerLink="/admin/orders" routerLinkActive="is-active" data-testid="profile-console-nav-orders">
+        {{ localeService.uiText('adminNavOrders') }}
+      </a>
+      <a routerLink="/admin/menu" routerLinkActive="is-active" data-testid="profile-console-nav-menu">
+        {{ localeService.uiText('adminNavMenu') }}
+      </a>
+      @if (isOwner()) {
+        <a routerLink="/admin/staff" routerLinkActive="is-active" data-testid="profile-console-nav-staff">
+          {{ localeService.uiText('adminNavStaff') }}
+        </a>
+      }
+    </nav>
+
+    <div class="profile-console__header-end" data-testid="profile-console-header-end">
+      <div class="profile-console__brand">
+        @if (brandAvatarUrl(); as avatarUrl) {
+          <img
+            class="profile-console__brand-avatar"
+            data-testid="profile-console-brand-avatar"
+            [src]="avatarUrl"
+            [alt]="branding.restaurantName()"
+            (error)="onAvatarError()"
+          />
+        } @else {
+          <span class="profile-console__brand-fallback" data-testid="profile-console-brand-fallback" aria-hidden="true">
+            {{ brandInitial() }}
+          </span>
+        }
+        <span class="profile-console__brand-title">{{ localeService.uiText('adminConsoleTitle') }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div
+    class="profile-console__shell"
+    [class.profile-console__shell--scrollable]="!isProfileRoute()"
+  >
+    <router-outlet />
+  </div>
+</div>
+

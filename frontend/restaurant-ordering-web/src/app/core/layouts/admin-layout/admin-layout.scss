@@ -116,6 +116,45 @@
   flex-direction: column;
   gap: 0.35rem;
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.admin-layout__sidebar-footer {
+  margin-block-start: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-layout__sidebar-role {
+  font-size: 0.8125rem;
+  color: var(--admin-muted);
+  padding-inline: 0.25rem;
+}
+
+.admin-layout__sidebar-logout,
+.admin-layout__menu-btn {
+  font: inherit;
+  cursor: pointer;
+}
+
+.admin-layout__sidebar-logout {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--admin-text);
+  text-align: start;
+}
+
+.admin-layout__sidebar-logout:hover,
+.admin-layout__sidebar-logout:focus-visible {
+  background: #efeeeb;
+  outline: none;
 }
 
 .admin-layout__nav a {
@@ -140,27 +179,9 @@
   color: #fff;
 }
 
-.admin-layout__sidebar-logout,
-.admin-layout__header-logout,
 .admin-layout__menu-btn {
   font: inherit;
   cursor: pointer;
-}
-
-.admin-layout__sidebar-logout {
-  margin-top: auto;
-  width: 100%;
-  padding: 0.65rem 0.85rem;
-  border: 1px solid var(--admin-border);
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: var(--admin-text);
-  text-align: start;
-}
-
-.admin-layout__sidebar-logout:hover,
-.admin-layout__header-logout:hover {
-  background: #efeeeb;
 }
 
 .admin-layout__main {
@@ -265,17 +286,6 @@
   color: #fff;
 }
 
-.admin-layout__header-logout {
-  display: none;
-  padding: 0.45rem 0.85rem;
-  border: 1px solid var(--admin-border);
-  border-radius: var(--radius-md);
-  background: var(--admin-surface-elevated);
-  color: var(--admin-text);
-  font-size: 0.8125rem;
-  font-weight: 600;
-}
-
 .admin-layout__content {
   flex: 1;
   min-width: 0;
@@ -284,8 +294,7 @@
 }
 
 @media (min-width: 48rem) {
-  .admin-layout__role-badge,
-  .admin-layout__header-logout {
+  .admin-layout__role-badge {
     display: inline-flex;
   }
 }

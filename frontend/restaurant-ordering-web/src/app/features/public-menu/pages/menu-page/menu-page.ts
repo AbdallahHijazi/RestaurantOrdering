@@ -106,6 +106,18 @@ export class MenuPage {
     () => this.cartOpen() || this.checkoutOpen() || this.confirmationOpen(),
   );
 
+  protected readonly menuAccentColor = computed(() =>
+    this.themeService.sanitizeAccentColor(this.menuData()?.restaurant.primaryAccentColor),
+  );
+
+  protected readonly menuAccentStrongColor = computed(
+    () => `color-mix(in srgb, ${this.menuAccentColor()} 82%, black)`,
+  );
+
+  protected readonly menuAccentSoftColor = computed(
+    () => `color-mix(in srgb, ${this.menuAccentColor()} 18%, white)`,
+  );
+
   protected readonly filteredItems = computed(() => {
     const data = this.menuData();
     const categoryId = this.activeCategoryId();

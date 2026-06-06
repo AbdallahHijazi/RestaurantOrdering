@@ -15,7 +15,12 @@
     (retry)="reload()"
   />
 } @else if (menuData(); as data) {
-  <div class="menu-page">
+  <div
+    class="menu-page"
+    [style.--restaurant-accent]="menuAccentColor()"
+    [style.--restaurant-accent-strong]="menuAccentStrongColor()"
+    [style.--restaurant-accent-soft]="menuAccentSoftColor()"
+  >
     <header class="menu-page__header">
       <div class="menu-page__header-inner">
         <div class="menu-page__brand">

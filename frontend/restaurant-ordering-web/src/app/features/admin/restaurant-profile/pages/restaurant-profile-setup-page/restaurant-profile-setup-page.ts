@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, map, of, switchMap, tap, throwError, type Observable } from 'rxjs';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
@@ -22,7 +23,7 @@ import { LocaleService, type SupportedLocale } from '../../../../../core/localiz
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { RestaurantLivePreview } from '../../components/restaurant-live-preview/restaurant-live-preview';
 import { AdminBrandingService } from '../../../../../core/layouts/admin-layout/admin-branding.service';
-import { RestaurantProfileApiService } from '../../data-access/restaurant-profile-api';
+import { RestaurantProfileApiService, type BrandingSaveError } from '../../data-access/restaurant-profile-api';
 import {
   createSettingsSnapshot,
   isCurrencyCodeValid,
@@ -33,7 +34,11 @@ import {
   normalizeSlugInput,
   revokeImagePreviewUrl,
   SLUG_PATTERN,
+  validateImageFile,
 } from '../../data-access/image-preview.util';
+import { resolveApiAssetUrl } from '../../../../../core/config/resolve-api-asset-url';
+import type { UploadedMediaFile } from '../../../data-access/admin-menu.models';
+import type { RestaurantApiDto } from '../../../../public-menu/data-access/public-menu.dto';
 import {
   PublicMenuApiService,
   type PublicMenuLoadError,
@@ -51,6 +56,10 @@ import type {
 } from '../../models/restaurant-profile.models';
 
 type PageLoadState = 'loading' | 'ready' | 'settings-error' | 'demo';
+type ProfileSavePhase = 'idle' | 'uploading-logo' | 'uploading-cover' | 'saving';
+type WorkspaceTab = 'identity' | 'localization' | 'contact' | 'delivery';
+
+const WORKSPACE_TABS: WorkspaceTab[] = ['identity', 'localization', 'contact', 'delivery'];
 
 const CURRENCY_CODE_PATTERN = /^[A-Za-z]{3}$/;
 
@@ -110,14 +119,16 @@ export class RestaurantProfileSetupPage {
   protected readonly settingsSaveNotice = signal<string | null>(null);
   protected readonly savingProfile = signal(false);
   protected readonly savingSettings = signal(false);
+  protected readonly profileSavePhase = signal<ProfileSavePhase>('idle');
   protected readonly logoFileName = signal<string | null>(null);
   protected readonly coverFileName = signal<string | null>(null);
-  protected readonly logoPreviewUrl = signal<string | null>(
-    MOCK_PUBLIC_MENU.restaurant.logoUrl ?? null,
-  );
-  protected readonly coverPreviewUrl = signal<string | null>(
-    MOCK_PUBLIC_MENU.restaurant.coverImageUrl ?? null,
-  );
+  protected readonly logoPreviewUrl = signal<string | null>(null);
+  protected readonly coverPreviewUrl = signal<string | null>(null);
+  private readonly pendingLogoFile = signal<File | null>(null);
+  private readonly pendingCoverFile = signal<File | null>(null);
+  private readonly uploadedLogoMedia = signal<UploadedMediaFile | null>(null);
+  private readonly uploadedCoverMedia = signal<UploadedMediaFile | null>(null);
+  private readonly persistedLogoFileId = signal<string | null>(null);
 
   private readonly settingsSnapshot = signal<RestaurantSettingsSnapshot>({
     workingHoursJson: null,
@@ -129,6 +140,25 @@ export class RestaurantProfileSetupPage {
   protected readonly previewMenuCategories = signal<PublicMenuCategory[]>([]);
   protected readonly previewMenuItems = signal<PublicMenuItem[]>([]);
 
+  protected readonly activeWorkspaceTab = signal<WorkspaceTab>('identity');
+  /** No backend publish endpoint exists in the current API surface. */
+  protected readonly publishAvailable = false;
+
+  protected readonly hasUnsavedProfileChanges = computed(() => {
+    this.formRevision();
+    return (
+      this.form.dirty ||
+      this.pendingLogoFile() !== null ||
+      this.pendingCoverFile() !== null ||
+      this.uploadedLogoMedia() !== null ||
+      this.uploadedCoverMedia() !== null
+    );
+  });
+
+  protected readonly previewSyncStatus = computed<'synced' | 'unsaved'>(() =>
+    this.hasUnsavedProfileChanges() ? 'unsaved' : 'synced',
+  );
+
   protected readonly canSaveSettings = computed(
     () => this.pageState() === 'ready' || this.pageState() === 'demo',
   );
@@ -136,6 +166,75 @@ export class RestaurantProfileSetupPage {
   protected readonly settingsLoadFailed = computed(
     () => this.pageState() === 'settings-error',
   );
+
+  protected readonly workspaceTabs = WORKSPACE_TABS;
+
+  protected workspaceTabLabel(tab: WorkspaceTab): string {
+    switch (tab) {
+      case 'identity':
+        return this.localeService.uiText('profileTabIdentity');
+      case 'localization':
+        return this.localeService.uiText('profileTabLocalization');
+      case 'contact':
+        return this.localeService.uiText('profileTabContact');
+      case 'delivery':
+        return this.localeService.uiText('profileTabDelivery');
+    }
+  }
+
+  protected workspaceTabPanelId(tab: WorkspaceTab): string {
+    return `profile-tabpanel-${tab}`;
+  }
+
+  protected selectWorkspaceTab(tab: WorkspaceTab): void {
+    this.activeWorkspaceTab.set(tab);
+  }
+
+  protected onWorkspaceTabKeydown(event: KeyboardEvent, tab: WorkspaceTab, index: number): void {
+    const tabs = WORKSPACE_TABS;
+    let nextIndex = index;
+
+    switch (event.key) {
+      case 'ArrowRight': {
+        const step = this.localeService.direction() === 'rtl' ? -1 : 1;
+        nextIndex = (index + step + tabs.length) % tabs.length;
+        break;
+      }
+      case 'ArrowLeft': {
+        const step = this.localeService.direction() === 'rtl' ? 1 : -1;
+        nextIndex = (index + step + tabs.length) % tabs.length;
+        break;
+      }
+      case 'Home':
+        nextIndex = 0;
+        break;
+      case 'End':
+        nextIndex = tabs.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    this.selectWorkspaceTab(tabs[nextIndex]);
+    const nextTabId = `profile-tab-${tabs[nextIndex]}`;
+    document.getElementById(nextTabId)?.focus();
+  }
+
+  protected onAccentColorPicked(event: Event): void {
+    const value = (event.target as HTMLInputElement).value.toUpperCase();
+    this.form.controls.primaryAccentColor.setValue(value);
+    this.form.controls.primaryAccentColor.markAsDirty();
+  }
+
+  protected accentColorPickerValue(): string {
+    return this.themeService.sanitizeAccentColor(this.form.controls.primaryAccentColor.value);
+  }
+
+  protected isUploadingBranding(): boolean {
+    const phase = this.profileSavePhase();
+    return phase === 'uploading-logo' || phase === 'uploading-cover';
+  }
 
   /**
    * Backend validation and ownership enforcement are required when wiring real saves.
@@ -253,6 +352,7 @@ export class RestaurantProfileSetupPage {
       const data = this.previewData();
       this.branding.updateBranding({
         logoUrl: data.logoUrl ?? null,
+        coverImageUrl: data.coverImageUrl ?? null,
         nameAr: data.nameAr,
         nameEn: data.nameEn ?? null,
       });
@@ -289,7 +389,7 @@ export class RestaurantProfileSetupPage {
   }
 
   protected onLogoSelected(event: Event): void {
-    this.handleImageSelection(event, (url, fileName) => {
+    this.handleImageSelection(event, 'logo', (url, fileName) => {
       revokeImagePreviewUrl(this.logoPreviewUrl());
       this.logoPreviewUrl.set(url);
       this.logoFileName.set(fileName);
@@ -297,11 +397,26 @@ export class RestaurantProfileSetupPage {
   }
 
   protected onCoverSelected(event: Event): void {
-    this.handleImageSelection(event, (url, fileName) => {
+    this.handleImageSelection(event, 'cover', (url, fileName) => {
       revokeImagePreviewUrl(this.coverPreviewUrl());
       this.coverPreviewUrl.set(url);
       this.coverFileName.set(fileName);
     });
+  }
+
+  protected profileSaveLabel(): string {
+    switch (this.profileSavePhase()) {
+      case 'uploading-logo':
+        return this.localeService.uiText('profileUploadingLogo');
+      case 'uploading-cover':
+        return this.localeService.uiText('profileUploadingCoverImage');
+      case 'saving':
+        return this.localeService.uiText('profileSavingRestaurant');
+      default:
+        return this.savingProfile()
+          ? this.localeService.uiText('profileSavingRestaurant')
+          : this.localeService.uiText('profileSaveRestaurant');
+    }
   }
 
   protected chooseImageLabel(): string {
@@ -353,29 +468,181 @@ export class RestaurantProfileSetupPage {
     }
 
     const payload = this.buildFormValue();
+    const restaurantId = this.authService.restaurantId();
+    if (!restaurantId) {
+      this.profileApi
+        .saveRestaurantProfile(payload)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.profileSaveNotice.set(this.localeService.uiText('demoSaveNotice'));
+          },
+        });
+      return;
+    }
+
     this.savingProfile.set(true);
+    this.profileSavePhase.set(
+      this.pendingLogoFile() ? 'uploading-logo' : this.pendingCoverFile() ? 'uploading-cover' : 'saving',
+    );
     this.profileSaveNotice.set(null);
 
-    this.profileApi
-      .saveRestaurantProfile(payload)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+    this.ensureLogoUploaded(restaurantId)
+      .pipe(
+        switchMap((uploadedLogo) =>
+          this.ensureCoverUploaded(restaurantId).pipe(
+            map((uploadedCover) => ({ uploadedLogo, uploadedCover })),
+          ),
+        ),
+        switchMap(({ uploadedLogo, uploadedCover }) => {
+          this.profileSavePhase.set('saving');
+          return this.profileApi.updateRestaurant(
+            restaurantId,
+            this.profileApi.toUpdateRestaurantRequest(payload),
+          ).pipe(
+            switchMap((restaurant) => {
+              const logoLink$ = uploadedLogo
+                ? this.profileApi.setRestaurantLogo(restaurantId, uploadedLogo.id)
+                : of(restaurant);
+              return logoLink$.pipe(
+                switchMap((afterLogo) => {
+                  if (!uploadedCover) {
+                    return of({ restaurant: afterLogo, uploadedLogo, uploadedCover });
+                  }
+
+                  return this.profileApi
+                    .setRestaurantCoverImage(restaurantId, uploadedCover.id)
+                    .pipe(
+                      map((afterCover) => ({
+                        restaurant: afterCover,
+                        uploadedLogo,
+                        uploadedCover,
+                      })),
+                    );
+                }),
+              );
+            }),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
         next: (result) => {
-          this.savingProfile.set(false);
-          this.profileSaveNotice.set(
-            result.mode === 'api'
-              ? this.localeService.uiText('profileRestaurantSaved')
-              : this.localeService.uiText('demoSaveNotice'),
-          );
-
-          if (result.mode === 'api') {
-            this.catalogSlug.set(payload.slug);
-            this.loadPreviewMenu(payload.slug);
+          if (result.uploadedLogo) {
+            this.uploadedLogoMedia.set(result.uploadedLogo);
+            this.pendingLogoFile.set(null);
           }
+          if (result.uploadedCover) {
+            this.uploadedCoverMedia.set(result.uploadedCover);
+            this.pendingCoverFile.set(null);
+          }
+
+          this.applyBrandingAfterSave(result);
+          this.catalogSlug.set(payload.slug);
+          this.savingProfile.set(false);
+          this.profileSavePhase.set('idle');
+          this.form.markAsPristine();
+          this.uploadedLogoMedia.set(null);
+          this.uploadedCoverMedia.set(null);
+          this.profileSaveNotice.set(this.localeService.uiText('profileRestaurantSaved'));
+          this.reloadProfileAfterSave(payload.slug);
+        },
+        error: (error: { type?: BrandingSaveError }) => {
+          this.savingProfile.set(false);
+          this.profileSavePhase.set('idle');
+          this.profileSaveNotice.set(this.brandingErrorMessage(error?.type));
+        },
+      });
+  }
+
+  private ensureLogoUploaded(restaurantId: string): Observable<UploadedMediaFile | null> {
+    const cached = this.uploadedLogoMedia();
+    if (cached) {
+      return of(cached);
+    }
+
+    const pending = this.pendingLogoFile();
+    if (!pending) {
+      return of(null);
+    }
+
+    this.profileSavePhase.set('uploading-logo');
+    return this.profileApi.uploadMedia(restaurantId, pending).pipe(
+      tap((media) => this.uploadedLogoMedia.set(media)),
+      catchError(() => throwError(() => ({ type: 'logo-upload' satisfies BrandingSaveError }))),
+    );
+  }
+
+  private ensureCoverUploaded(restaurantId: string): Observable<UploadedMediaFile | null> {
+    const cached = this.uploadedCoverMedia();
+    if (cached) {
+      return of(cached);
+    }
+
+    const pending = this.pendingCoverFile();
+    if (!pending) {
+      return of(null);
+    }
+
+    this.profileSavePhase.set('uploading-cover');
+    return this.profileApi.uploadMedia(restaurantId, pending).pipe(
+      tap((media) => this.uploadedCoverMedia.set(media)),
+      catchError(() => throwError(() => ({ type: 'cover-upload' satisfies BrandingSaveError }))),
+    );
+  }
+
+  private brandingErrorMessage(type?: BrandingSaveError): string {
+    switch (type) {
+      case 'logo-upload':
+        return this.localeService.uiText('profileLogoUploadFailed');
+      case 'cover-upload':
+        return this.localeService.uiText('profileCoverUploadFailed');
+      default:
+        return this.localeService.uiText('adminMenuErrorGeneric');
+    }
+  }
+
+  private applyBrandingAfterSave(
+    result: {
+      restaurant: RestaurantApiDto;
+      uploadedLogo: UploadedMediaFile | null;
+      uploadedCover: UploadedMediaFile | null;
+    },
+  ): void {
+    this.applyBrandingFromRestaurant(result.restaurant);
+  }
+
+  private reloadProfileAfterSave(slug: string): void {
+    const restaurantId = this.authService.restaurantId();
+    if (!restaurantId) {
+      return;
+    }
+
+    this.profileApi
+      .loadProfile(restaurantId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ restaurant, settings }) => {
+          this.form.patchValue({
+            nameAr: restaurant.nameAr,
+            nameEn: restaurant.nameEn ?? '',
+            descriptionAr: restaurant.descriptionAr ?? '',
+            descriptionEn: restaurant.descriptionEn ?? '',
+            slug: restaurant.slug,
+            phoneNumber: restaurant.phoneNumber,
+            whatsAppNumber: restaurant.whatsAppNumber ?? '',
+            addressAr: restaurant.addressAr ?? '',
+            addressEn: restaurant.addressEn ?? '',
+            ...mapSettingsDtoToFormPatch(settings),
+          });
+          this.settingsSnapshot.set(createSettingsSnapshot(settings));
+          this.applyBrandingFromRestaurant(restaurant);
+          this.form.markAsPristine();
+          this.loadPreviewMenu(slug);
         },
         error: () => {
-          this.savingProfile.set(false);
-          this.profileSaveNotice.set(this.localeService.uiText('adminMenuErrorGeneric'));
+          this.profileSaveNotice.set(this.localeService.uiText('profileReloadFailed'));
+          this.loadPreviewMenu(slug);
         },
       });
   }
@@ -434,6 +701,8 @@ export class RestaurantProfileSetupPage {
     const restaurantId = this.authService.restaurantId();
     if (!restaurantId) {
       this.applyMockOrderingDefaults();
+      this.logoPreviewUrl.set(MOCK_PUBLIC_MENU.restaurant.logoUrl ?? null);
+      this.coverPreviewUrl.set(MOCK_PUBLIC_MENU.restaurant.coverImageUrl ?? null);
       this.pageState.set('demo');
       this.applyDemoPreviewCatalog();
       return;
@@ -459,7 +728,9 @@ export class RestaurantProfileSetupPage {
           });
           this.settingsSnapshot.set(createSettingsSnapshot(settings));
           this.catalogSlug.set(restaurant.slug);
+          this.applyBrandingFromRestaurant(restaurant);
           this.pageState.set('ready');
+          this.form.markAsPristine();
           this.loadPreviewMenu(restaurant.slug);
         },
         error: () => {
@@ -551,28 +822,64 @@ export class RestaurantProfileSetupPage {
     };
   }
 
+  private applyBrandingFromRestaurant(restaurant: RestaurantApiDto): void {
+    this.persistedLogoFileId.set(restaurant.logoFileId ?? null);
+
+    if (!this.pendingLogoFile()) {
+      revokeImagePreviewUrl(this.logoPreviewUrl());
+      this.logoPreviewUrl.set(resolveApiAssetUrl(restaurant.logoUrl ?? null));
+    }
+
+    if (!this.pendingCoverFile()) {
+      revokeImagePreviewUrl(this.coverPreviewUrl());
+      this.coverPreviewUrl.set(resolveApiAssetUrl(restaurant.coverImageUrl ?? null));
+    }
+
+    if (restaurant.accentColor) {
+      this.form.patchValue({ primaryAccentColor: restaurant.accentColor });
+    }
+  }
+
   private handleImageSelection(
     event: Event,
+    kind: 'logo' | 'cover',
     assign: (url: string, fileName: string) => void,
   ): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    const previewUrl = file ? createImagePreviewUrl(file) : null;
 
-    if (file && !previewUrl) {
+    if (!file) {
+      input.value = '';
+      return;
+    }
+
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
       this.profileSaveNotice.set(
-        this.localeService.locale() === 'ar'
-          ? 'نوع الملف أو حجمه غير مدعوم.'
-          : 'Unsupported file type or size.',
+        validation.reason === 'size'
+          ? this.localeService.uiText('profileImageTooLarge')
+          : this.localeService.uiText('profileUnsupportedImageType'),
       );
       input.value = '';
       return;
     }
 
-    if (previewUrl && file) {
-      assign(previewUrl, file.name);
+    const previewUrl = createImagePreviewUrl(file);
+    if (!previewUrl) {
+      this.profileSaveNotice.set(this.localeService.uiText('profileUnsupportedImageType'));
+      input.value = '';
+      return;
     }
 
+    if (kind === 'logo') {
+      this.pendingLogoFile.set(file);
+      this.uploadedLogoMedia.set(null);
+    } else {
+      this.pendingCoverFile.set(file);
+      this.uploadedCoverMedia.set(null);
+    }
+
+    assign(previewUrl, file.name);
     input.value = '';
   }
 }
