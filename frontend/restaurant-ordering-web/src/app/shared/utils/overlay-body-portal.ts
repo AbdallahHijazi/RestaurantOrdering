@@ -14,6 +14,8 @@ export function attachElementToBody(element: HTMLElement): () => void {
     if (anchor.parentNode) {
       anchor.parentNode.insertBefore(element, anchor);
       anchor.remove();
+    } else if (element.parentNode === document.body) {
+      element.remove();
     }
   };
 }

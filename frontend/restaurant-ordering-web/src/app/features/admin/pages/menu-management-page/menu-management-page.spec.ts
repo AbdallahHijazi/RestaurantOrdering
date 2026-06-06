@@ -46,10 +46,63 @@ describe('MenuManagementPage', () => {
     session.clearSession();
   });
 
-  it('shows category item counts', () => {
+  it('renders internal page header without top bar selectors', () => {
+    expect(fixture.nativeElement.querySelector('[data-testid="menu-management-page"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-console-header"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-testid="admin-sidebar"]')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain(
+      TestBed.inject(LocaleService).uiText('adminMenuPageTitle'),
+    );
+  });
+
+  it('shows search input and add meal button', () => {
+    expect(fixture.nativeElement.querySelector('[data-testid="menu-search-input"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="menu-add-item-button"]')).toBeTruthy();
+  });
+
+  it('uses terracotta toolbar add button with existing create flow', () => {
+    const addButton = fixture.nativeElement.querySelector(
+      '[data-testid="menu-add-item-button"]',
+    ) as HTMLButtonElement;
+    expect(addButton.closest('.menu-management-toolbar')).toBeTruthy();
+    expect(getComputedStyle(addButton).color).toBe('rgb(255, 255, 255)');
+    addButton.click();
+    fixture.detectChanges();
+    expect(document.body.querySelector('[data-testid="menu-modal"]')).toBeTruthy();
+  });
+
+  it('centers plus icon inside add meal placeholder circle', () => {
+    const icon = fixture.nativeElement.querySelector(
+      '.menu-management-add-card__icon',
+    ) as HTMLElement;
+    expect(icon).toBeTruthy();
+    expect(getComputedStyle(icon).display).toBe('inline-flex');
+    expect(getComputedStyle(icon).alignItems).toBe('center');
+    expect(getComputedStyle(icon).justifyContent).toBe('center');
+    expect(getComputedStyle(icon).borderRadius).toBe('50%');
+  });
+
+  it('shows category item counts in category strip', () => {
     expect(
       fixture.nativeElement.querySelector('[data-testid="menu-category-count"]')?.textContent,
     ).toContain('1');
+    expect(fixture.nativeElement.querySelector('[data-testid="menu-category-strip"]')).toBeTruthy();
+  });
+
+  it('filters meals locally when searching', () => {
+    const searchInput = fixture.nativeElement.querySelector(
+      '[data-testid="menu-search-input"]',
+    ) as HTMLInputElement;
+    searchInput.value = 'nomatch';
+    searchInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="menu-items-filtered-empty"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector(`[data-testid="menu-item-${ITEM_ID}"]`)).toBeNull();
+  });
+
+  it('shows meals count label based on filtered results', () => {
+    expect(fixture.nativeElement.querySelector('[data-testid="menu-meals-count"]')?.textContent).toContain('1');
   });
 
   it('opens add category modal and creates a category', () => {
@@ -86,6 +139,123 @@ describe('MenuManagementPage', () => {
     expect(document.body.querySelector('[data-testid="menu-delete-category-warning"]')).toBeTruthy();
   });
 
+  it('closes delete category modal on dismiss without request', () => {
+    fixture.nativeElement
+      .querySelector(`[data-testid="menu-delete-category-${CATEGORY_ID}"]`)
+      .click();
+    fixture.detectChanges();
+
+    const page = fixture.componentInstance as unknown as { dismissModal(): void };
+    page.dismissModal();
+    fixture.detectChanges();
+
+    expect(document.body.querySelector('[data-testid="menu-modal"]')).toBeNull();
+    httpMock.expectNone(
+      (request) =>
+        request.method === 'DELETE' &&
+        request.url ===
+          `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/categories/${CATEGORY_ID}`,
+    );
+  });
+
+  it('closes delete category modal when close button is clicked', () => {
+    fixture.nativeElement
+      .querySelector(`[data-testid="menu-delete-category-${CATEGORY_ID}"]`)
+      .click();
+    fixture.detectChanges();
+
+    const page = fixture.componentInstance as unknown as { dismissModal(): void };
+    page.dismissModal();
+    fixture.detectChanges();
+
+    expect(document.body.querySelector('[data-testid="menu-modal"]')).toBeNull();
+  });
+
+  it('deletes category and closes modal on confirm', () => {
+    fixture.nativeElement
+      .querySelector(`[data-testid="menu-delete-category-${CATEGORY_ID}"]`)
+      .click();
+    fixture.detectChanges();
+
+    (document.body.querySelector('[data-testid="menu-confirm-delete-category"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/categories/${CATEGORY_ID}`,
+    );
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+    fixture.detectChanges();
+
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/menu-items`)
+      .flush([]);
+    fixture.detectChanges();
+
+    expect(document.body.querySelector('[data-testid="menu-modal"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-testid="menu-success-message"]')).toBeTruthy();
+  });
+
+  it('resets category save loading state after successful update', () => {
+    fixture.nativeElement.querySelector(`[data-testid="menu-edit-category-${CATEGORY_ID}"]`).click();
+    fixture.detectChanges();
+
+    setInputValue('input[formcontrolname="nameAr"]', 'فئة محدثة');
+    fixture.debugElement.query(By.css('form')).triggerEventHandler('submit', new Event('submit'));
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/categories/${CATEGORY_ID}`,
+    );
+    expect(req.request.method).toBe('PUT');
+    req.flush({ ...sampleCategory(), nameAr: 'فئة محدثة' });
+    fixture.detectChanges();
+
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/menu-items`)
+      .flush([sampleItem()]);
+    fixture.detectChanges();
+
+    expect(document.body.querySelector('[data-testid="menu-modal"]')).toBeNull();
+  });
+
+  it('resets category save loading state after update error', () => {
+    fixture.nativeElement.querySelector(`[data-testid="menu-edit-category-${CATEGORY_ID}"]`).click();
+    fixture.detectChanges();
+
+    setInputValue('input[formcontrolname="nameAr"]', 'فئة محدثة');
+    fixture.debugElement.query(By.css('form')).triggerEventHandler('submit', new Event('submit'));
+    fixture.detectChanges();
+
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/categories/${CATEGORY_ID}`)
+      .flush('Bad Request', { status: 400, statusText: 'Bad Request' });
+    fixture.detectChanges();
+
+    const saveButton = document.body.querySelector('.button-primary') as HTMLButtonElement;
+    expect(saveButton.disabled).toBe(false);
+    expect(saveButton.textContent).toContain(
+      TestBed.inject(LocaleService).uiText('adminMenuSave'),
+    );
+  });
+
+  it('keeps search and add meal on one toolbar row on desktop', () => {
+    const toolbar = fixture.nativeElement.querySelector('.menu-management-toolbar') as HTMLElement;
+    expect(getComputedStyle(toolbar).flexWrap).toBe('nowrap');
+  });
+
+  it('shows discounted price prominently with original price struck through', () => {
+    reloadItems([{ ...sampleItem(), price: 10.3, discountPrice: 0.1 }]);
+    const priceBlock = fixture.nativeElement.querySelector(
+      `[data-testid="menu-item-${ITEM_ID}"] .meal-card__price`,
+    );
+    expect(priceBlock.querySelector('strong')?.textContent?.trim()).toContain('0.10');
+    expect(priceBlock.querySelector('.meal-card__price-original')?.textContent?.trim()).toContain('10.30');
+    expect(fixture.nativeElement.textContent).not.toContain(
+      `${TestBed.inject(LocaleService).uiText('adminMenuDiscountLabel')} 0.10`,
+    );
+  });
+
   it('renders menu item image from resolved ImageUrl', () => {
     const img: HTMLImageElement | null = fixture.nativeElement.querySelector(
       `[data-testid="menu-item-${ITEM_ID}"] img`,
@@ -97,7 +267,7 @@ describe('MenuManagementPage', () => {
     reloadItems([{ ...sampleItem(), imageUrl: null, imageFileId: null }]);
     expect(
       fixture.nativeElement.querySelector(
-        `[data-testid="menu-item-${ITEM_ID}"] .menu-page__item-fallback`,
+        `[data-testid="menu-item-${ITEM_ID}"] .meal-card__fallback`,
       ),
     ).toBeTruthy();
   });
@@ -129,10 +299,38 @@ describe('MenuManagementPage', () => {
     );
   });
 
+  it('does not show discount label when discount is zero', () => {
+    reloadItems([{ ...sampleItem(), discountPrice: 0 }]);
+    expect(
+      fixture.nativeElement.querySelector(`[data-testid="menu-item-${ITEM_ID}"] .meal-card__price-original`),
+    ).toBeNull();
+  });
+
+  it('centers meal code and category badge content', () => {
+    const code = fixture.nativeElement.querySelector(
+      `[data-testid="menu-item-${ITEM_ID}"] .meal-card__code`,
+    ) as HTMLElement;
+    const badge = fixture.nativeElement.querySelector(
+      `[data-testid="menu-item-${ITEM_ID}"] .meal-card__badge`,
+    ) as HTMLElement;
+    expect(getComputedStyle(code).display).toBe('inline-flex');
+    expect(getComputedStyle(code).alignItems).toBe('center');
+    expect(getComputedStyle(code).justifyContent).toBe('center');
+    expect(getComputedStyle(badge).display).toBe('inline-flex');
+    expect(getComputedStyle(badge).alignItems).toBe('center');
+    expect(getComputedStyle(badge).justifyContent).toBe('center');
+  });
+
   it('falls back to Arabic name when English name is missing', () => {
     TestBed.inject(LocaleService).setLocale('en');
     reloadItems([{ ...sampleItem(), nameEn: null }]);
     expect(fixture.nativeElement.textContent).toContain('صنف');
+  });
+
+  it('opens add meal flow from placeholder card', () => {
+    fixture.nativeElement.querySelector('[data-testid="menu-add-item-placeholder"]').click();
+    fixture.detectChanges();
+    expect(document.body.querySelector('[data-testid="menu-modal"]')).toBeTruthy();
   });
 
   it('uploads image on submit then saves menu item with imageFileId', () => {
@@ -177,10 +375,10 @@ describe('MenuManagementPage', () => {
     );
   });
 
-  it('includes mobile layout hooks without broken DOM', () => {
-    expect(fixture.nativeElement.querySelector('[data-testid="menu-categories-panel"]')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('[data-testid="menu-items-panel"]')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('.menu-page__layout')).toBeTruthy();
+  it('uses responsive meal grid structure', () => {
+    expect(fixture.nativeElement.querySelector('[data-testid="menu-meals-section"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="menu-items-grid"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.menu-management-grid')).toBeTruthy();
   });
 
   function flushInitialRequests(): void {
@@ -195,7 +393,7 @@ describe('MenuManagementPage', () => {
 
   function reloadItems(items: AdminMenuItem[]): void {
     fixture.nativeElement
-      .querySelector(`[data-testid="menu-category-${CATEGORY_ID}"] .menu-page__category-btn`)
+      .querySelector(`[data-testid="menu-category-${CATEGORY_ID}"] .menu-management-category-pill`)
       .click();
     fixture.detectChanges();
     httpMock
@@ -209,7 +407,7 @@ describe('MenuManagementPage', () => {
 
   function reloadItemsError(status: number): void {
     fixture.nativeElement
-      .querySelector(`[data-testid="menu-category-${CATEGORY_ID}"] .menu-page__category-btn`)
+      .querySelector(`[data-testid="menu-category-${CATEGORY_ID}"] .menu-management-category-pill`)
       .click();
     fixture.detectChanges();
     httpMock

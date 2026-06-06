@@ -6,6 +6,7 @@ import {
   HostListener,
   inject,
   input,
+  OnDestroy,
   output,
   PLATFORM_ID,
 } from '@angular/core';
@@ -19,7 +20,7 @@ import { attachElementToBody } from '../../utils/overlay-body-portal';
     '[class.modal-shell-host--open]': 'open()',
   },
 })
-export class ModalShell {
+export class ModalShell implements OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private triggerElement: HTMLElement | null = null;
@@ -62,6 +63,9 @@ export class ModalShell {
         document.body.classList.remove('order-modal-scroll-lock');
         this.detachFromBody?.();
         this.detachFromBody = null;
+        if (this.elementRef.nativeElement.parentNode === document.body) {
+          this.elementRef.nativeElement.remove();
+        }
       });
     });
   }
@@ -82,6 +86,15 @@ export class ModalShell {
   protected onBackdropClick(event: MouseEvent): void {
     if (event.target === event.currentTarget && !this.blockCloseWhileBusy()) {
       this.closed.emit();
+    }
+  }
+
+  ngOnDestroy(): void {
+    document.body.classList.remove('order-modal-scroll-lock');
+    this.detachFromBody?.();
+    this.detachFromBody = null;
+    if (this.elementRef.nativeElement.parentNode === document.body) {
+      this.elementRef.nativeElement.remove();
     }
   }
 }

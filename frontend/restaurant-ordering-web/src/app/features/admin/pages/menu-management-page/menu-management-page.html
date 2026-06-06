@@ -1,141 +1,174 @@
-<section class="menu-page" data-testid="menu-management-page">
-  <header class="menu-page__header">
-    <div class="menu-page__header-text">
-      <h2>{{ locale.uiText('adminMenuPageTitle') }}</h2>
-      <p>{{ locale.uiText('adminMenuPageLead') }}</p>
-    </div>
-    <button
-      type="button"
-      class="menu-page__primary-btn"
-      data-testid="menu-add-item-button"
-      [disabled]="pageState() !== 'ready'"
-      (click)="openCreateItem()"
-    >
-      {{ locale.uiText('adminMenuAddItem') }}
-    </button>
-  </header>
-
-  @if (successMessage()) {
-    <p class="menu-page__success" role="status" data-testid="menu-success-message">
-      {{ successMessage() }}
-    </p>
-  }
-
-  @switch (pageState()) {
-    @case ('loading') {
-      <div class="menu-page__skeleton" aria-busy="true" data-testid="menu-loading">
-        <div class="menu-page__skeleton-panel"></div>
-        <div class="menu-page__skeleton-panel"></div>
+<section class="menu-management-page" data-testid="menu-management-page">
+  <div class="menu-management-shell">
+    <header class="menu-management-hero">
+      <div class="menu-management-title">
+        <h1>{{ locale.uiText('adminMenuPageTitle') }}</h1>
+        <p>{{ locale.uiText('adminMenuPageLead') }}</p>
       </div>
-    }
 
-    @case ('missing-context') {
-      <div class="menu-page__state menu-page__state--error" data-testid="menu-missing-context">
-        <h3>{{ locale.uiText('adminMenuMissingContextTitle') }}</h3>
-        <p>{{ locale.uiText('adminMenuMissingContextDescription') }}</p>
-      </div>
-    }
+      <div class="menu-management-toolbar">
+        <label class="menu-management-search">
+          <span class="menu-management-search__label">{{ locale.uiText('adminMenuSearchLabel') }}</span>
+          <svg class="menu-management-search__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              fill="currentColor"
+              d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"
+            />
+          </svg>
+          <input
+            type="search"
+            data-testid="menu-search-input"
+            [value]="searchQuery()"
+            [placeholder]="locale.uiText('adminMenuSearchPlaceholder')"
+            [attr.aria-label]="locale.uiText('adminMenuSearchLabel')"
+            autocomplete="off"
+            (input)="onSearchInput($event)"
+          />
+        </label>
 
-    @case ('error') {
-      <div class="menu-page__state menu-page__state--error" data-testid="menu-error-state">
-        <h3>{{ locale.uiText('adminMenuListErrorTitle') }}</h3>
-        <p>{{ listErrorMessage() }}</p>
-        <button type="button" class="menu-page__secondary-btn" (click)="loadCategories()">
-          {{ locale.uiText('adminMenuRetry') }}
+        <button
+          type="button"
+          class="menu-management-primary"
+          data-testid="menu-add-item-button"
+          [disabled]="pageState() !== 'ready'"
+          (click)="openCreateItem()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2Z" />
+          </svg>
+          {{ locale.uiText('adminMenuAddItem') }}
         </button>
       </div>
+    </header>
+
+    @if (successMessage()) {
+      <p class="menu-management-success" role="status" data-testid="menu-success-message">
+        {{ successMessage() }}
+      </p>
     }
 
-    @case ('ready') {
-      <div class="menu-page__layout">
-        <aside class="menu-page__categories" data-testid="menu-categories-panel">
-          <div class="menu-page__panel-head">
-            <h3>{{ locale.uiText('adminMenuCategoriesHeading') }}</h3>
-            <button
-              type="button"
-              class="menu-page__secondary-btn"
-              data-testid="menu-add-category-button"
-              (click)="openCreateCategory()"
-            >
-              {{ locale.uiText('adminMenuAddCategory') }}
-            </button>
-          </div>
+    @switch (pageState()) {
+      @case ('loading') {
+        <div class="menu-management-state" aria-busy="true" data-testid="menu-loading">
+          {{ locale.uiText('adminMenuLoading') }}
+        </div>
+      }
 
-          <div class="menu-page__category-list" role="list">
-            <button
-              type="button"
-              class="menu-page__category-btn"
-              role="listitem"
-              data-testid="menu-category-all"
-              [class.is-active]="selectedCategoryId() === allItemsFilter"
-              (click)="selectCategory(allItemsFilter)"
-            >
-              <span>{{ locale.uiText('adminMenuAllItems') }}</span>
-            </button>
+      @case ('missing-context') {
+        <div class="menu-management-state menu-management-state--error" data-testid="menu-missing-context">
+          <h2>{{ locale.uiText('adminMenuMissingContextTitle') }}</h2>
+          <p>{{ locale.uiText('adminMenuMissingContextDescription') }}</p>
+        </div>
+      }
 
-            @for (category of categories(); track category.id) {
-              <div
-                class="menu-page__category-row"
-                role="listitem"
-                [attr.data-testid]="'menu-category-' + category.id"
+      @case ('error') {
+        <div class="menu-management-state menu-management-state--error" data-testid="menu-error-state">
+          <h2>{{ locale.uiText('adminMenuListErrorTitle') }}</h2>
+          <p>{{ listErrorMessage() }}</p>
+          <button type="button" class="menu-management-secondary" (click)="loadCategories()">
+            {{ locale.uiText('adminMenuRetry') }}
+          </button>
+        </div>
+      }
+
+      @case ('ready') {
+        <section
+          class="menu-management-categories"
+          data-testid="menu-category-strip"
+          [attr.aria-label]="locale.uiText('adminMenuCategoriesHeading')"
+        >
+          <button
+            type="button"
+            class="menu-management-category-pill"
+            data-testid="menu-category-all"
+            [class.is-active]="selectedCategoryId() === allItemsFilter"
+            (click)="selectCategory(allItemsFilter)"
+          >
+            {{ locale.uiText('adminMenuAllItems') }}
+            <span>({{ allItemsCount() }})</span>
+          </button>
+
+          @for (category of categories(); track category.id) {
+            <div
+              class="menu-management-category-wrap"
+              [attr.data-testid]="'menu-category-' + category.id"
+            >
+              <button
+                type="button"
+                class="menu-management-category-pill"
+                [class.is-active]="selectedCategoryId() === category.id"
+                (click)="selectCategory(category.id)"
               >
+                {{ displayCategoryName(category) }}
+                <span data-testid="menu-category-count">({{ category.itemCount }})</span>
+              </button>
+              <div class="menu-management-category-manage">
                 <button
                   type="button"
-                  class="menu-page__category-btn"
-                  [class.is-active]="selectedCategoryId() === category.id"
-                  (click)="selectCategory(category.id)"
+                  class="menu-management-icon-btn"
+                  [attr.data-testid]="'menu-edit-category-' + category.id"
+                  [attr.aria-label]="locale.uiText('adminMenuEdit') + ' ' + displayCategoryName(category)"
+                  (click)="openEditCategory(category)"
                 >
-                  <span>{{ displayCategoryName(category) }}</span>
-                  <span class="menu-page__category-meta">
-                    <span data-testid="menu-category-count">{{ category.itemCount }}</span>
-                    ·
-                    {{
-                      category.isActive
-                        ? locale.uiText('adminMenuActive')
-                        : locale.uiText('adminMenuInactive')
-                    }}
-                  </span>
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path
+                      fill="currentColor"
+                      d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"
+                    />
+                  </svg>
                 </button>
-                <div class="menu-page__category-actions">
-                  <button
-                    type="button"
-                    class="menu-page__link-btn"
-                    [attr.data-testid]="'menu-edit-category-' + category.id"
-                    (click)="openEditCategory(category)"
-                  >
-                    {{ locale.uiText('adminMenuEdit') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="menu-page__link-btn menu-page__link-btn--danger"
-                    [attr.data-testid]="'menu-delete-category-' + category.id"
-                    (click)="openDeleteCategory(category)"
-                  >
-                    {{ locale.uiText('adminMenuDelete') }}
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  class="menu-management-icon-btn menu-management-icon-btn--danger"
+                  [attr.data-testid]="'menu-delete-category-' + category.id"
+                  [attr.aria-label]="locale.uiText('adminMenuDelete') + ' ' + displayCategoryName(category)"
+                  (click)="openDeleteCategory(category)"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path
+                      fill="currentColor"
+                      d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12ZM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4Z"
+                    />
+                  </svg>
+                </button>
               </div>
-            }
-          </div>
-        </aside>
+            </div>
+          }
 
-        <section class="menu-page__items" data-testid="menu-items-panel">
-          <div class="menu-page__panel-head">
-            <h3>{{ locale.uiText('adminMenuItemsHeading') }}</h3>
-            <p class="menu-page__selected-label">{{ selectedCategoryLabel() }}</p>
+          <button
+            type="button"
+            class="menu-management-category-pill menu-management-category-pill--add"
+            data-testid="menu-add-category-button"
+            [attr.aria-label]="locale.uiText('adminMenuAddCategoryAria')"
+            (click)="openCreateCategory()"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2Z" />
+            </svg>
+          </button>
+        </section>
+
+        <section class="menu-management-meals" data-testid="menu-meals-section">
+          <div class="menu-management-section-head">
+            <h2>{{ locale.uiText('adminMenuItemsHeading') }}</h2>
+            @if (itemsState() === 'ready' && menuItems().length > 0) {
+              <span class="menu-management-count" data-testid="menu-meals-count">
+                {{ showingMealsCountLabel() }}
+              </span>
+            }
           </div>
 
           @switch (itemsState()) {
             @case ('loading') {
-              <div class="menu-page__items-loading" data-testid="menu-items-loading">
+              <div class="menu-management-state" data-testid="menu-items-loading">
                 {{ locale.uiText('adminMenuLoading') }}
               </div>
             }
 
             @case ('error') {
-              <div class="menu-page__state menu-page__state--error" data-testid="menu-items-error">
+              <div class="menu-management-state menu-management-state--error" data-testid="menu-items-error">
                 <p>{{ itemsErrorMessage() }}</p>
-                <button type="button" class="menu-page__secondary-btn" (click)="loadMenuItems()">
+                <button type="button" class="menu-management-secondary" (click)="loadMenuItems()">
                   {{ locale.uiText('adminMenuRetry') }}
                 </button>
               </div>
@@ -143,122 +176,77 @@
 
             @case ('ready') {
               @if (menuItems().length === 0) {
-                <div class="menu-page__state" data-testid="menu-items-empty">
-                  <h4>{{ locale.uiText('adminMenuEmptyItemsTitle') }}</h4>
+                <div class="menu-management-state" data-testid="menu-items-empty">
+                  <h3>{{ locale.uiText('adminMenuEmptyItemsTitle') }}</h3>
                   <p>{{ locale.uiText('adminMenuEmptyItemsDescription') }}</p>
-                  <button type="button" class="menu-page__primary-btn" (click)="openCreateItem()">
+                  <button type="button" class="menu-management-primary" (click)="openCreateItem()">
                     {{ locale.uiText('adminMenuAddItem') }}
                   </button>
                 </div>
               } @else {
-                <div class="menu-page__item-grid" data-testid="menu-items-grid">
-                  @for (item of menuItems(); track item.id) {
-                    <article class="menu-page__item-card" [attr.data-testid]="'menu-item-' + item.id">
-                      <div class="menu-page__item-media">
-                        @if (itemImageSrc(item); as imageSrc) {
-                          <img
-                            [src]="imageSrc"
-                            [alt]="displayItemName(item)"
-                            (error)="onItemImageError(item.id)"
-                          />
-                        } @else {
-                          <div class="menu-page__item-fallback" aria-hidden="true">
-                            {{ locale.uiText('adminMenuImageFallbackAlt') }}
-                          </div>
-                        }
-                      </div>
+                @if (isFilteredEmpty()) {
+                  <div class="menu-management-empty-filtered" data-testid="menu-items-filtered-empty">
+                    {{ locale.uiText('adminMenuEmptyFiltered') }}
+                  </div>
+                } @else {
+                  <div class="menu-management-grid" data-testid="menu-items-grid">
+                    @for (item of filteredMenuItems(); track item.id) {
+                      <app-menu-management-meal-card
+                        [item]="item"
+                        [categoryName]="categoryNameById(item.categoryId)"
+                        [imageSrc]="itemImageSrc(item)"
+                        [availabilityBusy]="availabilityBusyId() === item.id"
+                        (toggleAvailability)="toggleAvailability($event)"
+                        (editItem)="openEditItem($event)"
+                        (deleteItem)="openDeleteItem($event)"
+                        (imageError)="onItemImageError($event)"
+                      />
+                    }
 
-                      <div class="menu-page__item-body">
-                        <h4>{{ displayItemName(item) }}</h4>
-                        <p class="menu-page__item-category">{{ categoryNameById(item.categoryId) }}</p>
-                        <p class="menu-page__item-price">
-                          {{ item.price | number: '1.2-2' }}
-                          @if (item.discountPrice !== null && item.discountPrice !== undefined) {
-                            <span class="menu-page__item-discount">
-                              {{ locale.uiText('adminMenuDiscountLabel') }}
-                              {{ item.discountPrice | number: '1.2-2' }}
-                            </span>
-                          }
-                        </p>
-                        <p class="menu-page__item-meta">
-                          #{{ item.displayOrder }}
-                          ·
-                          {{
-                            item.isAvailable
-                              ? locale.uiText('adminMenuAvailable')
-                              : locale.uiText('adminMenuUnavailable')
-                          }}
-                          ·
-                          {{
-                            item.isActive
-                              ? locale.uiText('adminMenuActive')
-                              : locale.uiText('adminMenuInactive')
-                          }}
-                        </p>
-                      </div>
-
-                      <div class="menu-page__item-actions">
-                        <button
-                          type="button"
-                          class="menu-page__secondary-btn"
-                          [attr.data-testid]="'menu-toggle-availability-' + item.id"
-                          [disabled]="availabilityBusyId() === item.id"
-                          (click)="toggleAvailability(item)"
-                        >
-                          {{
-                            availabilityBusyId() === item.id
-                              ? locale.uiText('adminMenuToggleAvailableBusy')
-                              : locale.uiText('adminMenuToggleAvailable')
-                          }}
-                        </button>
-                        <button
-                          type="button"
-                          class="menu-page__link-btn"
-                          [attr.data-testid]="'menu-edit-item-' + item.id"
-                          (click)="openEditItem(item)"
-                        >
-                          {{ locale.uiText('adminMenuEdit') }}
-                        </button>
-                        <button
-                          type="button"
-                          class="menu-page__link-btn menu-page__link-btn--danger"
-                          [attr.data-testid]="'menu-delete-item-' + item.id"
-                          (click)="openDeleteItem(item)"
-                        >
-                          {{ locale.uiText('adminMenuDelete') }}
-                        </button>
-                      </div>
-                    </article>
-                  }
-                </div>
+                    <button
+                      type="button"
+                      class="menu-management-add-card"
+                      data-testid="menu-add-item-placeholder"
+                      (click)="openCreateItem()"
+                    >
+                      <span class="menu-management-add-card__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                          <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2Z" />
+                        </svg>
+                      </span>
+                      <strong>{{ locale.uiText('adminMenuAddNewMealTitle') }}</strong>
+                      <small>{{ locale.uiText('adminMenuAddNewMealDescription') }}</small>
+                    </button>
+                  </div>
+                }
               }
             }
           }
         </section>
-      </div>
+      }
     }
-  }
+  </div>
 </section>
 
-@if (modalKind()) {
-  <app-modal-shell
-    [open]="true"
-    [title]="modalTitle()"
-    [closeLabel]="locale.uiText('adminMenuCloseModal')"
-    titleId="menu-modal-title"
-    testId="menu-modal"
-    [blockCloseWhileBusy]="modalSubmitting()"
-    (closed)="closeModal()"
-  >
+<app-modal-shell
+  [open]="modalKind() !== null"
+  [title]="modalTitle()"
+  [closeLabel]="locale.uiText('adminMenuCloseModal')"
+  titleId="menu-modal-title"
+  testId="menu-modal"
+  [blockCloseWhileBusy]="false"
+  (closed)="dismissModal()"
+>
+  @if (modalKind()) {
     @if (modalErrorMessage()) {
-      <p class="menu-page__modal-error" role="alert">{{ modalErrorMessage() }}</p>
+      <p class="menu-management-modal-error" role="alert">{{ modalErrorMessage() }}</p>
     }
 
     @switch (modalKind()) {
       @case ('category') {
         <form
           id="menu-category-form"
-          class="menu-page__form"
+          class="menu-management-form"
           [formGroup]="categoryForm"
           (ngSubmit)="submitCategory()"
         >
@@ -282,34 +270,17 @@
             {{ locale.uiText('adminMenuFormDisplayOrder') }}
             <input type="number" min="0" formControlName="displayOrder" />
           </label>
-          <label class="menu-page__checkbox">
+          <label class="menu-management-checkbox">
             <input type="checkbox" formControlName="isActive" />
             {{ locale.uiText('adminMenuFormIsActive') }}
           </label>
-          <div orderModalFooter class="menu-page__modal-actions">
-            <button type="button" class="menu-page__secondary-btn" (click)="closeModal()">
-              {{ locale.uiText('adminMenuCancel') }}
-            </button>
-            <button
-              type="submit"
-              class="menu-page__primary-btn"
-              form="menu-category-form"
-              [disabled]="modalSubmitting()"
-            >
-              {{
-                modalSubmitting()
-                  ? locale.uiText('adminMenuSaving')
-                  : locale.uiText('adminMenuSave')
-              }}
-            </button>
-          </div>
         </form>
       }
 
       @case ('item') {
         <form
           id="menu-item-form"
-          class="menu-page__form"
+          class="menu-management-form"
           [formGroup]="itemForm"
           (ngSubmit)="submitItem()"
         >
@@ -346,21 +317,21 @@
             <input type="number" min="0" step="0.01" formControlName="discountPrice" />
           </label>
           @if (itemForm.hasError('discountGreaterThanPrice')) {
-            <p class="menu-page__field-error">{{ locale.uiText('adminMenuDiscountInvalid') }}</p>
+            <p class="menu-management-field-error">{{ locale.uiText('adminMenuDiscountInvalid') }}</p>
           }
           <label>
             {{ locale.uiText('adminMenuFormDisplayOrder') }}
             <input type="number" min="0" formControlName="displayOrder" />
           </label>
-          <label class="menu-page__checkbox">
+          <label class="menu-management-checkbox">
             <input type="checkbox" formControlName="isAvailable" />
             {{ locale.uiText('adminMenuFormIsAvailable') }}
           </label>
-          <label class="menu-page__checkbox">
+          <label class="menu-management-checkbox">
             <input type="checkbox" formControlName="isActive" />
             {{ locale.uiText('adminMenuFormIsActive') }}
           </label>
-          <div class="menu-page__image-field">
+          <div class="menu-management-image-field">
             <label for="menu-item-image-input">{{ locale.uiText('adminMenuFormImage') }}</label>
             <input
               id="menu-item-image-input"
@@ -369,83 +340,130 @@
               data-testid="menu-item-image-input"
               (change)="onImageSelected($event)"
             />
-            <p class="menu-page__help">{{ locale.uiText('adminMenuImageHelp') }}</p>
+            <p class="menu-management-help">{{ locale.uiText('adminMenuImageHelp') }}</p>
             @if (imageValidationError()) {
-              <p class="menu-page__field-error">{{ imageValidationError() }}</p>
+              <p class="menu-management-field-error">{{ imageValidationError() }}</p>
             }
             @if (imagePreviewUrl(); as previewUrl) {
               <img
-                class="menu-page__image-preview"
+                class="menu-management-image-preview"
                 [src]="previewUrl"
                 [alt]="locale.uiText('adminMenuImagePreviewAlt')"
                 data-testid="menu-item-image-preview"
               />
             }
           </div>
-          <div orderModalFooter class="menu-page__modal-actions">
-            <button type="button" class="menu-page__secondary-btn" (click)="closeModal()">
-              {{ locale.uiText('adminMenuCancel') }}
-            </button>
-            <button
-              type="submit"
-              class="menu-page__primary-btn"
-              form="menu-item-form"
-              [disabled]="modalSubmitting()"
-            >
-              {{
-                modalSubmitting()
-                  ? locale.uiText('adminMenuSaving')
-                  : locale.uiText('adminMenuSave')
-              }}
-            </button>
-          </div>
         </form>
       }
 
       @case ('deleteCategory') {
-        <div class="menu-page__confirm">
+        <div class="menu-management-confirm">
           <p>{{ locale.uiText('adminMenuDeleteCategoryMessage') }}</p>
           @if ((deletingCategory()?.itemCount ?? 0) > 0) {
-            <p class="menu-page__warning" data-testid="menu-delete-category-warning">
+            <p class="menu-management-warning" data-testid="menu-delete-category-warning">
               {{ locale.uiText('adminMenuDeleteCategoryWarning') }}
             </p>
           }
-          <div orderModalFooter class="menu-page__modal-actions">
-            <button type="button" class="menu-page__secondary-btn" (click)="closeModal()">
-              {{ locale.uiText('adminMenuDismissDelete') }}
-            </button>
-            <button
-              type="button"
-              class="menu-page__primary-btn menu-page__primary-btn--danger"
-              data-testid="menu-confirm-delete-category"
-              [disabled]="modalSubmitting()"
-              (click)="submitDeleteCategory()"
-            >
-              {{ locale.uiText('adminMenuConfirmDelete') }}
-            </button>
-          </div>
         </div>
       }
 
       @case ('deleteItem') {
-        <div class="menu-page__confirm">
+        <div class="menu-management-confirm">
           <p>{{ locale.uiText('adminMenuDeleteItemMessage') }}</p>
-          <div orderModalFooter class="menu-page__modal-actions">
-            <button type="button" class="menu-page__secondary-btn" (click)="closeModal()">
-              {{ locale.uiText('adminMenuDismissDelete') }}
-            </button>
-            <button
-              type="button"
-              class="menu-page__primary-btn menu-page__primary-btn--danger"
-              data-testid="menu-confirm-delete-item"
-              [disabled]="modalSubmitting()"
-              (click)="submitDeleteItem()"
-            >
-              {{ locale.uiText('adminMenuConfirmDelete') }}
-            </button>
-          </div>
         </div>
       }
     }
-  </app-modal-shell>
-}
+
+    @if (modalKind() === 'category') {
+      <div orderModalFooter class="menu-management-modal-actions">
+        <button
+          type="button"
+          class="button-secondary"
+          data-testid="menu-dismiss-modal"
+          (click)="dismissModal()"
+        >
+          {{ locale.uiText('adminMenuCancel') }}
+        </button>
+        <button
+          type="submit"
+          class="button-primary"
+          form="menu-category-form"
+          [disabled]="modalSubmitting()"
+        >
+          {{
+            modalSubmitting()
+              ? locale.uiText('adminMenuSaving')
+              : locale.uiText('adminMenuSave')
+          }}
+        </button>
+      </div>
+    }
+
+    @if (modalKind() === 'item') {
+      <div orderModalFooter class="menu-management-modal-actions">
+        <button
+          type="button"
+          class="button-secondary"
+          data-testid="menu-dismiss-modal"
+          (click)="dismissModal()"
+        >
+          {{ locale.uiText('adminMenuCancel') }}
+        </button>
+        <button
+          type="submit"
+          class="button-primary"
+          form="menu-item-form"
+          [disabled]="modalSubmitting()"
+        >
+          {{
+            modalSubmitting()
+              ? locale.uiText('adminMenuSaving')
+              : locale.uiText('adminMenuSave')
+          }}
+        </button>
+      </div>
+    }
+
+    @if (modalKind() === 'deleteCategory' || modalKind() === 'deleteItem') {
+      <div orderModalFooter class="menu-management-modal-actions">
+        <button
+          type="button"
+          class="button-secondary"
+          data-testid="menu-dismiss-delete"
+          (click)="dismissModal()"
+        >
+          {{ locale.uiText('adminMenuDismissDelete') }}
+        </button>
+        @if (modalKind() === 'deleteCategory') {
+          <button
+            type="button"
+            class="button-danger menu-management-delete-confirm"
+            data-testid="menu-confirm-delete-category"
+            [disabled]="modalSubmitting()"
+            (click)="submitDeleteCategory()"
+          >
+            {{
+              modalSubmitting()
+                ? locale.uiText('adminMenuDeleting')
+                : locale.uiText('adminMenuConfirmDelete')
+            }}
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="button-danger menu-management-delete-confirm"
+            data-testid="menu-confirm-delete-item"
+            [disabled]="modalSubmitting()"
+            (click)="submitDeleteItem()"
+          >
+            {{
+              modalSubmitting()
+                ? locale.uiText('adminMenuDeleting')
+                : locale.uiText('adminMenuConfirmDelete')
+            }}
+          </button>
+        }
+      </div>
+    }
+  }
+</app-modal-shell>

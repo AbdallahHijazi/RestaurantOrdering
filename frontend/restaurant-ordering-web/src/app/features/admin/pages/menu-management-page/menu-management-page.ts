@@ -15,8 +15,7 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
-import { switchMap, of, type Observable } from 'rxjs';
+import { switchMap, of, finalize, type Observable } from 'rxjs';
 import { resolveApiAssetUrl } from '../../../../core/config/resolve-api-asset-url';
 import { LocaleService } from '../../../../core/localization/locale';
 import {
@@ -25,6 +24,7 @@ import {
   validateImageFile,
 } from '../../restaurant-profile/data-access/image-preview.util';
 import { AdminMenuService } from '../../data-access/admin-menu.service';
+import { MenuManagementMealCard } from './components/menu-management-meal-card/menu-management-meal-card';
 import {
   ALL_MENU_ITEMS_FILTER,
   type AdminCategory,
@@ -39,7 +39,7 @@ type ModalKind = 'category' | 'item' | 'deleteCategory' | 'deleteItem' | null;
 
 @Component({
   selector: 'app-menu-management-page',
-  imports: [ReactiveFormsModule, DecimalPipe, ModalShell],
+  imports: [ReactiveFormsModule, ModalShell, MenuManagementMealCard],
   templateUrl: './menu-management-page.html',
   styleUrl: './menu-management-page.scss',
 })
@@ -96,6 +96,33 @@ export class MenuManagementPage {
       isActive: [true],
     },
     { validators: [discountNotGreaterThanPriceValidator] },
+  );
+
+  protected readonly searchQuery = signal('');
+
+  protected readonly filteredMenuItems = computed(() => {
+    const query = this.searchQuery().trim().toLowerCase();
+    const items = this.menuItems();
+    if (!query) {
+      return items;
+    }
+
+    return items.filter((item) => {
+      const name = this.displayItemName(item).toLowerCase();
+      const category = this.categoryNameById(item.categoryId).toLowerCase();
+      return name.includes(query) || category.includes(query);
+    });
+  });
+
+  protected readonly allItemsCount = computed(() =>
+    this.categories().reduce((total, category) => total + category.itemCount, 0),
+  );
+
+  protected readonly isFilteredEmpty = computed(
+    () =>
+      this.itemsState() === 'ready' &&
+      this.menuItems().length > 0 &&
+      this.filteredMenuItems().length === 0,
   );
 
   protected readonly selectedCategoryLabel = computed(() => {
@@ -178,10 +205,39 @@ export class MenuManagementPage {
 
   protected selectCategory(categoryId: string): void {
     this.selectedCategoryId.set(categoryId);
+    this.searchQuery.set('');
     this.loadMenuItems();
   }
 
+  protected onSearchInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchQuery.set(value);
+  }
+
+  protected showingMealsCountLabel(): string {
+    const shown = this.filteredMenuItems().length;
+    const total = this.menuItems().length;
+    return this.locale
+      .uiText('adminMenuShowingCount')
+      .replace('{shown}', String(shown))
+      .replace('{total}', String(total));
+  }
+
+  protected hasMeaningfulDiscount(item: AdminMenuItem): boolean {
+    const discount = item.discountPrice;
+    return discount != null && discount > 0 && discount < item.price;
+  }
+
+  protected availabilityLabel(item: AdminMenuItem): string {
+    if (item.isAvailable) {
+      return this.locale.uiText('adminMenuAvailableNow');
+    }
+
+    return this.locale.uiText('adminMenuUnavailable');
+  }
+
   protected openCreateCategory(): void {
+    this.resetModalState();
     this.editingCategory.set(null);
     this.categoryForm.reset({
       nameAr: '',
@@ -196,6 +252,7 @@ export class MenuManagementPage {
   }
 
   protected openEditCategory(category: AdminCategory): void {
+    this.resetModalState();
     this.editingCategory.set(category);
     this.categoryForm.reset({
       nameAr: category.nameAr,
@@ -210,12 +267,14 @@ export class MenuManagementPage {
   }
 
   protected openDeleteCategory(category: AdminCategory): void {
+    this.resetModalState();
     this.deletingCategory.set(category);
     this.modalErrorMessage.set(null);
     this.modalKind.set('deleteCategory');
   }
 
   protected openCreateItem(): void {
+    this.resetModalState();
     const selected = this.selectedCategoryId();
     this.editingItem.set(null);
     this.resetItemFormState();
@@ -239,6 +298,7 @@ export class MenuManagementPage {
   }
 
   protected openEditItem(item: AdminMenuItem): void {
+    this.resetModalState();
     this.editingItem.set(item);
     this.resetItemFormState();
     this.uploadedMedia.set(
@@ -275,6 +335,7 @@ export class MenuManagementPage {
   }
 
   protected openDeleteItem(item: AdminMenuItem): void {
+    this.resetModalState();
     this.deletingItem.set(item);
     this.modalErrorMessage.set(null);
     this.modalKind.set('deleteItem');
@@ -289,6 +350,10 @@ export class MenuManagementPage {
     this.editingItem.set(null);
     this.deletingCategory.set(null);
     this.deletingItem.set(null);
+  }
+
+  protected dismissModal(): void {
+    this.closeModal();
   }
 
   protected submitCategory(): void {
@@ -310,29 +375,32 @@ export class MenuManagementPage {
       ? this.menuService.updateCategory(editing.id, request)
       : this.menuService.createCategory(request);
 
-    save$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (saved) => {
-        this.categories.update((entries) =>
-          this.sortCategories(
-            editing
-              ? entries.map((entry) => (entry.id === saved.id ? saved : entry))
-              : [...entries, saved],
-          ),
-        );
-        this.modalSubmitting.set(false);
-        this.closeModal();
-        this.successMessage.set(
-          this.locale.uiText(
-            editing ? 'adminMenuCategoryUpdateSuccess' : 'adminMenuCategoryCreateSuccess',
-          ),
-        );
-        this.loadMenuItems();
-      },
-      error: (error) => {
-        this.modalSubmitting.set(false);
-        this.modalErrorMessage.set(this.mapMutationError(error));
-      },
-    });
+    save$
+      .pipe(
+        finalize(() => this.modalSubmitting.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (saved) => {
+          this.categories.update((entries) =>
+            this.sortCategories(
+              editing
+                ? entries.map((entry) => (entry.id === saved.id ? saved : entry))
+                : [...entries, saved],
+            ),
+          );
+          this.closeModal();
+          this.successMessage.set(
+            this.locale.uiText(
+              editing ? 'adminMenuCategoryUpdateSuccess' : 'adminMenuCategoryCreateSuccess',
+            ),
+          );
+          this.loadMenuItems();
+        },
+        error: (error) => {
+          this.modalErrorMessage.set(this.mapMutationError(error));
+        },
+      });
   }
 
   protected submitDeleteCategory(): void {
@@ -346,20 +414,21 @@ export class MenuManagementPage {
 
     this.menuService
       .deleteCategory(category.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        finalize(() => this.modalSubmitting.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
         next: () => {
           this.categories.update((entries) => entries.filter((entry) => entry.id !== category.id));
           if (this.selectedCategoryId() === category.id) {
             this.selectedCategoryId.set(ALL_MENU_ITEMS_FILTER);
           }
-          this.modalSubmitting.set(false);
           this.closeModal();
           this.successMessage.set(this.locale.uiText('adminMenuCategoryDeleteSuccess'));
           this.loadMenuItems();
         },
         error: (error) => {
-          this.modalSubmitting.set(false);
           this.modalErrorMessage.set(this.mapMutationError(error));
           if (error instanceof HttpErrorResponse && error.status === 404) {
             this.loadCategories();
@@ -378,13 +447,13 @@ export class MenuManagementPage {
       return;
     }
 
+    const editing = this.editingItem();
     this.modalSubmitting.set(true);
     this.modalErrorMessage.set(null);
 
     this.ensureUploadedMedia$()
       .pipe(
         switchMap((media) => {
-          const editing = this.editingItem();
           const request = this.toItemRequest(
             this.itemForm.getRawValue(),
             media?.id ?? editing?.imageFileId ?? null,
@@ -393,28 +462,27 @@ export class MenuManagementPage {
             ? this.menuService.updateMenuItem(editing.id, request)
             : this.menuService.createMenuItem(request);
         }),
+        finalize(() => this.modalSubmitting.set(false)),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (saved) => {
           this.menuItems.update((entries) =>
             this.sortItems(
-              this.editingItem()
+              editing
                 ? entries.map((entry) => (entry.id === saved.id ? saved : entry))
                 : [...entries, saved],
             ),
           );
           this.refreshCategoryCounts();
-          this.modalSubmitting.set(false);
           this.closeModal();
           this.successMessage.set(
             this.locale.uiText(
-              this.editingItem() ? 'adminMenuItemUpdateSuccess' : 'adminMenuItemCreateSuccess',
+              editing ? 'adminMenuItemUpdateSuccess' : 'adminMenuItemCreateSuccess',
             ),
           );
         },
         error: (error) => {
-          this.modalSubmitting.set(false);
           this.modalErrorMessage.set(this.mapMutationError(error));
         },
       });
@@ -431,17 +499,18 @@ export class MenuManagementPage {
 
     this.menuService
       .deleteMenuItem(item.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        finalize(() => this.modalSubmitting.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
         next: () => {
           this.menuItems.update((entries) => entries.filter((entry) => entry.id !== item.id));
           this.refreshCategoryCounts();
-          this.modalSubmitting.set(false);
           this.closeModal();
           this.successMessage.set(this.locale.uiText('adminMenuItemDeleteSuccess'));
         },
         error: (error) => {
-          this.modalSubmitting.set(false);
           this.modalErrorMessage.set(this.mapMutationError(error));
           if (error instanceof HttpErrorResponse && error.status === 404) {
             this.loadMenuItems();
@@ -486,17 +555,18 @@ export class MenuManagementPage {
 
     this.menuService
       .updateMenuItem(item.id, request)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        finalize(() => this.availabilityBusyId.set(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
         next: (updated) => {
           this.menuItems.update((entries) =>
             entries.map((entry) => (entry.id === updated.id ? updated : entry)),
           );
-          this.availabilityBusyId.set(null);
           this.successMessage.set(this.locale.uiText('adminMenuItemUpdateSuccess'));
         },
         error: (error) => {
-          this.availabilityBusyId.set(null);
           this.successMessage.set(null);
           this.itemsErrorMessage.set(this.mapMutationError(error));
         },
@@ -573,6 +643,11 @@ export class MenuManagementPage {
         return of(uploaded);
       }),
     );
+  }
+
+  private resetModalState(): void {
+    this.modalSubmitting.set(false);
+    this.modalErrorMessage.set(null);
   }
 
   private resetItemFormState(): void {

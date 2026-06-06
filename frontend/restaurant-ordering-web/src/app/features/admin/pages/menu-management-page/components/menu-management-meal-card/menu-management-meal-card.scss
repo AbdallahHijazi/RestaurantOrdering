@@ -1,0 +1,28 @@
+:host{display:block}
+.meal-card{border:1px solid var(--menu-line,#e9e1d9);border-radius:1.375rem;background:#fff;box-shadow:var(--menu-shadow-sm,0 10px 28px rgb(39 45 42/.06));overflow:hidden;transition:transform .28s ease,box-shadow .28s ease}
+.meal-card:hover{transform:translateY(-4px);box-shadow:var(--menu-shadow-md,0 18px 42px rgb(39 45 42/.1))}
+.meal-card__media{position:relative;height:15.3125rem;overflow:hidden;background:#eee7df}
+.meal-card__media img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.meal-card:hover .meal-card__media img{transform:scale(1.05)}
+.meal-card__fallback{display:grid;place-items:center;width:100%;height:100%;color:var(--menu-muted,#6f756f);font-size:.875rem}
+.meal-card__code,.meal-card__badge{position:absolute;z-index:1;display:inline-flex;align-items:center;justify-content:center;line-height:1;text-align:center;font-size:.6875rem;font-weight:800}
+.meal-card__code{top:.875rem;inset-inline-start:.875rem;min-width:1.75rem;height:1.75rem;padding-inline:.5rem;border-radius:999px;background:rgb(255 255 255/.88);color:var(--menu-text,#202522)}
+.meal-card__badge{inset-inline-end:.875rem;bottom:.875rem;min-height:1.75rem;padding-inline:.75rem;border-radius:999px;color:#fff;background:rgb(184 102 63/.96);max-width:calc(100% - 1.75rem)}
+.meal-card__body{padding:1rem}
+.meal-card__info{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem}
+.meal-card__name{margin:0;font-size:1.125rem;font-weight:800}
+.meal-card__availability{display:flex;align-items:center;gap:.375rem;margin:.375rem 0 0;color:var(--menu-muted,#6f756f);font-size:.75rem}
+.meal-card__status-dot{width:.5rem;height:.5rem;border-radius:50%;background:#65a17e}
+.meal-card__status-dot.is-unavailable{background:var(--menu-red,#b83f3f)}
+.meal-card__price{text-align:end;white-space:nowrap}
+.meal-card__price strong{display:block;font-size:1.25rem;font-weight:800}
+.meal-card__price-original{display:block;margin-top:.2rem;color:var(--menu-muted,#6f756f);font-size:.8125rem;font-weight:600;text-decoration:line-through}
+.meal-card__actions{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:.5rem;margin-block-start:1rem;padding-block-start:.875rem;border-top:1px solid #eee8e2}
+.meal-card__action{min-height:2.5rem;display:flex;align-items:center;justify-content:center;gap:.375rem;padding-inline:.5rem;border:1px solid var(--menu-line,#e9e1d9);border-radius:.75rem;background:#fff;color:#59615d;font:inherit;font-size:.75rem;font-weight:800;cursor:pointer}
+.meal-card__action svg{width:1rem;height:1rem}
+.meal-card__action--edit{color:var(--menu-green-deep,#2f6f5c);border-color:#cce1d8;background:#fbfefc}
+.meal-card__action--delete{color:var(--menu-red,#b83f3f);border-color:#f0d2d2;background:#fffdfd}
+.meal-card__action:disabled{opacity:.55;cursor:not-allowed}
+@media (max-width:47.99rem){.meal-card__media{height:14.375rem}}
+@media (max-width:26.87rem){.meal-card__actions{grid-template-columns:1fr 1fr}.meal-card__action--neutral{grid-column:1/-1}}
+@media (prefers-reduced-motion:reduce){.meal-card,.meal-card__media img{transition:none}}

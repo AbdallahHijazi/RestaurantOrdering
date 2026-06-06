@@ -282,6 +282,15 @@ type UiTextKey =
   | 'staffErrorGeneric'
   | 'staffMissingContextTitle'
   | 'staffMissingContextDescription'
+  | 'staffSearchPlaceholder'
+  | 'staffFilterAllRoles'
+  | 'staffFilterAllStatuses'
+  | 'staffStatTotal'
+  | 'staffStatActive'
+  | 'staffStatRoles'
+  | 'staffShowingCount'
+  | 'staffEmptyFiltered'
+  | 'staffAccountLabel'
   | 'kitchenEyebrow'
   | 'kitchenTitle'
   | 'kitchenLead'
@@ -433,6 +442,7 @@ type UiTextKey =
   | 'adminMenuFormImage'
   | 'adminMenuSave'
   | 'adminMenuSaving'
+  | 'adminMenuDeleting'
   | 'adminMenuCancel'
   | 'adminMenuCloseModal'
   | 'adminMenuCategoryCreateSuccess'
@@ -465,6 +475,14 @@ type UiTextKey =
   | 'adminMenuToggleAvailable'
   | 'adminMenuToggleAvailableBusy'
   | 'adminMenuSelectCategory'
+  | 'adminMenuSearchLabel'
+  | 'adminMenuSearchPlaceholder'
+  | 'adminMenuShowingCount'
+  | 'adminMenuEmptyFiltered'
+  | 'adminMenuAddNewMealTitle'
+  | 'adminMenuAddNewMealDescription'
+  | 'adminMenuAvailableNow'
+  | 'adminMenuAddCategoryAria'
   | 'publicCartTitle'
   | 'publicCartEmpty'
   | 'publicCartRemove'
@@ -679,14 +697,23 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminDashboardStaffTitle: 'الموظفون',
     adminDashboardStaffDescription: 'ستظهر إدارة الموظفين هنا لاحقًا.',
     staffPageTitle: 'إدارة الموظفين',
-    staffPageLead: 'اعرض موظفي المطعم، وأضف حسابات جديدة، وحدّث أدوارهم.',
+    staffPageLead: 'اعرض موظفي المطعم، وأضف حسابات جديدة، وحدّث أدوارهم بسهولة.',
     staffAddMember: 'إضافة موظف',
     staffAddFirstMember: 'إضافة أول موظف',
     staffListErrorTitle: 'تعذر تحميل الموظفين',
     staffListError: 'حدث خطأ أثناء تحميل قائمة الموظفين. حاول مرة أخرى.',
     staffRetry: 'إعادة المحاولة',
-    staffEmptyTitle: 'لا يوجد موظفون بعد',
+    staffEmptyTitle: 'لا يوجد موظفون مضافون حتى الآن.',
     staffEmptyDescription: 'ابدأ بإضافة مدير مطعم أو مدير مطبخ لمساعدتك في التشغيل.',
+    staffEmptyFiltered: 'لا توجد نتائج مطابقة لعملية البحث أو التصفية المحددة.',
+    staffSearchPlaceholder: 'ابحث بالاسم أو البريد أو الهاتف...',
+    staffFilterAllRoles: 'كل الأدوار',
+    staffFilterAllStatuses: 'كل الحالات',
+    staffStatTotal: 'إجمالي الموظفين',
+    staffStatActive: 'الحسابات النشطة',
+    staffStatRoles: 'الأدوار الحالية',
+    staffShowingCount: 'عرض {shown} من أصل {total} موظفين',
+    staffAccountLabel: 'حساب إداري',
     staffColName: 'الاسم',
     staffColEmail: 'البريد الإلكتروني',
     staffColPhone: 'الهاتف',
@@ -698,11 +725,11 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     staffStatusInactive: 'غير نشط',
     staffRoleManager: 'مدير المطعم',
     staffRoleKitchen: 'مدير المطبخ',
-    staffCreateTitle: 'إضافة موظف',
+    staffCreateTitle: 'إضافة موظف جديد',
     staffCreateSubmit: 'حفظ الموظف',
     staffCreateSuccess: 'تم إنشاء الموظف بنجاح.',
     staffChangeRoleTitle: 'تغيير دور الموظف',
-    staffChangeRoleSubmit: 'حفظ الدور',
+    staffChangeRoleSubmit: 'حفظ التغيير',
     staffRoleUpdateSuccess: 'تم تحديث الدور بنجاح.',
     staffCurrentRole: 'الدور الحالي',
     staffNewRole: 'الدور الجديد',
@@ -837,7 +864,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
       'لا يمكن إدارة الطلبات بدون معرف مطعم في الجلسة الحالية.',
     adminOrdersLoadMore: 'تحميل المزيد',
     adminMenuPageTitle: 'إدارة القائمة',
-    adminMenuPageLead: 'أدر التصنيفات والوجبات وصور الأطباق لمطعمك.',
+    adminMenuPageLead: 'أدر التصنيفات والوجبات وصور الأطباق لمطعمك بلمسة عصرية.',
     adminMenuAddItem: 'إضافة وجبة',
     adminMenuAddCategory: 'إضافة تصنيف',
     adminMenuAllItems: 'كل الوجبات',
@@ -874,6 +901,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminMenuFormImage: 'صورة الوجبة (اختياري)',
     adminMenuSave: 'حفظ',
     adminMenuSaving: 'جاري الحفظ…',
+    adminMenuDeleting: 'جاري الحذف…',
     adminMenuCancel: 'إلغاء',
     adminMenuCloseModal: 'إغلاق النافذة',
     adminMenuCategoryCreateSuccess: 'تم إنشاء التصنيف بنجاح.',
@@ -907,6 +935,14 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminMenuToggleAvailable: 'تبديل التوفر',
     adminMenuToggleAvailableBusy: 'جاري التحديث…',
     adminMenuSelectCategory: 'اختر تصنيفًا',
+    adminMenuSearchLabel: 'بحث الوجبات',
+    adminMenuSearchPlaceholder: 'ابحث عن وجبة…',
+    adminMenuShowingCount: 'عرض {shown} من أصل {total}',
+    adminMenuEmptyFiltered: 'لا توجد وجبات مطابقة لعملية البحث أو التصنيف المحدد.',
+    adminMenuAddNewMealTitle: 'إضافة وجبة جديدة',
+    adminMenuAddNewMealDescription: 'أنشئ طبقًا جديدًا وأضف صورته وتفاصيله.',
+    adminMenuAvailableNow: 'متاح الآن',
+    adminMenuAddCategoryAria: 'إضافة تصنيف',
     publicCartTitle: 'سلة الطلب',
     publicCartEmpty: 'سلتك فارغة. أضف وجبات من القائمة.',
     publicCartRemove: 'إزالة',
@@ -1125,16 +1161,25 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminDashboardOrdersDescription: 'Track orders and update their status from the orders management page.',
     adminDashboardStaffTitle: 'Staff',
     adminDashboardStaffDescription: 'Staff management will appear here in a later step.',
-    staffPageTitle: 'Staff management',
-    staffPageLead: 'View restaurant staff, add new accounts, and update their roles.',
-    staffAddMember: 'Add staff member',
-    staffAddFirstMember: 'Add first staff member',
+    staffPageTitle: 'Employees Management',
+    staffPageLead: 'View restaurant employees, create new accounts, and update their roles with ease.',
+    staffAddMember: 'Add Employee',
+    staffAddFirstMember: 'Add first employee',
     staffListErrorTitle: 'Unable to load staff',
     staffListError: 'Something went wrong while loading staff. Please try again.',
     staffRetry: 'Retry',
-    staffEmptyTitle: 'No staff members yet',
+    staffEmptyTitle: 'No employees have been added yet.',
     staffEmptyDescription:
       'Start by adding a restaurant manager or kitchen manager to help run operations.',
+    staffEmptyFiltered: 'No employees match the current search or selected filters.',
+    staffSearchPlaceholder: 'Search by name, email, or phone...',
+    staffFilterAllRoles: 'All Roles',
+    staffFilterAllStatuses: 'All Statuses',
+    staffStatTotal: 'Total Employees',
+    staffStatActive: 'Active Accounts',
+    staffStatRoles: 'Current Roles',
+    staffShowingCount: 'Showing {shown} of {total} employees',
+    staffAccountLabel: 'Admin account',
     staffColName: 'Name',
     staffColEmail: 'Email',
     staffColPhone: 'Phone',
@@ -1146,11 +1191,11 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     staffStatusInactive: 'Inactive',
     staffRoleManager: 'Restaurant manager',
     staffRoleKitchen: 'Kitchen manager',
-    staffCreateTitle: 'Add staff member',
-    staffCreateSubmit: 'Save staff member',
+    staffCreateTitle: 'Add New Employee',
+    staffCreateSubmit: 'Save Employee',
     staffCreateSuccess: 'Staff member created successfully.',
     staffChangeRoleTitle: 'Change staff role',
-    staffChangeRoleSubmit: 'Save role',
+    staffChangeRoleSubmit: 'Save Change',
     staffRoleUpdateSuccess: 'Role updated successfully.',
     staffCurrentRole: 'Current role',
     staffNewRole: 'New role',
@@ -1286,7 +1331,8 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
       'Orders management requires a restaurant id in the current session.',
     adminOrdersLoadMore: 'Load more',
     adminMenuPageTitle: 'Menu management',
-    adminMenuPageLead: 'Manage categories, menu items, and dish photos for your restaurant.',
+    adminMenuPageLead:
+      'Manage categories, meals, and dish images for your restaurant with a modern experience.',
     adminMenuAddItem: 'Add menu item',
     adminMenuAddCategory: 'Add category',
     adminMenuAllItems: 'All items',
@@ -1324,6 +1370,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminMenuFormImage: 'Item image (optional)',
     adminMenuSave: 'Save',
     adminMenuSaving: 'Saving…',
+    adminMenuDeleting: 'Deleting…',
     adminMenuCancel: 'Cancel',
     adminMenuCloseModal: 'Close dialog',
     adminMenuCategoryCreateSuccess: 'Category created successfully.',
@@ -1357,6 +1404,14 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminMenuToggleAvailable: 'Toggle availability',
     adminMenuToggleAvailableBusy: 'Updating…',
     adminMenuSelectCategory: 'Select a category',
+    adminMenuSearchLabel: 'Search meals',
+    adminMenuSearchPlaceholder: 'Search for a meal…',
+    adminMenuShowingCount: 'Showing {shown} of {total}',
+    adminMenuEmptyFiltered: 'No meals match the current search or selected category.',
+    adminMenuAddNewMealTitle: 'Add new meal',
+    adminMenuAddNewMealDescription: 'Create a new dish and add its image and details.',
+    adminMenuAvailableNow: 'Available now',
+    adminMenuAddCategoryAria: 'Add category',
     publicCartTitle: 'Your cart',
     publicCartEmpty: 'Your cart is empty. Add dishes from the menu.',
     publicCartRemove: 'Remove',
