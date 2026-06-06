@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
+  computed,
   DestroyRef,
   inject,
   signal,
@@ -12,6 +13,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { finalize } from 'rxjs';
 import {
   ApplicationRoles,
   AssignableStaffRoles,
@@ -21,12 +23,22 @@ import {
 import { LocaleService } from '../../../../core/localization/locale';
 import { RestaurantStaffService } from '../../data-access/restaurant-staff.service';
 import type { RestaurantStaffUser } from '../../data-access/restaurant-staff.models';
+import { StaffManagementRoster } from './components/staff-management-roster/staff-management-roster';
+import { StaffManagementStats } from './components/staff-management-stats/staff-management-stats';
+import {
+  StaffManagementSelect,
+  type StaffSelectOption,
+} from './components/staff-management-select/staff-management-select';
+import { StaffModalActions } from './components/staff-modal-actions/staff-modal-actions';
 
 type PageState = 'loading' | 'ready' | 'error' | 'missing-context';
+type ModalKind = 'create' | 'changeRole' | null;
+type StaffFilterValue = 'all' | AssignableStaffRole;
+type StatusFilterValue = 'all' | 'active' | 'inactive';
 
 @Component({
   selector: 'app-staff-management-page',
-  imports: [ReactiveFormsModule, ModalShell],
+  imports: [ReactiveFormsModule, ModalShell, StaffManagementRoster, StaffManagementStats, StaffManagementSelect, StaffModalActions],
   templateUrl: './staff-management-page.html',
   styleUrl: './staff-management-page.scss',
 })
@@ -43,14 +55,77 @@ export class StaffManagementPage {
   protected readonly successMessage = signal<string | null>(null);
   protected readonly listErrorMessage = signal<string | null>(null);
 
-  protected readonly createOpen = signal(false);
+  protected readonly searchQuery = signal('');
+  protected readonly roleFilter = signal<StaffFilterValue>('all');
+  protected readonly statusFilter = signal<StatusFilterValue>('all');
+
+  protected readonly modalKind = signal<ModalKind>(null);
   protected readonly createSubmitting = signal(false);
   protected readonly createErrorMessage = signal<string | null>(null);
-
-  protected readonly changeRoleOpen = signal(false);
   protected readonly changeRoleSubmitting = signal(false);
   protected readonly changeRoleErrorMessage = signal<string | null>(null);
   protected readonly selectedStaff = signal<RestaurantStaffUser | null>(null);
+
+  protected readonly totalEmployees = computed(() => this.staff().length);
+  protected readonly activeEmployees = computed(
+    () => this.staff().filter((member) => member.isActive).length,
+  );
+  protected readonly distinctRoleCount = computed(
+    () => new Set(this.staff().map((member) => member.role)).size,
+  );
+
+  protected readonly roleSelectOptions = computed<StaffSelectOption[]>(() =>
+    this.assignableRoles.map((role) => ({
+      value: role,
+      label: this.roleLabel(role),
+    })),
+  );
+
+  protected readonly roleFilterOptions = computed<StaffSelectOption[]>(() => [
+    { value: 'all', label: this.locale.uiText('staffFilterAllRoles') },
+    ...this.roleSelectOptions(),
+  ]);
+
+  protected readonly statusFilterOptions = computed<StaffSelectOption[]>(() => [
+    { value: 'all', label: this.locale.uiText('staffFilterAllStatuses') },
+    { value: 'active', label: this.locale.uiText('staffStatusActive') },
+    { value: 'inactive', label: this.locale.uiText('staffStatusInactive') },
+  ]);
+
+  protected readonly filteredStaff = computed(() => {
+    const query = this.searchQuery().trim().toLowerCase();
+    const role = this.roleFilter();
+    const status = this.statusFilter();
+
+    return this.staff().filter((member) => {
+      if (role !== 'all' && member.role !== role) {
+        return false;
+      }
+
+      if (status === 'active' && !member.isActive) {
+        return false;
+      }
+
+      if (status === 'inactive' && member.isActive) {
+        return false;
+      }
+
+      if (!query) {
+        return true;
+      }
+
+      const haystack = [
+        member.fullName ?? '',
+        member.email,
+        member.phoneNumber ?? '',
+        this.roleLabel(member.role),
+      ]
+        .join(' ')
+        .toLowerCase();
+
+      return haystack.includes(query);
+    });
+  });
 
   protected readonly createForm = this.fb.group({
     email: ['', [Validators.required, Validators.email, Validators.maxLength(256)]],
@@ -96,21 +171,41 @@ export class StaffManagementPage {
       });
   }
 
+  protected setSearchQuery(value: string): void {
+    this.searchQuery.set(value);
+  }
+
+  protected setRoleFilter(value: string): void {
+    if (value === 'all' || isAssignableStaffRole(value)) {
+      this.roleFilter.set(value);
+    }
+  }
+
+  protected setStatusFilter(value: string): void {
+    if (value === 'all' || value === 'active' || value === 'inactive') {
+      this.statusFilter.set(value);
+    }
+  }
+
+  protected showingEmployeesLabel(): string {
+    const shown = this.filteredStaff().length;
+    const total = this.staff().length;
+    return this.locale
+      .uiText('staffShowingCount')
+      .replace('{shown}', String(shown))
+      .replace('{total}', String(total));
+  }
+
   protected openCreateModal(): void {
-    this.createForm.reset({
-      email: '',
-      password: '',
-      fullName: '',
-      phoneNumber: '',
-      role: ApplicationRoles.RestaurantManager,
-    });
+    this.resetCreateForm();
     this.createErrorMessage.set(null);
-    this.createOpen.set(true);
+    this.createSubmitting.set(false);
+    this.modalKind.set('create');
   }
 
   protected closeCreateModal(): void {
     this.createForm.controls.password.setValue('');
-    this.createOpen.set(false);
+    this.modalKind.set(null);
     this.createSubmitting.set(false);
     this.createErrorMessage.set(null);
   }
@@ -142,17 +237,18 @@ export class StaffManagementPage {
         phoneNumber: raw.phoneNumber.trim() || null,
         role,
       })
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.createSubmitting.set(false)),
+      )
       .subscribe({
         next: (created) => {
           this.staff.update((users) => [...users, created].sort(this.compareStaff));
-          this.createSubmitting.set(false);
           this.closeCreateModal();
           this.pageState.set('ready');
           this.successMessage.set(this.locale.uiText('staffCreateSuccess'));
         },
         error: (error) => {
-          this.createSubmitting.set(false);
           this.createErrorMessage.set(this.mapMutationError(error));
         },
       });
@@ -162,14 +258,26 @@ export class StaffManagementPage {
     this.selectedStaff.set(member);
     this.changeRoleForm.reset({ role: member.role });
     this.changeRoleErrorMessage.set(null);
-    this.changeRoleOpen.set(true);
+    this.changeRoleSubmitting.set(false);
+    this.modalKind.set('changeRole');
   }
 
   protected closeChangeRoleModal(): void {
-    this.changeRoleOpen.set(false);
+    this.modalKind.set(null);
     this.changeRoleSubmitting.set(false);
     this.changeRoleErrorMessage.set(null);
     this.selectedStaff.set(null);
+  }
+
+  protected dismissModal(): void {
+    if (this.modalKind() === 'create') {
+      this.closeCreateModal();
+      return;
+    }
+
+    if (this.modalKind() === 'changeRole') {
+      this.closeChangeRoleModal();
+    }
   }
 
   protected submitChangeRole(): void {
@@ -193,7 +301,10 @@ export class StaffManagementPage {
 
     this.staffService
       .updateStaffRole(member.id, { role })
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.changeRoleSubmitting.set(false)),
+      )
       .subscribe({
         next: (result) => {
           this.staff.update((users) =>
@@ -203,15 +314,25 @@ export class StaffManagementPage {
               )
               .sort(this.compareStaff),
           );
-          this.changeRoleSubmitting.set(false);
           this.closeChangeRoleModal();
           this.successMessage.set(this.locale.uiText('staffRoleUpdateSuccess'));
         },
         error: (error) => {
-          this.changeRoleSubmitting.set(false);
           this.changeRoleErrorMessage.set(this.mapMutationError(error));
         },
       });
+  }
+
+  protected modalTitle(): string {
+    if (this.modalKind() === 'create') {
+      return this.locale.uiText('staffCreateTitle');
+    }
+
+    if (this.modalKind() === 'changeRole') {
+      return this.locale.uiText('staffChangeRoleTitle');
+    }
+
+    return '';
   }
 
   protected roleLabel(role: string): string {
@@ -224,14 +345,18 @@ export class StaffManagementPage {
     return role;
   }
 
-  protected statusLabel(isActive: boolean): string {
-    return isActive
-      ? this.locale.uiText('staffStatusActive')
-      : this.locale.uiText('staffStatusInactive');
-  }
-
   protected displayName(member: RestaurantStaffUser): string {
     return member.fullName?.trim() || member.email;
+  }
+
+  private resetCreateForm(): void {
+    this.createForm.reset({
+      email: '',
+      password: '',
+      fullName: '',
+      phoneNumber: '',
+      role: ApplicationRoles.RestaurantManager,
+    });
   }
 
   private compareStaff(a: RestaurantStaffUser, b: RestaurantStaffUser): number {
