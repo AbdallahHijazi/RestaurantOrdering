@@ -45,6 +45,11 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
         builder.Property(r => r.Longitude)
             .HasPrecision(11, 8);
 
+        builder.Property(r => r.AccentColor)
+            .HasMaxLength(7)
+            .IsRequired()
+            .HasDefaultValue("#B8663F");
+
         builder.HasIndex(r => r.Slug)
             .IsUnique();
 
@@ -59,6 +64,13 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
             .WithMany()
             .HasForeignKey(r => r.LogoFileId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(r => r.CoverImageFile)
+            .WithMany()
+            .HasForeignKey(r => r.CoverImageFileId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(r => r.CoverImageFileId);
 
         builder.HasQueryFilter(r => !r.IsDeleted);
     }

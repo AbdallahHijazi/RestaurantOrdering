@@ -5,30 +5,49 @@ using RestaurantOrdering.Application.Common.Interfaces;
 using RestaurantOrdering.Application.Features.Restaurants.Common;
 using RestaurantOrdering.Application.Features.Restaurants.DTOs;
 
-namespace RestaurantOrdering.Application.Features.Restaurants.Queries.GetRestaurantById;
+namespace RestaurantOrdering.Application.Features.MediaFiles.Commands.SetRestaurantCoverImage;
 
-public sealed class GetRestaurantByIdQueryHandler
-    : IRequestHandler<GetRestaurantByIdQuery, RestaurantDto>
+public sealed class SetRestaurantCoverImageCommandHandler
+    : IRequestHandler<SetRestaurantCoverImageCommand, RestaurantDto>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IDateTimeService _dateTimeService;
 
-    public GetRestaurantByIdQueryHandler(IApplicationDbContext context)
+    public SetRestaurantCoverImageCommandHandler(
+        IApplicationDbContext context,
+        IDateTimeService dateTimeService)
     {
         _context = context;
+        _dateTimeService = dateTimeService;
     }
 
     public async Task<RestaurantDto> Handle(
-        GetRestaurantByIdQuery request,
+        SetRestaurantCoverImageCommand request,
         CancellationToken cancellationToken)
     {
         var restaurant = await _context.Restaurants
-            .AsNoTracking()
             .FirstOrDefaultAsync(r => r.Id == request.RestaurantId, cancellationToken);
 
         if (restaurant is null)
         {
             throw new NotFoundException("Restaurant", request.RestaurantId);
         }
+
+        var mediaFileExists = await _context.MediaFiles
+            .AsNoTracking()
+            .AnyAsync(
+                m => m.Id == request.MediaFileId && m.RestaurantId == request.RestaurantId,
+                cancellationToken);
+
+        if (!mediaFileExists)
+        {
+            throw new NotFoundException("MediaFile", request.MediaFileId);
+        }
+
+        restaurant.CoverImageFileId = request.MediaFileId;
+        restaurant.UpdatedAt = _dateTimeService.UtcNow;
+
+        await _context.SaveChangesAsync(cancellationToken);
 
         var (logoUrl, coverImageUrl) = await RestaurantBrandingMediaResolver.ResolveUrlsAsync(
             _context,

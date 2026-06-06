@@ -5,7 +5,10 @@ namespace RestaurantOrdering.Application.Features.Restaurants.Common;
 
 public static class RestaurantMappings
 {
-    public static RestaurantDto ToDto(this Restaurant restaurant) => new()
+    public static RestaurantDto ToDto(
+        this Restaurant restaurant,
+        string? logoUrl = null,
+        string? coverImageUrl = null) => new()
     {
         Id = restaurant.Id,
         OwnerId = restaurant.OwnerId,
@@ -15,6 +18,10 @@ public static class RestaurantMappings
         DescriptionAr = restaurant.DescriptionAr,
         DescriptionEn = restaurant.DescriptionEn,
         LogoFileId = restaurant.LogoFileId,
+        LogoUrl = logoUrl,
+        CoverImageFileId = restaurant.CoverImageFileId,
+        CoverImageUrl = coverImageUrl,
+        AccentColor = restaurant.AccentColor,
         PhoneNumber = restaurant.PhoneNumber,
         WhatsAppNumber = restaurant.WhatsAppNumber,
         AddressAr = restaurant.AddressAr,
@@ -26,7 +33,10 @@ public static class RestaurantMappings
         UpdatedAt = restaurant.UpdatedAt
     };
 
-    public static PublicRestaurantDto ToPublicDto(this Restaurant restaurant) => new()
+    public static PublicRestaurantDto ToPublicDto(
+        this Restaurant restaurant,
+        string? logoUrl = null,
+        string? coverImageUrl = null) => new()
     {
         Id = restaurant.Id,
         Slug = restaurant.Slug,
@@ -35,6 +45,9 @@ public static class RestaurantMappings
         DescriptionAr = restaurant.DescriptionAr,
         DescriptionEn = restaurant.DescriptionEn,
         LogoFileId = restaurant.LogoFileId,
+        LogoUrl = logoUrl,
+        CoverImageUrl = coverImageUrl,
+        AccentColor = restaurant.AccentColor,
         PhoneNumber = restaurant.PhoneNumber,
         WhatsAppNumber = restaurant.WhatsAppNumber,
         AddressAr = restaurant.AddressAr,

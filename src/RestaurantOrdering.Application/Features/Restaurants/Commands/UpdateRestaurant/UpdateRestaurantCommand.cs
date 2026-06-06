@@ -16,4 +16,5 @@ public sealed record UpdateRestaurantCommand(
     string? AddressAr,
     string? AddressEn,
     decimal? Latitude,
-    decimal? Longitude) : IRequest<RestaurantDto>, IRestaurantScopedRequest;
+    decimal? Longitude,
+    string AccentColor) : IRequest<RestaurantDto>, IRestaurantScopedRequest;

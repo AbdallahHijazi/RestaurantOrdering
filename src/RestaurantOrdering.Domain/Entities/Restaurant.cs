@@ -11,6 +11,8 @@ public class Restaurant : AuditableEntity, ISoftDelete
     public string? DescriptionAr { get; set; }
     public string? DescriptionEn { get; set; }
     public Guid? LogoFileId { get; set; }
+    public Guid? CoverImageFileId { get; set; }
+    public string AccentColor { get; set; } = "#B8663F";
     public string PhoneNumber { get; set; } = string.Empty;
     public string? WhatsAppNumber { get; set; }
     public string? AddressAr { get; set; }
@@ -28,4 +30,5 @@ public class Restaurant : AuditableEntity, ISoftDelete
     public ICollection<MediaFile> MediaFiles { get; set; } = new List<MediaFile>();
     public ICollection<QrCode> QrCodes { get; set; } = new List<QrCode>();
     public MediaFile? LogoFile { get; set; }
+    public MediaFile? CoverImageFile { get; set; }
 }

@@ -63,15 +63,29 @@ public sealed class GetPublicMenuBySlugQueryHandler
         var imageFileIds = menuItems
             .Where(item => item.ImageFileId.HasValue)
             .Select(item => item.ImageFileId!.Value)
-            .Distinct()
             .ToList();
+
+        if (restaurant.LogoFileId.HasValue)
+        {
+            imageFileIds.Add(restaurant.LogoFileId.Value);
+        }
+
+        if (restaurant.CoverImageFileId.HasValue)
+        {
+            imageFileIds.Add(restaurant.CoverImageFileId.Value);
+        }
 
         var imageUrlsById = imageFileIds.Count == 0
             ? new Dictionary<Guid, string>()
             : await _context.MediaFiles
                 .AsNoTracking()
-                .Where(media => imageFileIds.Contains(media.Id))
+                .Where(media => imageFileIds.Distinct().Contains(media.Id))
                 .ToDictionaryAsync(media => media.Id, media => media.FileUrl, cancellationToken);
+
+        string? ResolveMediaUrl(Guid? fileId) =>
+            fileId.HasValue && imageUrlsById.TryGetValue(fileId.Value, out var fileUrl)
+                ? fileUrl
+                : null;
 
         string? ResolveImageUrl(MenuItem item)
         {
@@ -112,6 +126,9 @@ public sealed class GetPublicMenuBySlugQueryHandler
             DescriptionAr = restaurant.DescriptionAr,
             DescriptionEn = restaurant.DescriptionEn,
             LogoFileId = restaurant.LogoFileId,
+            LogoUrl = ResolveMediaUrl(restaurant.LogoFileId),
+            CoverImageUrl = ResolveMediaUrl(restaurant.CoverImageFileId),
+            AccentColor = restaurant.AccentColor,
             PhoneNumber = restaurant.PhoneNumber,
             WhatsAppNumber = restaurant.WhatsAppNumber,
             AddressAr = restaurant.AddressAr,

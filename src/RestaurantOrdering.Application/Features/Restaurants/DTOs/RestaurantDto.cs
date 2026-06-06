@@ -1,5 +1,7 @@
 namespace RestaurantOrdering.Application.Features.Restaurants.DTOs;
 
+using RestaurantOrdering.Application.Features.Restaurants.Common;
+
 public class RestaurantDto
 {
     public Guid Id { get; init; }
@@ -10,6 +12,10 @@ public class RestaurantDto
     public string? DescriptionAr { get; init; }
     public string? DescriptionEn { get; init; }
     public Guid? LogoFileId { get; init; }
+    public string? LogoUrl { get; init; }
+    public Guid? CoverImageFileId { get; init; }
+    public string? CoverImageUrl { get; init; }
+    public string AccentColor { get; init; } = RestaurantAccentColor.Default;
     public string PhoneNumber { get; init; } = string.Empty;
     public string? WhatsAppNumber { get; init; }
     public string? AddressAr { get; init; }

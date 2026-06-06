@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using RestaurantOrdering.Api.Contracts.Admin.MediaFiles;
 using RestaurantOrdering.Application.Common.Security;
+using RestaurantOrdering.Application.Features.MediaFiles.Commands.SetRestaurantCoverImage;
 using RestaurantOrdering.Application.Features.MediaFiles.Commands.SetRestaurantLogo;
 using RestaurantOrdering.Application.Features.MediaFiles.Commands.UploadMediaFile;
 using RestaurantOrdering.Application.Features.MediaFiles.DTOs;
@@ -68,6 +69,22 @@ public sealed class MediaFilesController : ControllerBase
     {
         var result = await _sender.Send(
             new SetRestaurantLogoCommand(restaurantId, request.MediaFileId),
+            cancellationToken);
+
+        return Ok(result);
+    }
+
+    [HttpPut("cover-image")]
+    [Consumes("application/json")]
+    [RequestSizeLimit(16384)]
+    [ProducesResponseType(typeof(RestaurantDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<RestaurantDto>> SetCoverImage(
+        Guid restaurantId,
+        [FromBody] SetRestaurantCoverImageRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(
+            new SetRestaurantCoverImageCommand(restaurantId, request.MediaFileId),
             cancellationToken);
 
         return Ok(result);

@@ -49,6 +49,12 @@ public sealed class SetRestaurantLogoCommandHandler
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return restaurant.ToDto();
+        var (logoUrl, coverImageUrl) = await RestaurantBrandingMediaResolver.ResolveUrlsAsync(
+            _context,
+            restaurant.LogoFileId,
+            restaurant.CoverImageFileId,
+            cancellationToken);
+
+        return restaurant.ToDto(logoUrl, coverImageUrl);
     }
 }

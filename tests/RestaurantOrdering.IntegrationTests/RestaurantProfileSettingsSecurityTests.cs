@@ -179,7 +179,9 @@ public sealed class RestaurantProfileSettingsSecurityTests : IClassFixture<TestW
             WorkingHoursJson = (string?)null
         };
 
-    private static object CreateRestaurantPayload(string slug = "restaurant-a") =>
+    private static object CreateRestaurantPayload(
+        string slug = "restaurant-a",
+        string accentColor = "#B8663F") =>
         new
         {
             Slug = slug,
@@ -192,7 +194,8 @@ public sealed class RestaurantProfileSettingsSecurityTests : IClassFixture<TestW
             AddressAr = (string?)null,
             AddressEn = (string?)null,
             Latitude = (decimal?)null,
-            Longitude = (decimal?)null
+            Longitude = (decimal?)null,
+            AccentColor = accentColor
         };
 
     private static async Task AuthenticateAsync(HttpClient client, string email, string password)

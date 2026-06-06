@@ -56,10 +56,17 @@ public sealed class UpdateRestaurantCommandHandler
         restaurant.AddressEn = request.AddressEn;
         restaurant.Latitude = request.Latitude;
         restaurant.Longitude = request.Longitude;
+        restaurant.AccentColor = RestaurantAccentColor.Normalize(request.AccentColor);
         restaurant.UpdatedAt = _dateTimeService.UtcNow;
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return restaurant.ToDto();
+        var (logoUrl, coverImageUrl) = await RestaurantBrandingMediaResolver.ResolveUrlsAsync(
+            _context,
+            restaurant.LogoFileId,
+            restaurant.CoverImageFileId,
+            cancellationToken);
+
+        return restaurant.ToDto(logoUrl, coverImageUrl);
     }
 }
