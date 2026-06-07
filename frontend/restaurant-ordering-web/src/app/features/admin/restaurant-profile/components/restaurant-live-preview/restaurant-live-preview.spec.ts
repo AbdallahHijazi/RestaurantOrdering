@@ -64,7 +64,7 @@ function cardTexts(cards: HTMLElement[]): string {
 }
 
 function clickCategory(modal: HTMLElement, label: string): void {
-  const button = Array.from(modal.querySelectorAll('.category-nav__item')).find((element) =>
+  const button = Array.from(modal.querySelectorAll('.public-menu-filter__pill')).find((element) =>
     element.textContent?.includes(label),
   ) as HTMLButtonElement | undefined;
 

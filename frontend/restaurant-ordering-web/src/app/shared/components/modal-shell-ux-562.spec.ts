@@ -110,7 +110,7 @@ describe('5F.6.2 modal overlay polish', () => {
       (fixture.componentInstance as RestaurantLivePreview & { openFullPreview(): void }).openFullPreview();
       fixture.detectChanges();
 
-      const scroll = document.body.querySelector('.category-nav__scroll') as HTMLElement | null;
+      const scroll = document.body.querySelector('.public-menu-filter__scroll') as HTMLElement | null;
       expect(scroll).toBeTruthy();
       expect(getComputedStyle(scroll!).overflowX).toBe('auto');
       expect(getComputedStyle(scroll!).scrollbarWidth).toBe('none');

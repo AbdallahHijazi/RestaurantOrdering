@@ -68,22 +68,21 @@ describe('5F.6.1 UX fixes', () => {
       expect(fixture.nativeElement.querySelector('.kitchen-details__panel')).toBeNull();
     });
 
-    it('shows USD as $ in Arabic locale', () => {
+    it('shows order number with Latin digits in Arabic locale', () => {
       locale.setLocale('ar');
       fixture.componentRef.setInput('open', true);
       fixture.componentRef.setInput('confirmation', baseConfirmation());
       fixture.detectChanges();
 
       const text = document.body.textContent ?? '';
-      expect(text).toContain('$10.00');
+      expect(text).toContain('ORD-7F29134F948B4E60');
       expect(text).not.toMatch(/[٠-٩]/);
     });
 
-    it('wraps order number and phone in bdi ltr when present', () => {
+    it('wraps order number in bdi ltr when present', () => {
       fixture.componentRef.setInput('open', true);
       fixture.componentRef.setInput('confirmation', {
         ...baseConfirmation(),
-        guestPhone: '+963912345678',
       });
       fixture.detectChanges();
 

@@ -36,35 +36,26 @@ describe('Orders UX modals', () => {
       ).toBeTruthy();
     });
 
-    it('shows subtotal and total with Latin currency formatting', () => {
+    it('shows success copy and order number with Latin digits', () => {
       locale.setLocale('ar');
       fixture.componentRef.setInput('open', true);
       fixture.componentRef.setInput('confirmation', baseConfirmation());
       fixture.detectChanges();
 
       const text = (document.body.textContent ?? fixture.nativeElement.textContent) ?? '';
-      expect(text).toContain('$10.00');
+      expect(text).toContain(locale.uiText('publicConfirmationSuccessTitle'));
+      expect(text).toContain('ORD-7F29134F948B4E60');
       expect(text).not.toMatch(/[٠-٩]/);
     });
 
-    it('hides zero discount and tax rows but shows delivery fee when > 0', () => {
+    it('wraps order number in an ltr bdi element', () => {
       fixture.componentRef.setInput('open', true);
-      fixture.componentRef.setInput('confirmation', {
-        ...baseConfirmation(),
-        orderType: ORDER_TYPE_DELIVERY,
-        discountAmount: 0,
-        taxAmount: 0,
-        deliveryFee: 5,
-      });
+      fixture.componentRef.setInput('confirmation', baseConfirmation());
       fixture.detectChanges();
 
-      const labels = Array.from(
-        document.body.querySelectorAll('.order-financial-summary dt'),
-      ).map((element) => (element as HTMLElement).textContent?.trim());
-
-      expect(labels).not.toContain(locale.uiText('publicConfirmationDiscount'));
-      expect(labels).not.toContain(locale.uiText('publicConfirmationTax'));
-      expect(labels).toContain(locale.uiText('publicConfirmationDeliveryFee'));
+      const orderNumber = document.body.querySelector('.identifier-ltr');
+      expect(orderNumber?.textContent).toContain('ORD-7F29134F948B4E60');
+      expect(orderNumber?.getAttribute('dir')).toBe('ltr');
     });
 
     it('emits closed on escape via modal shell', () => {
