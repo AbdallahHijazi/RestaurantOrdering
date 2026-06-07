@@ -18,7 +18,7 @@
 
 .language-switcher__btn.is-active {
   background: var(--restaurant-accent);
-  color: #fff;
+  color: var(--restaurant-surface-white);
 }
 
 .language-switcher__btn:focus-visible {

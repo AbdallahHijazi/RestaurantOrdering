@@ -13,7 +13,7 @@
   flex-direction: column;
   width: min(24.4rem, 100vw);
   max-height: 100dvh;
-  background: #fff;
+  background: var(--restaurant-surface-white);
   box-shadow: 0 34px 90px rgb(22 25 24 / 0.18);
   outline: none;
   animation: public-cart-drawer-in 0.32s cubic-bezier(0.22, 1, 0.36, 1);
@@ -23,7 +23,7 @@
 .public-cart-drawer__footer {
   flex: 0 0 auto;
   padding: 1.1rem 1.15rem;
-  border-bottom: 1px solid var(--menu-line, #e4ddd3);
+  border-bottom: 1px solid var(--menu-line);
 }
 
 .public-cart-drawer__header {
@@ -53,7 +53,7 @@
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: var(--menu-surface-soft, #f7f3ed);
+  background: var(--menu-surface-soft);
   color: var(--menu-muted, #727975);
   cursor: pointer;
 }
@@ -75,7 +75,7 @@
   align-items: center;
   gap: 0.7rem;
   padding: 0.8rem 0;
-  border-bottom: 1px solid var(--menu-line, #e4ddd3);
+  border-bottom: 1px solid var(--menu-line);
 }
 
 .public-cart-drawer__thumb {
@@ -83,8 +83,8 @@
   height: 3.5rem;
   border-radius: 0.8rem;
   overflow: hidden;
-  background: var(--menu-surface-soft, #f7f3ed);
-  border: 1px solid var(--menu-line, #e4ddd3);
+  background: var(--menu-surface-soft);
+  border: 1px solid var(--menu-line);
 }
 
 .public-cart-drawer__thumb img {
@@ -125,9 +125,9 @@
   align-items: center;
   gap: 0.2rem;
   padding: 0.2rem;
-  border: 1px solid var(--menu-line, #e4ddd3);
+  border: 1px solid var(--menu-line);
   border-radius: 999px;
-  background: var(--menu-surface-soft, #f7f3ed);
+  background: var(--menu-surface-soft);
 }
 
 .public-cart-drawer__qty-btn {
@@ -137,7 +137,7 @@
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: #fff;
+  background: var(--restaurant-surface-white);
   color: var(--menu-text, #1f2421);
   cursor: pointer;
 }
@@ -152,7 +152,7 @@
 .public-cart-drawer__remove {
   border: 0;
   background: transparent;
-  color: var(--menu-danger, #ba4b4b);
+  color: var(--menu-danger);
   font: inherit;
   font-size: 0.68rem;
   font-weight: 900;
@@ -179,8 +179,8 @@
   place-items: center;
   margin: 0 auto 0.75rem;
   border-radius: 50%;
-  color: var(--menu-terracotta, #b8663f);
-  background: var(--menu-terracotta-soft, #fff1e9);
+  color: var(--menu-terracotta);
+  background: var(--menu-terracotta-soft);
 }
 
 .public-cart-drawer__empty-icon svg {
@@ -189,7 +189,7 @@
 }
 
 .public-cart-drawer__footer {
-  border-top: 1px solid var(--menu-line, #e4ddd3);
+  border-top: 1px solid var(--menu-line);
   border-bottom: 0;
 }
 
@@ -227,16 +227,16 @@
 
 .public-cart-drawer__checkout {
   border: 0;
-  color: #fff;
-  background: linear-gradient(135deg, var(--menu-terracotta, #b8663f), var(--menu-terracotta-deep, #97512d));
+  color: var(--restaurant-surface-white);
+  background: linear-gradient(135deg, var(--menu-terracotta), var(--menu-terracotta-deep, #97512d));
   box-shadow: 0 12px 20px rgb(184 102 63 / 0.2);
 }
 
 .public-cart-drawer__clear {
   padding: 0 0.75rem;
-  border: 1px solid var(--menu-line, #e4ddd3);
+  border: 1px solid var(--menu-line);
   color: var(--menu-muted, #727975);
-  background: #fff;
+  background: var(--restaurant-surface-white);
 }
 
 .public-cart-drawer__checkout:disabled,

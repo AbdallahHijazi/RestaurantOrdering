@@ -16,8 +16,8 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  color: var(--menu-sage, #5e7d63);
-  background: var(--menu-sage-soft, #eef4ef);
+  color: var(--menu-sage);
+  background: var(--menu-sage-soft);
 }
 
 .public-confirmation__icon svg {
@@ -36,9 +36,9 @@
   display: grid;
   gap: 0.45rem;
   padding: 1rem;
-  border: 1px solid var(--menu-line, #e4ddd3);
+  border: 1px solid var(--menu-line);
   border-radius: 0.875rem;
-  background: var(--menu-surface-soft, #f7f3ed);
+  background: var(--menu-surface-soft);
 }
 
 .public-confirmation__order-number span {

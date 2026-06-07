@@ -5,14 +5,14 @@
 .order-invoice-print-area__header {
   margin-block-end: 1.25rem;
   padding-block-end: 0.75rem;
-  border-block-end: 2px solid #b8663f;
+  border-block-end: 2px solid var(--restaurant-accent);
 }
 
 .order-invoice-print-area__title {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 800;
-  color: #b8663f;
+  color: var(--restaurant-accent);
 }
 
 .order-invoice-print-area__meta {
@@ -111,7 +111,7 @@
   }
 
   body {
-    background: #fff !important;
+    background: var(--restaurant-surface-white) !important;
   }
 
   body * {
@@ -129,7 +129,7 @@
     inset: 0;
     width: 100%;
     padding: 0;
-    background: #fff !important;
+    background: var(--restaurant-surface-white) !important;
     color: #111 !important;
     box-shadow: none !important;
     border: 0 !important;

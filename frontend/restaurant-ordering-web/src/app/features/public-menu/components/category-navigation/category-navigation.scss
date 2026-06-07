@@ -12,7 +12,7 @@
   border-radius: 1.375rem;
   background: rgb(255 252 248 / 0.9);
   backdrop-filter: blur(18px);
-  box-shadow: var(--menu-shadow-md, 0 22px 50px rgb(22 25 24 / 0.1));
+  box-shadow: var(--menu-shadow-md);
 }
 
 .public-menu-filter__categories {
@@ -52,21 +52,21 @@
   white-space: nowrap;
   cursor: pointer;
   transition:
-    color 0.22s var(--menu-ease, ease),
+    color 0.22s var(--menu-ease),
     background 0.22s ease,
     border-color 0.22s ease,
     transform 0.22s ease;
 }
 
 .public-menu-filter__pill:hover {
-  color: var(--menu-terracotta, #b8663f);
-  background: #fff;
+  color: var(--menu-terracotta);
+  background: var(--restaurant-surface-white);
   border-color: #e7d8c8;
 }
 
 .public-menu-filter__pill--active {
-  color: var(--menu-terracotta, #b8663f);
-  background: #fff;
+  color: var(--menu-terracotta);
+  background: var(--restaurant-surface-white);
   border-color: #ecd9ca;
   box-shadow: 0 8px 16px rgb(35 36 32 / 0.06);
 }
@@ -78,7 +78,7 @@
   bottom: -0.35rem;
   height: 2px;
   border-radius: 99px;
-  background: var(--menu-terracotta, #b8663f);
+  background: var(--menu-terracotta);
 }
 
 .public-menu-filter__pill:focus-visible,
@@ -108,9 +108,9 @@
   width: 100%;
   height: 2.75rem;
   padding-inline: 2.7rem 0.9rem;
-  border: 1px solid var(--menu-line, #e4ddd3);
+  border: 1px solid var(--menu-line);
   border-radius: 999px;
-  background: #fff;
+  background: var(--restaurant-surface-white);
   color: var(--menu-text, #1f2421);
   font: inherit;
   outline: none;
@@ -118,7 +118,7 @@
 }
 
 .public-menu-filter__search input:focus {
-  border-color: var(--menu-terracotta, #b8663f);
+  border-color: var(--menu-terracotta);
   box-shadow: 0 0 0 4px rgb(184 102 63 / 0.1);
 }
 

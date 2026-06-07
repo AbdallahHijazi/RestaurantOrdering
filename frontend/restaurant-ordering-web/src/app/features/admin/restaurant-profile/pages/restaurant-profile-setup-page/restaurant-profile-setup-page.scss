@@ -41,7 +41,7 @@
   border-radius: 999px;
   padding: 0.5rem 1rem;
   background: #171c19;
-  color: #fff;
+  color: var(--restaurant-surface-white);
   font-size: 0.8125rem;
   font-weight: 700;
   cursor: pointer;
@@ -93,8 +93,8 @@
   font-size: 0.875rem;
   cursor: pointer;
   transition:
-    color 280ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 280ms var(--restaurant-ease-standard),
+    transform 280ms var(--restaurant-ease-standard),
     background-color 280ms ease;
 }
 
@@ -104,7 +104,7 @@
 
 .profile-console__tab.is-active {
   background: #f5f2ed;
-  color: #b8663f;
+  color: var(--restaurant-accent);
   font-weight: 700;
 }
 
@@ -115,7 +115,7 @@
   bottom: 0;
   height: 3px;
   border-radius: 999px 999px 0 0;
-  background: #b8663f;
+  background: var(--restaurant-accent);
 }
 
 .profile-console__workspace {
@@ -133,7 +133,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: clamp(1rem, 2.5vw, 1.75rem);
-  background: #fff;
+  background: var(--restaurant-surface-white);
   border-inline-end: 1px solid #c4c7c3;
 }
 
@@ -199,9 +199,9 @@
 .profile-console__field input:focus-visible,
 .profile-console__field textarea:focus-visible,
 .profile-console__field select:focus-visible {
-  border-color: #b8663f;
+  border-color: var(--restaurant-accent);
   box-shadow: 0 0 0 4px rgb(184 102 63 / 0.18);
-  background: #fff;
+  background: var(--restaurant-surface-white);
 }
 
 .profile-console__technical {
@@ -215,7 +215,7 @@
 }
 
 .profile-console__error {
-  color: #b45309;
+  color: var(--restaurant-warning);
   font-size: 0.8125rem;
 }
 
@@ -251,7 +251,7 @@
 }
 
 .profile-console__toggle input {
-  accent-color: #b8663f;
+  accent-color: var(--restaurant-accent);
 }
 
 .profile-console__accent {
@@ -293,8 +293,8 @@
 }
 
 .profile-console__upload-card:hover {
-  border-color: #b8663f;
-  background: #fff;
+  border-color: var(--restaurant-accent);
+  background: var(--restaurant-surface-white);
 }
 
 .profile-console__upload-thumb {
@@ -349,12 +349,12 @@
 .profile-console__btn--primary {
   border: none;
   background: #171c19;
-  color: #fff;
+  color: var(--restaurant-surface-white);
 }
 
 .profile-console__btn--secondary {
   border: 1px solid #c4c7c3;
-  background: #fff;
+  background: var(--restaurant-surface-white);
   color: #1a1c1a;
 }
 
@@ -372,7 +372,7 @@
   width: 0.95rem;
   height: 0.95rem;
   border: 2px solid rgb(255 255 255 / 0.35);
-  border-top-color: #fff;
+  border-top-color: var(--restaurant-surface-white);
   border-radius: 50%;
   animation: profile-console-spin 720ms linear infinite;
 }

@@ -23,7 +23,7 @@
   border: 0;
   padding: 0.6rem 1rem;
   background: var(--orders-charcoal);
-  color: #fff;
+  color: var(--orders-surface);
   font-weight: 700;
 }
 
@@ -101,7 +101,7 @@
 
 .orders-management-page__card-number {
   margin: 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--restaurant-font-mono);
   font-size: 1.1rem;
   font-weight: 900;
   letter-spacing: 0.02em;
@@ -117,7 +117,7 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.2rem 0.65rem;
-  border-radius: 999px;
+  border-radius: var(--restaurant-radius-pill);
   font-size: 0.75rem;
   font-weight: 800;
 }
@@ -229,7 +229,7 @@
 
 .orders-management-page__details-btn:hover {
   background: var(--orders-charcoal);
-  color: #fff;
+  color: var(--orders-surface);
 }
 
 .orders-management-page__pagination {

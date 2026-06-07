@@ -1,9 +1,9 @@
 .public-menu-card {
   overflow: hidden;
-  border: 1px solid var(--menu-line, #e4ddd3);
+  border: 1px solid var(--menu-line);
   border-radius: 1.375rem;
-  background: #fff;
-  box-shadow: var(--menu-shadow-sm, 0 10px 26px rgb(22 25 24 / 0.06));
+  background: var(--restaurant-surface-white);
+  box-shadow: var(--menu-shadow-sm);
   transition:
     transform 0.36s cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 0.36s ease,
@@ -27,7 +27,7 @@
 }
 
 .public-menu-card__placeholder {
-  background: linear-gradient(135deg, var(--menu-bg-soft, #f4efe8), var(--menu-line, #e4ddd3));
+  background: linear-gradient(135deg, var(--menu-bg-soft), var(--menu-line));
 }
 
 .public-menu-card__badge {
@@ -39,7 +39,7 @@
   align-items: center;
   padding: 0 0.7rem;
   border-radius: 999px;
-  color: var(--menu-terracotta, #b8663f);
+  color: var(--menu-terracotta);
   background: rgb(255 255 255 / 0.92);
   backdrop-filter: blur(8px);
   box-shadow: 0 8px 14px rgb(43 32 23 / 0.08);
@@ -85,7 +85,7 @@
 
 .public-menu-card__price {
   display: block;
-  color: var(--menu-terracotta, #b8663f);
+  color: var(--menu-terracotta);
   font-size: 1.35rem;
   line-height: 1;
   font-weight: 900;
@@ -93,7 +93,7 @@
 
 .public-menu-card__price--original {
   margin-top: 0.3rem;
-  color: var(--menu-muted-soft, #979d99);
+  color: var(--menu-muted-soft);
   font-size: 0.75rem;
   text-decoration: line-through;
   font-weight: 700;
@@ -125,7 +125,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--menu-sage, #5e7d63);
+  color: var(--menu-sage);
   font-size: 0.68rem;
   font-weight: 900;
 }
@@ -140,7 +140,7 @@
 }
 
 .public-menu-card__tag--off {
-  color: var(--menu-muted-soft, #979d99);
+  color: var(--menu-muted-soft);
 }
 
 .public-menu-card__tag--off::before {
@@ -154,10 +154,10 @@
   justify-content: center;
   gap: 0.45rem;
   padding: 0 0.95rem;
-  border: 1px solid var(--menu-dark, #191c1b);
+  border: 1px solid var(--menu-dark);
   border-radius: 0.7rem;
   background: transparent;
-  color: var(--menu-dark, #191c1b);
+  color: var(--menu-dark);
   font: inherit;
   font-size: 0.68rem;
   font-weight: 900;
@@ -174,8 +174,8 @@
 }
 
 .public-menu-card__add:hover:not(:disabled) {
-  color: #fff;
-  background: var(--menu-dark, #191c1b);
+  color: var(--restaurant-surface-white);
+  background: var(--menu-dark);
   transform: translateY(-2px);
 }
 
@@ -186,9 +186,9 @@
 }
 
 .public-menu-card__add--added {
-  border-color: var(--menu-sage, #5e7d63);
-  color: var(--menu-sage, #5e7d63);
-  background: var(--menu-sage-soft, #eef4ef);
+  border-color: var(--menu-sage);
+  color: var(--menu-sage);
+  background: var(--menu-sage-soft);
 }
 
 .public-menu-card__add:focus-visible {
@@ -201,9 +201,9 @@
   align-items: center;
   gap: 0.2rem;
   padding: 0.2rem;
-  border: 1px solid var(--menu-line, #e4ddd3);
+  border: 1px solid var(--menu-line);
   border-radius: 999px;
-  background: var(--menu-surface-soft, #f7f3ed);
+  background: var(--menu-surface-soft);
 }
 
 .public-menu-card__qty-btn {
@@ -213,7 +213,7 @@
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: #fff;
+  background: var(--restaurant-surface-white);
   color: var(--menu-text, #1f2421);
   cursor: pointer;
 }
@@ -226,7 +226,7 @@
   .public-menu-card:hover {
     transform: translateY(-7px);
     border-color: #dcc7b4;
-    box-shadow: var(--menu-shadow-md, 0 22px 50px rgb(22 25 24 / 0.1));
+    box-shadow: var(--menu-shadow-md);
   }
 
   .public-menu-card:hover .public-menu-card__media img {
@@ -234,7 +234,7 @@
   }
 
   .public-menu-card:hover .public-menu-card__title-group h3 {
-    color: var(--menu-terracotta, #b8663f);
+    color: var(--menu-terracotta);
   }
 }
 

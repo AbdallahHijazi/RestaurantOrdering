@@ -28,7 +28,7 @@
   padding-inline: 1rem;
   border: 0;
   border-radius: 11px;
-  color: #fff;
+  color: var(--restaurant-surface-white);
   background: linear-gradient(135deg, #c2764d, #ad5d37);
   font: inherit;
   font-weight: 800;
@@ -78,7 +78,7 @@
   border: 1px solid #e2d8cf;
   border-radius: 11px;
   color: #4f5753;
-  background: #fff;
+  background: var(--restaurant-surface-white);
   font: inherit;
   font-weight: 800;
   line-height: 1;
@@ -88,7 +88,7 @@
 
 .staff-modal-actions__cancel:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgb(32 39 36 / 0.06);
+  box-shadow: var(--restaurant-shadow-admin-sm);
   background: #fcfaf7;
 }
 

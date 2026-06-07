@@ -24,7 +24,7 @@
 
 .button-primary {
   background: var(--restaurant-accent);
-  color: #fff;
+  color: var(--restaurant-surface-white);
   border-color: var(--restaurant-accent);
 }
 
@@ -55,7 +55,7 @@
 
 .button-danger {
   background: rgb(176 59 59 / 0.1);
-  color: #8f2f2f;
+  color: var(--restaurant-danger);
   border-color: rgb(176 59 59 / 0.35);
 }
 
@@ -65,7 +65,7 @@
 
 .button-success {
   background: rgb(47 122 79 / 0.12);
-  color: #2f6b47;
+  color: var(--restaurant-success);
   border-color: rgb(47 122 79 / 0.35);
 }
 

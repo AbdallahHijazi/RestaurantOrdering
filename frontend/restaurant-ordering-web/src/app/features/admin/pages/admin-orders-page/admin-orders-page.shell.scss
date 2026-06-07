@@ -1,19 +1,19 @@
 .orders-management-page {
-  --orders-bg: #faf8f5;
-  --orders-surface: #ffffff;
+  --orders-bg: var(--restaurant-background-orders);
+  --orders-surface: var(--restaurant-surface-white);
   --orders-charcoal: var(--restaurant-neutral-900);
   --orders-terracotta: var(--restaurant-accent);
   --orders-terracotta-soft: var(--restaurant-accent-soft);
-  --orders-sage: #4f8c76;
-  --orders-sage-soft: #eaf6f0;
-  --orders-amber: #b7832f;
-  --orders-amber-soft: #fff7e6;
+  --orders-sage: var(--restaurant-sage);
+  --orders-sage-soft: var(--restaurant-sage-soft);
+  --orders-amber: var(--restaurant-amber);
+  --orders-amber-soft: var(--restaurant-amber-soft);
   --orders-bluegray: var(--restaurant-neutral-500);
   --orders-muted: var(--restaurant-neutral-500);
   --orders-bluegray-soft: #eef2f6;
-  --orders-red: #b64141;
-  --orders-red-soft: #fff2f2;
-  --orders-line: #e8e0d8;
+  --orders-red: var(--restaurant-danger-medium);
+  --orders-red-soft: var(--restaurant-danger-surface);
+  --orders-line: var(--restaurant-border-orders);
 
   width: min(100%, 87.5rem);
   margin-inline: auto;
@@ -93,7 +93,7 @@
   padding-inline: 1.1rem;
   border: 0;
   background: var(--orders-charcoal);
-  color: #fff;
+  color: var(--orders-surface);
   font-weight: 700;
 }
 
@@ -156,7 +156,7 @@
 .orders-management-page__status-pill {
   flex: 0 0 auto;
   border: 1px solid var(--orders-line);
-  border-radius: 999px;
+  border-radius: var(--restaurant-radius-pill);
   padding: 0.45rem 0.95rem;
   background: var(--orders-surface);
   color: var(--orders-charcoal);
@@ -176,7 +176,7 @@
 .orders-management-page__status-pill--active {
   background: var(--orders-charcoal);
   border-color: var(--orders-charcoal);
-  color: #fff;
+  color: var(--orders-surface);
 }
 
 .orders-management-page__search {
@@ -262,7 +262,7 @@
   block-size: 20px;
   flex: 0 0 20px;
   fill: none;
-  stroke: #17201d;
+  stroke: var(--orders-charcoal);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -272,7 +272,7 @@
 
 .orders-management-page__extra-filters-icon path {
   fill: none;
-  stroke: #17201d;
+  stroke: var(--orders-charcoal);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;

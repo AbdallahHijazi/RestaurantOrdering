@@ -8,7 +8,7 @@
   --border: rgba(255, 255, 255, 0.08);
   --text: #f5f5f5;
   --muted: #a8a29e;
-  --accent: #b8663f;
+  --accent: var(--restaurant-accent);
   --input: #131313;
   --error: #ffb4ab;
   --grid: rgba(64, 58, 53, 0.12);
@@ -107,7 +107,7 @@
 .login-page__lang-btn.is-active {
   background: rgba(151, 79, 47, 0.38);
   border: 1px dashed var(--border);
-  color: #fff;
+  color: var(--restaurant-surface-white);
 }
 
 .login-page__lang-btn:focus-visible,
@@ -258,7 +258,7 @@
   border-radius: 0.65rem;
   padding: 0.85rem 1rem;
   background: var(--accent);
-  color: #fff;
+  color: var(--restaurant-surface-white);
   font: inherit 600;
   cursor: pointer;
 }
@@ -280,7 +280,7 @@
   width: 1rem;
   height: 1rem;
   border: 2px solid #ffffff59;
-  border-top-color: #fff;
+  border-top-color: var(--restaurant-surface-white);
   border-radius: 50%;
   animation: login-spin 0.8s linear infinite;
 }

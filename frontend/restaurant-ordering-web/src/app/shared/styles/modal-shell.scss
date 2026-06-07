@@ -5,10 +5,10 @@
   place-items: center;
   flex: 0 0 auto;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--restaurant-radius-pill);
   padding: 0;
   background: var(--restaurant-accent);
-  color: #fff;
+  color: var(--restaurant-surface-white);
   font-size: 1.35rem;
   line-height: 1;
   cursor: pointer;
@@ -47,7 +47,7 @@
   display: grid;
   place-items: center;
   padding: clamp(0.75rem, 3vw, 1.5rem);
-  background: rgb(17 24 20 / 0.46);
+  background: var(--restaurant-overlay-backdrop);
   backdrop-filter: blur(2px);
 }
 

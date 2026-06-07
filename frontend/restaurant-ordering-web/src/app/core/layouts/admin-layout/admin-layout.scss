@@ -84,7 +84,7 @@
   border: 1px solid var(--admin-border);
   object-fit: cover;
   flex-shrink: 0;
-  background: #fff;
+  background: var(--restaurant-surface-white);
 }
 
 .admin-layout__brand-text {
@@ -176,7 +176,7 @@
 
 .admin-layout__nav a.is-active {
   background: #171c19;
-  color: #fff;
+  color: var(--restaurant-surface-white);
 }
 
 .admin-layout__menu-btn {
@@ -283,7 +283,7 @@
 
 .admin-layout__lang button.is-active {
   background: #171c19;
-  color: #fff;
+  color: var(--restaurant-surface-white);
 }
 
 .admin-layout__content {

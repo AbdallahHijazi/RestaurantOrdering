@@ -1,5 +1,5 @@
 .profile-console {
-  --profile-accent: #b8663f;
+  --profile-accent: var(--restaurant-accent);
   --profile-surface: #faf9f6;
   --profile-surface-cream: #f5f2ed;
   --profile-outline: #c4c7c3;
@@ -135,7 +135,7 @@
   display: grid;
   place-items: center;
   background: var(--profile-charcoal);
-  color: #fff;
+  color: var(--restaurant-surface-white);
   font-size: 0.8125rem;
   font-weight: 700;
 }
@@ -211,7 +211,7 @@
   height: 2.25rem;
   border: 1px solid var(--profile-outline);
   border-radius: 0.625rem;
-  background: #fff;
+  background: var(--restaurant-surface-white);
   color: #434845;
   cursor: pointer;
   transition:
@@ -253,7 +253,7 @@
 }
 
 .profile-console__logout {
-  color: #8f2f2f;
+  color: var(--restaurant-danger);
 }
 
 .profile-console__logout:hover {

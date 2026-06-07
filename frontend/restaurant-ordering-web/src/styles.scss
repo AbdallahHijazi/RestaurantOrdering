@@ -1,32 +1,79 @@
 @import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@600;700&family=Be+Vietnam+Pro:wght@400;500;600&display=swap');
 
 :root {
+  /* Z-index */
   --z-admin-header: 100;
   --z-modal-backdrop: 1300;
   --z-modal-dialog: 1301;
   --z-preview-overlay: 1400;
 
+  /* Typography */
+  --restaurant-font-display: 'Epilogue', Georgia, serif;
+  --restaurant-font-ar: 'Be Vietnam Pro', 'Segoe UI', Tahoma, sans-serif;
+  --restaurant-font-en: 'Be Vietnam Pro', 'Segoe UI', Helvetica, sans-serif;
+  --restaurant-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-display: var(--restaurant-font-display);
+  --font-body: var(--restaurant-font-ar);
+
+  /* Accent */
   --restaurant-accent: #B8663F;
   --restaurant-accent-strong: #9a5534;
   --restaurant-accent-soft: color-mix(in srgb, var(--restaurant-accent) 18%, white);
+
+  /* Background and surfaces */
   --restaurant-background: #F6F0E7;
+  --restaurant-background-menu: #faf8f4;
+  --restaurant-background-orders: #faf8f5;
+  --restaurant-background-soft: #f4efe8;
   --restaurant-surface: #FFFDFC;
+  --restaurant-surface-white: #ffffff;
+  --restaurant-surface-soft: #f7f3ed;
   --restaurant-alternate-surface: #EEE3D6;
+
+  /* Text */
   --restaurant-text: #2A211C;
+  --restaurant-text-soft: #475569;
   --restaurant-muted-text: #796B61;
+  --restaurant-subtle-text: #979d99;
+
+  /* Borders */
   --restaurant-border: #E3D6C8;
+  --restaurant-border-menu: #e4ddd3;
+  --restaurant-border-menu-strong: #d3c9bc;
+  --restaurant-border-admin: #e9e1d9;
+  --restaurant-border-orders: #e8e0d8;
+  --restaurant-border-slate: #e2e8f0;
+
+  /* Footer */
   --restaurant-footer: #2E2925;
   --restaurant-footer-text: #F7F1E8;
 
+  /* Semantic */
   --restaurant-success: #2f6b47;
   --restaurant-success-soft: rgb(47 122 79 / 0.14);
   --restaurant-danger: #8f2f2f;
   --restaurant-danger-soft: rgb(176 59 59 / 0.12);
+  --restaurant-danger-medium: #b64141;
+  --restaurant-danger-menu: #ba4b4b;
+  --restaurant-danger-admin: #b83f3f;
+  --restaurant-danger-surface: #fff2f2;
   --restaurant-warning: #b45309;
   --restaurant-warning-soft: #fef3c7;
   --restaurant-info: #1d4ed8;
   --restaurant-info-soft: rgb(59 130 246 / 0.12);
+  --restaurant-sage: #4f8c76;
+  --restaurant-sage-menu: #5e7d63;
+  --restaurant-sage-soft: #eaf6f0;
+  --restaurant-sage-soft-menu: #eef4ef;
+  --restaurant-amber: #b7832f;
+  --restaurant-amber-soft: #fff7e6;
 
+  /* Dark surfaces */
+  --restaurant-dark: #191c1b;
+  --restaurant-dark-deep: #101312;
+
+  /* Neutral */
+  --restaurant-neutral-950: #0f172a;
   --restaurant-neutral-900: #17201d;
   --restaurant-neutral-800: #1e293b;
   --restaurant-neutral-700: #475569;
@@ -34,12 +81,25 @@
   --restaurant-neutral-300: #e2e8f0;
   --restaurant-neutral-100: #f7f3ed;
 
-  --font-display: 'Epilogue', Georgia, serif;
-  --font-body: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+  /* Radius */
+  --restaurant-radius-pill: 999px;
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
+
+  /* Shadows */
   --shadow-soft: 0 12px 32px rgb(42 33 28 / 0.08);
+  --restaurant-shadow-menu-sm: 0 10px 26px rgb(22 25 24 / 0.06);
+  --restaurant-shadow-menu-md: 0 22px 50px rgb(22 25 24 / 0.1);
+  --restaurant-shadow-admin-sm: 0 10px 28px rgb(32 39 36 / 0.06);
+  --restaurant-shadow-admin-md: 0 18px 42px rgb(32 39 36 / 0.1);
+  --restaurant-overlay-backdrop: rgb(17 24 20 / 0.46);
+
+  /* Motion */
+  --restaurant-motion-fast: 160ms;
+  --restaurant-motion-normal: 220ms;
+  --restaurant-motion-slow: 320ms;
+  --restaurant-ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
   --transition-base: 220ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -53,10 +113,17 @@ html {
   scroll-behavior: smooth;
 }
 
+html[dir='rtl'] body {
+  font-family: var(--restaurant-font-ar);
+}
+
+html[dir='ltr'] body {
+  font-family: var(--restaurant-font-en);
+}
+
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: var(--font-body);
   color: var(--restaurant-text);
   background: var(--restaurant-background);
   line-height: 1.5;
