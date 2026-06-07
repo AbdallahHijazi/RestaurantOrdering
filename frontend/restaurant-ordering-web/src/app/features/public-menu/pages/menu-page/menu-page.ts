@@ -29,6 +29,7 @@ import {
   type PublicMenuLoadError,
 } from '../../data-access/public-menu-api';
 import type { PublicOrderConfirmationApiDto } from '../../data-access/public-order.dto';
+import { PublicTablesApiService } from '../../data-access/public-tables-api.service';
 import { MOCK_IMAGE_FALLBACK } from '../../data-access/public-menu-mock.data';
 import type {
   PublicMenuCategory,
@@ -62,6 +63,7 @@ type PageState = 'loading' | 'success' | 'not-found' | 'error';
 export class MenuPage implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly menuApi = inject(PublicMenuApiService);
+  private readonly tablesApi = inject(PublicTablesApiService);
   protected readonly cart = inject(PublicCartService);
   protected readonly localeService = inject(LocaleService);
   private readonly themeService = inject(RestaurantThemeService);
@@ -85,6 +87,10 @@ export class MenuPage implements OnDestroy {
   protected readonly orderConfirmation = signal<PublicOrderConfirmationApiDto | null>(null);
   protected readonly toastMessage = signal('');
   protected readonly toastVisible = signal(false);
+  protected readonly tableResolveState = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  protected readonly tableResolveError = signal<string | null>(null);
+
+  protected readonly resolvedTable = this.cart.resolvedTable;
 
   protected readonly imageFallback = MOCK_IMAGE_FALLBACK;
 
@@ -174,6 +180,7 @@ export class MenuPage implements OnDestroy {
     }
 
     this.loadMenu(slug);
+    this.resolveTableFromQuery(slug);
   }
 
   ngOnDestroy(): void {
@@ -266,6 +273,41 @@ export class MenuPage implements OnDestroy {
 
   protected onLogoError(): void {
     this.logoFailed.set(true);
+  }
+
+  protected tableBadgeLabel(): string {
+    const table = this.resolvedTable();
+    if (!table) {
+      return '';
+    }
+
+    const zone = table.zone?.trim();
+    return zone ? `${table.tableName} · ${zone}` : table.tableName;
+  }
+
+  private resolveTableFromQuery(slug: string): void {
+    const token = this.route.snapshot.queryParamMap?.get('table')?.trim();
+    if (!token) {
+      this.cart.clearTableSession();
+      this.tableResolveState.set('idle');
+      this.tableResolveError.set(null);
+      return;
+    }
+
+    this.tableResolveState.set('loading');
+    this.tableResolveError.set(null);
+
+    this.tablesApi.resolveTable(slug, token).subscribe({
+      next: (resolved) => {
+        this.cart.setTableSession(resolved, token);
+        this.tableResolveState.set('ready');
+      },
+      error: () => {
+        this.cart.clearTableSession();
+        this.tableResolveState.set('error');
+        this.tableResolveError.set(this.ui().publicMenuTableInvalid);
+      },
+    });
   }
 
   private loadMenu(slug: string): void {

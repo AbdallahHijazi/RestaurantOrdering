@@ -50,6 +50,15 @@
             />
           }
           <h1>{{ restaurantName() }}</h1>
+          @if (resolvedTable(); as table) {
+            <p class="menu-page__table-badge" data-testid="public-menu-table-badge">
+              {{ ui().publicMenuTableBadge }}: {{ tableBadgeLabel() }}
+            </p>
+          } @else if (tableResolveState() === 'error') {
+            <p class="menu-page__table-badge menu-page__table-badge--error" data-testid="public-menu-table-error">
+              {{ tableResolveError() }}
+            </p>
+          }
         </div>
 
         <div class="menu-page__actions">

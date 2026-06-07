@@ -43,35 +43,52 @@
               <p class="public-checkout__alert" role="alert">{{ message }}</p>
             }
 
-            <div class="public-checkout__field public-checkout__field--full">
-              <span class="public-checkout__label">{{ ui().publicCheckoutTitle }}</span>
-              <div class="public-checkout__types">
-                @if (orderSettings().isPickupEnabled) {
-                  <label class="public-checkout__type-card">
-                    <input
-                      type="radio"
-                      name="orderType"
-                      [checked]="orderType() === 1"
-                      [disabled]="submitting()"
-                      (change)="selectPickup()"
-                    />
-                    <span>{{ ui().publicCheckoutPickup }}</span>
-                  </label>
-                }
-                @if (orderSettings().isDeliveryEnabled) {
-                  <label class="public-checkout__type-card">
-                    <input
-                      type="radio"
-                      name="orderType"
-                      [checked]="orderType() === 2"
-                      [disabled]="submitting()"
-                      (change)="selectDelivery()"
-                    />
-                    <span>{{ ui().publicCheckoutDelivery }}</span>
-                  </label>
-                }
+            @if (isDineIn()) {
+              <div class="public-checkout__field public-checkout__field--full">
+                <span class="public-checkout__label">{{ ui().publicCheckoutOrderType }}</span>
+                <p class="public-checkout__dine-in" data-testid="public-checkout-dine-in">
+                  {{ ui().publicOrderTypeDineIn }}
+                  @if (cart.resolvedTable(); as table) {
+                    <span class="public-checkout__table-badge">
+                      {{ table.tableName }}
+                      @if (table.zone?.trim()) {
+                        · {{ table.zone }}
+                      }
+                    </span>
+                  }
+                </p>
               </div>
-            </div>
+            } @else {
+              <div class="public-checkout__field public-checkout__field--full">
+                <span class="public-checkout__label">{{ ui().publicCheckoutTitle }}</span>
+                <div class="public-checkout__types">
+                  @if (orderSettings().isPickupEnabled) {
+                    <label class="public-checkout__type-card">
+                      <input
+                        type="radio"
+                        name="orderType"
+                        [checked]="orderType() === 1"
+                        [disabled]="submitting()"
+                        (change)="selectPickup()"
+                      />
+                      <span>{{ ui().publicCheckoutPickup }}</span>
+                    </label>
+                  }
+                  @if (orderSettings().isDeliveryEnabled) {
+                    <label class="public-checkout__type-card">
+                      <input
+                        type="radio"
+                        name="orderType"
+                        [checked]="orderType() === 2"
+                        [disabled]="submitting()"
+                        (change)="selectDelivery()"
+                      />
+                      <span>{{ ui().publicCheckoutDelivery }}</span>
+                    </label>
+                  }
+                </div>
+              </div>
+            }
 
             <div class="public-checkout__grid">
               <label class="public-checkout__field">
@@ -101,7 +118,7 @@
                 />
               </label>
 
-              @if (orderType() === 2) {
+              @if (orderType() === 2 && !isDineIn()) {
                 <label class="public-checkout__field public-checkout__field--full">
                   <span class="public-checkout__label">{{ ui().publicCheckoutDeliveryAddress }}</span>
                   <input

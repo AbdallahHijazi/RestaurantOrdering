@@ -14,6 +14,7 @@ public interface IApplicationDbContext
     DbSet<OrderItem> OrderItems { get; }
     DbSet<MediaFile> MediaFiles { get; }
     DbSet<QrCode> QrCodes { get; }
+    DbSet<RestaurantTable> RestaurantTables { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

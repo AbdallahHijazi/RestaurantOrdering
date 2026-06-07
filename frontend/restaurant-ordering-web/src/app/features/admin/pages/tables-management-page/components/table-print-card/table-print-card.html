@@ -1,0 +1,15 @@
+<article class="table-print-card">
+  <header class="table-print-card__header">
+    <h2>{{ restaurantName() }}</h2>
+    <p>{{ locale.uiText('tablesPrintScanToOrder') }}</p>
+  </header>
+
+  <div class="table-print-card__meta">
+    <strong>{{ table().name }}</strong>
+    <span>{{ zoneLabel(table()) }}</span>
+  </div>
+
+  <div class="table-print-card__qr" [innerHTML]="safeQrSvg()"></div>
+
+  <p class="table-print-card__url" dir="ltr">{{ menuUrl() }}</p>
+</article>

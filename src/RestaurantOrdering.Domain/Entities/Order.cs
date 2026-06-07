@@ -11,6 +11,7 @@ public class Order : AuditableEntity, ISoftDelete
     public string? GuestName { get; set; }
     public string? GuestPhone { get; set; }
     public OrderType OrderType { get; set; }
+    public Guid? TableId { get; set; }
     public OrderStatus OrderStatus { get; set; }
     public string? DeliveryAddress { get; set; }
     public decimal? DeliveryLatitude { get; set; }
@@ -25,6 +26,7 @@ public class Order : AuditableEntity, ISoftDelete
     public bool IsDeleted { get; set; }
 
     public Restaurant Restaurant { get; set; } = null!;
+    public RestaurantTable? Table { get; set; }
     public Customer? Customer { get; set; }
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 }

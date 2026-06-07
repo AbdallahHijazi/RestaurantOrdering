@@ -4,6 +4,7 @@ using RestaurantOrdering.Application.Common.Exceptions;
 using RestaurantOrdering.Application.Common.Interfaces;
 using RestaurantOrdering.Application.Features.Orders.Common;
 using RestaurantOrdering.Application.Features.Orders.DTOs;
+using RestaurantOrdering.Application.Features.RestaurantTables.Common;
 using RestaurantOrdering.Application.Features.Restaurants.Common;
 using RestaurantOrdering.Domain.Entities;
 using RestaurantOrdering.Domain.Enums;
@@ -58,6 +59,18 @@ public sealed class CreatePublicOrderCommandHandler
         if (request.OrderType == OrderType.Pickup && !settings.IsPickupEnabled)
         {
             throw new ConflictException("Pickup is not available for this restaurant.");
+        }
+
+        Guid? tableId = null;
+
+        if (request.OrderType == OrderType.DineIn)
+        {
+            var table = await RestaurantTableTokenService.ResolveActiveTableAsync(
+                _context,
+                restaurant.Id,
+                request.TableToken!,
+                cancellationToken);
+            tableId = table.Id;
         }
 
         var guestName = request.GuestName.Trim();
@@ -150,6 +163,7 @@ public sealed class CreatePublicOrderCommandHandler
             GuestName = guestName,
             GuestPhone = guestPhone,
             OrderType = request.OrderType,
+            TableId = tableId,
             OrderStatus = OrderStatus.New,
             DeliveryAddress = deliveryAddress,
             DeliveryLatitude = deliveryLatitude,

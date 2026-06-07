@@ -5,6 +5,7 @@ export interface CreatePublicOrderApiRequest {
   guestName: string;
   guestPhone: string;
   orderType: PublicOrderType;
+  tableToken?: string | null;
   deliveryAddress?: string | null;
   deliveryLatitude?: number | null;
   deliveryLongitude?: number | null;

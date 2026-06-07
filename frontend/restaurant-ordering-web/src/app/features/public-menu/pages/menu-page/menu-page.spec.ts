@@ -20,13 +20,17 @@ function addFirstItem(fixture: ComponentFixture<MenuPage>): void {
 }
 
 function createActivatedRoute(slug: string | null): ActivatedRoute {
-  const childSnapshot = { paramMap: convertToParamMap({}) };
-  const parentSnapshot = { paramMap: convertToParamMap(slug ? { slug } : {}) };
+  const emptyQuery = convertToParamMap({});
+  const childSnapshot = { paramMap: convertToParamMap({}), queryParamMap: emptyQuery };
+  const parentSnapshot = {
+    paramMap: convertToParamMap(slug ? { slug } : {}),
+    queryParamMap: emptyQuery,
+  };
 
   return {
     snapshot: childSnapshot,
     pathFromRoot: [
-      { snapshot: { paramMap: convertToParamMap({}) } },
+      { snapshot: { paramMap: convertToParamMap({}), queryParamMap: emptyQuery } },
       { snapshot: parentSnapshot },
       { snapshot: childSnapshot },
     ],

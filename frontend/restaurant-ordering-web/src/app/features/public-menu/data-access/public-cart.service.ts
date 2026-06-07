@@ -1,6 +1,8 @@
 import { Injectable, computed, signal } from '@angular/core';
 import type { PublicCartLineItem, PublicCartSnapshot } from '../models/public-cart.models';
 import type { PublicMenuItem } from '../models/public-menu.models';
+import { ORDER_TYPE_DINE_IN } from '../models/public-menu.models';
+import type { ResolvedPublicTable } from './public-tables.models';
 import { PUBLIC_CART_MAX_QUANTITY, PUBLIC_CART_MIN_QUANTITY } from '../models/public-menu.models';
 
 const STORAGE_PREFIX = 'restaurant-ordering.cart.';
@@ -50,15 +52,26 @@ function parseSnapshot(raw: string): PublicCartLineItem[] | null {
   }
 }
 
+export interface PublicTableSession {
+  token: string;
+  tableId: string;
+  tableName: string;
+  zone: string | null;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class PublicCartService {
   private readonly activeSlug = signal<string | null>(null);
   private readonly items = signal<PublicCartLineItem[]>([]);
+  private readonly tableSession = signal<PublicTableSession | null>(null);
 
   readonly cartItems = this.items.asReadonly();
   readonly restaurantSlug = this.activeSlug.asReadonly();
+  readonly resolvedTable = this.tableSession.asReadonly();
+  readonly hasTableSession = computed(() => this.tableSession() !== null);
+  readonly dineInOrderType = ORDER_TYPE_DINE_IN;
 
   readonly itemCount = computed(() =>
     this.items().reduce((total, line) => total + line.quantity, 0),
@@ -75,7 +88,25 @@ export class PublicCartService {
     if (this.activeSlug() !== normalized) {
       this.activeSlug.set(normalized);
       this.items.set(this.readStorage(normalized));
+      this.tableSession.set(null);
     }
+  }
+
+  setTableSession(table: ResolvedPublicTable, token: string): void {
+    this.tableSession.set({
+      token: token.trim(),
+      tableId: table.tableId,
+      tableName: table.tableName,
+      zone: table.zone,
+    });
+  }
+
+  clearTableSession(): void {
+    this.tableSession.set(null);
+  }
+
+  tableToken(): string | null {
+    return this.tableSession()?.token ?? null;
   }
 
   quantityFor(menuItemId: string): number {

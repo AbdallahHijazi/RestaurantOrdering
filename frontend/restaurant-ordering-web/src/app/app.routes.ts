@@ -96,6 +96,16 @@ export const routes: Routes = [
                 (m) => m.StaffManagementPage,
               ),
           },
+          {
+            path: 'tables',
+            data: {
+              roles: [ApplicationRoles.RestaurantOwner],
+            },
+            loadComponent: () =>
+              import('./features/admin/pages/tables-management-page/tables-management-page').then(
+                (m) => m.TablesManagementPage,
+              ),
+          },
         ],
       },
     ],

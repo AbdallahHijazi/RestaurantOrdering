@@ -75,6 +75,17 @@
   text-overflow: ellipsis;
 }
 
+.menu-page__table-badge {
+  margin: 0.2rem 0 0;
+  color: #5f6762;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.menu-page__table-badge--error {
+  color: #b42318;
+}
+
 .menu-page__logo {
   width: 2.5rem;
   height: 2.5rem;

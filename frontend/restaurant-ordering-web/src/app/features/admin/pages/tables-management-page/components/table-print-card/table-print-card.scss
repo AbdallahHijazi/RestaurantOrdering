@@ -1,0 +1,9 @@
+.table-print-card{display:grid;gap:.875rem;align-content:start;min-height:250px;padding:1rem;border:1px solid #d1d5db;border-radius:.75rem;background:var(--restaurant-surface-white);break-inside:avoid;page-break-inside:avoid}
+.table-print-card__header h2{margin:0;font-size:1.125rem;font-weight:800;color:#111}
+.table-print-card__header p{margin:.35rem 0 0;color:#64748b;font-size:.8125rem}
+.table-print-card__meta{display:grid;gap:.2rem}
+.table-print-card__meta strong{font-size:1rem;color:#111}
+.table-print-card__meta span{color:#64748b;font-size:.875rem}
+.table-print-card__qr{display:grid;place-items:center;padding:.5rem}
+.table-print-card__qr svg{width:9rem;height:9rem;display:block}
+.table-print-card__url{margin:0;color:#64748b;font-size:.6875rem;text-align:center;word-break:break-all}

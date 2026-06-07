@@ -29,6 +29,7 @@ public class Restaurant : AuditableEntity, ISoftDelete
     public ICollection<Customer> Customers { get; set; } = new List<Customer>();
     public ICollection<MediaFile> MediaFiles { get; set; } = new List<MediaFile>();
     public ICollection<QrCode> QrCodes { get; set; } = new List<QrCode>();
+    public ICollection<RestaurantTable> Tables { get; set; } = new List<RestaurantTable>();
     public MediaFile? LogoFile { get; set; }
     public MediaFile? CoverImageFile { get; set; }
 }

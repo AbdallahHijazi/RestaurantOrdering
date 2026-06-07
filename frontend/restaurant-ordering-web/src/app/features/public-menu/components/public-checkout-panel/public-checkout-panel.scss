@@ -130,6 +130,23 @@
   margin-top: 0.9rem;
 }
 
+.public-checkout__dine-in {
+  margin: 0;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--menu-line);
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--restaurant-accent, #b8663f) 10%, white);
+  color: #2f3532;
+  font-weight: 700;
+}
+
+.public-checkout__table-badge {
+  display: block;
+  margin-top: 0.35rem;
+  color: #606963;
+  font-weight: 600;
+}
+
 .public-checkout__types {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

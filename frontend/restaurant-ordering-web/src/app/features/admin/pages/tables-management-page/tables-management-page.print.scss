@@ -1,0 +1,36 @@
+@media print {
+  @page {
+    margin: 12mm;
+    size: A4;
+  }
+
+  body {
+    background: var(--restaurant-surface-white) !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .tables-print-area,
+  .tables-print-area * {
+    visibility: visible !important;
+  }
+
+  .tables-print-area {
+    display: grid !important;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0;
+    background: var(--restaurant-surface-white) !important;
+    color: #111 !important;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .tables-print-area--all {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+  }
+}

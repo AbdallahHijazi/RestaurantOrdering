@@ -1,11 +1,14 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter, Router, RouterOutlet } from '@angular/router';
 import { ApplicationRoles } from '../../auth/application-roles';
 import { AuthService } from '../../auth/auth.service';
 import { AuthSessionService } from '../../auth/auth-session.service';
 import { createTestSession } from '../../auth/test-jwt.util';
+import { API_BASE_URL } from '../../config/api-config';
 import { LocaleService } from '../../localization/locale';
 import { routes } from '../../../app.routes';
 import { AdminBrandingService } from './admin-branding.service';
@@ -336,32 +339,107 @@ describe('Admin shell routing', () => {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [Host],
-      providers: [provideRouter(routes)],
+      providers: [provideRouter(routes), provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     session = TestBed.inject(AuthSessionService);
     router = TestBed.inject(Router);
+    const httpMock = TestBed.inject(HttpTestingController);
     session.clearSession();
     session.saveSession(createTestSession(ApplicationRoles.RestaurantOwner));
 
     const hostFixture = TestBed.createComponent(Host);
+    const restaurantId = session.getRestaurantId()!;
     const adminPaths = [
       '/admin/dashboard',
       '/admin/restaurant-profile',
       '/admin/orders',
       '/admin/menu',
       '/admin/staff',
+      '/admin/tables',
     ];
+
+    const flushOpenHttpRequests = (): void => {
+      for (const request of httpMock.match(() => true)) {
+        if (request.cancelled) {
+          continue;
+        }
+
+        const url = request.request.url;
+
+        if (url.endsWith(`/restaurants/${restaurantId}`)) {
+          request.flush({
+            id: restaurantId,
+            ownerId: 'owner-id',
+            slug: 'demo-restaurant',
+            nameAr: 'مطعم',
+            nameEn: 'Restaurant',
+            phoneNumber: '+966500000000',
+            isActive: true,
+          });
+          continue;
+        }
+
+        if (url.includes('/settings')) {
+          request.flush({
+            id: 'settings-id',
+            restaurantId,
+            currencyCode: 'SAR',
+            timeZone: 'Asia/Riyadh',
+            taxRate: 15,
+            deliveryFee: 0,
+            minimumOrderAmount: 0,
+            isDeliveryEnabled: true,
+            isPickupEnabled: true,
+          });
+          continue;
+        }
+
+        if (url.includes('/orders')) {
+          request.flush({ items: [], totalCount: 0, pageNumber: 1, pageSize: 20 });
+          continue;
+        }
+
+        if (url.includes('/tables')) {
+          request.flush([]);
+          continue;
+        }
+
+        if (url.includes('/categories') || url.includes('/users')) {
+          request.flush([]);
+          continue;
+        }
+
+        if (url.includes('/public/restaurants/') && url.endsWith('/menu')) {
+          request.flush({
+            id: restaurantId,
+            slug: 'demo-restaurant',
+            nameAr: 'مطعم',
+            nameEn: 'Restaurant',
+            categories: [],
+            items: [],
+          });
+          continue;
+        }
+
+        request.flush([]);
+      }
+    };
 
     for (const path of adminPaths) {
       await router.navigateByUrl(path);
       hostFixture.detectChanges();
+      flushOpenHttpRequests();
+      hostFixture.detectChanges();
+      flushOpenHttpRequests();
 
       expect(hostFixture.nativeElement.querySelector('app-admin-layout')).toBeNull();
       expect(hostFixture.nativeElement.querySelector('[data-testid="profile-console"]')).toBeTruthy();
       expect(hostFixture.nativeElement.querySelector('[data-testid="admin-sidebar"]')).toBeNull();
       expect(hostFixture.nativeElement.querySelectorAll('[data-testid="profile-console-header"]').length).toBe(1);
     }
+
+    httpMock.verify();
   });
 
   it('redirects RestaurantManager from /admin/restaurant-profile to /admin/dashboard', async () => {

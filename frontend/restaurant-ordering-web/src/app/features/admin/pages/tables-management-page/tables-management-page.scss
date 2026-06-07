@@ -1,0 +1,42 @@
+.tables-management-page{--tables-line:var(--restaurant-border-admin);--tables-text:#1d2421;--tables-muted:#737a75;--tables-dark:var(--restaurant-neutral-900);--tables-green:var(--restaurant-sage);--tables-green-soft:#e9f5ef;--tables-terracotta:var(--restaurant-accent);--tables-terracotta-soft:#fbf1eb;--tables-red:var(--restaurant-danger-medium);--tables-red-soft:#fff3f2;--tables-amber:#b37a2a;--tables-amber-soft:#fff7e8;--tables-shadow:var(--restaurant-shadow-admin-sm);--tables-shadow-md:var(--restaurant-shadow-admin-md);position:relative;isolation:isolate;min-height:100%;padding:clamp(1.25rem,2vw,2rem) clamp(.75rem,4vw,4rem) clamp(2rem,4vw,4rem);color:var(--tables-text);background:radial-gradient(circle at 12% 22%,rgb(241 226 211/.58),transparent 18rem),linear-gradient(135deg,#faf7f3,#fdfbf8 52%,#f7f1ea);overflow:hidden}
+.tables-management-shell{max-width:90rem;margin-inline:auto}
+.tables-management-success{margin:0 0 1rem;padding:.75rem 1rem;border-radius:.75rem;background:var(--tables-green-soft);color:var(--tables-green);font-weight:700}
+.tables-management-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-block-end:1.5rem}
+.tables-management-head__actions{display:flex;flex-wrap:wrap;gap:.625rem}
+.tables-management-title h1{margin:0;font-family:var(--font-display);font-size:clamp(1.75rem,3vw,2.25rem);font-weight:800;letter-spacing:-.02em}
+.tables-management-title p{margin:.75rem 0 0;color:var(--tables-muted);font-size:clamp(.95rem,1.5vw,1.0625rem);line-height:1.7;max-width:42rem}
+.tables-management-primary,.tables-management-secondary{font:inherit;cursor:pointer;border-radius:.9375rem;transition:transform .24s cubic-bezier(.22,1,.36,1),box-shadow .24s,filter .24s}
+.tables-management-primary{min-height:3.125rem;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding-inline:1.25rem;border:0;color:var(--restaurant-surface-white);background:linear-gradient(135deg,var(--tables-dark),#111815);font-weight:800;box-shadow:0 12px 22px rgb(24 32 29/.18)}
+.tables-management-primary:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 18px 28px rgb(24 32 29/.24)}
+.tables-management-primary:disabled,.tables-management-secondary:disabled{opacity:.55;cursor:not-allowed}
+.tables-management-secondary{min-height:2.625rem;padding-inline:.9375rem;border:1px solid var(--tables-line);border-radius:.6875rem;background:var(--restaurant-surface-white);color:#626a65;font-weight:800}
+.tables-management-secondary:hover:not(:disabled){transform:translateY(-2px);box-shadow:var(--tables-shadow)}
+.tables-management-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.875rem;margin-block-end:1.25rem}
+.tables-management-stats__card{padding:1rem 1.125rem;border:1px solid var(--tables-line);border-radius:1rem;background:rgb(255 255 255/.91);box-shadow:var(--tables-shadow)}
+.tables-management-stats__content{display:grid;gap:.35rem}
+.tables-management-stats__content span{color:var(--tables-muted);font-size:.8125rem;font-weight:700}
+.tables-management-stats__content strong{font-size:1.5rem;font-weight:800;color:var(--tables-text)}
+.tables-management-stats__card--skeleton{min-height:5.5rem;background:#efeeeb}
+.tables-management-workspace{border:1px solid var(--tables-line);border-radius:1.375rem;background:rgb(255 255 255/.91);box-shadow:var(--tables-shadow);overflow:hidden}
+.tables-management-workspace-top{display:flex;align-items:center;justify-content:space-between;gap:.875rem;padding:1rem 1.125rem;border-bottom:1px solid var(--tables-line);background:rgb(252 250 247/.82);flex-wrap:wrap}
+.tables-management-search{position:relative;flex:1;max-width:31.25rem;min-width:min(100%,12rem)}
+.tables-management-search__label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+.tables-management-search input{width:100%;height:2.875rem;padding-inline:1rem;border:1px solid var(--tables-line);border-radius:var(--restaurant-radius-pill);background:var(--restaurant-surface-white);outline:none;font:inherit}
+.tables-management-search input:focus{border-color:var(--tables-terracotta);box-shadow:0 0 0 4px rgb(184 102 63/.1)}
+.tables-management-filters{display:flex;gap:.625rem;flex-wrap:wrap}
+.tables-management-filter{flex:0 1 auto;min-width:8.75rem}
+.tables-management-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(16.5rem,1fr));gap:1rem;padding:1rem 1.125rem}
+.tables-management-summary{display:flex;justify-content:space-between;gap:.75rem;padding:.875rem 1.125rem;border-top:1px solid var(--tables-line);color:var(--tables-muted);background:#fcfaf7;font-size:.8125rem}
+.tables-management-empty{padding:2.625rem 1.25rem;color:var(--tables-muted);text-align:center;border-top:1px dashed #eadfd4;background:rgb(252 250 247/.72)}
+.tables-management-empty h2{margin:0 0 .5rem;font-size:1.125rem;color:var(--tables-text)}
+.tables-management-empty p{margin:0 0 1rem}
+.tables-management-empty--filtered{border-top:0}
+.tables-management-state{padding:1.5rem 1.35rem;border:1px solid var(--tables-line);border-radius:1.125rem;background:rgb(255 255 255/.88);box-shadow:var(--tables-shadow)}
+.tables-management-state h2{margin:0 0 .5rem;font-family:var(--font-display);font-size:1.125rem}
+.tables-management-state p{margin:0 0 1rem;color:var(--tables-muted)}
+.tables-management-state--error{border-color:#ead6c3;background:var(--tables-red-soft)}
+.tables-management-skeleton-toolbar{height:3.25rem;margin:1rem 1.125rem;border-radius:999px;background:#efeeeb}
+.tables-management-skeleton-grid{height:12rem;margin:0 1.125rem 1.125rem;border-radius:1rem;background:#efeeeb}
+.tables-print-area{display:none}
+@media (max-width:65.625rem){.tables-management-head{align-items:stretch;flex-direction:column}.tables-management-head__actions{width:100%}.tables-management-primary,.tables-management-secondary{flex:1}.tables-management-stats{grid-template-columns:1fr}.tables-management-workspace-top{align-items:stretch;flex-direction:column}.tables-management-search{max-width:none}.tables-management-filter{flex:1;min-width:0}}
+@media (prefers-reduced-motion:reduce){.tables-management-page *{animation-duration:.01ms!important;transition-duration:.01ms!important}}

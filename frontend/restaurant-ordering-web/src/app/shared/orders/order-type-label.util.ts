@@ -6,10 +6,12 @@ const TYPE_LABELS: Record<OrderLabelLocale, Record<OrderType, string>> = {
   ar: {
     [OrderType.Pickup]: 'استلام',
     [OrderType.Delivery]: 'توصيل',
+    [OrderType.DineIn]: 'تناول في المطعم',
   },
   en: {
     [OrderType.Pickup]: 'Pickup',
     [OrderType.Delivery]: 'Delivery',
+    [OrderType.DineIn]: 'Dine in',
   },
 };
 

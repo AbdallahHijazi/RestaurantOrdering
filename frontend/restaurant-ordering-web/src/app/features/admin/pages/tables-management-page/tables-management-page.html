@@ -1,0 +1,254 @@
+<section class="tables-management-page" data-testid="tables-management-page">
+  <div class="tables-management-shell">
+    @if (successMessage()) {
+      <p class="tables-management-success" role="status" data-testid="tables-success-message">
+        {{ successMessage() }}
+      </p>
+    }
+
+    <header class="tables-management-head">
+      <div class="tables-management-title">
+        <h1>{{ locale.uiText('tablesPageTitle') }}</h1>
+        <p>{{ locale.uiText('tablesPageLead') }}</p>
+      </div>
+      <div class="tables-management-head__actions">
+        <button
+          type="button"
+          class="tables-management-secondary"
+          data-testid="tables-print-all-button"
+          [disabled]="pageState() !== 'ready' || filteredTables().length === 0"
+          (click)="printAllTables()"
+        >
+          {{ locale.uiText('tablesPrintAll') }}
+        </button>
+        <button
+          type="button"
+          class="tables-management-primary"
+          data-testid="tables-add-button"
+          [disabled]="pageState() === 'loading' || pageState() === 'missing-context'"
+          (click)="openCreateModal()"
+        >
+          {{ locale.uiText('tablesAddTable') }}
+        </button>
+      </div>
+    </header>
+
+    @switch (pageState()) {
+      @case ('loading') {
+        <section class="tables-management-stats tables-management-stats--loading" aria-busy="true">
+          @for (card of [1, 2, 3]; track card) {
+            <div class="tables-management-stats__card tables-management-stats__card--skeleton"></div>
+          }
+        </section>
+        <section class="tables-management-workspace tables-management-workspace--loading" data-testid="tables-loading">
+          <div class="tables-management-skeleton-toolbar"></div>
+          <div class="tables-management-skeleton-grid"></div>
+        </section>
+      }
+
+      @case ('missing-context') {
+        <div class="tables-management-state tables-management-state--error" data-testid="tables-missing-context">
+          <h2>{{ locale.uiText('tablesMissingContextTitle') }}</h2>
+          <p>{{ locale.uiText('tablesMissingContextDescription') }}</p>
+        </div>
+      }
+
+      @case ('error') {
+        <div class="tables-management-state tables-management-state--error" data-testid="tables-error-state">
+          <h2>{{ locale.uiText('tablesListErrorTitle') }}</h2>
+          <p>{{ listErrorMessage() }}</p>
+          <button type="button" class="tables-management-secondary" (click)="loadTables()">
+            {{ locale.uiText('tablesRetry') }}
+          </button>
+        </div>
+      }
+
+      @case ('ready') {
+        <section class="tables-management-stats" data-testid="tables-stats">
+          <article class="tables-management-stats__card">
+            <div class="tables-management-stats__content">
+              <span>{{ locale.uiText('tablesStatTotal') }}</span>
+              <strong data-testid="tables-stat-total">{{ totalTables() }}</strong>
+            </div>
+          </article>
+          <article class="tables-management-stats__card">
+            <div class="tables-management-stats__content">
+              <span>{{ locale.uiText('tablesStatActive') }}</span>
+              <strong data-testid="tables-stat-active">{{ activeTables() }}</strong>
+            </div>
+          </article>
+          <article class="tables-management-stats__card">
+            <div class="tables-management-stats__content">
+              <span>{{ locale.uiText('tablesStatZones') }}</span>
+              <strong data-testid="tables-stat-zones">{{ distinctZoneCount() }}</strong>
+            </div>
+          </article>
+        </section>
+
+        <section class="tables-management-workspace">
+          <div class="tables-management-workspace-top">
+            <label class="tables-management-search">
+              <span class="tables-management-search__label">{{ locale.uiText('tablesSearchPlaceholder') }}</span>
+              <input
+                type="search"
+                data-testid="tables-search-input"
+                [value]="searchQuery()"
+                [placeholder]="locale.uiText('tablesSearchPlaceholder')"
+                (input)="setSearchQuery($any($event.target).value)"
+              />
+            </label>
+            <div class="tables-management-filters">
+              <app-tables-management-select
+                class="tables-management-filter"
+                [options]="zoneFilterOptions()"
+                [value]="zoneFilter()"
+                [label]="locale.uiText('tablesColZone')"
+                testId="tables-zone-filter"
+                (valueChange)="setZoneFilter($event)"
+              />
+              <app-tables-management-select
+                class="tables-management-filter"
+                [options]="statusFilterOptions()"
+                [value]="statusFilter()"
+                [label]="locale.uiText('tablesColStatus')"
+                testId="tables-status-filter"
+                (valueChange)="setStatusFilter($event)"
+              />
+            </div>
+          </div>
+
+          @if (tables().length === 0) {
+            <div class="tables-management-empty" data-testid="tables-empty-state">
+              <h2>{{ locale.uiText('tablesEmptyTitle') }}</h2>
+              <p>{{ locale.uiText('tablesEmptyDescription') }}</p>
+              <button type="button" class="tables-management-primary" (click)="openCreateModal()">
+                {{ locale.uiText('tablesAddFirstTable') }}
+              </button>
+            </div>
+          } @else if (filteredTables().length === 0) {
+            <div class="tables-management-empty tables-management-empty--filtered" data-testid="tables-empty-filtered">
+              <p>{{ locale.uiText('tablesEmptyFiltered') }}</p>
+            </div>
+          } @else {
+            <div class="tables-management-grid" data-testid="tables-grid">
+              @for (table of filteredTables(); track table.id) {
+                <app-table-card
+                  [table]="table"
+                  [qrSvg]="qrSvgFor(table.id)"
+                  [qrLoading]="qrLoadingFor(table.id)"
+                  (edit)="openEditModal($event)"
+                  (toggleStatus)="openStatusConfirm($event)"
+                  (print)="printTable($event)"
+                  (downloadQr)="downloadQr($event)"
+                  (regenerateToken)="openRegenerateConfirm($event)"
+                />
+              }
+            </div>
+          }
+
+          @if (tables().length > 0) {
+            <footer class="tables-management-summary" data-testid="tables-summary">
+              <span>{{ showingTablesLabel() }}</span>
+            </footer>
+          }
+        </section>
+      }
+    }
+  </div>
+</section>
+
+<div class="tables-print-area" data-testid="tables-print-area" [class.tables-print-area--all]="printMode() === 'all'">
+  @for (entry of printEntries(); track entry.table.id) {
+    <app-table-print-card
+      [table]="entry.table"
+      [restaurantName]="restaurantDisplayName()"
+      [qrSvg]="entry.qrSvg"
+      [menuUrl]="entry.menuUrl"
+    />
+  }
+</div>
+
+<app-modal-shell
+  [open]="modalKind() !== null"
+  [title]="modalTitle()"
+  [closeLabel]="locale.uiText('tablesCloseModal')"
+  [titleId]="modalTestId() + '-title'"
+  [testId]="modalTestId()"
+  [blockCloseWhileBusy]="confirmSubmitting() || createSubmitting() || editSubmitting()"
+  (closed)="dismissModal()"
+>
+  @if (modalKind() === 'create') {
+    <app-table-form-modal
+      [form]="createForm"
+      mode="create"
+      [submitting]="createSubmitting()"
+      [errorMessage]="createErrorMessage()"
+      (submitted)="submitCreate()"
+      (cancelled)="closeCreateModal()"
+    />
+  }
+
+  @if (modalKind() === 'create') {
+    <app-staff-modal-actions orderModalFooter>
+      <button
+        type="submit"
+        class="staff-modal-actions__save"
+        form="tables-create-form"
+        data-testid="tables-create-submit"
+        [disabled]="createSubmitting()"
+      >
+        {{
+          createSubmitting()
+            ? locale.uiText('tablesSaving')
+            : locale.uiText('tablesCreateSubmit')
+        }}
+      </button>
+      <button type="button" class="staff-modal-actions__cancel" (click)="closeCreateModal()">
+        {{ locale.uiText('tablesCancel') }}
+      </button>
+    </app-staff-modal-actions>
+  }
+
+  @if (modalKind() === 'edit') {
+    <app-table-form-modal
+      [form]="editForm"
+      mode="edit"
+      [submitting]="editSubmitting()"
+      [errorMessage]="editErrorMessage()"
+      (submitted)="submitEdit()"
+      (cancelled)="closeEditModal()"
+    />
+  }
+
+  @if (modalKind() === 'edit') {
+    <app-staff-modal-actions orderModalFooter>
+      <button
+        type="submit"
+        class="staff-modal-actions__save"
+        form="tables-edit-form"
+        data-testid="tables-edit-submit"
+        [disabled]="editSubmitting()"
+      >
+        {{
+          editSubmitting()
+            ? locale.uiText('tablesSaving')
+            : locale.uiText('tablesEditSubmit')
+        }}
+      </button>
+      <button type="button" class="staff-modal-actions__cancel" (click)="closeEditModal()">
+        {{ locale.uiText('tablesCancel') }}
+      </button>
+    </app-staff-modal-actions>
+  }
+
+  @if (modalKind() === 'confirm' && selectedTable(); as table) {
+    <app-table-confirm-modal
+      [kind]="confirmKind()"
+      [tableName]="table.name"
+      [submitting]="confirmSubmitting()"
+      [errorMessage]="confirmErrorMessage()"
+      (confirmed)="submitConfirm()"
+      (cancelled)="closeConfirmModal()"
+    />
+  }
+</app-modal-shell>

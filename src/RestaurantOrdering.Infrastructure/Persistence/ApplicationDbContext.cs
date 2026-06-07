@@ -24,6 +24,7 @@ public class ApplicationDbContext
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<MediaFile> MediaFiles => Set<MediaFile>();
     public DbSet<QrCode> QrCodes => Set<QrCode>();
+    public DbSet<RestaurantTable> RestaurantTables => Set<RestaurantTable>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

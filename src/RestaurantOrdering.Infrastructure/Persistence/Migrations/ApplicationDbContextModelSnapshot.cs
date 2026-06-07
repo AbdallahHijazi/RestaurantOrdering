@@ -452,6 +452,9 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
 
+                    b.Property<Guid?>("TableId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<decimal>("TaxAmount")
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
@@ -469,6 +472,8 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("GuestPhone");
 
+                    b.HasIndex("TableId");
+
                     b.HasIndex("RestaurantId", "CreatedAt");
 
                     b.HasIndex("RestaurantId", "OrderNumber")
@@ -484,7 +489,7 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
 
                             t.HasCheckConstraint("CK_Orders_OrderStatus", "[OrderStatus] IN (1, 2, 3, 4, 5)");
 
-                            t.HasCheckConstraint("CK_Orders_OrderType", "[OrderType] IN (1, 2)");
+                            t.HasCheckConstraint("CK_Orders_OrderType", "[OrderType] IN (1, 2, 3)");
 
                             t.HasCheckConstraint("CK_Orders_Subtotal", "[Subtotal] >= 0");
 
@@ -749,6 +754,48 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.RestaurantTable", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PublicToken")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Zone")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PublicToken")
+                        .IsUnique();
+
+                    b.HasIndex("RestaurantId");
+
+                    b.ToTable("RestaurantTables");
+                });
+
             modelBuilder.Entity("RestaurantOrdering.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -959,9 +1006,16 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("RestaurantOrdering.Domain.Entities.RestaurantTable", "Table")
+                        .WithMany("Orders")
+                        .HasForeignKey("TableId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("Customer");
 
                     b.Navigation("Restaurant");
+
+                    b.Navigation("Table");
                 });
 
             modelBuilder.Entity("RestaurantOrdering.Domain.Entities.OrderItem", b =>
@@ -1034,6 +1088,17 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                     b.Navigation("Restaurant");
                 });
 
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.RestaurantTable", b =>
+                {
+                    b.HasOne("RestaurantOrdering.Domain.Entities.Restaurant", "Restaurant")
+                        .WithMany("Tables")
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Restaurant");
+                });
+
             modelBuilder.Entity("RestaurantOrdering.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.HasOne("RestaurantOrdering.Domain.Entities.Restaurant", "AssignedRestaurant")
@@ -1074,6 +1139,13 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                     b.Navigation("QrCodes");
 
                     b.Navigation("Settings");
+
+                    b.Navigation("Tables");
+                });
+
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.RestaurantTable", b =>
+                {
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("RestaurantOrdering.Infrastructure.Identity.ApplicationUser", b =>

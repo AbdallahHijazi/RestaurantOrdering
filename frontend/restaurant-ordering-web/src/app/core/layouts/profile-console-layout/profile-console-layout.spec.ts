@@ -55,7 +55,7 @@ describe('ProfileConsoleLayout', () => {
     fixture.detectChanges();
   });
 
-  it('renders compact header with five primary navigation links for owners', () => {
+  it('renders compact header with six primary navigation links for owners', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="profile-console-header"]')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.profile-console__header--compact')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[data-testid="profile-console-header-start"]')).toBeTruthy();
@@ -65,6 +65,7 @@ describe('ProfileConsoleLayout', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="profile-console-nav-orders"]')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[data-testid="profile-console-nav-menu"]')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[data-testid="profile-console-nav-staff"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-console-nav-tables"]')).toBeTruthy();
   });
 
   it('defines desktop single-row balanced grid rules at min-width 1100px', () => {
@@ -160,6 +161,9 @@ describe('ProfileConsoleLayout', () => {
     expect(
       fixture.nativeElement.querySelector('[data-testid="profile-console-nav-staff"]')?.getAttribute('href'),
     ).toBe('/admin/staff');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="profile-console-nav-tables"]')?.getAttribute('href'),
+    ).toBe('/admin/tables');
   });
 
   it('shows restaurant avatar from cover image before logo', () => {
@@ -272,6 +276,7 @@ describe('ProfileConsoleLayout', () => {
     expect(managerFixture.nativeElement.querySelector('[data-testid="profile-console-nav-menu"]')).toBeTruthy();
     expect(managerFixture.nativeElement.querySelector('[data-testid="profile-console-nav-profile"]')).toBeNull();
     expect(managerFixture.nativeElement.querySelector('[data-testid="profile-console-nav-staff"]')).toBeNull();
+    expect(managerFixture.nativeElement.querySelector('[data-testid="profile-console-nav-tables"]')).toBeNull();
   });
 
   it('marks restaurant profile link active on profile route', async () => {

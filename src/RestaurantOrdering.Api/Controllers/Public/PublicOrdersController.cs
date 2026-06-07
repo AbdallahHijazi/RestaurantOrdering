@@ -37,6 +37,7 @@ public sealed class PublicOrdersController : ControllerBase
             request.GuestName,
             request.GuestPhone,
             request.OrderType,
+            request.TableToken,
             request.DeliveryAddress,
             request.DeliveryLatitude,
             request.DeliveryLongitude,

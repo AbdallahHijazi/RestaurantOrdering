@@ -20,6 +20,7 @@ import {
 import type { PublicOrderConfirmationApiDto } from '../../data-access/public-order.dto';
 import {
   ORDER_TYPE_DELIVERY,
+  ORDER_TYPE_DINE_IN,
   ORDER_TYPE_PICKUP,
   type PublicOrderType,
   type PublicRestaurantOrderSettings,
@@ -57,7 +58,13 @@ export class PublicCheckoutPanel {
 
   protected readonly isPreviewMode = computed(() => isDemoMenuSlug(this.slug()));
 
+  protected readonly isDineIn = computed(() => this.cart.hasTableSession());
+
   protected readonly servicesAvailable = computed(() => {
+    if (this.isDineIn()) {
+      return true;
+    }
+
     const settings = this.orderSettings();
     return settings.isPickupEnabled || settings.isDeliveryEnabled;
   });
@@ -80,6 +87,11 @@ export class PublicCheckoutPanel {
   }
 
   protected syncDefaultOrderType(): void {
+    if (this.isDineIn()) {
+      this.orderType.set(ORDER_TYPE_DINE_IN);
+      return;
+    }
+
     const settings = this.orderSettings();
     if (settings.isPickupEnabled && !settings.isDeliveryEnabled) {
       this.orderType.set(ORDER_TYPE_PICKUP);
@@ -122,6 +134,14 @@ export class PublicCheckoutPanel {
 
     if (this.isPreviewMode()) {
       return false;
+    }
+
+    if (this.isDineIn()) {
+      if (!this.guestName().trim() || !this.guestPhone().trim()) {
+        return false;
+      }
+
+      return !this.belowMinimum();
     }
 
     if (this.belowMinimum()) {
@@ -185,10 +205,13 @@ export class PublicCheckoutPanel {
 
   protected buildRequest(): CreatePublicOrderApiRequest {
     const type = this.orderType();
+    const tableToken = type === ORDER_TYPE_DINE_IN ? this.cart.tableToken() : null;
+
     return {
       guestName: this.guestName().trim(),
       guestPhone: this.guestPhone().trim(),
       orderType: type,
+      tableToken,
       deliveryAddress: type === ORDER_TYPE_DELIVERY ? this.deliveryAddress().trim() : null,
       deliveryLatitude: null,
       deliveryLongitude: null,
@@ -212,6 +235,30 @@ export class PublicCheckoutPanel {
       return false;
     }
 
+    if (this.isDineIn()) {
+      if (!this.cart.tableToken()) {
+        this.errorMessage.set(this.ui().publicCheckoutTableRequired);
+        return false;
+      }
+
+      if (!this.guestName().trim()) {
+        this.errorMessage.set(this.ui().publicCheckoutGuestName);
+        return false;
+      }
+
+      if (!this.guestPhone().trim()) {
+        this.errorMessage.set(this.ui().publicCheckoutGuestPhone);
+        return false;
+      }
+
+      if (this.belowMinimum()) {
+        this.errorMessage.set(this.ui().publicCheckoutMinimumOrder);
+        return false;
+      }
+
+      return true;
+    }
+
     if (!this.guestName().trim()) {
       this.errorMessage.set(this.ui().publicCheckoutGuestName);
       return false;
@@ -228,6 +275,15 @@ export class PublicCheckoutPanel {
     }
 
     const type = this.orderType();
+    if (type === ORDER_TYPE_DINE_IN) {
+      if (!this.cart.tableToken()) {
+        this.errorMessage.set(this.ui().publicCheckoutTableRequired);
+        return false;
+      }
+
+      return true;
+    }
+
     if (type === ORDER_TYPE_DELIVERY && !this.deliveryAddress().trim()) {
       this.errorMessage.set(this.ui().publicCheckoutDeliveryAddress);
       return false;

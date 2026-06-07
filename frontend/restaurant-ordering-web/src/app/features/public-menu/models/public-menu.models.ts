@@ -58,10 +58,14 @@ export interface PublicMenuPageData {
   items: PublicMenuItem[];
 }
 
-/** Backend OrderType: Pickup = 1, Delivery = 2 */
+/** Backend OrderType: Pickup = 1, Delivery = 2, DineIn = 3 */
 export const ORDER_TYPE_PICKUP = 1 as const;
 export const ORDER_TYPE_DELIVERY = 2 as const;
-export type PublicOrderType = typeof ORDER_TYPE_PICKUP | typeof ORDER_TYPE_DELIVERY;
+export const ORDER_TYPE_DINE_IN = 3 as const;
+export type PublicOrderType =
+  | typeof ORDER_TYPE_PICKUP
+  | typeof ORDER_TYPE_DELIVERY
+  | typeof ORDER_TYPE_DINE_IN;
 
 /** Backend OrderStatus values used in confirmation display */
 export const ORDER_STATUS_NEW = 1 as const;

@@ -95,7 +95,7 @@ export class LocaleService {
   }
 }
 
-type UiTextKey =
+export type UiTextKey =
   | 'loading'
   | 'errorTitle'
   | 'errorGeneric'
@@ -206,6 +206,7 @@ type UiTextKey =
   | 'adminNavOrders'
   | 'adminNavMenu'
   | 'adminNavStaff'
+  | 'adminNavTables'
   | 'adminPageStaff'
   | 'adminPageOrders'
   | 'adminPageMenu'
@@ -291,6 +292,67 @@ type UiTextKey =
   | 'staffShowingCount'
   | 'staffEmptyFiltered'
   | 'staffAccountLabel'
+  | 'tablesPageTitle'
+  | 'tablesPageLead'
+  | 'tablesAddTable'
+  | 'tablesAddFirstTable'
+  | 'tablesPrintAll'
+  | 'tablesListErrorTitle'
+  | 'tablesListError'
+  | 'tablesRetry'
+  | 'tablesEmptyTitle'
+  | 'tablesEmptyDescription'
+  | 'tablesEmptyFiltered'
+  | 'tablesSearchPlaceholder'
+  | 'tablesFilterAllZones'
+  | 'tablesFilterAllStatuses'
+  | 'tablesStatTotal'
+  | 'tablesStatActive'
+  | 'tablesStatZones'
+  | 'tablesShowingCount'
+  | 'tablesColZone'
+  | 'tablesColStatus'
+  | 'tablesStatusActive'
+  | 'tablesStatusInactive'
+  | 'tablesNoZone'
+  | 'tablesQrUnavailable'
+  | 'tablesActionEdit'
+  | 'tablesActionPrint'
+  | 'tablesActionDownloadQr'
+  | 'tablesActionActivate'
+  | 'tablesActionDeactivate'
+  | 'tablesActionRegenerateToken'
+  | 'tablesCreateTitle'
+  | 'tablesCreateSubmit'
+  | 'tablesCreateSuccess'
+  | 'tablesEditTitle'
+  | 'tablesEditSubmit'
+  | 'tablesUpdateSuccess'
+  | 'tablesFormName'
+  | 'tablesFormZone'
+  | 'tablesFormActiveOnCreate'
+  | 'tablesCancel'
+  | 'tablesSaving'
+  | 'tablesCloseModal'
+  | 'tablesErrorValidation'
+  | 'tablesErrorConflict'
+  | 'tablesErrorTooManyRequests'
+  | 'tablesErrorGeneric'
+  | 'tablesMissingContextTitle'
+  | 'tablesMissingContextDescription'
+  | 'tablesConfirmDeactivateTitle'
+  | 'tablesConfirmDeactivateMessage'
+  | 'tablesConfirmDeactivateSubmit'
+  | 'tablesConfirmActivateTitle'
+  | 'tablesConfirmActivateMessage'
+  | 'tablesConfirmActivateSubmit'
+  | 'tablesConfirmRegenerateTitle'
+  | 'tablesConfirmRegenerateMessage'
+  | 'tablesConfirmRegenerateSubmit'
+  | 'tablesDeactivateSuccess'
+  | 'tablesActivateSuccess'
+  | 'tablesRegenerateSuccess'
+  | 'tablesPrintScanToOrder'
   | 'kitchenEyebrow'
   | 'kitchenTitle'
   | 'kitchenLead'
@@ -573,6 +635,11 @@ type UiTextKey =
   | 'publicConfirmationCloseAria'
   | 'publicOrderTypePickup'
   | 'publicOrderTypeDelivery'
+  | 'publicOrderTypeDineIn'
+  | 'publicMenuTableBadge'
+  | 'publicMenuTableInvalid'
+  | 'publicCheckoutTableRequired'
+  | 'publicCheckoutOrderType'
   | 'publicOrderStatusNew'
   | 'publicStaffLogin'
   | 'publicConfirmationSuccessTitle'
@@ -718,6 +785,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminNavOrders: 'إدارة الطلبات',
     adminNavMenu: 'إدارة القائمة',
     adminNavStaff: 'إدارة الموظفين',
+    adminNavTables: 'إدارة الطاولات',
     adminPageStaff: 'إدارة الموظفين',
     adminPageOrders: 'إدارة الطلبات',
     adminPageMenu: 'إدارة القائمة',
@@ -806,6 +874,67 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     staffMissingContextTitle: 'سياق المطعم غير متوفر',
     staffMissingContextDescription:
       'لا يمكن إدارة الموظفين بدون معرف مطعم في الجلسة الحالية.',
+    tablesPageTitle: 'إدارة الطاولات',
+    tablesPageLead: 'أنشئ طاولات المطعم، وولّد رموز QR، واطبع بطاقات الطلب من مكان واحد.',
+    tablesAddTable: 'إضافة طاولة',
+    tablesAddFirstTable: 'إضافة أول طاولة',
+    tablesPrintAll: 'طباعة الكل (A4)',
+    tablesListErrorTitle: 'تعذر تحميل الطاولات',
+    tablesListError: 'حدث خطأ أثناء تحميل قائمة الطاولات. حاول مرة أخرى.',
+    tablesRetry: 'إعادة المحاولة',
+    tablesEmptyTitle: 'لا توجد طاولات مضافة حتى الآن.',
+    tablesEmptyDescription: 'ابدأ بإضافة طاولات المطعم لتفعيل الطلب عبر QR.',
+    tablesEmptyFiltered: 'لا توجد طاولات مطابقة لعملية البحث أو التصفية المحددة.',
+    tablesSearchPlaceholder: 'ابحث باسم الطاولة أو المنطقة...',
+    tablesFilterAllZones: 'كل المناطق',
+    tablesFilterAllStatuses: 'كل الحالات',
+    tablesStatTotal: 'إجمالي الطاولات',
+    tablesStatActive: 'الطاولات النشطة',
+    tablesStatZones: 'المناطق',
+    tablesShowingCount: 'عرض {shown} من أصل {total} طاولات',
+    tablesColZone: 'المنطقة',
+    tablesColStatus: 'الحالة',
+    tablesStatusActive: 'نشطة',
+    tablesStatusInactive: 'غير نشطة',
+    tablesNoZone: 'بدون منطقة',
+    tablesQrUnavailable: 'تعذر إنشاء رمز QR',
+    tablesActionEdit: 'تعديل',
+    tablesActionPrint: 'طباعة البطاقة',
+    tablesActionDownloadQr: 'تنزيل QR',
+    tablesActionActivate: 'تفعيل',
+    tablesActionDeactivate: 'إيقاف',
+    tablesActionRegenerateToken: 'تجديد الرمز',
+    tablesCreateTitle: 'إضافة طاولة جديدة',
+    tablesCreateSubmit: 'حفظ الطاولة',
+    tablesCreateSuccess: 'تم إنشاء الطاولة بنجاح.',
+    tablesEditTitle: 'تعديل الطاولة',
+    tablesEditSubmit: 'حفظ التعديل',
+    tablesUpdateSuccess: 'تم تحديث الطاولة بنجاح.',
+    tablesFormName: 'اسم الطاولة',
+    tablesFormZone: 'المنطقة (اختياري)',
+    tablesFormActiveOnCreate: 'تفعيل الطاولة فور الإنشاء',
+    tablesCancel: 'إلغاء',
+    tablesSaving: 'جاري الحفظ…',
+    tablesCloseModal: 'إغلاق',
+    tablesErrorValidation: 'تحقق من الحقول وأعد المحاولة.',
+    tablesErrorConflict: 'تعارض في بيانات الطاولة. حاول مرة أخرى.',
+    tablesErrorTooManyRequests: 'طلبات كثيرة جدًا. حاول لاحقًا.',
+    tablesErrorGeneric: 'تعذر إكمال العملية. حاول مرة أخرى.',
+    tablesMissingContextTitle: 'لا يوجد مطعم مرتبط بالحساب',
+    tablesMissingContextDescription: 'سجّل الدخول بحساب مالك مطعم لإدارة الطاولات.',
+    tablesConfirmDeactivateTitle: 'إيقاف الطاولة',
+    tablesConfirmDeactivateMessage: 'سيتوقف رمز QR عن قبول الطلبات الجديدة حتى تعيد تفعيل الطاولة.',
+    tablesConfirmDeactivateSubmit: 'إيقاف الطاولة',
+    tablesConfirmActivateTitle: 'تفعيل الطاولة',
+    tablesConfirmActivateMessage: 'سيتمكن الزبائن من الطلب عبر رمز QR لهذه الطاولة.',
+    tablesConfirmActivateSubmit: 'تفعيل الطاولة',
+    tablesConfirmRegenerateTitle: 'تجديد رمز QR',
+    tablesConfirmRegenerateMessage: 'سيتوقف الرمز الحالي عن العمل. ستحتاج لطباعة بطاقة QR جديدة.',
+    tablesConfirmRegenerateSubmit: 'تجديد الرمز',
+    tablesDeactivateSuccess: 'تم إيقاف الطاولة.',
+    tablesActivateSuccess: 'تم تفعيل الطاولة.',
+    tablesRegenerateSuccess: 'تم تجديد رمز QR.',
+    tablesPrintScanToOrder: 'امسح الرمز للطلب من طاولتك',
     kitchenEyebrow: 'المطبخ',
     kitchenTitle: 'لوحة المطبخ',
     kitchenLead: 'تابع الطلبات النشطة وحدّث حالة التحضير.',
@@ -1095,6 +1224,11 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     publicConfirmationCloseAria: 'إغلاق تأكيد الطلب',
     publicOrderTypePickup: 'استلام',
     publicOrderTypeDelivery: 'توصيل',
+    publicOrderTypeDineIn: 'تناول في المطعم',
+    publicMenuTableBadge: 'طاولتك',
+    publicMenuTableInvalid: 'رمز الطاولة غير صالح أو منتهي.',
+    publicCheckoutTableRequired: 'رمز الطاولة مطلوب لإكمال الطلب.',
+    publicCheckoutOrderType: 'نوع الطلب',
     publicOrderStatusNew: 'جديد',
     publicStaffLogin: 'دخول الإدارة',
     publicConfirmationSuccessTitle: 'تم استلام طلبك بنجاح',
@@ -1241,6 +1375,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminNavOrders: 'Orders management',
     adminNavMenu: 'Menu management',
     adminNavStaff: 'Staff management',
+    adminNavTables: 'Tables management',
     adminPageStaff: 'Staff management',
     adminPageOrders: 'Orders management',
     adminPageMenu: 'Menu management',
@@ -1330,6 +1465,67 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     staffMissingContextTitle: 'Restaurant context unavailable',
     staffMissingContextDescription:
       'Staff management requires a restaurant id in the current session.',
+    tablesPageTitle: 'Tables management',
+    tablesPageLead: 'Create restaurant tables, generate QR codes, and print order cards from one place.',
+    tablesAddTable: 'Add table',
+    tablesAddFirstTable: 'Add first table',
+    tablesPrintAll: 'Print all (A4)',
+    tablesListErrorTitle: 'Unable to load tables',
+    tablesListError: 'Something went wrong while loading tables. Please try again.',
+    tablesRetry: 'Retry',
+    tablesEmptyTitle: 'No tables have been added yet.',
+    tablesEmptyDescription: 'Start by adding restaurant tables to enable QR ordering.',
+    tablesEmptyFiltered: 'No tables match the current search or selected filters.',
+    tablesSearchPlaceholder: 'Search by table name or zone...',
+    tablesFilterAllZones: 'All zones',
+    tablesFilterAllStatuses: 'All statuses',
+    tablesStatTotal: 'Total tables',
+    tablesStatActive: 'Active tables',
+    tablesStatZones: 'Zones',
+    tablesShowingCount: 'Showing {shown} of {total} tables',
+    tablesColZone: 'Zone',
+    tablesColStatus: 'Status',
+    tablesStatusActive: 'Active',
+    tablesStatusInactive: 'Inactive',
+    tablesNoZone: 'No zone',
+    tablesQrUnavailable: 'Unable to generate QR code',
+    tablesActionEdit: 'Edit',
+    tablesActionPrint: 'Print card',
+    tablesActionDownloadQr: 'Download QR',
+    tablesActionActivate: 'Activate',
+    tablesActionDeactivate: 'Deactivate',
+    tablesActionRegenerateToken: 'Regenerate token',
+    tablesCreateTitle: 'Add new table',
+    tablesCreateSubmit: 'Save table',
+    tablesCreateSuccess: 'Table created successfully.',
+    tablesEditTitle: 'Edit table',
+    tablesEditSubmit: 'Save changes',
+    tablesUpdateSuccess: 'Table updated successfully.',
+    tablesFormName: 'Table name',
+    tablesFormZone: 'Zone (optional)',
+    tablesFormActiveOnCreate: 'Activate table on create',
+    tablesCancel: 'Cancel',
+    tablesSaving: 'Saving…',
+    tablesCloseModal: 'Close',
+    tablesErrorValidation: 'Check the form fields and try again.',
+    tablesErrorConflict: 'Table data conflict. Please try again.',
+    tablesErrorTooManyRequests: 'Too many requests. Please try again later.',
+    tablesErrorGeneric: 'Unable to complete the request. Please try again.',
+    tablesMissingContextTitle: 'Restaurant context unavailable',
+    tablesMissingContextDescription: 'Sign in with a restaurant owner account to manage tables.',
+    tablesConfirmDeactivateTitle: 'Deactivate table',
+    tablesConfirmDeactivateMessage: 'The QR code will stop accepting new orders until you activate the table again.',
+    tablesConfirmDeactivateSubmit: 'Deactivate table',
+    tablesConfirmActivateTitle: 'Activate table',
+    tablesConfirmActivateMessage: 'Customers will be able to order using this table QR code.',
+    tablesConfirmActivateSubmit: 'Activate table',
+    tablesConfirmRegenerateTitle: 'Regenerate QR token',
+    tablesConfirmRegenerateMessage: 'The current token will stop working. You will need to print a new QR card.',
+    tablesConfirmRegenerateSubmit: 'Regenerate token',
+    tablesDeactivateSuccess: 'Table deactivated.',
+    tablesActivateSuccess: 'Table activated.',
+    tablesRegenerateSuccess: 'QR token regenerated.',
+    tablesPrintScanToOrder: 'Scan to order from your table',
     kitchenEyebrow: 'Kitchen',
     kitchenTitle: 'Kitchen Dashboard',
     kitchenLead: 'Track active orders and update preparation status.',
@@ -1623,6 +1819,11 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     publicConfirmationCloseAria: 'Close order confirmation',
     publicOrderTypePickup: 'Pickup',
     publicOrderTypeDelivery: 'Delivery',
+    publicOrderTypeDineIn: 'Dine in',
+    publicMenuTableBadge: 'Your table',
+    publicMenuTableInvalid: 'This table link is invalid or expired.',
+    publicCheckoutTableRequired: 'A table token is required to place this order.',
+    publicCheckoutOrderType: 'Order type',
     publicOrderStatusNew: 'New',
     publicStaffLogin: 'Staff login',
     publicConfirmationSuccessTitle: 'Your order has been received',

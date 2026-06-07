@@ -16,6 +16,7 @@ import { PublicOrdersApiService } from './data-access/public-orders-api.service'
 import { MOCK_PUBLIC_MENU } from './data-access/public-menu-mock.data';
 import {
   ORDER_TYPE_DELIVERY,
+  ORDER_TYPE_DINE_IN,
   ORDER_TYPE_PICKUP,
 } from './models/public-menu.models';
 
@@ -197,6 +198,7 @@ describe('Public order flow', () => {
       guestName: 'Guest',
       guestPhone: '+966500000000',
       orderType: ORDER_TYPE_PICKUP,
+      tableToken: null,
       deliveryAddress: null,
       deliveryLatitude: null,
       deliveryLongitude: null,
@@ -456,5 +458,70 @@ describe('Public order flow', () => {
 
     expect(document.documentElement.dir).toBe('ltr');
     expect(fixture.nativeElement.textContent).toContain('Checkout');
+  });
+
+  it('uses dine-in checkout when table session is active', async () => {
+    cart.setTableSession(
+      {
+        tableId: '11111111-1111-1111-1111-111111111101',
+        tableName: 'Table 5',
+        zone: 'Terrace',
+        restaurantId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+      },
+      'table-token-1',
+    );
+
+    const fixture = TestBed.createComponent(PublicCheckoutPanel);
+    fixture.componentRef.setInput('open', true);
+    fixture.componentRef.setInput('slug', 'restaurant-a');
+    fixture.componentRef.setInput('orderSettings', settings);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="public-checkout-dine-in"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[name="deliveryAddress"]')).toBeNull();
+    expect(fixture.componentInstance['orderType']()).toBe(ORDER_TYPE_DINE_IN);
+  });
+
+  it('posts dine-in order with tableToken', async () => {
+    cart.setTableSession(
+      {
+        tableId: '11111111-1111-1111-1111-111111111101',
+        tableName: 'Table 5',
+        zone: null,
+        restaurantId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+      },
+      'table-token-1',
+    );
+
+    const fixture = TestBed.createComponent(PublicCheckoutPanel);
+    fixture.componentRef.setInput('open', true);
+    fixture.componentRef.setInput('slug', 'restaurant-a');
+    fixture.componentRef.setInput('orderSettings', settings);
+    fixture.detectChanges();
+
+    fixture.componentInstance['guestName'].set('Guest');
+    fixture.componentInstance['guestPhone'].set('+966500000000');
+    fixture.componentInstance['submit']();
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/orders`);
+    expect(req.request.body.orderType).toBe(ORDER_TYPE_DINE_IN);
+    expect(req.request.body.tableToken).toBe('table-token-1');
+
+    req.flush({
+      orderId: '99999999-9999-9999-9999-999999999901',
+      orderNumber: 'ORD-T5',
+      orderType: ORDER_TYPE_DINE_IN,
+      orderStatus: 1,
+      subtotal: 28,
+      discountAmount: 0,
+      taxAmount: 4.2,
+      deliveryFee: 0,
+      totalAmount: 32.2,
+      currencyCode: 'SAR',
+      createdAt: '2026-06-04T12:00:00Z',
+      items: [],
+    });
+    fixture.detectChanges();
   });
 });

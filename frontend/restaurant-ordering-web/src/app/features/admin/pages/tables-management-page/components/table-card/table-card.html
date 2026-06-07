@@ -1,0 +1,76 @@
+<article class="table-card" [attr.data-testid]="'table-card-' + table().id">
+  <div class="table-card__head">
+    <div class="table-card__title">
+      <h2>{{ table().name }}</h2>
+      <p>{{ zoneLabel(table()) }}</p>
+    </div>
+    <span
+      class="table-card__badge"
+      [class.table-card__badge--inactive]="!table().isActive"
+      [attr.data-testid]="'table-status-' + table().id"
+    >
+      {{
+        table().isActive
+          ? locale.uiText('tablesStatusActive')
+          : locale.uiText('tablesStatusInactive')
+      }}
+    </span>
+  </div>
+
+  <div class="table-card__qr" [attr.data-testid]="'table-qr-' + table().id">
+    @if (qrLoading()) {
+      <div class="table-card__qr-skeleton" aria-hidden="true"></div>
+    } @else if (qrSvg(); as svg) {
+      <div class="table-card__qr-image" [innerHTML]="safeQrSvg(svg)"></div>
+    } @else {
+      <div class="table-card__qr-empty">{{ locale.uiText('tablesQrUnavailable') }}</div>
+    }
+  </div>
+
+  <div class="table-card__actions">
+    <button
+      type="button"
+      class="table-card__action table-card__action--primary"
+      [attr.data-testid]="'table-edit-' + table().id"
+      (click)="edit.emit(table())"
+    >
+      {{ locale.uiText('tablesActionEdit') }}
+    </button>
+    <button
+      type="button"
+      class="table-card__action"
+      [attr.data-testid]="'table-print-' + table().id"
+      (click)="print.emit(table())"
+    >
+      {{ locale.uiText('tablesActionPrint') }}
+    </button>
+    <button
+      type="button"
+      class="table-card__action"
+      [attr.data-testid]="'table-download-qr-' + table().id"
+      (click)="downloadQr.emit(table())"
+    >
+      {{ locale.uiText('tablesActionDownloadQr') }}
+    </button>
+    <button
+      type="button"
+      class="table-card__action"
+      [attr.data-testid]="'table-toggle-status-' + table().id"
+      (click)="toggleStatus.emit(table())"
+    >
+      {{
+        table().isActive
+          ? locale.uiText('tablesActionDeactivate')
+          : locale.uiText('tablesActionActivate')
+      }}
+    </button>
+    <button
+      type="button"
+      class="table-card__action table-card__action--danger"
+      [attr.data-testid]="'table-regenerate-' + table().id"
+      (click)="regenerateToken.emit(table())"
+    >
+      {{ locale.uiText('tablesActionRegenerateToken') }}
+    </button>
+  </div>
+</article>

@@ -9,6 +9,7 @@ export enum OrderStatus {
 export enum OrderType {
   Pickup = 1,
   Delivery = 2,
+  DineIn = 3,
 }
 
 export interface OrderSummary {
