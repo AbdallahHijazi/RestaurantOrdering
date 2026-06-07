@@ -3,9 +3,11 @@ import {
   ElementRef,
   HostListener,
   computed,
+  effect,
   inject,
   input,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { LocaleService } from '../../../../core/localization/locale';
@@ -33,10 +35,23 @@ export class PublicCartDrawer {
   protected readonly cart = inject(PublicCartService);
   protected readonly localeService = inject(LocaleService);
   protected readonly ui = this.localeService.ui;
+  private readonly brokenImages = signal<Record<string, true>>({});
 
   protected readonly estimate = computed(() =>
     estimateOrderTotals(this.cart.cartItems(), this.orderSettings(), ORDER_TYPE_PICKUP),
   );
+
+  protected readonly subtitle = computed(() =>
+    this.ui().publicCartSubtitle.replace('{count}', String(this.cart.itemCount())),
+  );
+
+  constructor() {
+    effect(() => {
+      if (this.open()) {
+        queueMicrotask(() => this.panelRef()?.nativeElement.focus());
+      }
+    });
+  }
 
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
@@ -59,6 +74,18 @@ export class PublicCartDrawer {
 
   protected unitPrice(line: Parameters<typeof displayUnitPrice>[0]): number {
     return displayUnitPrice(line);
+  }
+
+  protected imageSrc(line: { menuItemId: string; imageUrl?: string | null }): string {
+    if (this.brokenImages()[line.menuItemId]) {
+      return this.imageFallback();
+    }
+
+    return line.imageUrl?.trim() || this.imageFallback();
+  }
+
+  protected onImageError(lineId: string): void {
+    this.brokenImages.update((current) => ({ ...current, [lineId]: true }));
   }
 
   protected onBackdropClick(event: MouseEvent): void {
@@ -113,10 +140,6 @@ export class PublicCartDrawer {
     this.cart.removeItem(lineId);
   }
 
-  protected onNotesInput(lineId: string, value: string): void {
-    this.cart.updateItemNotes(lineId, value);
-  }
-
   protected clearCart(): void {
     if (!window.confirm(this.ui().publicCartClearConfirm)) {
       return;
@@ -125,7 +148,7 @@ export class PublicCartDrawer {
     this.cart.clearCart();
   }
 
-  protected focusPanel(): void {
-    queueMicrotask(() => this.panelRef()?.nativeElement.focus());
+  protected exploreMenu(): void {
+    this.closed.emit();
   }
 }

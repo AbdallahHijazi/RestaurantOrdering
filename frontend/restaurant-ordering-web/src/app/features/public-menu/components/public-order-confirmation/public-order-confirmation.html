@@ -1,12 +1,12 @@
 @if (confirmation(); as order) {
   <app-order-modal-shell
-    [wide]="true"
+    class="public-order-confirmation__shell"
     [open]="open()"
     [title]="ui().publicConfirmationSuccessTitle"
     [closeLabel]="ui().publicConfirmationCloseAria"
     titleId="public-order-confirmation-title"
     testId="public-order-confirmation-modal"
-    (closed)="closed.emit()"
+    (closed)="onDismiss()"
   >
     <div class="public-confirmation">
       <div class="public-confirmation__success">
@@ -18,7 +18,7 @@
             />
           </svg>
         </span>
-        <p class="public-confirmation__lead">{{ ui().publicConfirmationSuccessLead }}</p>
+        <p class="public-confirmation__lead">{{ ui().publicConfirmationPreparingMessage }}</p>
       </div>
 
       <div class="public-confirmation__order-number">
@@ -30,8 +30,13 @@
     </div>
 
     <div orderModalFooter class="public-confirmation__footer">
-      <button type="button" class="button-primary" (click)="returnToMenu.emit()">
-        {{ ui().publicConfirmationReturnMenu }}
+      <button
+        type="button"
+        class="button-primary public-confirmation__back-btn"
+        data-testid="public-order-confirmation-return"
+        (click)="onReturnToMenu()"
+      >
+        {{ ui().publicConfirmationBackToMenu }}
       </button>
     </div>
   </app-order-modal-shell>

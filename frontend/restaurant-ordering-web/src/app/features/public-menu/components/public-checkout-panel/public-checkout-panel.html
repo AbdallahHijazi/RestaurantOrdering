@@ -13,25 +13,34 @@
       (click)="$event.stopPropagation()"
     >
       <header class="public-checkout__header">
-        <div>
-          <h2 id="public-checkout-title">{{ ui().publicCheckoutTitle }}</h2>
+        <div class="public-checkout__header-copy">
+          <h2 id="public-checkout-title" data-testid="public-checkout-title">{{ ui().publicCheckoutTitle }}</h2>
           <p>{{ ui().publicMenuCheckoutDescription }}</p>
         </div>
         <button
           type="button"
           class="public-checkout__close"
+          data-testid="public-checkout-close"
           [attr.aria-label]="ui().publicCartCloseAria"
           [disabled]="submitting()"
           (click)="closed.emit()"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <path
+              d="m7 7 10 10M17 7 7 17"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
           </svg>
         </button>
       </header>
 
       @if (!servicesAvailable()) {
-        <p class="public-checkout__alert">{{ ui().publicCheckoutAllServicesDisabled }}</p>
+        <div class="public-checkout__body">
+          <p class="public-checkout__alert">{{ ui().publicCheckoutAllServicesDisabled }}</p>
+        </div>
       } @else {
         <form class="public-checkout__form" (submit)="$event.preventDefault(); submit()">
           <div class="public-checkout__body">
@@ -40,55 +49,110 @@
             }
 
             @if (errorMessage(); as message) {
-              <p class="public-checkout__alert" role="alert">{{ message }}</p>
+              <p class="public-checkout__alert" role="alert" data-testid="public-checkout-error">{{ message }}</p>
             }
 
-            @if (isDineIn()) {
-              <div class="public-checkout__field public-checkout__field--full">
-                <span class="public-checkout__label">{{ ui().publicCheckoutOrderType }}</span>
-                <p class="public-checkout__dine-in" data-testid="public-checkout-dine-in">
-                  {{ ui().publicOrderTypeDineIn }}
-                  @if (cart.resolvedTable(); as table) {
-                    <span class="public-checkout__table-badge">
-                      {{ table.tableName }}
-                      @if (table.zone?.trim()) {
-                        · {{ table.zone }}
-                      }
-                    </span>
+            <section class="public-checkout__section">
+              <span class="public-checkout__label">{{ ui().publicCheckoutOrderType }}</span>
+
+              <div class="public-checkout__types" role="group" [attr.aria-label]="ui().publicCheckoutOrderType">
+                <button
+                  type="button"
+                  class="public-checkout__type-card"
+                  data-testid="public-checkout-type-pickup"
+                  [class.public-checkout__type-card--active]="orderType() === ORDER_TYPE_PICKUP"
+                  [attr.aria-pressed]="orderType() === ORDER_TYPE_PICKUP"
+                  [disabled]="submitting() || !orderSettings().isPickupEnabled"
+                  (click)="selectPickup()"
+                >
+                  <div class="public-checkout__type-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path
+                        d="M7 8h10l-1 10H8L7 8Zm2-3h6v2H9V5Z"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
+                  <strong>{{ ui().publicCheckoutPickup }}</strong>
+                  <span class="public-checkout__type-radio" aria-hidden="true">
+                    <span class="public-checkout__type-radio-dot"></span>
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  class="public-checkout__type-card"
+                  data-testid="public-checkout-type-dine-in"
+                  [class.public-checkout__type-card--active]="orderType() === ORDER_TYPE_DINE_IN"
+                  [attr.aria-pressed]="orderType() === ORDER_TYPE_DINE_IN"
+                  [attr.aria-disabled]="!dineInAvailable()"
+                  [attr.aria-describedby]="!dineInAvailable() ? 'public-checkout-dine-in-helper' : null"
+                  [disabled]="submitting() || !dineInAvailable()"
+                  (click)="selectDineIn()"
+                >
+                  <div class="public-checkout__type-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path
+                        d="M4 10h16v2H4v-2Zm2 4h12v6H6v-6Zm2-8h8v4H8V6Z"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
+                  <strong>{{ ui().publicCheckoutDineIn }}</strong>
+                  <span class="public-checkout__type-radio" aria-hidden="true">
+                    <span class="public-checkout__type-radio-dot"></span>
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  class="public-checkout__type-card"
+                  data-testid="public-checkout-type-delivery"
+                  [class.public-checkout__type-card--active]="orderType() === ORDER_TYPE_DELIVERY"
+                  [attr.aria-pressed]="orderType() === ORDER_TYPE_DELIVERY"
+                  [disabled]="submitting() || !orderSettings().isDeliveryEnabled"
+                  (click)="selectDelivery()"
+                >
+                  <div class="public-checkout__type-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path
+                        d="M3 13h11v5H3v-5Zm11 0 3-5h4l2 5h-6ZM6 18a1.5 1.5 0 1 0 0 .01M17 18a1.5 1.5 0 1 0 0 .01"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
+                  <strong>{{ ui().publicCheckoutDelivery }}</strong>
+                  <span class="public-checkout__type-radio" aria-hidden="true">
+                    <span class="public-checkout__type-radio-dot"></span>
+                  </span>
+                </button>
+              </div>
+
+              @if (!dineInAvailable()) {
+                <p id="public-checkout-dine-in-helper" class="public-checkout__type-helper" data-testid="public-checkout-dine-in-helper">
+                  {{ ui().publicCheckoutDineInRequiresQr }}
+                </p>
+              }
+
+              @if (orderType() === ORDER_TYPE_DINE_IN && dineInAvailable()) {
+                <p class="public-checkout__table-banner" data-testid="public-checkout-table-badge">
+                  {{ tableOrderingLabel() }}
+                  @if (cart.resolvedTable()?.zone?.trim(); as zone) {
+                    · {{ zone }}
                   }
                 </p>
-              </div>
-            } @else {
-              <div class="public-checkout__field public-checkout__field--full">
-                <span class="public-checkout__label">{{ ui().publicCheckoutTitle }}</span>
-                <div class="public-checkout__types">
-                  @if (orderSettings().isPickupEnabled) {
-                    <label class="public-checkout__type-card">
-                      <input
-                        type="radio"
-                        name="orderType"
-                        [checked]="orderType() === 1"
-                        [disabled]="submitting()"
-                        (change)="selectPickup()"
-                      />
-                      <span>{{ ui().publicCheckoutPickup }}</span>
-                    </label>
-                  }
-                  @if (orderSettings().isDeliveryEnabled) {
-                    <label class="public-checkout__type-card">
-                      <input
-                        type="radio"
-                        name="orderType"
-                        [checked]="orderType() === 2"
-                        [disabled]="submitting()"
-                        (change)="selectDelivery()"
-                      />
-                      <span>{{ ui().publicCheckoutDelivery }}</span>
-                    </label>
-                  }
-                </div>
-              </div>
-            }
+              }
+            </section>
 
             <div class="public-checkout__grid">
               <label class="public-checkout__field">
@@ -98,6 +162,7 @@
                   name="guestName"
                   autocomplete="name"
                   required
+                  [placeholder]="ui().publicCheckoutGuestNamePlaceholder"
                   [disabled]="submitting()"
                   [ngModel]="guestName()"
                   (ngModelChange)="guestName.set($event)"
@@ -111,14 +176,16 @@
                   name="guestPhone"
                   autocomplete="tel"
                   inputmode="tel"
+                  dir="ltr"
                   required
+                  [placeholder]="ui().publicCheckoutGuestPhonePlaceholder"
                   [disabled]="submitting()"
                   [ngModel]="guestPhone()"
                   (ngModelChange)="guestPhone.set($event)"
                 />
               </label>
 
-              @if (orderType() === 2 && !isDineIn()) {
+              @if (orderType() === ORDER_TYPE_DELIVERY) {
                 <label class="public-checkout__field public-checkout__field--full">
                   <span class="public-checkout__label">{{ ui().publicCheckoutDeliveryAddress }}</span>
                   <input
@@ -126,6 +193,7 @@
                     name="deliveryAddress"
                     autocomplete="street-address"
                     required
+                    [placeholder]="ui().publicCheckoutDeliveryAddressPlaceholder"
                     [disabled]="submitting()"
                     [ngModel]="deliveryAddress()"
                     (ngModelChange)="deliveryAddress.set($event)"
@@ -134,12 +202,11 @@
               }
 
               <label class="public-checkout__field public-checkout__field--full">
-                <span class="public-checkout__label">
-                  {{ ui().publicCheckoutOrderNotes }}
-                </span>
+                <span class="public-checkout__label">{{ ui().publicCheckoutOrderNotes }}</span>
                 <textarea
-                  rows="3"
+                  rows="4"
                   name="orderNotes"
+                  [placeholder]="ui().publicCheckoutOrderNotesPlaceholder"
                   [disabled]="submitting()"
                   [ngModel]="orderNotes()"
                   (ngModelChange)="orderNotes.set($event)"
@@ -147,12 +214,36 @@
               </label>
             </div>
 
-            <div class="public-checkout__summary">
-              <span>{{ ui().publicCheckoutEstimatedTotal }}</span>
-              <strong>
-                <bdi dir="ltr">{{ formatMoney(estimate().estimatedTotal) }}</bdi>
-              </strong>
-            </div>
+            <section class="public-checkout__summary" data-testid="public-checkout-summary">
+              <div class="public-checkout__summary-row">
+                <span>{{ ui().publicCartSubtotal }}</span>
+                <strong>
+                  <bdi dir="ltr">{{ formatMoney(estimate().subtotal) }}</bdi>
+                </strong>
+              </div>
+              @if (showTax()) {
+                <div class="public-checkout__summary-row">
+                  <span>{{ ui().publicCheckoutEstimatedTax }}</span>
+                  <strong>
+                    <bdi dir="ltr">{{ formatMoney(estimate().estimatedTax) }}</bdi>
+                  </strong>
+                </div>
+              }
+              @if (showDeliveryFee()) {
+                <div class="public-checkout__summary-row" data-testid="public-checkout-delivery-fee">
+                  <span>{{ ui().publicCheckoutDeliveryFee }}</span>
+                  <strong>
+                    <bdi dir="ltr">{{ formatMoney(estimate().deliveryFee) }}</bdi>
+                  </strong>
+                </div>
+              }
+              <div class="public-checkout__summary-row public-checkout__summary-row--total">
+                <span>{{ ui().publicCheckoutEstimatedTotal }}</span>
+                <strong>
+                  <bdi dir="ltr">{{ formatMoney(estimate().estimatedTotal) }}</bdi>
+                </strong>
+              </div>
+            </section>
 
             @if (belowMinimum()) {
               <p class="public-checkout__alert">{{ ui().publicCheckoutMinimumOrder }}</p>
@@ -161,25 +252,35 @@
 
           <footer class="public-checkout__footer">
             <button
-              type="button"
-              class="public-checkout__secondary"
-              [disabled]="submitting()"
-              (click)="closed.emit()"
-            >
-              {{ ui().publicMenuCancel }}
-            </button>
-            <button
               type="submit"
               class="public-checkout__primary"
+              data-testid="public-checkout-submit"
               [disabled]="!canSubmit()"
             >
-              {{
+              <span>{{
                 submitting()
                   ? ui().publicCheckoutSubmitting
                   : isPreviewMode()
                     ? ui().publicCheckoutPreviewMode
                     : ui().publicMenuConfirmOrder
-              }}
+              }}</span>
+              @if (!submitting() && !isPreviewMode()) {
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path
+                    d="M12 3a9 9 0 1 0 9 9 9 9 0 0 0-9-9Zm-1 12 2.6 2.6L17 13l1.4 1.4-6.4 6.4-4-4L9.4 15 11 13Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              }
+            </button>
+            <button
+              type="button"
+              class="public-checkout__secondary"
+              data-testid="public-checkout-cancel"
+              [disabled]="submitting()"
+              (click)="closed.emit()"
+            >
+              {{ ui().publicMenuCancel }}
             </button>
           </footer>
         </form>

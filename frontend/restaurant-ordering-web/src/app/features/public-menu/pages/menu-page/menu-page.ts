@@ -261,9 +261,13 @@ export class MenuPage implements OnDestroy {
 
   protected closeConfirmation(): void {
     this.confirmationOpen.set(false);
-    this.orderConfirmation.set(null);
     this.syncBodyScrollLock();
     this.restoreFocus();
+    queueMicrotask(() => {
+      if (!this.confirmationOpen()) {
+        this.orderConfirmation.set(null);
+      }
+    });
   }
 
   protected returnToMenuFromConfirmation(): void {

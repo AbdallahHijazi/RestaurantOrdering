@@ -596,9 +596,23 @@ export type UiTextKey =
   | 'publicCartOpenAria'
   | 'publicCartCloseAria'
   | 'publicCartSubtotal'
+  | 'publicCartSubtitle'
+  | 'publicCartEmptyTitle'
+  | 'publicCartEmptyLead'
+  | 'publicCartExploreMenu'
+  | 'publicCartDecrease'
+  | 'publicCartIncrease'
   | 'publicCheckoutTitle'
+  | 'publicCheckoutGuestNamePlaceholder'
+  | 'publicCheckoutGuestPhonePlaceholder'
+  | 'publicCheckoutDeliveryAddressPlaceholder'
+  | 'publicCheckoutOrderNotesPlaceholder'
+  | 'publicCheckoutTableOrdering'
   | 'publicCheckoutPickup'
+  | 'publicCheckoutDineIn'
   | 'publicCheckoutDelivery'
+  | 'publicCheckoutOrderingForTable'
+  | 'publicCheckoutDineInRequiresQr'
   | 'publicCheckoutGuestName'
   | 'publicCheckoutGuestPhone'
   | 'publicCheckoutDeliveryAddress'
@@ -635,6 +649,8 @@ export type UiTextKey =
   | 'publicConfirmationDeliveryInstructions'
   | 'publicConfirmationClose'
   | 'publicConfirmationReturnMenu'
+  | 'publicConfirmationBackToMenu'
+  | 'publicConfirmationPreparingMessage'
   | 'publicConfirmationCloseAria'
   | 'publicOrderTypePickup'
   | 'publicOrderTypeDelivery'
@@ -1172,25 +1188,39 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminMenuAddNewMealDescription: 'أنشئ طبقًا جديدًا وأضف صورته وتفاصيله.',
     adminMenuAvailableNow: 'متاح الآن',
     adminMenuAddCategoryAria: 'إضافة تصنيف',
-    publicCartTitle: 'سلة الطلب',
+    publicCartTitle: 'سلتك',
     publicCartEmpty: 'سلتك فارغة. أضف وجبات من القائمة.',
-    publicCartRemove: 'إزالة',
-    publicCartClear: 'إفراغ السلة',
-    publicCartClearConfirm: 'هل تريد إفراغ السلة؟',
+    publicCartEmptyTitle: 'سلتك فارغة',
+    publicCartEmptyLead: 'أضف أطباقك المفضلة من القائمة لمتابعة الطلب.',
+    publicCartExploreMenu: 'تصفح القائمة',
+    publicCartSubtitle: '{count} عناصر مختارة · راجع طلبك وعدّل الكميات',
+    publicCartDecrease: 'تقليل الكمية',
+    publicCartIncrease: 'زيادة الكمية',
+    publicCartRemove: 'حذف',
+    publicCartClear: 'تفريغ السلة',
+    publicCartClearConfirm: 'هل تريد تفريغ السلة؟',
     publicCartQuantity: 'الكمية',
     publicCartItemNotes: 'ملاحظات على الوجبة',
-    publicCartContinueCheckout: 'متابعة إلى الدفع',
+    publicCartContinueCheckout: 'متابعة لإتمام الطلب',
     publicCartClose: 'إغلاق',
     publicCartOpenAria: 'فتح سلة الطلب',
-    publicCartCloseAria: 'إغلاق النافذة',
+    publicCartCloseAria: 'إغلاق السلة',
     publicCartSubtotal: 'المجموع الفرعي',
     publicCheckoutTitle: 'إتمام الطلب',
-    publicCheckoutPickup: 'استلام من المطعم',
-    publicCheckoutDelivery: 'توصيل',
-    publicCheckoutGuestName: 'الاسم',
-    publicCheckoutGuestPhone: 'رقم الجوال',
+    publicCheckoutPickup: 'استلام من الفرع',
+    publicCheckoutDineIn: 'على الطاولة',
+    publicCheckoutDelivery: 'توصيل للمنزل',
+    publicCheckoutOrderingForTable: 'الطلب على طاولة {table}',
+    publicCheckoutDineInRequiresQr: 'امسح رمز QR الموجود على الطاولة للطلب داخل المطعم',
+    publicCheckoutGuestName: 'الاسم الكامل',
+    publicCheckoutGuestPhone: 'رقم الهاتف',
+    publicCheckoutGuestNamePlaceholder: 'مثال: أحمد محمد',
+    publicCheckoutGuestPhonePlaceholder: '+966 5X XXX XXXX',
     publicCheckoutDeliveryAddress: 'عنوان التوصيل',
-    publicCheckoutOrderNotes: 'ملاحظات على الطلب (اختياري)',
+    publicCheckoutDeliveryAddressPlaceholder: 'الحي، الشارع، رقم المبنى',
+    publicCheckoutOrderNotes: 'ملاحظات إضافية (اختياري)',
+    publicCheckoutOrderNotesPlaceholder: 'أي تعليمات خاصة بالطلب أو التوصيل...',
+    publicCheckoutTableOrdering: 'الطلب على طاولة {table}',
     publicCheckoutEstimatedTax: 'الضريبة التقديرية',
     publicCheckoutDeliveryFee: 'رسوم التوصيل',
     publicCheckoutEstimatedTotal: 'الإجمالي التقديري',
@@ -1227,10 +1257,12 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
       'سيتم تجهيز طلبك للتوصيل إلى العنوان المحدد.',
     publicConfirmationClose: 'إغلاق',
     publicConfirmationReturnMenu: 'العودة إلى المنيو',
+    publicConfirmationBackToMenu: 'العودة إلى المنيو',
+    publicConfirmationPreparingMessage: 'سيتم تجهيز طلبك قريبًا.',
     publicConfirmationCloseAria: 'إغلاق تأكيد الطلب',
     publicOrderTypePickup: 'استلام',
     publicOrderTypeDelivery: 'توصيل',
-    publicOrderTypeDineIn: 'تناول في المطعم',
+    publicOrderTypeDineIn: 'على الطاولة',
     publicMenuTableBadge: 'طاولتك',
     publicMenuTableInvalid: 'رمز الطاولة غير صالح أو منتهي.',
     publicCheckoutTableRequired: 'رمز الطاولة مطلوب لإكمال الطلب.',
@@ -1255,7 +1287,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     publicMenuCartReady: 'سلتك جاهزة',
     publicMenuViewCart: 'عرض السلة',
     publicMenuCartSubtitle: 'راجع طلبك وعدّل الكميات بسهولة.',
-    publicMenuCheckoutDescription: 'أدخل بيانات الطلب لإكمال العملية.',
+    publicMenuCheckoutDescription: 'أدخل تفاصيل طلبك لإكمال العملية',
     publicMenuConfirmOrder: 'تأكيد الطلب',
     publicMenuCancel: 'إلغاء',
     publicMenuFooterCopy: '© تجربة طعام مصممة بذوق راقٍ.',
@@ -1771,6 +1803,12 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminMenuAddCategoryAria: 'Add category',
     publicCartTitle: 'Your cart',
     publicCartEmpty: 'Your cart is empty. Add dishes from the menu.',
+    publicCartEmptyTitle: 'Your cart is empty',
+    publicCartEmptyLead: 'Add your favorite dishes from the menu to continue your order.',
+    publicCartExploreMenu: 'Explore menu',
+    publicCartSubtitle: '{count} items selected · Review and adjust your order',
+    publicCartDecrease: 'Decrease quantity',
+    publicCartIncrease: 'Increase quantity',
     publicCartRemove: 'Remove',
     publicCartClear: 'Clear cart',
     publicCartClearConfirm: 'Clear all items from your cart?',
@@ -1779,15 +1817,23 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     publicCartContinueCheckout: 'Continue to checkout',
     publicCartClose: 'Close',
     publicCartOpenAria: 'Open cart',
-    publicCartCloseAria: 'Close dialog',
+    publicCartCloseAria: 'Close cart',
     publicCartSubtotal: 'Subtotal',
-    publicCheckoutTitle: 'Checkout',
+    publicCheckoutTitle: 'Complete your order',
     publicCheckoutPickup: 'Pickup',
+    publicCheckoutDineIn: 'Dine in',
     publicCheckoutDelivery: 'Delivery',
-    publicCheckoutGuestName: 'Your name',
+    publicCheckoutOrderingForTable: 'Ordering for {table}',
+    publicCheckoutDineInRequiresQr: 'Scan the QR code on your table to place a dine-in order',
+    publicCheckoutGuestName: 'Full name',
     publicCheckoutGuestPhone: 'Phone number',
+    publicCheckoutGuestNamePlaceholder: 'e.g. Ahmed Mohamed',
+    publicCheckoutGuestPhonePlaceholder: '+966 5X XXX XXXX',
     publicCheckoutDeliveryAddress: 'Delivery address',
-    publicCheckoutOrderNotes: 'Order notes (optional)',
+    publicCheckoutDeliveryAddressPlaceholder: 'District, street, building number',
+    publicCheckoutOrderNotes: 'Additional notes (optional)',
+    publicCheckoutOrderNotesPlaceholder: 'Any special instructions for your order or delivery...',
+    publicCheckoutTableOrdering: 'Ordering for {table}',
     publicCheckoutEstimatedTax: 'Estimated tax',
     publicCheckoutDeliveryFee: 'Delivery fee',
     publicCheckoutEstimatedTotal: 'Estimated total',
@@ -1825,6 +1871,8 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
       'Your order will be prepared for delivery to the provided address.',
     publicConfirmationClose: 'Close',
     publicConfirmationReturnMenu: 'Back to menu',
+    publicConfirmationBackToMenu: 'Back to menu',
+    publicConfirmationPreparingMessage: 'Your order will be prepared shortly.',
     publicConfirmationCloseAria: 'Close order confirmation',
     publicOrderTypePickup: 'Pickup',
     publicOrderTypeDelivery: 'Delivery',
@@ -1853,7 +1901,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     publicMenuCartReady: 'Your cart is ready',
     publicMenuViewCart: 'View cart',
     publicMenuCartSubtitle: 'Review your cart and adjust quantities easily.',
-    publicMenuCheckoutDescription: 'Enter your order details to complete the process.',
+    publicMenuCheckoutDescription: 'Enter your details to complete the order',
     publicMenuConfirmOrder: 'Confirm order',
     publicMenuCancel: 'Cancel',
     publicMenuFooterCopy: '© A thoughtfully designed dining experience.',

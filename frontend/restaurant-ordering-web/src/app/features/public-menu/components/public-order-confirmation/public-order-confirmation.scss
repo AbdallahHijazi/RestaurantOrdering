@@ -1,58 +1,73 @@
+.public-order-confirmation__shell {
+  --modal-dialog-max-width: min(38rem, calc(100vw - 2rem));
+  --modal-dialog-max-height: 40rem;
+}
+
 .public-confirmation {
   display: grid;
-  gap: 1.25rem;
+  gap: 0.9rem;
   text-align: center;
 }
 
 .public-confirmation__success {
   display: grid;
   justify-items: center;
-  gap: 0.75rem;
+  gap: 0.55rem;
 }
 
 .public-confirmation__icon {
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 3rem;
+  height: 3rem;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  color: var(--menu-sage);
-  background: var(--menu-sage-soft);
+  color: var(--confirmation-accent, var(--restaurant-accent));
+  background: var(--confirmation-accent-soft, var(--restaurant-accent-soft));
 }
 
 .public-confirmation__icon svg {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .public-confirmation__lead {
   margin: 0;
-  color: var(--menu-muted, #727975);
-  font-size: 0.95rem;
-  line-height: 1.7;
+  color: var(--confirmation-muted, var(--restaurant-muted-text));
+  font-size: 0.92rem;
+  line-height: 1.6;
 }
 
 .public-confirmation__order-number {
   display: grid;
-  gap: 0.45rem;
-  padding: 1rem;
-  border: 1px solid var(--menu-line);
-  border-radius: 0.875rem;
-  background: var(--menu-surface-soft);
+  gap: 0.35rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--confirmation-border, var(--restaurant-border));
+  border-radius: var(--restaurant-radius-lg, 0.75rem);
+  background: var(--confirmation-surface, var(--restaurant-surface-soft));
 }
 
 .public-confirmation__order-number span {
-  color: var(--menu-muted, #727975);
+  color: var(--confirmation-muted, var(--restaurant-muted-text));
   font-size: 0.75rem;
   font-weight: 800;
 }
 
 .public-confirmation__order-number strong {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 .public-confirmation__footer {
   display: flex;
   width: 100%;
   justify-content: center;
+}
+
+.public-confirmation__back-btn {
+  min-width: min(100%, 14rem);
+}
+
+@media (max-width: 640px) {
+  .public-order-confirmation__shell {
+    --modal-dialog-max-width: calc(100vw - 1rem);
+  }
 }

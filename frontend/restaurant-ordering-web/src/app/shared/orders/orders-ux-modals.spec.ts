@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LocaleService } from '../../core/localization/locale';
 import { PublicOrderConfirmation } from '../../features/public-menu/components/public-order-confirmation/public-order-confirmation';
@@ -58,7 +59,7 @@ describe('Orders UX modals', () => {
       expect(orderNumber?.getAttribute('dir')).toBe('ltr');
     });
 
-    it('emits closed on escape via modal shell', () => {
+    it('emits closed on escape', () => {
       fixture.componentRef.setInput('open', true);
       fixture.componentRef.setInput('confirmation', baseConfirmation());
       fixture.detectChanges();
@@ -68,6 +69,36 @@ describe('Orders UX modals', () => {
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
       fixture.detectChanges();
       expect(closed).toHaveBeenCalled();
+    });
+
+    it('emits closed when modal close button is clicked', () => {
+      fixture.componentRef.setInput('open', true);
+      fixture.componentRef.setInput('confirmation', baseConfirmation());
+      fixture.detectChanges();
+
+      const closed = vi.fn();
+      fixture.componentInstance.closed.subscribe(closed);
+      const close = document.body.querySelector(
+        '[data-testid="order-modal-close"]',
+      ) as HTMLButtonElement;
+      close.click();
+      fixture.detectChanges();
+      expect(closed).toHaveBeenCalled();
+    });
+
+    it('emits returnToMenu when back button is clicked', () => {
+      fixture.componentRef.setInput('open', true);
+      fixture.componentRef.setInput('confirmation', baseConfirmation());
+      fixture.detectChanges();
+
+      const returnToMenu = vi.fn();
+      fixture.componentInstance.returnToMenu.subscribe(returnToMenu);
+      const back = document.body.querySelector(
+        '[data-testid="public-order-confirmation-return"]',
+      ) as HTMLButtonElement;
+      back.click();
+      fixture.detectChanges();
+      expect(returnToMenu).toHaveBeenCalled();
     });
 
     it('does not render when open is false', () => {

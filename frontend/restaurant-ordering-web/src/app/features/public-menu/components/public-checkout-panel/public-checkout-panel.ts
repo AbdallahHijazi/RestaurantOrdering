@@ -48,6 +48,10 @@ export class PublicCheckoutPanel {
   protected readonly localeService = inject(LocaleService);
   protected readonly ui = this.localeService.ui;
 
+  protected readonly ORDER_TYPE_PICKUP = ORDER_TYPE_PICKUP;
+  protected readonly ORDER_TYPE_DELIVERY = ORDER_TYPE_DELIVERY;
+  protected readonly ORDER_TYPE_DINE_IN = ORDER_TYPE_DINE_IN;
+
   protected readonly guestName = signal('');
   protected readonly guestPhone = signal('');
   protected readonly deliveryAddress = signal('');
@@ -58,10 +62,10 @@ export class PublicCheckoutPanel {
 
   protected readonly isPreviewMode = computed(() => isDemoMenuSlug(this.slug()));
 
-  protected readonly isDineIn = computed(() => this.cart.hasTableSession());
+  protected readonly dineInAvailable = computed(() => this.cart.hasTableSession());
 
   protected readonly servicesAvailable = computed(() => {
-    if (this.isDineIn()) {
+    if (this.dineInAvailable()) {
       return true;
     }
 
@@ -77,6 +81,21 @@ export class PublicCheckoutPanel {
     () => this.estimate().subtotal < this.orderSettings().minimumOrderAmount,
   );
 
+  protected readonly showDeliveryFee = computed(
+    () => this.orderType() === ORDER_TYPE_DELIVERY && this.orderSettings().isDeliveryEnabled,
+  );
+
+  protected readonly showTax = computed(() => this.estimate().estimatedTax > 0);
+
+  protected readonly tableOrderingLabel = computed(() => {
+    const table = this.cart.resolvedTable();
+    if (!table) {
+      return '';
+    }
+
+    return this.ui().publicCheckoutOrderingForTable.replace('{table}', table.tableName);
+  });
+
   constructor() {
     effect(() => {
       if (this.open()) {
@@ -87,7 +106,7 @@ export class PublicCheckoutPanel {
   }
 
   protected syncDefaultOrderType(): void {
-    if (this.isDineIn()) {
+    if (this.dineInAvailable()) {
       this.orderType.set(ORDER_TYPE_DINE_IN);
       return;
     }
@@ -127,6 +146,12 @@ export class PublicCheckoutPanel {
     }
   }
 
+  protected selectDineIn(): void {
+    if (this.dineInAvailable()) {
+      this.orderType.set(ORDER_TYPE_DINE_IN);
+    }
+  }
+
   protected canSubmit(): boolean {
     if (this.submitting() || this.cart.isEmpty() || !this.servicesAvailable()) {
       return false;
@@ -134,14 +159,6 @@ export class PublicCheckoutPanel {
 
     if (this.isPreviewMode()) {
       return false;
-    }
-
-    if (this.isDineIn()) {
-      if (!this.guestName().trim() || !this.guestPhone().trim()) {
-        return false;
-      }
-
-      return !this.belowMinimum();
     }
 
     if (this.belowMinimum()) {
@@ -153,21 +170,19 @@ export class PublicCheckoutPanel {
     }
 
     const type = this.orderType();
-    if (type === ORDER_TYPE_PICKUP && !this.orderSettings().isPickupEnabled) {
-      return false;
+    if (type === ORDER_TYPE_DINE_IN) {
+      return this.dineInAvailable() && !!this.cart.tableToken();
+    }
+
+    if (type === ORDER_TYPE_PICKUP) {
+      return this.orderSettings().isPickupEnabled;
     }
 
     if (type === ORDER_TYPE_DELIVERY) {
-      if (!this.orderSettings().isDeliveryEnabled) {
-        return false;
-      }
-
-      if (!this.deliveryAddress().trim()) {
-        return false;
-      }
+      return this.orderSettings().isDeliveryEnabled && !!this.deliveryAddress().trim();
     }
 
-    return true;
+    return false;
   }
 
   protected submit(): void {
@@ -233,30 +248,6 @@ export class PublicCheckoutPanel {
     if (!this.servicesAvailable()) {
       this.errorMessage.set(this.ui().publicCheckoutAllServicesDisabled);
       return false;
-    }
-
-    if (this.isDineIn()) {
-      if (!this.cart.tableToken()) {
-        this.errorMessage.set(this.ui().publicCheckoutTableRequired);
-        return false;
-      }
-
-      if (!this.guestName().trim()) {
-        this.errorMessage.set(this.ui().publicCheckoutGuestName);
-        return false;
-      }
-
-      if (!this.guestPhone().trim()) {
-        this.errorMessage.set(this.ui().publicCheckoutGuestPhone);
-        return false;
-      }
-
-      if (this.belowMinimum()) {
-        this.errorMessage.set(this.ui().publicCheckoutMinimumOrder);
-        return false;
-      }
-
-      return true;
     }
 
     if (!this.guestName().trim()) {

@@ -38,8 +38,16 @@ export class PublicOrderConfirmation {
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
     if (this.open()) {
-      this.closed.emit();
+      this.onDismiss();
     }
+  }
+
+  protected onDismiss(): void {
+    this.closed.emit();
+  }
+
+  protected onReturnToMenu(): void {
+    this.returnToMenu.emit();
   }
 
   protected lineName(line: {

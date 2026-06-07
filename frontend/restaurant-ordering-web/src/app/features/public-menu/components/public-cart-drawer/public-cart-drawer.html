@@ -15,109 +15,216 @@
       (click)="$event.stopPropagation()"
     >
       <header class="public-cart-drawer__header">
-        <div>
-          <h2 id="public-cart-drawer-title">{{ ui().publicCartTitle }}</h2>
-          <span class="public-cart-drawer__subtitle">{{ ui().publicMenuCartSubtitle }}</span>
+        <div class="public-cart-drawer__title-wrap">
+          <div class="public-cart-drawer__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path
+                d="M6 8h12l-1 12H7L6 8Z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M9 8V6a3 3 0 0 1 6 0v2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+          <div class="public-cart-drawer__title-copy">
+            <h2 id="public-cart-drawer-title" data-testid="public-cart-drawer-title">
+              {{ ui().publicCartTitle }}
+            </h2>
+            <p class="public-cart-drawer__subtitle" data-testid="public-cart-drawer-subtitle">
+              {{ subtitle() }}
+            </p>
+          </div>
         </div>
         <button
           type="button"
           class="public-cart-drawer__close"
+          data-testid="public-cart-drawer-close"
           [attr.aria-label]="ui().publicCartCloseAria"
           (click)="closed.emit()"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <path
+              d="m7 7 10 10M17 7 7 17"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
           </svg>
         </button>
       </header>
 
-      <div class="public-cart-drawer__items">
+      <div class="public-cart-drawer__body">
         @if (cart.isEmpty()) {
-          <div class="public-cart-drawer__empty">
+          <div class="public-cart-drawer__empty" data-testid="public-cart-drawer-empty">
             <div class="public-cart-drawer__empty-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M6 8h12l-1 12H7L6 8Z" fill="none" stroke="currentColor" stroke-width="1.9" />
-                <path d="M9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.9" />
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path
+                  d="M6 8h12l-1 12H7L6 8Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M9 8V6a3 3 0 0 1 6 0v2"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
               </svg>
             </div>
-            <p>{{ ui().publicCartEmpty }}</p>
+            <h3>{{ ui().publicCartEmptyTitle }}</h3>
+            <p>{{ ui().publicCartEmptyLead }}</p>
+            <button
+              type="button"
+              class="public-cart-drawer__explore"
+              data-testid="public-cart-drawer-explore"
+              (click)="exploreMenu()"
+            >
+              {{ ui().publicCartExploreMenu }}
+            </button>
           </div>
         } @else {
-          @for (line of cart.cartItems(); track line.menuItemId) {
-            <article class="public-cart-drawer__line">
-              <div class="public-cart-drawer__thumb">
-                @if (line.imageUrl) {
-                  <img [src]="line.imageUrl" [alt]="lineName(line)" loading="lazy" />
-                } @else {
-                  <img [src]="imageFallback()" [alt]="lineName(line)" loading="lazy" />
-                }
-              </div>
+          <div class="public-cart-drawer__items" data-testid="public-cart-drawer-items">
+            @for (line of cart.cartItems(); track line.menuItemId) {
+              <article class="public-cart-drawer__line" [attr.data-testid]="'public-cart-line-' + line.menuItemId">
+                <div class="public-cart-drawer__thumb">
+                  <img
+                    [src]="imageSrc(line)"
+                    [alt]="lineName(line)"
+                    loading="lazy"
+                    (error)="onImageError(line.menuItemId)"
+                  />
+                </div>
 
-              <div class="public-cart-drawer__line-main">
-                <strong>{{ lineName(line) }}</strong>
-                <small>
-                  <bdi dir="ltr">
-                    {{ formatMoney(unitPrice(line)) }} × {{ line.quantity }}
-                  </bdi>
-                </small>
+                <div class="public-cart-drawer__line-main">
+                  <div class="public-cart-drawer__line-top">
+                    <div class="public-cart-drawer__line-copy">
+                      <h3 class="public-cart-drawer__line-name">{{ lineName(line) }}</h3>
+                      <span class="public-cart-drawer__line-unit">
+                        <bdi dir="ltr">
+                          {{ formatMoney(unitPrice(line)) }} × {{ line.quantity }}
+                        </bdi>
+                      </span>
+                    </div>
+                    <strong class="public-cart-drawer__line-price">
+                      <bdi dir="ltr">{{ formatMoney(unitPrice(line) * line.quantity) }}</bdi>
+                    </strong>
+                  </div>
 
-                <div class="public-cart-drawer__tools">
-                  <div class="public-cart-drawer__qty" role="group" [attr.aria-label]="ui().publicCartQuantity">
-                    <button
-                      type="button"
-                      class="public-cart-drawer__qty-btn"
+                  <div class="public-cart-drawer__tools">
+                    <div
+                      class="public-cart-drawer__qty"
+                      role="group"
                       [attr.aria-label]="ui().publicCartQuantity"
-                      (click)="decrement(line.menuItemId)"
                     >
-                      −
-                    </button>
-                    <span aria-live="polite">{{ line.quantity }}</span>
+                      <button
+                        type="button"
+                        class="public-cart-drawer__qty-btn"
+                        data-testid="public-cart-decrease"
+                        [attr.aria-label]="ui().publicCartDecrease"
+                        (click)="decrement(line.menuItemId)"
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <path d="M6 12h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                      </button>
+                      <span class="public-cart-drawer__qty-value" aria-live="polite">{{ line.quantity }}</span>
+                      <button
+                        type="button"
+                        class="public-cart-drawer__qty-btn"
+                        data-testid="public-cart-increase"
+                        [attr.aria-label]="ui().publicCartIncrease"
+                        (click)="increment(line.menuItemId)"
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <path
+                            d="M12 6v12M6 12h12"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                          />
+                        </svg>
+                      </button>
+                    </div>
                     <button
                       type="button"
-                      class="public-cart-drawer__qty-btn"
-                      (click)="increment(line.menuItemId)"
+                      class="public-cart-drawer__remove"
+                      data-testid="public-cart-remove"
+                      [attr.aria-label]="ui().publicCartRemove"
+                      (click)="remove(line.menuItemId)"
                     >
-                      +
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path
+                          d="M4 7h16M10 11v6M14 11v6M6 7l1 12h10l1-12M9 7V5h6v2"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                      <span>{{ ui().publicCartRemove }}</span>
                     </button>
                   </div>
-                  <button
-                    type="button"
-                    class="public-cart-drawer__remove"
-                    (click)="remove(line.menuItemId)"
-                  >
-                    {{ ui().publicCartRemove }}
-                  </button>
                 </div>
-              </div>
-
-              <strong class="public-cart-drawer__line-price">
-                <bdi dir="ltr">{{ formatMoney(unitPrice(line) * line.quantity) }}</bdi>
-              </strong>
-            </article>
-          }
+              </article>
+            }
+          </div>
         }
       </div>
 
       <footer class="public-cart-drawer__footer">
-        <div class="public-cart-drawer__total">
-          <span>{{ ui().publicCheckoutEstimatedTotal }}</span>
-          <strong>
-            <bdi dir="ltr">{{ formatMoney(estimate().subtotal) }}</bdi>
-          </strong>
+        <div class="public-cart-drawer__summary">
+          <div class="public-cart-drawer__summary-row">
+            <span>{{ ui().publicCartSubtotal }}</span>
+            <strong>
+              <bdi dir="ltr">{{ formatMoney(estimate().subtotal) }}</bdi>
+            </strong>
+          </div>
+          <div class="public-cart-drawer__summary-row public-cart-drawer__summary-row--total">
+            <span>{{ ui().publicCheckoutEstimatedTotal }}</span>
+            <strong>
+              <bdi dir="ltr">{{ formatMoney(estimate().estimatedTotal) }}</bdi>
+            </strong>
+          </div>
         </div>
         <p class="public-cart-drawer__note">{{ ui().publicCheckoutEstimatedDisclaimer }}</p>
         <div class="public-cart-drawer__actions">
           <button
             type="button"
             class="public-cart-drawer__checkout"
+            data-testid="public-cart-checkout"
             [disabled]="cart.isEmpty()"
             (click)="continueCheckout.emit()"
           >
-            {{ ui().publicCartContinueCheckout }}
+            <span>{{ ui().publicCartContinueCheckout }}</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M5 12h12M13 6l6 6-6 6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
           </button>
           <button
             type="button"
             class="public-cart-drawer__clear"
+            data-testid="public-cart-clear"
             [disabled]="cart.isEmpty()"
             (click)="clearCart()"
           >
