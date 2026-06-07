@@ -1,15 +1,15 @@
 .orders-management-page {
   --orders-bg: #faf8f5;
   --orders-surface: #ffffff;
-  --orders-charcoal: #17201d;
-  --orders-terracotta: #b8663f;
-  --orders-terracotta-soft: #fff1e9;
+  --orders-charcoal: var(--restaurant-neutral-900);
+  --orders-terracotta: var(--restaurant-accent);
+  --orders-terracotta-soft: var(--restaurant-accent-soft);
   --orders-sage: #4f8c76;
   --orders-sage-soft: #eaf6f0;
   --orders-amber: #b7832f;
   --orders-amber-soft: #fff7e6;
-  --orders-bluegray: #69778a;
-  --orders-muted: #69778a;
+  --orders-bluegray: var(--restaurant-neutral-500);
+  --orders-muted: var(--restaurant-neutral-500);
   --orders-bluegray-soft: #eef2f6;
   --orders-red: #b64141;
   --orders-red-soft: #fff2f2;

@@ -10,9 +10,9 @@
   --menu-muted-soft: #979d99;
   --menu-dark: #191c1b;
   --menu-dark-deep: #101312;
-  --menu-terracotta: #b8663f;
+  --menu-terracotta: var(--restaurant-accent);
   --menu-terracotta-deep: #97512d;
-  --menu-terracotta-soft: #fff1e9;
+  --menu-terracotta-soft: var(--restaurant-accent-soft);
   --menu-sage: #5e7d63;
   --menu-sage-soft: #eef4ef;
   --menu-danger: #ba4b4b;
