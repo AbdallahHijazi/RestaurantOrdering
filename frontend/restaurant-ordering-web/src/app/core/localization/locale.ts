@@ -353,6 +353,9 @@ export type UiTextKey =
   | 'tablesActivateSuccess'
   | 'tablesRegenerateSuccess'
   | 'tablesPrintScanToOrder'
+  | 'tablesCardSubtitle'
+  | 'tablesCardOrderFromPhone'
+  | 'tablesCardScanEnglish'
   | 'kitchenEyebrow'
   | 'kitchenTitle'
   | 'kitchenLead'
@@ -935,6 +938,9 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     tablesActivateSuccess: 'تم تفعيل الطاولة.',
     tablesRegenerateSuccess: 'تم تجديد رمز QR.',
     tablesPrintScanToOrder: 'امسح الرمز للطلب من طاولتك',
+    tablesCardSubtitle: 'امسح الرمز لعرض المنيو وبدء الطلب',
+    tablesCardOrderFromPhone: 'اطلب مباشرة من هاتفك',
+    tablesCardScanEnglish: 'Scan to view the menu',
     kitchenEyebrow: 'المطبخ',
     kitchenTitle: 'لوحة المطبخ',
     kitchenLead: 'تابع الطلبات النشطة وحدّث حالة التحضير.',
@@ -1526,6 +1532,9 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     tablesActivateSuccess: 'Table activated.',
     tablesRegenerateSuccess: 'QR token regenerated.',
     tablesPrintScanToOrder: 'Scan to order from your table',
+    tablesCardSubtitle: 'Scan the code to view the menu and start your order',
+    tablesCardOrderFromPhone: 'Order directly from your phone',
+    tablesCardScanEnglish: 'Scan to view the menu',
     kitchenEyebrow: 'Kitchen',
     kitchenTitle: 'Kitchen Dashboard',
     kitchenLead: 'Track active orders and update preparation status.',

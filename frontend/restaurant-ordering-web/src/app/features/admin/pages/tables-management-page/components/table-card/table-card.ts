@@ -1,18 +1,21 @@
 import { Component, inject, input, output } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { LocaleService } from '../../../../../../core/localization/locale';
 import type { RestaurantTable } from '../../../../data-access/restaurant-tables.models';
+import { TablePrintCard } from '../table-print-card/table-print-card';
 
 @Component({
   selector: 'app-table-card',
+  imports: [TablePrintCard],
   templateUrl: './table-card.html',
   styleUrl: './table-card.scss',
 })
 export class TableCard {
-  private readonly sanitizer = inject(DomSanitizer);
   protected readonly locale = inject(LocaleService);
 
   readonly table = input.required<RestaurantTable>();
+  readonly restaurantName = input.required<string>();
+  readonly restaurantLogoUrl = input<string | null>(null);
+  readonly brandInitial = input('?');
   readonly qrSvg = input<string | null>(null);
   readonly qrLoading = input(false);
 
@@ -24,9 +27,5 @@ export class TableCard {
 
   protected zoneLabel(table: RestaurantTable): string {
     return table.zone?.trim() || this.locale.uiText('tablesNoZone');
-  }
-
-  protected safeQrSvg(svg: string): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(svg);
   }
 }

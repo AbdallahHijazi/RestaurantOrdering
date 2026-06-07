@@ -17,14 +17,16 @@
     </span>
   </div>
 
-  <div class="table-card__qr" [attr.data-testid]="'table-qr-' + table().id">
-    @if (qrLoading()) {
-      <div class="table-card__qr-skeleton" aria-hidden="true"></div>
-    } @else if (qrSvg(); as svg) {
-      <div class="table-card__qr-image" [innerHTML]="safeQrSvg(svg)"></div>
-    } @else {
-      <div class="table-card__qr-empty">{{ locale.uiText('tablesQrUnavailable') }}</div>
-    }
+  <div class="table-card__preview" [attr.data-testid]="'table-qr-' + table().id">
+    <app-table-print-card
+      variant="preview"
+      [table]="table()"
+      [restaurantName]="restaurantName()"
+      [restaurantLogoUrl]="restaurantLogoUrl()"
+      [brandInitial]="brandInitial()"
+      [qrSvg]="qrSvg() ?? ''"
+      [qrLoading]="qrLoading()"
+    />
   </div>
 
   <div class="table-card__actions">

@@ -1,36 +1,89 @@
+.tables-print-area {
+  display: none;
+}
+
 @media print {
   @page {
     margin: 12mm;
-    size: A4;
+    size: A4 portrait;
   }
 
-  body {
-    background: var(--restaurant-surface-white) !important;
+  body.tables-print-active {
+    background: var(--restaurant-surface-white, #fff) !important;
   }
 
-  body * {
+  body.tables-print-active * {
     visibility: hidden !important;
   }
 
-  .tables-print-area,
-  .tables-print-area * {
+  body.tables-print-active .tables-print-area,
+  body.tables-print-active .tables-print-area * {
     visibility: visible !important;
   }
 
-  .tables-print-area {
-    display: grid !important;
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    padding: 0;
-    background: var(--restaurant-surface-white) !important;
-    color: #111 !important;
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  body.tables-print-active .profile-console,
+  body.tables-print-active .profile-console *,
+  body.tables-print-active app-tables-management-page > :not(#printAreaHost),
+  body.tables-print-active .modal-overlay,
+  body.tables-print-active app-modal-shell,
+  body.tables-print-active .table-card__actions,
+  body.tables-print-active .table-card__head {
+    display: none !important;
+    visibility: hidden !important;
   }
 
-  .tables-print-area--all {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  body.tables-print-active .tables-print-area {
+    display: flex !important;
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    background: var(--restaurant-surface-white, #fff) !important;
+    color: var(--restaurant-text, #202522) !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+
+  body.tables-print-active .tables-print-area--all {
+    display: grid !important;
+    position: static;
+    grid-template-columns: repeat(2, 89mm);
     align-content: start;
+    justify-content: center;
+    justify-items: center;
+    gap: 8mm;
+    padding: 0;
+    min-height: auto;
+  }
+
+  body.tables-print-active .tables-print-area:not(.tables-print-area--all) .table-qr-card--print {
+    width: 100mm !important;
+    height: 150mm !important;
+    flex-shrink: 0;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  body.tables-print-active .tables-print-area--all .table-qr-card--print {
+    --table-card-logo-size: 17mm;
+    --table-card-qr-size: 48mm;
+    --table-card-restaurant-size: 9.5pt;
+    --table-card-subtitle-size: 6pt;
+    --table-card-table-size: 15pt;
+    --table-card-zone-size: 7pt;
+    --table-card-inner-padding-block: 4mm;
+    --table-card-inner-padding-inline: 3.5mm;
+
+    width: 89mm !important;
+    height: 133.5mm !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+    transform: none !important;
   }
 }

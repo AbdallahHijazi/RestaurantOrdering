@@ -1,17 +1,102 @@
-.table-card{display:grid;gap:1rem;padding:1.125rem;border:1px solid var(--tables-line);border-radius:1.125rem;background:rgb(255 255 255/.94);box-shadow:var(--tables-shadow)}
-.table-card__head{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem}
-.table-card__title h2{margin:0;font-size:1.0625rem;font-weight:800;color:var(--tables-text)}
-.table-card__title p{margin:.35rem 0 0;color:var(--tables-muted);font-size:.8125rem}
-.table-card__badge{display:inline-flex;align-items:center;min-height:1.75rem;padding-inline:.625rem;border-radius:999px;background:var(--tables-green-soft);color:var(--tables-green);font-size:.75rem;font-weight:800;white-space:nowrap}
-.table-card__badge--inactive{background:var(--tables-red-soft);color:var(--tables-red)}
-.table-card__qr{display:grid;place-items:center;min-height:11rem;padding:.75rem;border:1px dashed #eadfd4;border-radius:.875rem;background:rgb(252 250 247/.72)}
-.table-card__qr-image{display:grid;place-items:center;width:100%;max-width:10.5rem}
-.table-card__qr-image svg{width:100%;height:auto;display:block}
-.table-card__qr-skeleton{width:9.5rem;height:9.5rem;border-radius:.75rem;background:#efeeeb}
-.table-card__qr-empty{color:var(--tables-muted);font-size:.8125rem;text-align:center}
-.table-card__actions{display:flex;flex-wrap:wrap;gap:.5rem}
-.table-card__action{min-height:2.375rem;padding-inline:.75rem;border:1px solid var(--tables-line);border-radius:.6875rem;background:var(--restaurant-surface-white);color:#626a65;font:inherit;font-weight:800;cursor:pointer;transition:transform .24s,box-shadow .24s}
-.table-card__action:hover{transform:translateY(-2px);box-shadow:var(--tables-shadow)}
-.table-card__action--primary{border-color:transparent;color:var(--restaurant-surface-white);background:linear-gradient(135deg,var(--tables-dark),#111815)}
-.table-card__action--danger{color:var(--tables-red);border-color:#f0d4cf;background:var(--tables-red-soft)}
-@media (prefers-reduced-motion:reduce){.table-card__action{transition-duration:.01ms!important}}
+.table-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1.125rem;
+  border: 1px solid var(--tables-line);
+  border-radius: 1.125rem;
+  background: rgb(255 255 255 / 0.94);
+  box-shadow: var(--tables-shadow);
+}
+
+.table-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.table-card__title h2 {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 800;
+  color: var(--tables-text);
+}
+
+.table-card__title p {
+  margin: 0.35rem 0 0;
+  color: var(--tables-muted);
+  font-size: 0.8125rem;
+}
+
+.table-card__badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding-inline: 0.625rem;
+  border-radius: 999px;
+  background: var(--tables-green-soft);
+  color: var(--tables-green);
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.table-card__badge--inactive {
+  background: var(--tables-red-soft);
+  color: var(--tables-red);
+}
+
+.table-card__preview {
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  padding: 0.625rem 0.375rem;
+  border-radius: 0.875rem;
+  background: linear-gradient(
+    180deg,
+    var(--restaurant-surface-white, #fff),
+    var(--restaurant-surface-soft, #fffaf7)
+  );
+}
+
+.table-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.table-card__action {
+  min-height: 2.375rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--tables-line);
+  border-radius: 0.6875rem;
+  background: var(--restaurant-surface-white);
+  color: #626a65;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.24s, box-shadow 0.24s;
+}
+
+.table-card__action:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--tables-shadow);
+}
+
+.table-card__action--primary {
+  border-color: transparent;
+  color: var(--restaurant-surface-white);
+  background: linear-gradient(135deg, var(--tables-dark), #111815);
+}
+
+.table-card__action--danger {
+  color: var(--tables-red);
+  border-color: #f0d4cf;
+  background: var(--tables-red-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .table-card__action {
+    transition-duration: 0.01ms !important;
+  }
+}

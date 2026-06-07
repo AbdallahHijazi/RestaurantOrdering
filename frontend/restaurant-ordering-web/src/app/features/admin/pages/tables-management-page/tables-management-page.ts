@@ -1,16 +1,21 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import {
+  ApplicationRef,
   Component,
   computed,
   DestroyRef,
+  ElementRef,
   inject,
   signal,
+  ViewChild,
+  ViewEncapsulation,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, switchMap } from 'rxjs';
 import { ModalShell } from '../../../../shared/components/order-modal-shell/order-modal-shell';
 import { LocaleService } from '../../../../core/localization/locale';
+import { resolveApiAssetUrl } from '../../../../core/config/resolve-api-asset-url';
 import { AdminBrandingService } from '../../../../core/layouts/admin-layout/admin-branding.service';
 import { RestaurantProfileApiService } from '../../restaurant-profile/data-access/restaurant-profile-api';
 import { RestaurantTablesService } from '../../data-access/restaurant-tables.service';
@@ -54,6 +59,7 @@ interface PrintEntry {
   ],
   templateUrl: './tables-management-page.html',
   styleUrls: ['./tables-management-page.scss', './tables-management-page.print.scss'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class TablesManagementPage {
   private readonly fb = inject(NonNullableFormBuilder);
@@ -61,6 +67,13 @@ export class TablesManagementPage {
   private readonly profileApi = inject(RestaurantProfileApiService);
   private readonly branding = inject(AdminBrandingService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly appRef = inject(ApplicationRef);
+
+  @ViewChild('printArea', { read: ElementRef })
+  private printAreaRef?: ElementRef<HTMLElement>;
+
+  @ViewChild('printAreaHost', { read: ElementRef })
+  private printAreaHostRef?: ElementRef<HTMLElement>;
 
   protected readonly locale = inject(LocaleService);
 
@@ -169,6 +182,14 @@ export class TablesManagementPage {
     return this.branding.restaurantName();
   }
 
+  protected restaurantLogoUrl(): string | null {
+    return this.branding.logoUrl();
+  }
+
+  protected restaurantBrandInitial(): string {
+    return this.branding.brandInitial();
+  }
+
   protected showingTablesLabel(): string {
     const shown = this.filteredTables().length;
     const total = this.tables().length;
@@ -196,6 +217,12 @@ export class TablesManagementPage {
       .pipe(
         switchMap((restaurant) => {
           this.restaurantSlug.set(restaurant.slug.trim().toLowerCase());
+          this.branding.updateBranding({
+            logoUrl: resolveApiAssetUrl(restaurant.logoUrl),
+            coverImageUrl: resolveApiAssetUrl(restaurant.coverImageUrl),
+            nameAr: restaurant.nameAr,
+            nameEn: restaurant.nameEn ?? null,
+          });
           return this.tablesService.listTables();
         }),
         takeUntilDestroyed(this.destroyRef),
@@ -464,9 +491,7 @@ export class TablesManagementPage {
       return;
     }
 
-    this.printEntries.set([entry]);
-    this.printMode.set('single');
-    queueMicrotask(() => window.print());
+    await this.runPrint([entry], 'single');
   }
 
   protected async printAllTables(): Promise<void> {
@@ -479,9 +504,57 @@ export class TablesManagementPage {
       await Promise.all(activeTables.map((table) => this.buildPrintEntry(table)))
     ).filter((entry): entry is PrintEntry => entry !== null);
 
+    await this.runPrint(entries, 'all');
+  }
+
+  private async runPrint(entries: PrintEntry[], mode: 'single' | 'all'): Promise<void> {
     this.printEntries.set(entries);
-    this.printMode.set('all');
-    queueMicrotask(() => window.print());
+    this.printMode.set(mode);
+    this.appRef.tick();
+    await this.waitForNextPaint();
+
+    const printArea = this.printAreaRef?.nativeElement;
+    const printHost = this.printAreaHostRef?.nativeElement;
+    if (!printArea || !printHost) {
+      return;
+    }
+
+    const restoreParent = printArea.parentElement;
+    const restoreNextSibling = printArea.nextSibling;
+
+    document.body.classList.add('tables-print-active');
+    document.body.appendChild(printArea);
+    this.appRef.tick();
+    await this.waitForNextPaint();
+
+    const cleanup = (): void => {
+      document.body.classList.remove('tables-print-active');
+      if (restoreParent) {
+        restoreParent.insertBefore(printArea, restoreNextSibling);
+      } else {
+        printHost.appendChild(printArea);
+      }
+      this.printMode.set(null);
+      this.printEntries.set([]);
+    };
+
+    window.addEventListener('afterprint', cleanup, { once: true });
+    window.print();
+
+    // Fallback when afterprint is not fired (some browsers / cancel).
+    window.setTimeout(() => {
+      if (document.body.classList.contains('tables-print-active')) {
+        cleanup();
+      }
+    }, 1000);
+  }
+
+  private waitForNextPaint(): Promise<void> {
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => resolve());
+      });
+    });
   }
 
   protected modalTestId(): string {

@@ -1,6 +1,9 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { vi } from 'vitest';
 import { API_BASE_URL } from '../../../../core/config/api-config';
 import { ApplicationRoles } from '../../../../core/auth/application-roles';
 import { AuthSessionService } from '../../../../core/auth/auth-session.service';
@@ -113,6 +116,69 @@ describe('TablesManagementPage', () => {
   it('shows empty state when list is empty', () => {
     flushList([]);
     expect(root().querySelector('[data-testid="tables-empty-state"]')).toBeTruthy();
+  });
+
+  it('renders polished QR preview with restaurant and table identity', async () => {
+    flushList([sampleTable]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const preview = root().querySelector('[data-testid="table-qr-preview-11111111-1111-1111-1111-111111111101"]');
+    expect(preview).toBeTruthy();
+    expect(preview?.querySelector('[data-testid="table-qr-card-restaurant-name"]')?.textContent).toBeTruthy();
+    expect(preview?.querySelector('[data-testid="table-qr-card-table-name"]')?.textContent?.trim()).toBe('Table 1');
+    expect(preview?.querySelector('[data-testid="table-qr-card-zone"]')?.textContent?.trim()).toBe('Main Hall');
+  });
+
+  it('preview card uses fixed preview dimensions without clipping table meta', async () => {
+    flushList([sampleTable]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const preview = root().querySelector(
+      '[data-testid="table-qr-preview-11111111-1111-1111-1111-111111111101"]',
+    ) as HTMLElement;
+    expect(preview.classList.contains('table-qr-card--preview')).toBe(true);
+    expect(preview.querySelector('.table-qr-card__table-meta')).toBeTruthy();
+    expect(preview.querySelector('[data-testid="table-qr-card-table-name"]')).toBeTruthy();
+    expect(preview.querySelector('[data-testid="table-qr-card-zone"]')).toBeTruthy();
+  });
+
+  it('includes single-print 100mm sizing rules in page print styles', () => {
+    flushList([]);
+
+    const printScss = readFileSync(resolve(__dirname, 'tables-management-page.print.scss'), 'utf8');
+
+    expect(printScss).toContain('tables-print-active');
+    expect(printScss).toMatch(/100mm/);
+    expect(printScss).toMatch(/150mm/);
+    expect(printScss).toContain('.profile-console');
+    expect(printScss).toContain('.table-card__actions');
+  });
+
+  it('prints only the dedicated card area after moving it to document body', async () => {
+    const printSpy = vi.spyOn(window, 'print').mockImplementation(() => undefined);
+    flushList([sampleTable]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const printButton = root().querySelector<HTMLButtonElement>(
+      '[data-testid="table-print-11111111-1111-1111-1111-111111111101"]',
+    );
+    expect(printButton).toBeTruthy();
+    printButton!.click();
+
+    await vi.waitUntil(() => printSpy.mock.calls.length === 1, { timeout: 3000 });
+    await fixture.whenStable();
+
+    expect(document.body.classList.contains('tables-print-active')).toBe(true);
+    const printArea = document.body.querySelector('[data-testid="tables-print-area"]') as HTMLElement;
+    expect(printArea).toBeTruthy();
+    expect(printArea.querySelector('[data-testid="table-qr-print-11111111-1111-1111-1111-111111111101"]')).toBeTruthy();
+
+    document.body.classList.remove('tables-print-active');
+    printSpy.mockRestore();
   });
 
   it('updates summary count when filters change', () => {

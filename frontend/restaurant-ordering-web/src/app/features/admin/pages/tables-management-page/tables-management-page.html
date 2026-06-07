@@ -134,6 +134,9 @@
               @for (table of filteredTables(); track table.id) {
                 <app-table-card
                   [table]="table"
+                  [restaurantName]="restaurantDisplayName()"
+                  [restaurantLogoUrl]="restaurantLogoUrl()"
+                  [brandInitial]="restaurantBrandInitial()"
                   [qrSvg]="qrSvgFor(table.id)"
                   [qrLoading]="qrLoadingFor(table.id)"
                   (edit)="openEditModal($event)"
@@ -157,15 +160,24 @@
   </div>
 </section>
 
-<div class="tables-print-area" data-testid="tables-print-area" [class.tables-print-area--all]="printMode() === 'all'">
-  @for (entry of printEntries(); track entry.table.id) {
-    <app-table-print-card
-      [table]="entry.table"
-      [restaurantName]="restaurantDisplayName()"
-      [qrSvg]="entry.qrSvg"
-      [menuUrl]="entry.menuUrl"
-    />
-  }
+<div #printAreaHost id="printAreaHost">
+  <div
+    #printArea
+    class="tables-print-area"
+    data-testid="tables-print-area"
+    [class.tables-print-area--all]="printMode() === 'all'"
+  >
+    @for (entry of printEntries(); track entry.table.id) {
+      <app-table-print-card
+        variant="print"
+        [table]="entry.table"
+        [restaurantName]="restaurantDisplayName()"
+        [restaurantLogoUrl]="restaurantLogoUrl()"
+        [brandInitial]="restaurantBrandInitial()"
+        [qrSvg]="entry.qrSvg"
+      />
+    }
+  </div>
 </div>
 
 <app-modal-shell

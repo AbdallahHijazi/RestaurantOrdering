@@ -1,9 +1,279 @@
-.table-print-card{display:grid;gap:.875rem;align-content:start;min-height:250px;padding:1rem;border:1px solid #d1d5db;border-radius:.75rem;background:var(--restaurant-surface-white);break-inside:avoid;page-break-inside:avoid}
-.table-print-card__header h2{margin:0;font-size:1.125rem;font-weight:800;color:#111}
-.table-print-card__header p{margin:.35rem 0 0;color:#64748b;font-size:.8125rem}
-.table-print-card__meta{display:grid;gap:.2rem}
-.table-print-card__meta strong{font-size:1rem;color:#111}
-.table-print-card__meta span{color:#64748b;font-size:.875rem}
-.table-print-card__qr{display:grid;place-items:center;padding:.5rem}
-.table-print-card__qr svg{width:9rem;height:9rem;display:block}
-.table-print-card__url{margin:0;color:#64748b;font-size:.6875rem;text-align:center;word-break:break-all}
+.table-qr-card {
+  --table-card-accent: var(--restaurant-accent);
+  --table-card-accent-strong: var(--restaurant-accent-strong);
+  --table-card-accent-soft: var(--restaurant-accent-soft);
+  --table-card-surface: var(--restaurant-surface);
+  --table-card-surface-soft: var(--restaurant-surface-soft);
+  --table-card-text: var(--restaurant-text);
+  --table-card-muted: var(--restaurant-muted-text);
+  --table-card-border: var(--restaurant-border);
+  --table-card-gap: 0.375rem;
+  --table-card-logo-size: 3.625rem;
+  --table-card-qr-size: 7.875rem;
+  --table-card-restaurant-size: 1rem;
+  --table-card-subtitle-size: 0.5625rem;
+  --table-card-table-size: 1.25rem;
+  --table-card-zone-size: 0.625rem;
+  --table-card-inner-padding-block: 0.875rem;
+  --table-card-inner-padding-inline: 0.75rem;
+
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid var(--table-card-border);
+  border-radius: var(--restaurant-radius-xl, 1.25rem);
+  background: linear-gradient(
+    155deg,
+    var(--table-card-surface-soft),
+    color-mix(in srgb, var(--table-card-surface-soft) 72%, var(--table-card-border)) 62%,
+    color-mix(in srgb, var(--table-card-surface-soft) 58%, var(--table-card-border))
+  );
+  box-shadow: var(--restaurant-shadow-sm, 0 10px 28px rgb(32 28 24 / 0.06));
+  color: var(--table-card-text);
+}
+
+.table-qr-card::before,
+.table-qr-card::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.table-qr-card::before {
+  width: 9.5rem;
+  height: 9.5rem;
+  top: -5rem;
+  inset-inline-start: -4rem;
+  background: color-mix(in srgb, var(--table-card-accent) 9%, transparent);
+}
+
+.table-qr-card::after {
+  width: 8.5rem;
+  height: 8.5rem;
+  bottom: -4.5rem;
+  inset-inline-end: -3.75rem;
+  background: color-mix(in srgb, var(--restaurant-sage, #4f8c76) 8%, transparent);
+}
+
+.table-qr-card__inner {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--table-card-gap);
+  height: 100%;
+  padding: var(--table-card-inner-padding-block) var(--table-card-inner-padding-inline);
+  text-align: center;
+}
+
+.table-qr-card__identity,
+.table-qr-card__scan,
+.table-qr-card__table-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.table-qr-card__identity {
+  gap: 0.25rem;
+}
+
+.table-qr-card__scan {
+  gap: 0.125rem;
+  max-width: 11.5rem;
+}
+
+.table-qr-card__table-meta {
+  gap: 0.2rem;
+  margin-top: 0.125rem;
+}
+
+.table-qr-card--preview {
+  --table-card-gap: 0.3125rem;
+  --table-card-logo-size: 3.625rem;
+  --table-card-qr-size: 7.875rem;
+  --table-card-restaurant-size: 1rem;
+  --table-card-table-size: 1.25rem;
+  --table-card-inner-padding-block: 0.8125rem;
+  --table-card-inner-padding-inline: 0.6875rem;
+
+  width: 14.75rem;
+  height: 22.125rem;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.table-qr-card--print {
+  --table-card-gap: 2mm;
+  --table-card-logo-size: 20mm;
+  --table-card-qr-size: 56mm;
+  --table-card-restaurant-size: 11pt;
+  --table-card-subtitle-size: 6.5pt;
+  --table-card-table-size: 18pt;
+  --table-card-zone-size: 8pt;
+  --table-card-inner-padding-block: 5mm;
+  --table-card-inner-padding-inline: 4mm;
+
+  width: 100mm;
+  height: 150mm;
+  margin-inline: auto;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  box-shadow: none;
+}
+
+.table-qr-card__logo {
+  width: var(--table-card-logo-size);
+  height: var(--table-card-logo-size);
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 1.125rem;
+  border: 1px solid color-mix(in srgb, var(--table-card-border) 90%, white);
+  background: var(--table-card-surface);
+  box-shadow: 0 12px 20px rgb(40 33 26 / 0.1);
+}
+
+.table-qr-card--print .table-qr-card__logo {
+  border-radius: 4mm;
+  box-shadow: none;
+}
+
+.table-qr-card__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: var(--table-card-surface);
+}
+
+.table-qr-card__logo--fallback {
+  background: linear-gradient(135deg, var(--table-card-accent), var(--table-card-accent-strong));
+}
+
+.table-qr-card__logo-fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--table-card-surface);
+  font-size: calc(var(--table-card-logo-size) * 0.36);
+  font-weight: 900;
+}
+
+.table-qr-card__restaurant {
+  margin: 0;
+  font-size: var(--table-card-restaurant-size);
+  font-weight: 900;
+  line-height: 1.25;
+  color: var(--table-card-text);
+}
+
+.table-qr-card__subtitle {
+  margin: 0;
+  max-width: 11.5rem;
+  color: var(--table-card-muted);
+  font-size: var(--table-card-subtitle-size);
+  line-height: 1.45;
+}
+
+.table-qr-card__qr-box {
+  width: var(--table-card-qr-size);
+  height: var(--table-card-qr-size);
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  padding: 0.4375rem;
+  display: grid;
+  place-items: center;
+  border-radius: 0.8125rem;
+  background: var(--table-card-surface);
+  box-shadow: 0 7px 15px rgb(30 26 22 / 0.07);
+}
+
+.table-qr-card--print .table-qr-card__qr-box {
+  padding: 2.5mm;
+  border-radius: 3mm;
+  box-shadow: none;
+}
+
+.table-qr-card__qr-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.table-qr-card__qr-image svg {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.table-qr-card__qr-skeleton {
+  width: 100%;
+  height: 100%;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--table-card-border) 55%, white);
+}
+
+.table-qr-card__qr-empty {
+  color: var(--table-card-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.table-qr-card__scan-ar,
+.table-qr-card__scan-en {
+  margin: 0;
+  color: var(--table-card-muted);
+  line-height: 1.35;
+}
+
+.table-qr-card__scan-ar {
+  font-size: 0.5625rem;
+  font-weight: 800;
+}
+
+.table-qr-card__scan-en {
+  font-size: 0.5625rem;
+  font-weight: 700;
+}
+
+.table-qr-card--print .table-qr-card__scan-ar,
+.table-qr-card--print .table-qr-card__scan-en {
+  font-size: 6.5pt;
+}
+
+.table-qr-card__table-name {
+  margin: 0;
+  color: var(--table-card-accent);
+  font-size: var(--table-card-table-size);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.table-qr-card__zone {
+  margin: 0;
+  color: color-mix(in srgb, var(--table-card-muted) 88%, var(--table-card-text));
+  font-size: var(--table-card-zone-size);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .table-qr-card {
+    transition: none;
+  }
+}

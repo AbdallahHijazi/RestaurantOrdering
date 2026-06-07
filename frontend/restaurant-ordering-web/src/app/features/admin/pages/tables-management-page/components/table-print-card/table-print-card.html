@@ -1,15 +1,51 @@
-<article class="table-print-card">
-  <header class="table-print-card__header">
-    <h2>{{ restaurantName() }}</h2>
-    <p>{{ locale.uiText('tablesPrintScanToOrder') }}</p>
-  </header>
+<article
+  class="table-qr-card"
+  [class.table-qr-card--preview]="variant() === 'preview'"
+  [class.table-qr-card--print]="variant() === 'print'"
+  [attr.data-testid]="variant() === 'preview' ? 'table-qr-preview-' + table().id : 'table-qr-print-' + table().id"
+>
+  <div class="table-qr-card__inner">
+    <header class="table-qr-card__identity">
+      <div
+        class="table-qr-card__logo"
+        [class.table-qr-card__logo--fallback]="!showLogo()"
+        data-testid="table-qr-card-logo"
+      >
+        @if (showLogo()) {
+          <img
+            [src]="restaurantLogoUrl()!"
+            [alt]="restaurantName()"
+            (error)="onLogoError()"
+          />
+        } @else {
+          <span class="table-qr-card__logo-fallback" aria-hidden="true">{{ brandInitial() }}</span>
+        }
+      </div>
 
-  <div class="table-print-card__meta">
-    <strong>{{ table().name }}</strong>
-    <span>{{ zoneLabel(table()) }}</span>
+      <h3 class="table-qr-card__restaurant" data-testid="table-qr-card-restaurant-name">
+        {{ restaurantName() }}
+      </h3>
+      <p class="table-qr-card__subtitle">{{ locale.uiText('tablesCardSubtitle') }}</p>
+    </header>
+
+    <div class="table-qr-card__qr-box" data-testid="table-qr-card-qr">
+      @if (qrLoading()) {
+        <span class="table-qr-card__qr-skeleton" aria-hidden="true"></span>
+      } @else if (qrSvg()) {
+        <div class="table-qr-card__qr-image" [innerHTML]="safeQrSvg()"></div>
+      } @else {
+        <span class="table-qr-card__qr-empty">{{ locale.uiText('tablesQrUnavailable') }}</span>
+      }
+    </div>
+
+    <div class="table-qr-card__scan">
+      <p class="table-qr-card__scan-ar">{{ locale.uiText('tablesCardOrderFromPhone') }}</p>
+      <p class="table-qr-card__scan-en" dir="ltr">{{ locale.uiText('tablesCardScanEnglish') }}</p>
+    </div>
+
+    <footer class="table-qr-card__table-meta">
+      <p class="table-qr-card__table-name" data-testid="table-qr-card-table-name">{{ table().name }}</p>
+      <p class="table-qr-card__zone" data-testid="table-qr-card-zone">{{ zoneLabel(table()) }}</p>
+    </footer>
   </div>
-
-  <div class="table-print-card__qr" [innerHTML]="safeQrSvg()"></div>
-
-  <p class="table-print-card__url" dir="ltr">{{ menuUrl() }}</p>
 </article>
