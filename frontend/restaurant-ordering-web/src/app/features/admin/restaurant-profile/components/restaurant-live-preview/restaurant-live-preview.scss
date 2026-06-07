@@ -298,9 +298,9 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--restaurant-background);
-  transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1), max-width 420ms cubic-bezier(0.22, 1, 0.36, 1),
-    max-height 420ms cubic-bezier(0.22, 1, 0.36, 1), border-radius 420ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-width 420ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width 420ms var(--restaurant-ease-standard), max-width 420ms var(--restaurant-ease-standard),
+    max-height 420ms var(--restaurant-ease-standard), border-radius 420ms var(--restaurant-ease-standard),
+    border-width 420ms var(--restaurant-ease-standard), box-shadow 420ms var(--restaurant-ease-standard);
 }
 
 .live-preview--studio .live-preview__frame--tablet {

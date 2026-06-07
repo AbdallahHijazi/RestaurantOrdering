@@ -1,4 +1,17 @@
 .admin-dashboard {
+  --dashboard-accent: var(--restaurant-console-accent);
+  --dashboard-border: var(--restaurant-console-border);
+  --dashboard-muted: var(--restaurant-console-muted);
+  --dashboard-text: var(--restaurant-console-text);
+  --dashboard-charcoal: var(--restaurant-console-charcoal);
+  --dashboard-outline: var(--restaurant-console-outline);
+  --dashboard-surface-elevated: var(--restaurant-console-surface-elevated);
+  --dashboard-surface-panel: var(--restaurant-console-surface-panel);
+  --dashboard-stat-muted: var(--restaurant-console-stat-muted);
+  --dashboard-text-on-dark: var(--restaurant-console-text-on-dark);
+  --dashboard-text-on-dark-muted: var(--restaurant-console-text-on-dark-muted);
+  --dashboard-shadow: var(--shadow-soft);
+
   width: min(100%, 72rem);
   margin-inline: auto;
   display: flex;
@@ -9,9 +22,9 @@
 .admin-dashboard__hero {
   padding: 1.25rem 1.35rem;
   border-radius: var(--radius-lg);
-  background: linear-gradient(145deg, #fffdfc, #f4f3f1);
-  border: 1px solid #e3e2e0;
-  box-shadow: var(--shadow-soft);
+  background: linear-gradient(145deg, var(--dashboard-surface-elevated), var(--dashboard-surface-panel));
+  border: 1px solid var(--dashboard-border);
+  box-shadow: var(--dashboard-shadow);
 }
 
 .admin-dashboard__eyebrow {
@@ -20,7 +33,7 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #7d562d;
+  color: var(--dashboard-accent);
 }
 
 .admin-dashboard__hero h2 {
@@ -32,27 +45,27 @@
 
 .admin-dashboard__lead {
   margin: 0;
-  color: #434845;
+  color: var(--dashboard-muted);
   max-width: 42rem;
 }
 
 .admin-dashboard__role {
   margin: 0.85rem 0 0;
   font-size: 0.875rem;
-  color: #434845;
+  color: var(--dashboard-muted);
 }
 
 .admin-dashboard__role strong {
-  color: #1a1c1a;
+  color: var(--dashboard-text);
 }
 
 .admin-dashboard__demo-notice {
   margin: 0;
   padding: 0.65rem 0.85rem;
   border-radius: var(--radius-md);
-  border: 1px dashed #c4c7c3;
-  background: #f4f3f1;
-  color: #434845;
+  border: 1px dashed var(--dashboard-outline);
+  background: var(--dashboard-surface-panel);
+  color: var(--dashboard-muted);
   font-size: 0.875rem;
 }
 
@@ -70,7 +83,7 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--restaurant-border);
   background: var(--restaurant-surface);
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--dashboard-shadow);
 }
 
 .admin-dashboard__stat-icon {
@@ -87,7 +100,7 @@
 
 .admin-dashboard__stat-label {
   margin: 0 0 0.35rem;
-  color: #747875;
+  color: var(--dashboard-stat-muted);
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -99,14 +112,14 @@
   font-family: var(--font-display);
   font-size: clamp(1.75rem, 4vw, 2.25rem);
   font-weight: 700;
-  color: #171c19;
+  color: var(--dashboard-charcoal);
 }
 
 .admin-dashboard__ready-card {
   padding: 1.15rem 1.35rem;
   border-radius: var(--radius-lg);
-  background: #171c19;
-  color: #faf9f6;
+  background: var(--dashboard-charcoal);
+  color: var(--dashboard-text-on-dark);
 }
 
 .admin-dashboard__ready-card h3 {
@@ -117,7 +130,7 @@
 
 .admin-dashboard__ready-card p {
   margin: 0 0 0.85rem;
-  color: #e3e2e0;
+  color: var(--dashboard-text-on-dark-muted);
 }
 
 .admin-dashboard__cta {
@@ -136,7 +149,7 @@
 .admin-dashboard__placeholder-card {
   padding: 1rem 1.1rem;
   border-radius: var(--radius-md);
-  border: 1px dashed #c4c7c3;
+  border: 1px dashed var(--dashboard-outline);
   background: rgb(255 253 252 / 0.7);
 }
 
@@ -148,7 +161,7 @@
 
 .admin-dashboard__placeholder-card p {
   margin: 0;
-  color: #434845;
+  color: var(--dashboard-muted);
   font-size: 0.875rem;
 }
 

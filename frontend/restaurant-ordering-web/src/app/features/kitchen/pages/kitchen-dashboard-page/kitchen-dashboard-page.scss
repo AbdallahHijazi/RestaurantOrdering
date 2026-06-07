@@ -1,4 +1,19 @@
 .kitchen-page {
+  --kitchen-accent: var(--restaurant-console-accent);
+  --kitchen-border: var(--restaurant-console-border);
+  --kitchen-muted: var(--restaurant-console-muted);
+  --kitchen-text: var(--restaurant-console-text);
+  --kitchen-charcoal: var(--restaurant-console-charcoal);
+  --kitchen-surface: var(--restaurant-console-surface);
+  --kitchen-surface-elevated: var(--restaurant-console-surface-elevated);
+  --kitchen-surface-muted: var(--restaurant-console-surface-muted);
+  --kitchen-text-on-dark: var(--restaurant-console-text-on-dark);
+  --kitchen-new: var(--restaurant-kitchen-new);
+  --kitchen-new-text: var(--restaurant-kitchen-new-text);
+  --kitchen-indicator: var(--restaurant-kitchen-indicator);
+  --kitchen-delivery: var(--restaurant-kitchen-delivery);
+  --kitchen-delivery-text: var(--restaurant-kitchen-delivery-text);
+
   width: min(100%, 80rem);
   margin-inline: auto;
   padding: clamp(1rem, 3vw, 1.75rem);
@@ -17,7 +32,7 @@
 
 .kitchen-page__eyebrow {
   margin: 0 0 0.35rem;
-  color: #7d562d;
+  color: var(--kitchen-accent);
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -33,12 +48,12 @@
 .kitchen-page__lead,
 .kitchen-page__role {
   margin: 0;
-  color: #434845;
+  color: var(--kitchen-muted);
 }
 
 .kitchen-page__role span {
   font-weight: 600;
-  color: #1a1c1a;
+  color: var(--kitchen-text);
 }
 
 .kitchen-page__actions {
@@ -50,23 +65,23 @@
 
 .kitchen-page__language {
   display: inline-flex;
-  border: 1px solid #e3e2e0;
+  border: 1px solid var(--kitchen-border);
   border-radius: var(--radius-md);
   overflow: hidden;
 }
 
 .kitchen-page__lang-btn {
   border: 0;
-  background: #fffdfc;
-  color: #434845;
+  background: var(--kitchen-surface-elevated);
+  color: var(--kitchen-muted);
   padding: 0.45rem 0.75rem;
   font: inherit;
   cursor: pointer;
 }
 
 .kitchen-page__lang-btn--active {
-  background: #171c19;
-  color: #faf9f6;
+  background: var(--kitchen-charcoal);
+  color: var(--kitchen-text-on-dark);
 }
 
 .kitchen-page__primary-btn,
@@ -80,8 +95,8 @@
 .kitchen-page__primary-btn {
   border: 0;
   padding: 0.55rem 0.95rem;
-  background: #171c19;
-  color: #faf9f6;
+  background: var(--kitchen-charcoal);
+  color: var(--kitchen-text-on-dark);
   font-weight: 600;
 }
 
@@ -91,10 +106,10 @@
 }
 
 .kitchen-page__secondary-btn {
-  border: 1px solid #e3e2e0;
+  border: 1px solid var(--kitchen-border);
   padding: 0.5rem 0.9rem;
-  background: #fffdfc;
-  color: #1a1c1a;
+  background: var(--kitchen-surface-elevated);
+  color: var(--kitchen-text);
   font-weight: 600;
 }
 
@@ -107,7 +122,7 @@
   border: 0;
   padding: 0;
   background: transparent;
-  color: #7d562d;
+  color: var(--kitchen-accent);
   text-decoration: underline;
   font-weight: 600;
 }
@@ -116,16 +131,16 @@
   margin: 0;
   padding: 0.65rem 0.85rem;
   border-radius: var(--radius-md);
-  background: #efeeeb;
-  color: #1a1c1a;
+  background: var(--kitchen-surface-muted);
+  color: var(--kitchen-text);
 }
 
 .kitchen-page__state,
 .kitchen-details__loading {
   padding: 1.25rem 1.35rem;
   border-radius: var(--radius-lg);
-  border: 1px solid #e3e2e0;
-  background: #fffdfc;
+  border: 1px solid var(--kitchen-border);
+  background: var(--kitchen-surface-elevated);
 }
 
 .kitchen-page__skeleton-board {
@@ -137,7 +152,12 @@
 .kitchen-page__skeleton-column {
   min-height: 18rem;
   border-radius: var(--radius-lg);
-  background: linear-gradient(90deg, #efeeeb 0%, #f4f3f1 50%, #efeeeb 100%);
+  background: linear-gradient(
+    90deg,
+    var(--kitchen-surface-muted) 0%,
+    var(--restaurant-console-surface-panel) 50%,
+    var(--kitchen-surface-muted) 100%
+  );
   background-size: 200% 100%;
   animation: kitchen-skeleton 1.2s ease-in-out infinite;
 }
@@ -158,18 +178,18 @@
 
 .kitchen-page__tab {
   flex: 1;
-  border: 1px solid #e3e2e0;
+  border: 1px solid var(--kitchen-border);
   border-radius: var(--radius-md);
-  background: #fffdfc;
+  background: var(--kitchen-surface-elevated);
   padding: 0.55rem 0.65rem;
   font: inherit;
   cursor: pointer;
 }
 
 .kitchen-page__tab--active {
-  border-color: #171c19;
-  background: #171c19;
-  color: #faf9f6;
+  border-color: var(--kitchen-charcoal);
+  background: var(--kitchen-charcoal);
+  color: var(--kitchen-text-on-dark);
 }
 
 .kitchen-page__tab-count {
@@ -191,8 +211,8 @@
   min-width: 0;
   padding: 0.85rem;
   border-radius: var(--radius-lg);
-  border: 1px solid #e3e2e0;
-  background: #faf9f6;
+  border: 1px solid var(--kitchen-border);
+  background: var(--kitchen-surface);
 }
 
 .kitchen-page__column-header {
@@ -211,9 +231,9 @@
 .kitchen-page__column-count {
   min-width: 1.75rem;
   padding: 0.15rem 0.45rem;
-  border-radius: 999px;
-  background: #171c19;
-  color: #faf9f6;
+  border-radius: var(--restaurant-radius-pill);
+  background: var(--kitchen-charcoal);
+  color: var(--kitchen-text-on-dark);
   font-size: 0.8rem;
   font-weight: 700;
   text-align: center;
@@ -223,8 +243,8 @@
   margin: 0;
   padding: 1rem;
   border-radius: var(--radius-md);
-  background: #fffdfc;
-  color: #434845;
+  background: var(--kitchen-surface-elevated);
+  color: var(--kitchen-muted);
   text-align: center;
 }
 
@@ -240,8 +260,8 @@
 .kitchen-page__card {
   padding: 0.85rem;
   border-radius: var(--radius-md);
-  border: 1px solid #e3e2e0;
-  background: #fffdfc;
+  border: 1px solid var(--kitchen-border);
+  background: var(--kitchen-surface-elevated);
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
@@ -261,9 +281,9 @@
 
 .kitchen-page__badge {
   padding: 0.15rem 0.45rem;
-  border-radius: 999px;
-  background: #ffca98;
-  color: #2c1600;
+  border-radius: var(--restaurant-radius-pill);
+  background: var(--kitchen-new);
+  color: var(--kitchen-new-text);
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -272,7 +292,7 @@
 .kitchen-page__guest,
 .kitchen-page__waiting {
   margin: 0;
-  color: #434845;
+  color: var(--kitchen-muted);
   font-size: 0.92rem;
 }
 
@@ -285,15 +305,15 @@
 .kitchen-page__indicator {
   padding: 0.15rem 0.45rem;
   border-radius: var(--radius-sm);
-  background: #efeeeb;
-  color: #434845;
+  background: var(--kitchen-surface-muted);
+  color: var(--kitchen-muted);
   font-size: 0.78rem;
   font-weight: 600;
 }
 
 .kitchen-page__indicator--delivery {
-  background: #dfe4df;
-  color: #181d1a;
+  background: var(--kitchen-delivery);
+  color: var(--kitchen-delivery-text);
 }
 
 .kitchen-page__card-actions {

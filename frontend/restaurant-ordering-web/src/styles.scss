@@ -68,6 +68,45 @@
   --restaurant-amber: #b7832f;
   --restaurant-amber-soft: #fff7e6;
 
+  /* Admin console palette */
+  --restaurant-console-accent: #7d562d;
+  --restaurant-console-accent-soft: #ffca98;
+  --restaurant-console-text: #1a1c1a;
+  --restaurant-console-charcoal: #171c19;
+  --restaurant-console-muted: #434845;
+  --restaurant-console-stat-muted: #747875;
+  --restaurant-console-border: #e3e2e0;
+  --restaurant-console-outline: #c4c7c3;
+  --restaurant-console-surface: #faf9f6;
+  --restaurant-console-surface-elevated: #fffdfc;
+  --restaurant-console-surface-muted: #efeeeb;
+  --restaurant-console-surface-panel: #f4f3f1;
+  --restaurant-console-text-on-dark: #faf9f6;
+  --restaurant-console-text-on-dark-muted: #e3e2e0;
+  --restaurant-console-shadow: 0 12px 32px rgb(26 28 26 / 0.08);
+  --restaurant-console-backdrop: rgb(26 28 26 / 0.42);
+
+  /* Kitchen functional */
+  --restaurant-kitchen-new: #ffca98;
+  --restaurant-kitchen-new-text: #2c1600;
+  --restaurant-kitchen-indicator: #efeeeb;
+  --restaurant-kitchen-delivery: #dfe4df;
+  --restaurant-kitchen-delivery-text: #181d1a;
+
+  /* Live preview status */
+  --restaurant-preview-sync-border: #dcfce7;
+  --restaurant-preview-sync-bg: #f0fdf4;
+  --restaurant-preview-sync-text: #15803d;
+  --restaurant-preview-unsaved-border: #ffedd5;
+  --restaurant-preview-unsaved-bg: #fff7ed;
+  --restaurant-preview-unsaved-text: #9a3412;
+  --restaurant-preview-dot-live: #22c55e;
+  --restaurant-preview-dot-unsaved: #f97316;
+  --restaurant-preview-canvas-bg: #f5f5f3;
+  --restaurant-preview-frame-border: #e5e7eb;
+  --restaurant-preview-muted: #5d635f;
+  --restaurant-preview-device-chrome: #1a1c1b;
+
   /* Dark surfaces */
   --restaurant-dark: #191c1b;
   --restaurant-dark-deep: #101312;

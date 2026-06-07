@@ -21,7 +21,7 @@
 
 .error-state__retry {
   border: none;
-  border-radius: 999px;
+  border-radius: var(--restaurant-radius-pill);
   padding: 0.65rem 1.25rem;
   background: var(--restaurant-accent);
   color: var(--restaurant-surface-white);

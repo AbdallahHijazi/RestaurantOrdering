@@ -10,7 +10,7 @@
 }
 
 .order-status-chip[data-status='1'] {
-  background: rgb(59 130 246 / 0.12);
+  background: var(--restaurant-info-soft);
   color: var(--restaurant-info);
   border-color: rgb(59 130 246 / 0.25);
 }
@@ -22,7 +22,7 @@
 }
 
 .order-status-chip[data-status='3'] {
-  background: rgb(47 122 79 / 0.14);
+  background: var(--restaurant-success-soft);
   color: var(--restaurant-success);
   border-color: rgb(47 122 79 / 0.28);
 }
@@ -34,7 +34,7 @@
 }
 
 .order-status-chip[data-status='5'] {
-  background: rgb(176 59 59 / 0.12);
+  background: var(--restaurant-danger-soft);
   color: var(--restaurant-danger);
   border-color: rgb(176 59 59 / 0.28);
 }
@@ -162,7 +162,7 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--restaurant-radius-pill);
-  background: rgb(47 122 79 / 0.14);
+  background: var(--restaurant-success-soft);
   color: var(--restaurant-success);
 }
 

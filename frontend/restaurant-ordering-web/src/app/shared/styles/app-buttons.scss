@@ -54,7 +54,7 @@
 }
 
 .button-danger {
-  background: rgb(176 59 59 / 0.1);
+  background: var(--restaurant-danger-soft);
   color: var(--restaurant-danger);
   border-color: rgb(176 59 59 / 0.35);
 }
@@ -64,7 +64,7 @@
 }
 
 .button-success {
-  background: rgb(47 122 79 / 0.12);
+  background: var(--restaurant-success-soft);
   color: var(--restaurant-success);
   border-color: rgb(47 122 79 / 0.35);
 }
