@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router, RouterOutlet } from '@angular/router';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { ApplicationRoles } from '../../auth/application-roles';
 import { AuthService } from '../../auth/auth.service';
@@ -29,6 +31,10 @@ function getInjectedStyleText(): string {
     }
   }
   return cssText;
+}
+
+function getLayoutStylesheetText(): string {
+  return readFileSync(resolve(__dirname, 'profile-console-layout.scss'), 'utf8');
 }
 
 describe('ProfileConsoleLayout', () => {
@@ -94,8 +100,44 @@ describe('ProfileConsoleLayout', () => {
     ) as HTMLElement;
 
     expect(cssText).toContain('grid-template-rows: auto');
-    expect(cssText).toContain('header-start header-end');
+    expect(cssText).toContain('header-end header-start');
     expect(getComputedStyle(header).alignItems).toBe('center');
+  });
+
+  it('renders exactly one top bar without legacy sidebar', () => {
+    expect(fixture.nativeElement.querySelectorAll('[data-testid="profile-console-header"]').length).toBe(1);
+    expect(fixture.nativeElement.querySelector('[data-testid="admin-sidebar"]')).toBeNull();
+  });
+
+  it('places LTR zones with identity in column 1 and actions in column 3 on desktop', () => {
+    TestBed.inject(LocaleService).setLocale('en');
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement.querySelector('[data-testid="profile-console"]') as HTMLElement;
+    const cssText = getLayoutStylesheetText();
+
+    expect(root.getAttribute('dir')).toBe('ltr');
+    expect(cssText).toContain(".profile-console[dir='ltr'] .profile-console__header-start");
+    expect(cssText).toContain(".profile-console[dir='ltr'] .profile-console__header-end");
+    expect(cssText).toMatch(/\[dir='ltr'\][\s\S]*profile-console__header-start[\s\S]*grid-column:\s*3/);
+    expect(cssText).toMatch(/\[dir='ltr'\][\s\S]*profile-console__header-end[\s\S]*grid-column:\s*1/);
+    expect(cssText).toContain('grid-column: 2');
+    expect(cssText).toContain('justify-self: center');
+  });
+
+  it('places RTL zones with actions in column 3 and identity in column 1 on desktop', () => {
+    TestBed.inject(LocaleService).setLocale('ar');
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement.querySelector('[data-testid="profile-console"]') as HTMLElement;
+    const cssText = getLayoutStylesheetText();
+
+    expect(root.getAttribute('dir')).toBe('rtl');
+    expect(cssText).toContain(".profile-console[dir='rtl'] .profile-console__header-start");
+    expect(cssText).toContain(".profile-console[dir='rtl'] .profile-console__header-end");
+    expect(cssText).toMatch(/\[dir='rtl'\][\s\S]*profile-console__header-start[\s\S]*grid-column:\s*3/);
+    expect(cssText).toMatch(/\[dir='rtl'\][\s\S]*profile-console__header-end[\s\S]*grid-column:\s*1/);
+    expect(cssText).toContain('grid-column: 2');
   });
 
   it('uses two-row header layout on tablet widths only', () => {
@@ -108,9 +150,35 @@ describe('ProfileConsoleLayout', () => {
     const nav = fixture.nativeElement.querySelector('.profile-console__header-nav') as HTMLElement;
     const headerStyle = getComputedStyle(header);
 
+    expect(headerStyle.gridTemplateAreas).toContain('header-end');
     expect(headerStyle.gridTemplateAreas).toContain('header-start');
     expect(headerStyle.gridTemplateAreas).toContain('header-nav');
     expect(getComputedStyle(nav).gridArea).toBe('header-nav');
+  });
+
+  it('keeps mobile grid on two rows with swapped corner zones for LTR and RTL', () => {
+    setViewportWidth(900);
+
+    TestBed.inject(LocaleService).setLocale('en');
+    fixture.detectChanges();
+
+    const end = fixture.nativeElement.querySelector(
+      '[data-testid="profile-console-header-end"]',
+    ) as HTMLElement;
+    const start = fixture.nativeElement.querySelector(
+      '[data-testid="profile-console-header-start"]',
+    ) as HTMLElement;
+
+    expect(getComputedStyle(end).gridArea).toBe('header-end');
+    expect(getComputedStyle(start).gridArea).toBe('header-start');
+    expect(getComputedStyle(end).justifySelf).toBe('start');
+    expect(getComputedStyle(start).justifySelf).toBe('end');
+
+    TestBed.inject(LocaleService).setLocale('ar');
+    fixture.detectChanges();
+
+    expect(getComputedStyle(end).justifySelf).toBe('start');
+    expect(getComputedStyle(start).justifySelf).toBe('end');
   });
 
   it('supports RTL header zones without manual navigation margins', () => {
