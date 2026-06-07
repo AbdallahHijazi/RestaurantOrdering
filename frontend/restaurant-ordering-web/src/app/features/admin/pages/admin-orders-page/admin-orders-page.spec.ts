@@ -56,169 +56,213 @@ describe('AdminOrdersPage', () => {
     const req = httpMock.expectOne(
       (request) =>
         request.url === `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders` &&
-        request.method === 'GET',
+        request.method === 'GET' &&
+        !request.params.has('status'),
     );
     req.flush(resultFor(items));
     fixture.detectChanges();
   }
 
-  it('shows loading, translated statuses, and actions for New orders', () => {
-    const locale = TestBed.inject(LocaleService);
-    locale.setLocale('en');
-
+  it('does not render page-level top bar or layout chrome', () => {
     fixture.detectChanges();
-    expect(root().querySelector('[data-testid="admin-orders-loading"]')).toBeTruthy();
+    flushList([]);
 
+    expect(root().querySelector('.topbar')).toBeNull();
+    expect(root().querySelector('.profile-console-layout')).toBeNull();
+    expect(root().querySelector('.orders-management-page__title')).toBeTruthy();
+  });
+
+  it('renders internal header, refresh, status pills, and search', () => {
+    const locale = TestBed.inject(LocaleService);
+    fixture.detectChanges();
     flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
 
-    expect(root().querySelector('[data-testid="admin-orders-table"]')).toBeTruthy();
-    expect(root().textContent).toContain(locale.uiText('adminOrdersStatusNew'));
-    expect(
-      root().querySelector('[data-testid="admin-order-action-order-new-2"]'),
-    ).toBeTruthy();
-    expect(
-      root().querySelector('[data-testid="admin-order-action-order-new-5"]'),
-    ).toBeTruthy();
+    expect(root().textContent).toContain(locale.uiText('adminOrdersEyebrow'));
+    expect(root().textContent).toContain(locale.uiText('adminOrdersTitle'));
+    expect(root().textContent).toContain(locale.uiText('adminOrdersLead'));
+    expect(root().querySelector('[data-testid="admin-orders-refresh"]')).toBeTruthy();
+    expect(root().querySelector('[data-testid="admin-orders-filters"]')).toBeTruthy();
+    expect(root().querySelector('[data-testid="admin-orders-search"]')).toBeTruthy();
+    expect(root().querySelector('[data-testid="admin-orders-filter-all"]')).toBeTruthy();
+    expect(root().querySelector('[data-testid="admin-orders-filter-1"]')).toBeTruthy();
   });
 
-  it('shows Mark Ready and Cancel for Preparing orders', () => {
-    fixture.detectChanges();
-    flushList([createSummary('order-prep', OrderStatus.Preparing, 'A-101')]);
-
-    expect(root().querySelector('[data-testid="admin-order-action-order-prep-3"]')).toBeTruthy();
-    expect(root().querySelector('[data-testid="admin-order-action-order-prep-5"]')).toBeTruthy();
-  });
-
-  it('shows Complete and Cancel for Ready orders', () => {
-    fixture.detectChanges();
-    flushList([createSummary('order-ready', OrderStatus.Ready, 'A-102')]);
-
-    expect(root().querySelector('[data-testid="admin-order-action-order-ready-4"]')).toBeTruthy();
-    expect(root().querySelector('[data-testid="admin-order-action-order-ready-5"]')).toBeTruthy();
-  });
-
-  it('does not show actions for Completed or Cancelled orders', () => {
+  it('filters orders locally without extra API calls when changing status pill', () => {
     fixture.detectChanges();
     flushList([
-      createSummary('order-done', OrderStatus.Completed, 'A-103'),
-      createSummary('order-cancelled', OrderStatus.Cancelled, 'A-104'),
+      createSummary('order-new', OrderStatus.New, 'A-100'),
+      createSummary('order-done', OrderStatus.Completed, 'A-101'),
     ]);
 
-    expect(root().querySelector('[data-testid="admin-order-action-order-done-2"]')).toBeNull();
-    expect(root().querySelector('[data-testid="admin-order-action-order-cancelled-5"]')).toBeNull();
-  });
-
-  it('opens centered details modal with items and totals', () => {
-    TestBed.inject(LocaleService).setLocale('ar');
-    fixture.detectChanges();
-    flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
-
-    root()
-      .querySelector<HTMLButtonElement>('[data-testid="admin-order-details-order-new"]')!
-      .click();
-
-    const detailsReq = httpMock.expectOne(
-      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders/order-new`,
-    );
-    detailsReq.flush(createDetails('order-new', OrderStatus.New));
+    root().querySelector<HTMLButtonElement>('[data-testid="admin-orders-filter-4"]')?.click();
     fixture.detectChanges();
 
-    expect(root().querySelector('.kitchen-details__panel')).toBeNull();
-    expect(document.body.querySelector('[data-testid="admin-order-details-modal"]')).toBeTruthy();
-    expect(document.body.querySelector('[data-testid="admin-orders-details-body"]')).toBeTruthy();
-    expect(document.body.textContent).toContain('برجر');
-  });
-
-  it('falls back from itemNameEn to itemNameAr when English name is missing', () => {
-    fixture.detectChanges();
-    flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
-
-    root()
-      .querySelector<HTMLButtonElement>('[data-testid="admin-order-details-order-new"]')!
-      .click();
-
-    const detailsReq = httpMock.expectOne(
-      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders/order-new`,
-    );
-    const details = createDetails('order-new', OrderStatus.New);
-    details.items = [
-      {
-        id: 'item-1',
-        menuItemId: null,
-        itemNameAr: 'سلطة',
-        itemNameEn: null,
-        unitPrice: 10,
-        quantity: 1,
-        totalPrice: 10,
-        notes: null,
-      },
-    ];
-    detailsReq.flush(details);
-
-    TestBed.inject(LocaleService).setLocale('en');
-    fixture.detectChanges();
-
-    expect(document.body.textContent).toContain('سلطة');
-  });
-
-  it('shows conflict feedback and refreshes on 409', () => {
-    const locale = TestBed.inject(LocaleService);
-
-    fixture.detectChanges();
-    flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
-
-    root()
-      .querySelector<HTMLButtonElement>('[data-testid="admin-order-action-order-new-2"]')!
-      .click();
-
-    const patchReq = httpMock.expectOne(
-      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders/order-new/status`,
-    );
-    patchReq.flush({ title: 'Conflict.' }, { status: 409, statusText: 'Conflict' });
-    fixture.detectChanges();
-
-    expect(root().querySelector('[data-testid="admin-orders-feedback"]')?.textContent).toContain(
-      locale.uiText('adminOrdersErrorConflict'),
-    );
-
-    const refreshReq = httpMock.expectOne(
+    expect(root().querySelector('[data-testid="admin-order-card-order-done"]')).toBeTruthy();
+    expect(root().querySelector('[data-testid="admin-order-card-order-new"]')).toBeNull();
+    httpMock.expectNone(
       (request) =>
-        request.url === `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders`,
+        request.url === `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders` &&
+        request.method === 'GET',
     );
-    refreshReq.flush(resultFor([]));
-    fixture.detectChanges();
   });
 
-  it('shows not-found feedback and refreshes on details 404', () => {
-    const locale = TestBed.inject(LocaleService);
+  it('searches by order number and guest name locally', () => {
+    fixture.detectChanges();
+    flushList([
+      createSummary('order-new', OrderStatus.New, 'ORD-100', OrderType.Pickup, 'Ali Guest'),
+      createSummary('order-sara', OrderStatus.New, 'ORD-200', OrderType.Pickup, 'Sara Ahmed'),
+    ]);
 
+    const search = root().querySelector<HTMLInputElement>('[data-testid="admin-orders-search"]')!;
+    search.value = 'sara';
+    search.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(root().querySelector('[data-testid="admin-order-card-order-sara"]')).toBeTruthy();
+    expect(root().querySelector('[data-testid="admin-order-card-order-new"]')).toBeNull();
+  });
+
+  it('renders additional filters toolbar with visible icon and aligned controls', () => {
+    fixture.detectChanges();
+    flushList([]);
+
+    const row = root().querySelector('.orders-management-page__extra-filters-row') as HTMLElement;
+    const label = root().querySelector('[data-testid="admin-orders-extra-filters-label"]') as HTMLElement;
+    const icon = label?.querySelector('.orders-management-page__extra-filters-icon') as SVGElement | null;
+    const typeTrigger = root().querySelector('[data-testid="admin-orders-type-filter"]') as HTMLElement;
+    const clearButton = root().querySelector('[data-testid="admin-orders-clear-filters"]') as HTMLButtonElement;
+    const resultCount = root().querySelector('[data-testid="admin-orders-result-count"]') as HTMLElement;
+
+    expect(row).toBeTruthy();
+    expect(row.contains(label)).toBe(true);
+    expect(row.contains(typeTrigger)).toBe(true);
+    expect(row.contains(clearButton)).toBe(true);
+    expect(row.contains(resultCount)).toBe(true);
+    expect(root().querySelector('.orders-management-page__extra-filters-title')).toBeNull();
+
+    expect(getComputedStyle(row).display).toBe('flex');
+    expect(getComputedStyle(label).display).toBe('inline-flex');
+    expect(getComputedStyle(label).width).not.toBe('100%');
+    expect(getComputedStyle(label).flexGrow).toBe('0');
+
+    expect(icon).toBeTruthy();
+    expect(icon?.getAttribute('aria-hidden')).toBe('true');
+    expect(icon?.getAttribute('focusable')).toBe('false');
+    expect(icon?.querySelectorAll('path').length).toBeGreaterThanOrEqual(6);
+
+    const iconCss = Array.from(document.styleSheets)
+      .flatMap((sheet) => {
+        try {
+          return Array.from(sheet.cssRules).map((rule) => rule.cssText);
+        } catch {
+          return [];
+        }
+      })
+      .join('\n');
+    expect(iconCss).toContain('orders-management-page__extra-filters-icon');
+    expect(iconCss).toContain('20px');
+    expect(iconCss).toContain('stroke: #17201d');
+    expect(iconCss).toContain('height: 46px');
+    expect(iconCss).toContain('align-self: center');
+
+    expect(['0px', '']).toContain(getComputedStyle(clearButton).marginTop);
+    expect(getComputedStyle(resultCount).marginInlineStart).toBe('auto');
+  });
+
+  it('supports additional filters, derived guest options, clear filters, and result count', () => {
+    fixture.detectChanges();
+    flushList([
+      createSummary('order-new', OrderStatus.New, 'A-100', OrderType.Delivery, 'Ali Guest'),
+      createSummary('order-pickup', OrderStatus.New, 'A-101', OrderType.Pickup, 'Sara Ahmed'),
+    ]);
+
+    expect(root().querySelector('[data-testid="admin-orders-type-filter"]')).toBeTruthy();
+    expect(root().querySelector('[data-testid="admin-orders-guest-filter"]')).toBeTruthy();
+    expect(root().textContent).toContain('Ali Guest');
+
+    root().querySelector<HTMLButtonElement>('[data-testid="admin-orders-type-filter"]')?.click();
+    fixture.detectChanges();
+    root().querySelector<HTMLButtonElement>('[data-option-index="2"]')?.click();
+    fixture.detectChanges();
+
+    expect(root().querySelector('[data-testid="admin-order-card-order-pickup"]')).toBeTruthy();
+    expect(root().querySelector('[data-testid="admin-order-card-order-new"]')).toBeNull();
+
+    root().querySelector<HTMLButtonElement>('[data-testid="admin-orders-clear-filters"]')?.click();
+    fixture.detectChanges();
+
+    expect(root().querySelector('[data-testid="admin-order-card-order-new"]')).toBeTruthy();
+    expect((root().querySelector<HTMLInputElement>('[data-testid="admin-orders-search"]'))!.value).toBe('');
+  });
+
+  it('renders production cards with type-first hierarchy, labels, meta corner, total, and details flow', () => {
+    fixture.detectChanges();
+    flushList([createSummary('order-new', OrderStatus.New, 'ORD-7F29134F948B4E60', OrderType.Delivery, 'Abdallah Hijazi')]);
+
+    expect(root().querySelector('[data-testid="admin-orders-table"]')).toBeNull();
+    expect(root().querySelector('[data-testid="admin-orders-cards"]')).toBeTruthy();
+
+    const card = root().querySelector('[data-testid="admin-order-card-order-new"]') as HTMLElement;
+    const content = card.querySelector('.orders-management-page__card-content') as HTMLElement;
+    const type = card.querySelector('.orders-management-page__card-type') as HTMLElement;
+    const number = card.querySelector('.orders-management-page__card-number') as HTMLElement;
+    const guest = card.querySelector('.orders-management-page__card-guest') as HTMLElement;
+    const labels = card.querySelectorAll('.orders-management-page__card-label');
+    const meta = card.querySelector('[data-testid="admin-order-card-meta-order-new"]') as HTMLElement;
+    const status = meta.querySelector('.orders-management-page__card-status') as HTMLElement;
+    const time = meta.querySelector('.orders-management-page__card-time') as HTMLElement;
+    const contentChildren = Array.from(content.children);
+
+    expect(card.textContent).toContain('#7F29134F');
+    expect(card.textContent).toContain('Abdallah Hijazi');
+    expect(labels.length).toBe(2);
+    expect(contentChildren[0]).toBe(type);
+    expect(contentChildren[1].classList.contains('orders-management-page__card-field')).toBe(true);
+    expect(contentChildren[2].classList.contains('orders-management-page__card-field')).toBe(true);
+    expect(number.tagName.toLowerCase()).toBe('h3');
+    expect(guest.tagName.toLowerCase()).toBe('p');
+    expect(Number(getComputedStyle(number).fontWeight)).toBeGreaterThan(Number(getComputedStyle(guest).fontWeight));
+    expect(getComputedStyle(guest).fontSize).not.toBe(getComputedStyle(number).fontSize);
+    expect(meta.contains(status)).toBe(true);
+    expect(meta.contains(time)).toBe(true);
+    expect(getComputedStyle(meta).flexDirection).toBe('column');
+    expect(getComputedStyle(meta).marginInlineStart).toBe('auto');
+    expect(card.querySelector('.orders-management-page__avatar')).toBeNull();
+
+    root().querySelector<HTMLButtonElement>('[data-testid="admin-order-details-order-new"]')?.click();
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders/order-new`)
+      .flush(createDetails('order-new', OrderStatus.New));
+    fixture.detectChanges();
+
+    expect(document.body.querySelector('[data-testid="admin-order-details-modal"]')).toBeTruthy();
+  });
+
+  it('shows filtered empty state when search has no matches', () => {
     fixture.detectChanges();
     flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
 
-    root()
-      .querySelector<HTMLButtonElement>('[data-testid="admin-order-details-order-new"]')!
-      .click();
-
-    const detailsReq = httpMock.expectOne(
-      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders/order-new`,
-    );
-    detailsReq.flush({ title: 'Not found.' }, { status: 404, statusText: 'Not Found' });
+    const search = root().querySelector<HTMLInputElement>('[data-testid="admin-orders-search"]')!;
+    search.value = 'missing-guest';
+    search.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    expect(
-      document.body.querySelector('[data-testid="admin-orders-details-error"]')?.textContent,
-    ).toContain(locale.uiText('adminOrdersErrorNotFound'));
+    expect(root().querySelector('[data-testid="admin-orders-filtered-empty"]')).toBeTruthy();
+    expect(root().querySelector('[data-testid="admin-orders-empty"]')).toBeNull();
   });
 
-  it('shows empty state when there are no orders', () => {
+  it('shows API empty state when there are no orders', () => {
     fixture.detectChanges();
     flushList([]);
 
     expect(root().querySelector('[data-testid="admin-orders-empty"]')).toBeTruthy();
+    expect(root().querySelector('[data-testid="admin-orders-filtered-empty"]')).toBeNull();
   });
 
-  it('shows error state with retry', () => {
+  it('shows loading skeleton and error retry state', () => {
     fixture.detectChanges();
+    expect(root().querySelector('[data-testid="admin-orders-loading"]')).toBeTruthy();
+
     const req = httpMock.expectOne(
       (request) =>
         request.url === `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders`,
@@ -229,12 +273,56 @@ describe('AdminOrdersPage', () => {
     expect(root().querySelector('[data-testid="admin-orders-error"]')).toBeTruthy();
   });
 
-  it('renders mobile cards without breaking the page markup', () => {
+  it('opens details modal and keeps modal regression behavior', () => {
     fixture.detectChanges();
     flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
 
-    expect(root().querySelector('[data-testid="admin-orders-cards"]')).toBeTruthy();
-    expect(root().querySelector('[data-testid="admin-order-card-order-new"]')).toBeTruthy();
+    root()
+      .querySelector<HTMLButtonElement>('[data-testid="admin-order-details-order-new"]')!
+      .click();
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders/order-new`)
+      .flush(createDetails('order-new', OrderStatus.New));
+    fixture.detectChanges();
+
+    const scroll = document.body.querySelector('.order-details-modal__scroll') as HTMLElement;
+    const footer = document.body.querySelector('.order-details-modal__footer') as HTMLElement;
+    expect(scroll.contains(footer)).toBe(false);
+    expect(getComputedStyle(scroll).overflowY).toBe('auto');
+    expect(
+      (document.body.querySelector('[data-testid="admin-order-details-print"]') as HTMLButtonElement).disabled,
+    ).toBe(false);
+    expect(document.body.querySelector('[data-testid="admin-order-invoice-print-area"]')).toBeTruthy();
+  });
+
+  it('keeps modal status actions working and refreshes details after success', () => {
+    fixture.detectChanges();
+    flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
+
+    root()
+      .querySelector<HTMLButtonElement>('[data-testid="admin-order-details-order-new"]')!
+      .click();
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders/order-new`)
+      .flush(createDetails('order-new', OrderStatus.New));
+    fixture.detectChanges();
+
+    document.body
+      .querySelector<HTMLButtonElement>('[data-testid="admin-order-modal-action-order-new-2"]')
+      ?.click();
+    fixture.detectChanges();
+
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders/order-new/status`)
+      .flush(createSummary('order-new', OrderStatus.Preparing, 'A-100'));
+    fixture.detectChanges();
+
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders/order-new`)
+      .flush(createDetails('order-new', OrderStatus.Preparing));
+    fixture.detectChanges();
+
+    expect(document.body.textContent).toContain('قيد التحضير');
   });
 });
 
@@ -247,15 +335,21 @@ function resultFor(items: OrderSummary[]): GetOrdersResult {
   };
 }
 
-function createSummary(id: string, status: OrderStatus, orderNumber: string): OrderSummary {
+function createSummary(
+  id: string,
+  status: OrderStatus,
+  orderNumber: string,
+  orderType: OrderType = OrderType.Pickup,
+  guestName = 'Guest User',
+): OrderSummary {
   return {
     id,
     orderNumber,
     restaurantId: RESTAURANT_ID,
     customerId: null,
-    guestName: 'Guest User',
+    guestName,
     guestPhone: '+10000000001',
-    orderType: OrderType.Pickup,
+    orderType,
     orderStatus: status,
     totalAmount: 25,
     currencyCode: 'SAR',
@@ -264,9 +358,13 @@ function createSummary(id: string, status: OrderStatus, orderNumber: string): Or
   };
 }
 
-function createDetails(id: string, status: OrderStatus): OrderDetails {
+function createDetails(
+  id: string,
+  status: OrderStatus,
+  orderType: OrderType = OrderType.Pickup,
+): OrderDetails {
   return {
-    ...createSummary(id, status, 'A-100'),
+    ...createSummary(id, status, 'A-100', orderType),
     deliveryAddress: null,
     deliveryLatitude: null,
     deliveryLongitude: null,

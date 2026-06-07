@@ -10,8 +10,6 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LocaleService } from '../../../../core/localization/locale';
 import { OrderModalShell } from '../../../../shared/components/order-modal-shell/order-modal-shell';
-import { shouldShowFinancialAmount } from '../../../../shared/orders/order-display.util';
-import { formatOrderDateTime } from '../../../../shared/orders/order-date-time.util';
 import { formatOrderCurrency } from '../../../../shared/orders/order-money.util';
 import { getOrderStatusLabel } from '../../../../shared/orders/order-status-label.util';
 import { getOrderTypeLabel } from '../../../../shared/orders/order-type-label.util';
@@ -22,19 +20,26 @@ import {
   type OrderSummary,
 } from '../../../kitchen/data-access/kitchen-orders.models';
 import { AdminOrdersService } from '../../data-access/admin-orders.service';
+import { AdminOrdersSelect } from './components/admin-orders-select/admin-orders-select';
+import {
+  AdminOrderDetailsModal,
+  type AdminOrderDetailsAction,
+} from './components/admin-order-details-modal/admin-order-details-modal';
+import {
+  buildGuestFilterOptions,
+  filterOrders,
+  formatRelativeOrderTime,
+  getAvatarInitials,
+  hasActiveFilters,
+  shortenOrderNumber,
+  type OrderGuestFilter,
+  type OrderListFilters,
+  type OrderTypeFilter,
+} from './admin-orders-page.util';
 
 type PageState = 'loading' | 'ready' | 'error' | 'missing-context';
 type StatusFilter = 'all' | OrderStatus;
-
-interface OrderAction {
-  labelKey:
-    | 'adminOrdersActionStartPreparing'
-    | 'adminOrdersActionMarkReady'
-    | 'adminOrdersActionComplete'
-    | 'adminOrdersActionCancel';
-  newStatus: OrderStatus;
-  destructive?: boolean;
-}
+type OrderAction = AdminOrderDetailsAction;
 
 const STATUS_FILTERS: readonly { key: StatusFilter; status: OrderStatus | null }[] = [
   { key: 'all', status: null },
@@ -47,9 +52,9 @@ const STATUS_FILTERS: readonly { key: StatusFilter; status: OrderStatus | null }
 
 @Component({
   selector: 'app-admin-orders-page',
-  imports: [OrderModalShell],
+  imports: [OrderModalShell, AdminOrderDetailsModal, AdminOrdersSelect],
   templateUrl: './admin-orders-page.html',
-  styleUrl: './admin-orders-page.scss',
+  styleUrls: ['./admin-orders-page.shell.scss', './admin-orders-page.cards.scss'],
 })
 export class AdminOrdersPage {
   private readonly ordersService = inject(AdminOrdersService);
@@ -59,13 +64,17 @@ export class AdminOrdersPage {
   protected readonly statusFilters = STATUS_FILTERS;
   protected readonly OrderStatus = OrderStatus;
   protected readonly OrderType = OrderType;
-  protected readonly shouldShowFinancialAmount = shouldShowFinancialAmount;
+  protected readonly shortenOrderNumber = shortenOrderNumber;
+  protected readonly getAvatarInitials = getAvatarInitials;
 
   protected readonly pageState = signal<PageState>('loading');
   protected readonly listError = signal<string | null>(null);
   protected readonly refreshing = signal(false);
   protected readonly feedbackMessage = signal<string | null>(null);
   protected readonly activeFilter = signal<StatusFilter>('all');
+  protected readonly searchQuery = signal('');
+  protected readonly typeFilter = signal<OrderTypeFilter>('all');
+  protected readonly guestFilter = signal<OrderGuestFilter>('all');
   protected readonly orders = signal<OrderSummary[]>([]);
   protected readonly pageNumber = signal(1);
   protected readonly totalCount = signal(0);
@@ -78,8 +87,42 @@ export class AdminOrdersPage {
   protected readonly orderDetails = signal<OrderDetails | null>(null);
   protected readonly pendingCancelOrder = signal<OrderSummary | null>(null);
 
+  protected readonly listFilters = computed<OrderListFilters>(() => ({
+    status: this.activeFilter(),
+    search: this.searchQuery(),
+    orderType: this.typeFilter(),
+    guest: this.guestFilter(),
+  }));
+
+  protected readonly filteredOrders = computed(() =>
+    filterOrders(this.orders(), this.listFilters()),
+  );
+
+  protected readonly guestOptions = computed(() =>
+    buildGuestFilterOptions(
+      this.orders(),
+      this.locale.uiText('adminOrdersFilterAllGuests'),
+    ),
+  );
+
+  protected readonly typeOptions = computed(() => [
+    { value: 'all', label: this.locale.uiText('adminOrdersFilterAllTypes') },
+    {
+      value: String(OrderType.Delivery),
+      label: this.locale.uiText('adminOrdersTypeDelivery'),
+    },
+    {
+      value: String(OrderType.Pickup),
+      label: this.locale.uiText('adminOrdersTypePickup'),
+    },
+  ]);
+
   protected readonly hasMore = computed(
     () => this.orders().length < this.totalCount(),
+  );
+
+  protected readonly filtersActive = computed(() =>
+    hasActiveFilters(this.listFilters()),
   );
 
   constructor() {
@@ -111,10 +154,8 @@ export class AdminOrdersPage {
       this.listError.set(null);
     }
 
-    const status = this.resolveStatusFilter(this.activeFilter());
-
     this.ordersService
-      .listOrders(status, nextPage)
+      .listOrders(null, nextPage)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
@@ -149,7 +190,34 @@ export class AdminOrdersPage {
 
     this.feedbackMessage.set(null);
     this.activeFilter.set(filter);
-    this.loadOrders(true);
+  }
+
+  protected setSearchQuery(value: string): void {
+    this.searchQuery.set(value);
+  }
+
+  protected setTypeFilter(value: string): void {
+    this.typeFilter.set(value === 'all' ? 'all' : (Number(value) as OrderType));
+  }
+
+  protected typeFilterValue(): string {
+    const value = this.typeFilter();
+    return value === 'all' ? 'all' : String(value);
+  }
+
+  protected setGuestFilter(value: string): void {
+    this.guestFilter.set(value as OrderGuestFilter);
+  }
+
+  protected clearFilters(): void {
+    this.activeFilter.set('all');
+    this.searchQuery.set('');
+    this.typeFilter.set('all');
+    this.guestFilter.set('all');
+  }
+
+  protected resultCountLabel(): string {
+    return `${this.locale.uiText('adminOrdersShowing')} ${this.filteredOrders().length} ${this.locale.uiText('adminOrdersOf')} ${this.orders().length} ${this.locale.uiText('adminOrdersOrdersWord')}`;
   }
 
   protected loadMore(): void {
@@ -158,10 +226,9 @@ export class AdminOrdersPage {
     }
 
     const nextPage = this.pageNumber() + 1;
-    const status = this.resolveStatusFilter(this.activeFilter());
 
     this.ordersService
-      .listOrders(status, nextPage)
+      .listOrders(null, nextPage)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
@@ -200,8 +267,16 @@ export class AdminOrdersPage {
     return getOrderTypeLabel(orderType, this.locale.locale());
   }
 
-  protected actionsFor(order: OrderSummary): OrderAction[] {
-    return this.actionsForStatus(order.orderStatus);
+  protected guestDisplayName(order: OrderSummary): string {
+    return order.guestName?.trim() || this.locale.uiText('adminOrdersGuestFallback');
+  }
+
+  protected formatMoney(amount: number, currencyCode: string): string {
+    return formatOrderCurrency(amount, currencyCode);
+  }
+
+  protected formatOrderTime(value: string): string {
+    return formatRelativeOrderTime(value, this.locale.locale());
   }
 
   protected actionsForDetails(): OrderAction[] {
@@ -327,22 +402,6 @@ export class AdminOrdersPage {
     return this.updatingOrderIds().has(orderId);
   }
 
-  protected formatCreatedAt(value: string): string {
-    return formatOrderDateTime(value);
-  }
-
-  protected itemName(item: { itemNameAr: string; itemNameEn: string | null }): string {
-    if (this.locale.locale() === 'en') {
-      return item.itemNameEn?.trim() || item.itemNameAr;
-    }
-
-    return item.itemNameAr;
-  }
-
-  protected formatMoney(amount: number, currencyCode: string): string {
-    return formatOrderCurrency(amount, currencyCode);
-  }
-
   private applyStatusUpdate(order: OrderSummary, newStatus: OrderStatus): void {
     if (this.isUpdating(order.id)) {
       return;
@@ -364,10 +423,6 @@ export class AdminOrdersPage {
 
           if (this.selectedOrderId() === order.id) {
             this.loadDetails(order.id);
-          }
-
-          if (!this.matchesActiveFilter(updated.orderStatus)) {
-            this.loadOrders(true);
           }
         },
         error: (error) => {
@@ -394,15 +449,6 @@ export class AdminOrdersPage {
           this.detailsError.set(this.mapDetailsError(error));
         },
       });
-  }
-
-  private resolveStatusFilter(filter: StatusFilter): OrderStatus | null {
-    return filter === 'all' ? null : filter;
-  }
-
-  private matchesActiveFilter(status: OrderStatus): boolean {
-    const filter = this.activeFilter();
-    return filter === 'all' || filter === status;
   }
 
   private setUpdating(orderId: string, updating: boolean): void {

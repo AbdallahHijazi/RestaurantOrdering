@@ -1,426 +1,658 @@
-<div class="admin-orders" data-testid="admin-orders-page">
-  <header class="admin-orders__header">
-    <div class="admin-orders__intro">
-      <p class="admin-orders__eyebrow">{{ locale.uiText('adminOrdersEyebrow') }}</p>
-      <h2>{{ locale.uiText('adminOrdersTitle') }}</h2>
-      <p class="admin-orders__lead">{{ locale.uiText('adminOrdersLead') }}</p>
+<div class="orders-management-page" data-testid="admin-orders-page">
+
+  <header class="orders-management-page__header">
+
+    <div class="orders-management-page__intro">
+
+      <p class="orders-management-page__eyebrow">{{ locale.uiText('adminOrdersEyebrow') }}</p>
+
+      <h1 class="orders-management-page__title">{{ locale.uiText('adminOrdersTitle') }}</h1>
+
+      <p class="orders-management-page__lead">{{ locale.uiText('adminOrdersLead') }}</p>
+
     </div>
+
+
 
     <button
+
       type="button"
-      class="button-secondary admin-orders__refresh"
+
+      class="orders-management-page__refresh"
+
       data-testid="admin-orders-refresh"
+
       [disabled]="pageState() === 'loading' || refreshing()"
+
       (click)="refreshOrders()"
+
     >
+
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+
+        <path
+
+          fill="currentColor"
+
+          d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.75 10h-2.1A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35Z"
+
+        />
+
+      </svg>
+
       @if (refreshing()) {
+
         {{ locale.uiText('adminOrdersRefreshing') }}
+
       } @else {
+
         {{ locale.uiText('adminOrdersRefresh') }}
+
       }
+
     </button>
+
   </header>
 
+
+
   @if (feedbackMessage()) {
-    <p class="admin-orders__feedback" role="status" data-testid="admin-orders-feedback">
+
+    <p class="orders-management-page__feedback" role="status" data-testid="admin-orders-feedback">
+
       {{ feedbackMessage() }}
+
     </p>
+
   }
 
-  <nav
-    class="admin-orders__filters"
-    role="tablist"
-    [attr.aria-label]="locale.uiText('adminOrdersFiltersLabel')"
-    data-testid="admin-orders-filters"
-  >
-    @for (filter of statusFilters; track filter.key) {
+
+
+  <div class="orders-management-page__toolbar">
+
+    <nav
+
+      class="orders-management-page__status-pills"
+
+      role="tablist"
+
+      [attr.aria-label]="locale.uiText('adminOrdersFiltersLabel')"
+
+      data-testid="admin-orders-filters"
+
+    >
+
+      @for (filter of statusFilters; track filter.key) {
+
+        <button
+
+          type="button"
+
+          role="tab"
+
+          class="orders-management-page__status-pill"
+
+          [class.orders-management-page__status-pill--active]="activeFilter() === filter.key"
+
+          [attr.aria-selected]="activeFilter() === filter.key"
+
+          [attr.data-testid]="'admin-orders-filter-' + filter.key"
+
+          (click)="setFilter(filter.key)"
+
+        >
+
+          {{ filterLabel(filter.key) }}
+
+        </button>
+
+      }
+
+    </nav>
+
+
+
+    <label class="orders-management-page__search">
+
+      <span class="orders-management-page__search-label">{{ locale.uiText('adminOrdersSearchLabel') }}</span>
+
+      <svg class="orders-management-page__search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+
+        <path
+
+          fill="currentColor"
+
+          d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"
+
+        />
+
+      </svg>
+
+      <input
+
+        type="search"
+
+        data-testid="admin-orders-search"
+
+        [placeholder]="locale.uiText('adminOrdersSearchPlaceholder')"
+
+        [value]="searchQuery()"
+
+        (input)="setSearchQuery($any($event.target).value)"
+
+      />
+
+    </label>
+
+  </div>
+
+
+
+  <section class="orders-management-page__extra-filters" data-testid="admin-orders-extra-filters">
+
+    <div class="orders-management-page__extra-filters-row">
+
+      <span class="orders-management-page__extra-filters-label" data-testid="admin-orders-extra-filters-label">
+
+        <svg
+          class="orders-management-page__extra-filters-icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M4 7h10" />
+          <path d="M18 7h2" />
+          <path d="M14 4v6" />
+          <path d="M4 17h2" />
+          <path d="M10 17h10" />
+          <path d="M8 14v6" />
+        </svg>
+
+        {{ locale.uiText('adminOrdersAdditionalFiltersLabel') }}
+
+      </span>
+
+
+
+      <app-admin-orders-select
+
+        [label]="locale.uiText('adminOrdersFilterTypeLabel')"
+
+        testId="admin-orders-type-filter"
+
+        [options]="typeOptions()"
+
+        [value]="typeFilterValue()"
+
+        (valueChange)="setTypeFilter($event)"
+
+      />
+
+
+
+      <app-admin-orders-select
+
+        [label]="locale.uiText('adminOrdersFilterGuestLabel')"
+
+        testId="admin-orders-guest-filter"
+
+        [options]="guestOptions()"
+
+        [value]="guestFilter()"
+
+        (valueChange)="setGuestFilter($event)"
+
+      />
+
+
+
       <button
+
         type="button"
-        role="tab"
-        class="admin-orders__filter"
-        [class.admin-orders__filter--active]="activeFilter() === filter.key"
-        [attr.aria-selected]="activeFilter() === filter.key"
-        [attr.data-testid]="'admin-orders-filter-' + filter.key"
-        (click)="setFilter(filter.key)"
+
+        class="orders-management-page__clear-filters"
+
+        data-testid="admin-orders-clear-filters"
+
+        [disabled]="!filtersActive()"
+
+        (click)="clearFilters()"
+
       >
-        {{ filterLabel(filter.key) }}
+
+        {{ locale.uiText('adminOrdersClearFilters') }}
+
       </button>
-    }
-  </nav>
+
+
+
+      <p class="orders-management-page__result-count" data-testid="admin-orders-result-count">
+
+        {{ resultCountLabel() }}
+
+      </p>
+
+    </div>
+
+  </section>
+
+
 
   @switch (pageState()) {
+
     @case ('missing-context') {
-      <section class="admin-orders__state" data-testid="admin-orders-missing-context">
+
+      <section class="orders-management-page__state" data-testid="admin-orders-missing-context">
+
         <h3>{{ locale.uiText('adminOrdersMissingContextTitle') }}</h3>
+
         <p>{{ locale.uiText('adminOrdersMissingContextDescription') }}</p>
+
       </section>
+
     }
+
+
 
     @case ('loading') {
-      <section class="admin-orders__loading" data-testid="admin-orders-loading" aria-busy="true">
-        <p>{{ locale.uiText('adminOrdersLoading') }}</p>
+
+      <section class="orders-management-page__loading" data-testid="admin-orders-loading" aria-busy="true">
+
+        <div class="orders-management-page__skeleton-grid">
+
+          @for (slot of [1, 2, 3, 4, 5, 6]; track slot) {
+
+            <div class="orders-management-page__skeleton-card" aria-hidden="true"></div>
+
+          }
+
+        </div>
+
       </section>
+
     }
+
+
 
     @case ('error') {
-      <section class="admin-orders__state" data-testid="admin-orders-error">
+
+      <section class="orders-management-page__state" data-testid="admin-orders-error">
+
         <h3>{{ locale.uiText('adminOrdersListErrorTitle') }}</h3>
+
         <p>{{ listError() }}</p>
-        <button type="button" class="admin-orders__primary" (click)="loadOrders()">
+
+        <button type="button" class="orders-management-page__primary" (click)="loadOrders()">
+
           {{ locale.uiText('adminOrdersRetry') }}
+
         </button>
+
       </section>
+
     }
+
+
 
     @case ('ready') {
+
       @if (orders().length === 0) {
-        <section class="admin-orders__state" data-testid="admin-orders-empty">
+
+        <section class="orders-management-page__state" data-testid="admin-orders-empty">
+
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+
+            <path
+
+              fill="currentColor"
+
+              d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2Zm-1 16H6V7h12v12ZM8 9h8v2H8V9Zm0 4h8v2H8v-2Z"
+
+            />
+
+          </svg>
+
           <h3>{{ locale.uiText('adminOrdersEmptyTitle') }}</h3>
+
           <p>{{ locale.uiText('adminOrdersEmptyDescription') }}</p>
+
         </section>
+
+      } @else if (filteredOrders().length === 0) {
+
+        <section class="orders-management-page__empty-filtered" data-testid="admin-orders-filtered-empty">
+
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+
+            <path
+
+              fill="currentColor"
+
+              d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"
+
+            />
+
+          </svg>
+
+          <h3>{{ locale.uiText('adminOrdersFilteredEmptyTitle') }}</h3>
+
+          <p>{{ locale.uiText('adminOrdersFilteredEmptyDescription') }}</p>
+
+          <button type="button" class="orders-management-page__clear-filters" (click)="clearFilters()">
+
+            {{ locale.uiText('adminOrdersClearFilters') }}
+
+          </button>
+
+        </section>
+
       } @else {
-        <div class="admin-orders__table-wrap" data-testid="admin-orders-table">
-          <table class="admin-orders__table">
-            <thead>
-              <tr>
-                <th scope="col">{{ locale.uiText('adminOrdersColNumber') }}</th>
-                <th scope="col">{{ locale.uiText('adminOrdersColCreatedAt') }}</th>
-                <th scope="col">{{ locale.uiText('adminOrdersColType') }}</th>
-                <th scope="col">{{ locale.uiText('adminOrdersColGuest') }}</th>
-                <th scope="col">{{ locale.uiText('adminOrdersColStatus') }}</th>
-                <th scope="col">{{ locale.uiText('adminOrdersColTotal') }}</th>
-                <th scope="col">{{ locale.uiText('adminOrdersColActions') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (order of orders(); track order.id) {
-                <tr [attr.data-testid]="'admin-order-row-' + order.id">
-                  <td>
-                    <bdi class="identifier-ltr" dir="ltr">{{ order.orderNumber }}</bdi>
-                  </td>
-                  <td>
-                    <bdi class="numeric-ltr" dir="ltr">{{ formatCreatedAt(order.createdAt) }}</bdi>
-                  </td>
-                  <td>{{ orderTypeLabel(order.orderType) }}</td>
-                  <td>
-                    <span>{{ order.guestName || '—' }}</span>
-                    @if (order.guestPhone?.trim()) {
-                      <span class="admin-orders__phone phone-ltr" dir="ltr">{{ order.guestPhone }}</span>
-                    }
-                  </td>
-                  <td>
-                    <span class="order-status-chip" [attr.data-status]="order.orderStatus">
-                      {{ statusLabel(order.orderStatus) }}
+
+        <div class="orders-management-page__grid" data-testid="admin-orders-cards">
+
+          @for (order of filteredOrders(); track order.id) {
+
+            <article class="orders-management-page__card" [attr.data-testid]="'admin-order-card-' + order.id">
+
+              <header class="orders-management-page__card-head">
+
+                <div class="orders-management-page__card-content">
+
+                  <div class="orders-management-page__card-type">
+
+                @if (order.orderType === OrderType.Delivery) {
+
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+
+                    <path
+
+                      fill="currentColor"
+
+                      d="M18 18.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM4.5 18.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM19 7h-3V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v8h2a3.5 3.5 0 0 1 7 0h2.05a3.5 3.5 0 0 1 6.9 1H19V7Z"
+
+                    />
+
+                  </svg>
+
+                } @else {
+
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+
+                    <path
+
+                      fill="currentColor"
+
+                      d="M6 2h12l4 5v13a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm10 2H8v4h8V4Zm-8 6v8h12v-8H6Z"
+
+                    />
+
+                  </svg>
+
+                }
+
+                <span>{{ orderTypeLabel(order.orderType) }}</span>
+
+                  </div>
+
+
+
+                  <div class="orders-management-page__card-field">
+
+                    <span class="orders-management-page__card-label">
+
+                      {{ locale.uiText('adminOrdersColNumber') }}
+
                     </span>
-                  </td>
-                  <td>
-                    <bdi class="currency-ltr" dir="ltr">
-                      {{ formatMoney(order.totalAmount, order.currencyCode) }}
-                    </bdi>
-                  </td>
-                  <td class="admin-orders__row-actions">
-                    <button
-                      type="button"
-                      class="button-ghost"
-                      [attr.data-testid]="'admin-order-details-' + order.id"
-                      (click)="openDetails(order)"
+
+                    <h3
+
+                      class="orders-management-page__card-number"
+
+                      [attr.data-full-order-number]="order.orderNumber"
+
+                      dir="ltr"
+
                     >
-                      {{ locale.uiText('adminOrdersViewDetails') }}
-                    </button>
-                    @for (action of actionsFor(order); track action.labelKey) {
-                      <button
-                        type="button"
-                        [class.button-danger]="action.destructive"
-                        [class.button-success]="!action.destructive && action.newStatus === OrderStatus.Completed"
-                        [class.button-primary]="!action.destructive && action.newStatus !== OrderStatus.Completed"
-                        [disabled]="isUpdating(order.id)"
-                        [attr.data-testid]="'admin-order-action-' + order.id + '-' + action.newStatus"
-                        (click)="requestAction(order, action)"
-                      >
-                        {{ locale.uiText(action.labelKey) }}
-                      </button>
-                    }
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
+
+                      {{ shortenOrderNumber(order.orderNumber) }}
+
+                    </h3>
+
+                  </div>
+
+
+
+                  <div class="orders-management-page__card-field">
+
+                    <span class="orders-management-page__card-label">
+
+                      {{ locale.uiText('adminOrdersColGuest') }}
+
+                    </span>
+
+                    <p class="orders-management-page__card-guest">{{ guestDisplayName(order) }}</p>
+
+                  </div>
+
+                </div>
+
+
+
+                <div class="orders-management-page__card-meta" [attr.data-testid]="'admin-order-card-meta-' + order.id">
+
+                  <span
+
+                    class="orders-management-page__status-pill orders-management-page__card-status"
+
+                    [attr.data-status]="order.orderStatus"
+
+                  >
+
+                    <span class="orders-management-page__status-dot" aria-hidden="true"></span>
+
+                    {{ statusLabel(order.orderStatus) }}
+
+                  </span>
+
+
+
+                  <time class="orders-management-page__card-time" [attr.datetime]="order.createdAt">
+
+                    {{ formatOrderTime(order.createdAt) }}
+
+                  </time>
+
+                </div>
+
+              </header>
+
+
+
+              <footer class="orders-management-page__card-footer">
+
+              <div class="orders-management-page__card-total">
+
+                <span>{{ locale.uiText('adminOrdersColTotal') }}</span>
+
+                <strong>
+
+                  <bdi dir="ltr">{{ formatMoney(order.totalAmount, order.currencyCode) }}</bdi>
+
+                </strong>
+
+              </div>
+
+
+
+              <button
+
+                type="button"
+
+                class="orders-management-page__details-btn"
+
+                [attr.data-testid]="'admin-order-details-' + order.id"
+
+                (click)="openDetails(order)"
+
+              >
+
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+
+                  <path
+
+                    fill="currentColor"
+
+                    d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5ZM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5Zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3Z"
+
+                  />
+
+                </svg>
+
+                {{ locale.uiText('adminOrdersViewDetails') }}
+
+              </button>
+
+              </footer>
+
+            </article>
+
+          }
+
         </div>
 
-        <div class="admin-orders__cards" data-testid="admin-orders-cards">
-          @for (order of orders(); track order.id) {
-            <article class="admin-orders__card" [attr.data-testid]="'admin-order-card-' + order.id">
-              <header class="admin-orders__card-head">
-                <strong>
-                  <bdi class="identifier-ltr" dir="ltr">{{ order.orderNumber }}</bdi>
-                </strong>
-                <span class="order-status-chip" [attr.data-status]="order.orderStatus">
-                  {{ statusLabel(order.orderStatus) }}
-                </span>
-              </header>
-              <dl class="admin-orders__card-meta">
-                <div>
-                  <dt>{{ locale.uiText('adminOrdersColCreatedAt') }}</dt>
-                  <dd>{{ formatCreatedAt(order.createdAt) }}</dd>
-                </div>
-                <div>
-                  <dt>{{ locale.uiText('adminOrdersColType') }}</dt>
-                  <dd>{{ orderTypeLabel(order.orderType) }}</dd>
-                </div>
-                @if (order.guestName?.trim()) {
-                  <div>
-                    <dt>{{ locale.uiText('adminOrdersColGuest') }}</dt>
-                    <dd>{{ order.guestName }}</dd>
-                  </div>
-                }
-                @if (order.guestPhone?.trim()) {
-                  <div>
-                    <dt>{{ locale.uiText('adminOrdersColPhone') }}</dt>
-                    <dd>{{ order.guestPhone }}</dd>
-                  </div>
-                }
-                <div>
-                  <dt>{{ locale.uiText('adminOrdersColTotal') }}</dt>
-                  <dd>{{ formatMoney(order.totalAmount, order.currencyCode) }}</dd>
-                </div>
-              </dl>
-              <div class="admin-orders__card-actions">
-                <button type="button" class="admin-orders__link-btn" (click)="openDetails(order)">
-                  {{ locale.uiText('adminOrdersViewDetails') }}
-                </button>
-                @for (action of actionsFor(order); track action.labelKey) {
-                  <button
-                    type="button"
-                    class="admin-orders__action-btn"
-                    [class.admin-orders__action-btn--danger]="action.destructive"
-                    [disabled]="isUpdating(order.id)"
-                    (click)="requestAction(order, action)"
-                  >
-                    {{ locale.uiText(action.labelKey) }}
-                  </button>
-                }
-              </div>
-            </article>
-          }
-        </div>
+
 
         @if (hasMore()) {
-          <div class="admin-orders__pagination">
-            <button type="button" class="admin-orders__secondary" data-testid="admin-orders-load-more" (click)="loadMore()">
+
+          <div class="orders-management-page__pagination">
+
+            <button
+
+              type="button"
+
+              class="orders-management-page__secondary"
+
+              data-testid="admin-orders-load-more"
+
+              (click)="loadMore()"
+
+            >
+
               {{ locale.uiText('adminOrdersLoadMore') }}
+
             </button>
+
           </div>
+
         }
+
       }
+
     }
+
   }
+
+
 
   @if (pendingCancelOrder(); as order) {
-    <div class="admin-orders__confirm" data-testid="admin-orders-cancel-confirm">
+
+    <div class="orders-management-page__confirm" data-testid="admin-orders-cancel-confirm">
+
       <button
+
         type="button"
-        class="admin-orders__confirm-backdrop"
+
+        class="orders-management-page__confirm-backdrop"
+
         [attr.aria-label]="locale.uiText('adminOrdersCancelConfirmDismiss')"
+
         (click)="dismissCancelConfirmation()"
+
       ></button>
-      <div class="admin-orders__confirm-panel" role="alertdialog" aria-modal="true" [attr.aria-label]="locale.uiText('adminOrdersCancelConfirmTitle')">
+
+      <div
+
+        class="orders-management-page__confirm-panel"
+
+        role="alertdialog"
+
+        aria-modal="true"
+
+        [attr.aria-label]="locale.uiText('adminOrdersCancelConfirmTitle')"
+
+      >
+
         <h3>{{ locale.uiText('adminOrdersCancelConfirmTitle') }}</h3>
+
         <p>{{ locale.uiText('adminOrdersCancelConfirmMessage') }}</p>
-        <div class="admin-orders__confirm-actions">
-          <button type="button" class="admin-orders__secondary" (click)="dismissCancelConfirmation()">
+
+        <div class="orders-management-page__confirm-actions">
+
+          <button type="button" class="orders-management-page__secondary" (click)="dismissCancelConfirmation()">
+
             {{ locale.uiText('adminOrdersCancelConfirmDismiss') }}
+
           </button>
-          <button type="button" class="admin-orders__action-btn admin-orders__action-btn--danger" (click)="confirmCancel()">
+
+          <button type="button" class="orders-management-page__danger" (click)="confirmCancel()">
+
             {{ locale.uiText('adminOrdersActionCancel') }}
+
           </button>
+
         </div>
+
       </div>
+
     </div>
+
   }
 
+
+
   <app-order-modal-shell
+
     [wide]="true"
+
     [open]="detailsOpen()"
+
     [title]="locale.uiText('adminOrdersDetailsTitle')"
+
     [closeLabel]="locale.uiText('adminOrdersCloseDetails')"
+
     titleId="admin-order-details-title"
+
     testId="admin-order-details-modal"
+
     (closed)="closeDetails()"
+
   >
-    @if (orderDetails(); as details) {
-      <span
-        orderModalHeaderExtra
-        class="order-status-chip"
-        [attr.data-status]="details.orderStatus"
-      >
-        {{ statusLabel(details.orderStatus) }}
-      </span>
-    }
 
-    @if (detailsLoading()) {
-      <p data-testid="admin-orders-details-loading">{{ locale.uiText('adminOrdersDetailsLoading') }}</p>
-    } @else if (detailsError()) {
-      <div class="admin-orders__state" data-testid="admin-orders-details-error">
-        <p>{{ detailsError() }}</p>
-        <button type="button" class="button-primary" (click)="retryDetails()">
-          {{ locale.uiText('adminOrdersRetry') }}
-        </button>
-      </div>
-    } @else if (orderDetails(); as details) {
-      <div data-testid="admin-orders-details-body">
-        <dl class="order-details-meta">
-          <div>
-            <dt>{{ locale.uiText('adminOrdersColNumber') }}</dt>
-            <dd>
-              <bdi class="identifier-ltr" dir="ltr">{{ details.orderNumber }}</bdi>
-            </dd>
-          </div>
-          <div>
-            <dt>{{ locale.uiText('adminOrdersColType') }}</dt>
-            <dd>
-              <span
-                class="order-type-chip"
-                [class.order-type-chip--delivery]="details.orderType === OrderType.Delivery"
-              >
-                {{ orderTypeLabel(details.orderType) }}
-              </span>
-            </dd>
-          </div>
-          <div>
-            <dt>{{ locale.uiText('adminOrdersColCreatedAt') }}</dt>
-            <dd>
-              <bdi class="numeric-ltr" dir="ltr">{{ formatCreatedAt(details.createdAt) }}</bdi>
-            </dd>
-          </div>
-          @if (details.updatedAt) {
-            <div>
-              <dt>{{ locale.uiText('adminOrdersFieldUpdatedAt') }}</dt>
-              <dd>
-                <bdi class="numeric-ltr" dir="ltr">{{ formatCreatedAt(details.updatedAt) }}</bdi>
-              </dd>
-            </div>
-          }
-          @if (details.guestName?.trim()) {
-            <div>
-              <dt>{{ locale.uiText('adminOrdersColGuest') }}</dt>
-              <dd>{{ details.guestName }}</dd>
-            </div>
-          }
-          @if (details.guestPhone?.trim()) {
-            <div>
-              <dt>{{ locale.uiText('adminOrdersColPhone') }}</dt>
-              <dd>
-                <bdi class="phone-ltr" dir="ltr">{{ details.guestPhone }}</bdi>
-              </dd>
-            </div>
-          }
-          @if (details.orderType === OrderType.Delivery && details.deliveryAddress?.trim()) {
-            <div>
-              <dt>{{ locale.uiText('adminOrdersFieldDeliveryAddress') }}</dt>
-              <dd>{{ details.deliveryAddress }}</dd>
-            </div>
-          }
-          @if (details.notes?.trim()) {
-            <div>
-              <dt>{{ locale.uiText('adminOrdersFieldNotes') }}</dt>
-              <dd>{{ details.notes }}</dd>
-            </div>
-          }
-        </dl>
+    <app-admin-order-details-modal
 
-        <section class="admin-orders__items-section">
-          <h4>{{ locale.uiText('adminOrdersItemsHeading') }}</h4>
-          <ul class="order-items-list">
-            @for (item of details.items; track item.id) {
-              <li [attr.data-testid]="'admin-order-item-' + item.id">
-                <div class="order-items-list__head">
-                  <strong>{{ itemName(item) }}</strong>
-                  <span>× {{ item.quantity }}</span>
-                </div>
-                <p class="admin-orders__item-price">
-                  <bdi class="currency-ltr" dir="ltr">
-                    {{ formatMoney(item.unitPrice, details.currencyCode) }}
-                  </bdi>
-                  ·
-                  <bdi class="currency-ltr" dir="ltr">
-                    {{ formatMoney(item.totalPrice, details.currencyCode) }}
-                  </bdi>
-                </p>
-                @if (item.notes?.trim()) {
-                  <p class="order-items-list__notes">{{ item.notes }}</p>
-                }
-              </li>
-            }
-          </ul>
-        </section>
+      [loading]="detailsLoading()"
 
-        <dl class="order-financial-summary">
-          <div>
-            <dt>{{ locale.uiText('adminOrdersFieldSubtotal') }}</dt>
-            <dd>
-              <bdi class="currency-ltr" dir="ltr">
-                {{ formatMoney(details.subtotal, details.currencyCode) }}
-              </bdi>
-            </dd>
-          </div>
-          @if (shouldShowFinancialAmount(details.discountAmount)) {
-            <div>
-              <dt>{{ locale.uiText('adminOrdersFieldDiscount') }}</dt>
-              <dd>
-                <bdi class="currency-ltr" dir="ltr">
-                  {{ formatMoney(details.discountAmount, details.currencyCode) }}
-                </bdi>
-              </dd>
-            </div>
-          }
-          @if (shouldShowFinancialAmount(details.taxAmount)) {
-            <div>
-              <dt>{{ locale.uiText('adminOrdersFieldTax') }}</dt>
-              <dd>
-                <bdi class="currency-ltr" dir="ltr">
-                  {{ formatMoney(details.taxAmount, details.currencyCode) }}
-                </bdi>
-              </dd>
-            </div>
-          }
-          @if (shouldShowFinancialAmount(details.deliveryFee)) {
-            <div>
-              <dt>{{ locale.uiText('adminOrdersFieldDeliveryFee') }}</dt>
-              <dd>
-                <bdi class="currency-ltr" dir="ltr">
-                  {{ formatMoney(details.deliveryFee, details.currencyCode) }}
-                </bdi>
-              </dd>
-            </div>
-          }
-          <div class="order-financial-summary__total">
-            <dt>{{ locale.uiText('adminOrdersFieldTotal') }}</dt>
-            <dd>
-              <bdi class="currency-ltr" dir="ltr">
-                {{ formatMoney(details.totalAmount, details.currencyCode) }}
-              </bdi>
-            </dd>
-          </div>
-        </dl>
-      </div>
-    }
+      [error]="detailsError()"
 
-    @if (orderDetails(); as details) {
-      <div orderModalFooter class="admin-orders__modal-footer">
-        @for (action of actionsForDetails(); track action.labelKey) {
-          <button
-            type="button"
-            [class.button-danger]="action.destructive"
-            [class.button-success]="!action.destructive && action.newStatus === OrderStatus.Completed"
-            [class.button-primary]="!action.destructive && action.newStatus !== OrderStatus.Completed"
-            [disabled]="isUpdating(details.id)"
-            [attr.data-testid]="'admin-order-modal-action-' + details.id + '-' + action.newStatus"
-            (click)="requestDetailsAction(action)"
-          >
-            {{ locale.uiText(action.labelKey) }}
-          </button>
-        }
-      </div>
-    }
+      [details]="orderDetails()"
+
+      [actions]="actionsForDetails()"
+
+      [updating]="orderDetails() ? isUpdating(orderDetails()!.id) : false"
+
+      titleId="admin-order-details-title"
+
+      [closeLabel]="locale.uiText('adminOrdersCloseDetails')"
+
+      (closed)="closeDetails()"
+
+      (retry)="retryDetails()"
+
+      (actionRequested)="requestDetailsAction($event)"
+
+    />
+
   </app-order-modal-shell>
+
 </div>
+

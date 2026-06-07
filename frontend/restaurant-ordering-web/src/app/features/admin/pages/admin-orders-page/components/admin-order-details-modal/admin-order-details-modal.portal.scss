@@ -1,0 +1,42 @@
+.modal-overlay:has([data-testid='admin-order-details-modal']){padding:1rem}
+[data-testid='admin-order-details-modal'].modal-dialog{display:flex;flex-direction:column;width:min(920px,calc(100vw - 2rem));max-width:920px;max-height:min(820px,calc(100dvh - 2rem));overflow:hidden;border-radius:24px;box-shadow:0 20px 50px -12px rgb(0 0 0/.1)}
+[data-testid='admin-order-details-modal'] .modal-dialog__header{display:none}
+[data-testid='admin-order-details-modal'] .modal-dialog__body{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;min-width:0;max-height:min(820px,calc(100dvh - 2rem));padding:0;overflow:hidden}
+[data-testid='admin-order-details-modal'] .modal-dialog__footer{display:none}
+.order-details-modal{display:flex;flex-direction:column;width:100%;max-width:920px;height:100%;max-height:min(820px,calc(100dvh - 2rem));min-height:0;flex:1 1 auto;overflow:hidden;border-radius:24px;background:#fff}
+.order-details-modal__header{flex:0 0 auto;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.25rem 1.5rem;border-block-end:1px solid #f1f5f9;background:#fff}
+.order-details-modal__header-brand{display:flex;align-items:center;gap:1rem;min-width:0}
+.order-details-modal__header-icon{inline-size:3rem;block-size:3rem;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:1rem;background:rgb(184 102 63/.1);color:#b8663f}
+.order-details-modal__header-icon svg,.order-details-modal__close svg,.order-details-modal__footer-print svg{display:block}
+.order-details-modal__header-icon svg{inline-size:1.75rem;block-size:1.75rem}
+.order-details-modal__title{margin:0;font-family:var(--font-display);font-size:1.25rem;font-weight:800;line-height:1.3;color:#0f172a}
+.order-details-modal__lead{margin:.2rem 0 0;font-size:.875rem;color:#64748b}
+.order-details-modal__header-actions{display:flex;align-items:center;gap:.75rem;flex-shrink:0}
+.order-details-modal__status-badge{display:inline-flex;align-items:center;gap:.375rem;padding:.25rem .75rem;border-radius:999px;font-size:.8125rem;font-weight:700;line-height:1.3}
+.order-details-modal__status-dot{inline-size:.5rem;block-size:.5rem;border-radius:50%;background:currentColor}
+.order-details-modal__status-badge[data-status='1']{background:rgb(184 102 63/.12);color:#9a5d32}
+.order-details-modal__status-badge[data-status='2']{background:#fef3c7;color:#b45309}
+.order-details-modal__status-badge[data-status='3']{background:#ecfdf5;color:#059669}
+.order-details-modal__status-badge[data-status='4']{background:#ecfdf5;color:#047857}
+.order-details-modal__status-badge[data-status='5']{background:#fef2f2;color:#b91c1c}
+.order-details-modal__close{inline-size:2.5rem;block-size:2.5rem;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:999px;background:transparent;color:#94a3b8;cursor:pointer;transition:transform .28s cubic-bezier(.22,1,.36,1),background .28s ease,color .28s ease}
+.order-details-modal__close svg{inline-size:1.25rem;block-size:1.25rem}
+.order-details-modal__close:hover{transform:translateY(-2px) rotate(4deg);background:#fff7f2;color:#b8663f}
+.order-details-modal__close:focus-visible,.order-details-modal__footer-close:focus-visible,.order-details-modal__footer-print:focus-visible,.order-details-modal__status-btn:focus-visible{outline:2px solid rgb(184 102 63/.35);outline-offset:2px}
+.order-details-modal__scroll{flex:1 1 auto;min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:1.5rem;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
+.order-details-modal__scroll::-webkit-scrollbar{width:6px}
+.order-details-modal__scroll::-webkit-scrollbar-thumb{border-radius:999px;background:#cbd5e1}
+.order-details-modal__body{display:grid;gap:1.5rem;min-height:0;min-width:0}
+.order-details-modal__state{margin:0;padding:1rem 0;color:#64748b}
+.order-details-modal__retry{margin-block-start:.75rem;border:0;border-radius:.75rem;padding:.55rem 1rem;background:#171c19;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.order-details-modal__footer{flex:0 0 auto;flex-shrink:0;display:flex;align-items:center;padding-block-start:1rem;padding-inline:1.5rem;padding-block-end:calc(1.25rem + env(safe-area-inset-bottom,0px));border-block-start:1px solid #f1f5f9;background:#fff}
+.order-details-modal__footer-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.75rem;margin-inline-start:auto}
+.order-details-modal__footer-close,.order-details-modal__footer-print{min-height:2.75rem;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding-inline:1.5rem;border-radius:.75rem;font:inherit;font-size:.875rem;font-weight:800;cursor:pointer;transition:transform .28s cubic-bezier(.22,1,.36,1),box-shadow .28s ease,background .28s ease}
+.order-details-modal__footer-close{border:1px solid #e2e8f0;background:#fff;color:#475569}
+.order-details-modal__footer-close:hover{transform:translateY(-2px);background:#f8fafc}
+.order-details-modal__footer-print{border:0;background:#0f172a;color:#fff;box-shadow:0 10px 24px rgb(15 23 42/.12)}
+.order-details-modal__footer-print svg{inline-size:1.125rem;block-size:1.125rem}
+.order-details-modal__footer-print:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+@media (max-width:40rem){.modal-overlay:has([data-testid='admin-order-details-modal']){padding:.5rem}[data-testid='admin-order-details-modal'].modal-dialog,.order-details-modal{max-height:min(820px,calc(100dvh - 1rem));border-radius:1.125rem}.order-details-modal__header,.order-details-modal__scroll{padding-inline:1rem}.order-details-modal__footer{padding-inline:1rem;padding-block-start:1rem;padding-block-end:calc(1.25rem + env(safe-area-inset-bottom,0px))}.order-details-modal__scroll{padding-block:1rem}.order-details-modal__footer-actions{width:100%;margin-inline-start:0}.order-details-modal__footer-close,.order-details-modal__footer-print{flex:1 1 calc(50% - .375rem);min-width:0}}
+@media (prefers-reduced-motion:reduce){.order-details-modal__close,.order-details-modal__footer-close,.order-details-modal__footer-print,.order-details-modal__status-btn{transition-duration:.01ms!important}}
+

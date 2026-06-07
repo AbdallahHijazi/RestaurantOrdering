@@ -1,0 +1,21 @@
+.order-details-modal__aside{min-width:0;min-height:0}
+.order-details-modal__timeline{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.order-details-modal__timeline-item{position:relative;display:grid;grid-template-columns:auto 1fr;gap:.75rem;padding-block-end:1.5rem}
+.order-details-modal__timeline-item::after{content:'';position:absolute;inset-inline-start:1rem;inset-block-start:2rem;inline-size:2px;block-size:calc(100% - 1.25rem);background:#f1f5f9}
+.order-details-modal__timeline-item:last-child::after{display:none}
+.order-details-modal__timeline-marker{inline-size:2rem;block-size:2rem;display:inline-flex;align-items:center;justify-content:center;position:relative;z-index:1;border-radius:999px;background:#b8663f;color:#fff;box-shadow:0 8px 18px rgb(184 102 63/.22)}
+.order-details-modal__timeline-marker svg{inline-size:.875rem;block-size:.875rem;display:block}
+.order-details-modal__timeline-item--current .order-details-modal__timeline-marker{background:#059669;box-shadow:0 8px 18px rgb(5 150 105/.18)}
+.order-details-modal__timeline-item--cancelled .order-details-modal__timeline-marker{background:#ef4444;box-shadow:0 8px 18px rgb(239 68 68/.18)}
+.order-details-modal__timeline-item h3{margin:0;font-size:.875rem;font-weight:800;color:#1e293b}
+.order-details-modal__timeline-item--current h3{color:#047857}
+.order-details-modal__timeline-item--cancelled h3{color:#b91c1c}
+.order-details-modal__timeline-time,.order-details-modal__timeline-hint{margin:.25rem 0 0;font-size:.75rem;color:#64748b}
+.order-details-modal__status-actions{margin-block-start:1.5rem;padding:1rem;border:1px solid #f1f5f9;border-radius:1rem;background:#f8fafc}
+.order-details-modal__status-actions h3{margin:0 0 .75rem;font-size:.875rem;font-weight:800;color:#1e293b}
+.order-details-modal__status-buttons{display:flex;flex-wrap:wrap;gap:.5rem}
+.order-details-modal__status-btn{border:1px solid #e2e8f0;border-radius:.75rem;padding:.5rem .875rem;background:#fff;color:#1e293b;font:inherit;font-size:.8125rem;font-weight:700;cursor:pointer;transition:transform .24s ease,box-shadow .24s ease}
+.order-details-modal__status-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 18px rgb(15 23 42/.08)}
+.order-details-modal__status-btn--success{border-color:#86efac;background:#ecfdf5;color:#047857}
+.order-details-modal__status-btn--danger{border-color:#fecaca;background:#fef2f2;color:#b91c1c}
+.order-details-modal__status-btn:disabled{opacity:.55;cursor:not-allowed}

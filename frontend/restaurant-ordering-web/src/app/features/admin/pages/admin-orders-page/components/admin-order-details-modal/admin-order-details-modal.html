@@ -1,0 +1,476 @@
+<div class="order-details-modal" data-testid="admin-orders-details-shell">
+  <header class="order-details-modal__header">
+    <div class="order-details-modal__header-brand">
+      <span class="order-details-modal__header-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path
+            fill="currentColor"
+            d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2Zm-1 16H6V7h12v12ZM8 9h8v2H8V9Zm0 4h8v2H8v-2Z"
+          />
+        </svg>
+      </span>
+      <div>
+        <h1 class="order-details-modal__title" [id]="titleId()">
+          {{ locale.uiText('adminOrdersDetailsTitle') }}
+        </h1>
+        <p class="order-details-modal__lead" id="admin-order-details-lead">
+          {{ locale.uiText('adminOrderDetailsLead') }}
+        </p>
+      </div>
+    </div>
+
+    <div class="order-details-modal__header-actions">
+      @if (details(); as order) {
+        <span
+          class="order-details-modal__status-badge"
+          data-testid="admin-order-details-status-badge"
+          [attr.data-status]="order.orderStatus"
+        >
+          <span class="order-details-modal__status-dot" aria-hidden="true"></span>
+          {{ statusLabel(order.orderStatus) }}
+        </span>
+      }
+
+      <button
+        type="button"
+        class="order-details-modal__close"
+        data-testid="admin-order-details-close"
+        [attr.aria-label]="closeLabel() || locale.uiText('adminOrderDetailsClose')"
+        (click)="requestClose()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            fill="currentColor"
+            d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.89 4.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4Z"
+          />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="order-details-modal__scroll">
+    @if (loading()) {
+      <p class="order-details-modal__state" data-testid="admin-orders-details-loading">
+        {{ locale.uiText('adminOrdersDetailsLoading') }}
+      </p>
+    } @else if (error()) {
+      <div class="order-details-modal__state" data-testid="admin-orders-details-error">
+        <p>{{ error() }}</p>
+        <button type="button" class="order-details-modal__retry" (click)="retry.emit()">
+          {{ locale.uiText('adminOrdersRetry') }}
+        </button>
+      </div>
+    } @else if (details(); as order) {
+      <div class="order-details-modal__body" data-testid="admin-orders-details-body">
+        <div class="order-details-modal__layout">
+        <div class="order-details-modal__main">
+          <div class="order-details-modal__info-grid">
+            <div>
+              <span class="order-details-modal__info-label">
+                {{ locale.uiText('adminOrdersColNumber') }}
+              </span>
+              <span class="order-details-modal__order-number" data-testid="admin-order-details-number">
+                {{ order.orderNumber }}
+              </span>
+            </div>
+            <div>
+              <span class="order-details-modal__info-label">
+                {{ locale.uiText('adminOrdersColType') }}
+              </span>
+              <span
+                class="order-details-modal__type"
+                [class.order-details-modal__type--delivery]="order.orderType === OrderType.Delivery"
+                data-testid="admin-order-details-type"
+              >
+                @if (order.orderType === OrderType.Delivery) {
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path
+                      fill="currentColor"
+                      d="M18 18.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM4.5 18.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM19 7h-3V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v8h2a3.5 3.5 0 0 1 7 0h2.05a3.5 3.5 0 0 1 6.9 1H19V7Z"
+                    />
+                  </svg>
+                } @else {
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path
+                      fill="currentColor"
+                      d="M6 2h12l4 5v13a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm10 2H8v4h8V4Zm-8 6v8h12v-8H6Z"
+                    />
+                  </svg>
+                }
+                {{ orderTypeLabel(order.orderType) }}
+              </span>
+            </div>
+            <div>
+              <span class="order-details-modal__info-label">
+                {{ locale.uiText('adminOrdersColGuest') }}
+              </span>
+              <span data-testid="admin-order-details-guest">
+                {{ order.guestName?.trim() || '—' }}
+              </span>
+            </div>
+            <div>
+              <span class="order-details-modal__info-label">
+                {{ locale.uiText('adminOrdersColCreatedAt') }}
+              </span>
+              <span class="order-details-modal__datetime" data-testid="admin-order-details-created">
+                {{ formatCreatedAt(order.createdAt) }}
+              </span>
+            </div>
+            @if (order.guestPhone?.trim()) {
+              <div>
+                <span class="order-details-modal__info-label">
+                  {{ locale.uiText('adminOrdersColPhone') }}
+                </span>
+                <span class="order-details-modal__phone" data-testid="admin-order-details-phone">
+                  {{ order.guestPhone }}
+                </span>
+              </div>
+            }
+            @if (showDeliveryAddress(order)) {
+              <div class="order-details-modal__info-span">
+                <span class="order-details-modal__info-label">
+                  {{ locale.uiText('adminOrdersFieldDeliveryAddress') }}
+                </span>
+                <span data-testid="admin-order-details-address">{{ order.deliveryAddress }}</span>
+              </div>
+            }
+            @if (order.notes?.trim()) {
+              <div class="order-details-modal__info-span">
+                <span class="order-details-modal__info-label">
+                  {{ locale.uiText('adminOrdersFieldNotes') }}
+                </span>
+                <span>{{ order.notes }}</span>
+              </div>
+            }
+          </div>
+
+          <section class="order-details-modal__items">
+            <h2 class="order-details-modal__section-title">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path
+                  fill="currentColor"
+                  d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7Zm5-3v8h2.5v8H21V2h-4.5Z"
+                />
+              </svg>
+              {{ locale.uiText('adminOrderDetailsItemsHeading') }}
+            </h2>
+
+            <div class="order-details-modal__table-wrap">
+              <table class="order-details-modal__table">
+                <thead>
+                  <tr>
+                    <th scope="col">{{ locale.uiText('adminOrderDetailsColProduct') }}</th>
+                    <th scope="col">{{ locale.uiText('adminOrderDetailsColQuantity') }}</th>
+                    <th scope="col">{{ locale.uiText('adminOrderDetailsColPrice') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of order.items; track item.id) {
+                    <tr [attr.data-testid]="'admin-order-item-' + item.id">
+                      <td>
+                        <div class="order-details-modal__item-product">
+                          <span class="order-details-modal__item-thumb" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                              <path
+                                fill="currentColor"
+                                d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7Zm5-3v8h2.5v8H21V2h-4.5Z"
+                              />
+                            </svg>
+                          </span>
+                          <span>
+                            <strong>{{ itemName(item) }}</strong>
+                            @if (item.notes?.trim()) {
+                              <span class="order-details-modal__item-notes">{{ item.notes }}</span>
+                            }
+                          </span>
+                        </div>
+                      </td>
+                      <td class="order-details-modal__item-qty">{{ item.quantity }}×</td>
+                      <td class="order-details-modal__item-price">
+                        <bdi dir="ltr">{{ formatMoney(item.unitPrice, order.currencyCode) }}</bdi>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="order-details-modal__summary" data-testid="admin-order-details-summary">
+            <div class="order-details-modal__summary-line">
+              <span>{{ locale.uiText('adminOrdersFieldSubtotal') }}</span>
+              <strong>
+                <bdi dir="ltr">{{ formatMoney(order.subtotal, order.currencyCode) }}</bdi>
+              </strong>
+            </div>
+            @if (showDeliveryFee(order)) {
+              <div class="order-details-modal__summary-line">
+                <span>{{ locale.uiText('adminOrdersFieldDeliveryFee') }}</span>
+                <strong>
+                  <bdi dir="ltr">{{ formatMoney(order.deliveryFee, order.currencyCode) }}</bdi>
+                </strong>
+              </div>
+            }
+            @if (shouldShowFinancialAmount(order.taxAmount)) {
+              <div class="order-details-modal__summary-line">
+                <span>{{ locale.uiText('adminOrdersFieldTax') }}</span>
+                <strong>
+                  <bdi dir="ltr">{{ formatMoney(order.taxAmount, order.currencyCode) }}</bdi>
+                </strong>
+              </div>
+            }
+            @if (shouldShowFinancialAmount(order.discountAmount)) {
+              <div class="order-details-modal__summary-line">
+                <span>{{ locale.uiText('adminOrdersFieldDiscount') }}</span>
+                <strong>
+                  <bdi dir="ltr">{{ formatMoney(order.discountAmount, order.currencyCode) }}</bdi>
+                </strong>
+              </div>
+            }
+            <div class="order-details-modal__summary-line order-details-modal__summary-line--total">
+              <span>{{ locale.uiText('adminOrdersFieldTotal') }}</span>
+              <strong data-testid="admin-order-details-total">
+                <bdi dir="ltr">{{ formatMoney(order.totalAmount, order.currencyCode) }}</bdi>
+              </strong>
+            </div>
+          </section>
+        </div>
+
+        <aside class="order-details-modal__aside">
+          <h2 class="order-details-modal__section-title">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                fill="currentColor"
+                d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 5h-2v6l5.25 3.15.75-1.23-4-2.35V7Z"
+              />
+            </svg>
+            {{ locale.uiText('adminOrderDetailsTimelineTitle') }}
+          </h2>
+
+          <ol class="order-details-modal__timeline" data-testid="admin-order-details-timeline">
+            @for (step of timelineSteps(); track step.status) {
+              <li
+                class="order-details-modal__timeline-item"
+                [class.order-details-modal__timeline-item--current]="step.current"
+                [class.order-details-modal__timeline-item--cancelled]="step.status === OrderStatus.Cancelled"
+                [attr.data-status]="step.status"
+              >
+                <span class="order-details-modal__timeline-marker" aria-hidden="true">
+                  @if (step.status === OrderStatus.Completed) {
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path
+                        fill="currentColor"
+                        d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z"
+                      />
+                    </svg>
+                  } @else if (step.status === OrderStatus.Cancelled) {
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path
+                        fill="currentColor"
+                        d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.89 4.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4Z"
+                      />
+                    </svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path
+                        fill="currentColor"
+                        d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z"
+                      />
+                    </svg>
+                  }
+                </span>
+                <div>
+                  <h3>{{ locale.uiText(step.labelKey) }}</h3>
+                  @if (step.showTimestamp) {
+                    <p class="order-details-modal__timeline-time">
+                      {{ formatCreatedAt(order.createdAt) }}
+                    </p>
+                  } @else if (step.hintKey) {
+                    <p class="order-details-modal__timeline-hint">
+                      {{ locale.uiText(step.hintKey) }}
+                    </p>
+                  }
+                </div>
+              </li>
+            }
+          </ol>
+
+          @if (actions().length) {
+            <div class="order-details-modal__status-actions" data-testid="admin-order-details-status-actions">
+              <h3>{{ locale.uiText('adminOrderDetailsStatusActions') }}</h3>
+              <div class="order-details-modal__status-buttons">
+                @for (action of actions(); track action.labelKey) {
+                  <button
+                    type="button"
+                    class="order-details-modal__status-btn"
+                    [class.order-details-modal__status-btn--danger]="action.destructive"
+                    [class.order-details-modal__status-btn--success]="!action.destructive && action.newStatus === OrderStatus.Completed"
+                    [disabled]="updating()"
+                    [attr.data-testid]="'admin-order-modal-action-' + order.id + '-' + action.newStatus"
+                    (click)="actionRequested.emit(action)"
+                  >
+                    {{ locale.uiText(action.labelKey) }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </aside>
+        </div>
+      </div>
+    }
+  </div>
+
+  <footer class="order-details-modal__footer">
+    <div class="order-details-modal__footer-actions">
+      <button
+        type="button"
+        class="order-details-modal__footer-close"
+        data-testid="admin-order-details-footer-close"
+        (click)="requestClose()"
+      >
+        {{ locale.uiText('adminOrderDetailsClose') }}
+      </button>
+      <button
+        type="button"
+        class="order-details-modal__footer-print"
+        data-testid="admin-order-details-print"
+        [disabled]="!details() || loading()"
+        [attr.aria-label]="locale.uiText('adminOrderDetailsPrint')"
+        (click)="printInvoice()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            fill="currentColor"
+            d="M19 8H5a3 3 0 0 0-3 3v6h4v4h12v-4h4v-6a3 3 0 0 0-3-3Zm-1 10H6v-4h12v4Zm3-6a1 1 0 1 1 1-1 1 1 0 0 1-1 1Zm-2-5H5v3h14V7Z"
+          />
+        </svg>
+        {{ locale.uiText('adminOrderDetailsPrint') }}
+      </button>
+    </div>
+  </footer>
+
+  @if (details(); as order) {
+    <section
+      class="order-invoice-print-area"
+      data-testid="admin-order-invoice-print-area"
+      aria-hidden="true"
+      [attr.dir]="locale.locale() === 'ar' ? 'rtl' : 'ltr'"
+    >
+      <header class="order-invoice-print-area__header">
+        <h1 class="order-invoice-print-area__title">
+          {{ locale.uiText('adminOrderDetailsInvoiceTitle') }}
+        </h1>
+      </header>
+
+      <dl class="order-invoice-print-area__meta">
+        <div>
+          <dt>{{ locale.uiText('adminOrdersColNumber') }}</dt>
+          <dd class="order-invoice-print-area__ltr" dir="ltr" data-testid="admin-order-invoice-number">
+            {{ order.orderNumber }}
+          </dd>
+        </div>
+        <div>
+          <dt>{{ locale.uiText('adminOrdersColStatus') }}</dt>
+          <dd data-testid="admin-order-invoice-status">{{ statusLabel(order.orderStatus) }}</dd>
+        </div>
+        <div>
+          <dt>{{ locale.uiText('adminOrdersColType') }}</dt>
+          <dd data-testid="admin-order-invoice-type">{{ orderTypeLabel(order.orderType) }}</dd>
+        </div>
+        <div>
+          <dt>{{ locale.uiText('adminOrdersColGuest') }}</dt>
+          <dd data-testid="admin-order-invoice-guest">{{ order.guestName?.trim() || '—' }}</dd>
+        </div>
+        @if (order.guestPhone?.trim()) {
+          <div>
+            <dt>{{ locale.uiText('adminOrdersColPhone') }}</dt>
+            <dd class="order-invoice-print-area__ltr" dir="ltr" data-testid="admin-order-invoice-phone">
+              {{ order.guestPhone }}
+            </dd>
+          </div>
+        }
+        @if (showDeliveryAddress(order)) {
+          <div class="order-invoice-print-area__span">
+            <dt>{{ locale.uiText('adminOrdersFieldDeliveryAddress') }}</dt>
+            <dd data-testid="admin-order-invoice-address">{{ order.deliveryAddress }}</dd>
+          </div>
+        }
+        <div>
+          <dt>{{ locale.uiText('adminOrdersColCreatedAt') }}</dt>
+          <dd class="order-invoice-print-area__ltr" dir="ltr" data-testid="admin-order-invoice-created">
+            {{ formatCreatedAt(order.createdAt) }}
+          </dd>
+        </div>
+      </dl>
+
+      <table class="order-invoice-print-area__table" data-testid="admin-order-invoice-items">
+        <thead>
+          <tr>
+            <th scope="col">{{ locale.uiText('adminOrderDetailsColProduct') }}</th>
+            <th scope="col">{{ locale.uiText('adminOrderDetailsColQuantity') }}</th>
+            <th scope="col">{{ locale.uiText('adminOrderDetailsColPrice') }}</th>
+            <th scope="col">{{ locale.uiText('adminOrderDetailsColLineTotal') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of order.items; track item.id) {
+            <tr [attr.data-testid]="'admin-order-invoice-item-' + item.id">
+              <td>{{ itemName(item) }}</td>
+              <td>{{ item.quantity }}</td>
+              <td class="order-invoice-print-area__ltr" dir="ltr">
+                {{ formatMoney(item.unitPrice, order.currencyCode) }}
+              </td>
+              <td class="order-invoice-print-area__ltr" dir="ltr">
+                {{ formatMoney(item.totalPrice, order.currencyCode) }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="order-invoice-print-area__summary" data-testid="admin-order-invoice-summary">
+        <div class="order-invoice-print-area__summary-line">
+          <span>{{ locale.uiText('adminOrdersFieldSubtotal') }}</span>
+          <strong class="order-invoice-print-area__ltr" dir="ltr">
+            {{ formatMoney(order.subtotal, order.currencyCode) }}
+          </strong>
+        </div>
+        @if (showDeliveryFee(order)) {
+          <div class="order-invoice-print-area__summary-line">
+            <span>{{ locale.uiText('adminOrdersFieldDeliveryFee') }}</span>
+            <strong class="order-invoice-print-area__ltr" dir="ltr">
+              {{ formatMoney(order.deliveryFee, order.currencyCode) }}
+            </strong>
+          </div>
+        }
+        @if (shouldShowFinancialAmount(order.discountAmount)) {
+          <div class="order-invoice-print-area__summary-line">
+            <span>{{ locale.uiText('adminOrdersFieldDiscount') }}</span>
+            <strong class="order-invoice-print-area__ltr" dir="ltr">
+              {{ formatMoney(order.discountAmount, order.currencyCode) }}
+            </strong>
+          </div>
+        }
+        @if (shouldShowFinancialAmount(order.taxAmount)) {
+          <div class="order-invoice-print-area__summary-line">
+            <span>{{ locale.uiText('adminOrdersFieldTax') }}</span>
+            <strong class="order-invoice-print-area__ltr" dir="ltr">
+              {{ formatMoney(order.taxAmount, order.currencyCode) }}
+            </strong>
+          </div>
+        }
+        <div class="order-invoice-print-area__summary-line order-invoice-print-area__summary-line--total">
+          <span>{{ locale.uiText('adminOrdersFieldTotal') }}</span>
+          <strong class="order-invoice-print-area__ltr" dir="ltr" data-testid="admin-order-invoice-total">
+            {{ formatMoney(order.totalAmount, order.currencyCode) }}
+          </strong>
+        </div>
+      </div>
+
+      <p class="order-invoice-print-area__thanks" data-testid="admin-order-invoice-thanks">
+        {{ locale.uiText('adminOrderDetailsInvoiceThanks') }}
+      </p>
+    </section>
+  }
+</div>

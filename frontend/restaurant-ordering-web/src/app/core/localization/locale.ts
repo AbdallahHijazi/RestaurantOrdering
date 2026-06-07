@@ -404,6 +404,42 @@ type UiTextKey =
   | 'adminOrdersMissingContextTitle'
   | 'adminOrdersMissingContextDescription'
   | 'adminOrdersLoadMore'
+  | 'adminOrdersSearchLabel'
+  | 'adminOrdersSearchPlaceholder'
+  | 'adminOrdersAdditionalFiltersLabel'
+  | 'adminOrdersFilterTypeLabel'
+  | 'adminOrdersFilterGuestLabel'
+  | 'adminOrdersFilterAllTypes'
+  | 'adminOrdersFilterAllGuests'
+  | 'adminOrdersClearFilters'
+  | 'adminOrdersShowing'
+  | 'adminOrdersOf'
+  | 'adminOrdersOrdersWord'
+  | 'adminOrdersFilteredEmptyTitle'
+  | 'adminOrdersFilteredEmptyDescription'
+  | 'adminOrdersGuestFallback'
+  | 'adminOrderDetailsLead'
+  | 'adminOrderDetailsItemsHeading'
+  | 'adminOrderDetailsColProduct'
+  | 'adminOrderDetailsColQuantity'
+  | 'adminOrderDetailsColPrice'
+  | 'adminOrderDetailsTimelineTitle'
+  | 'adminOrderDetailsTimelineCreated'
+  | 'adminOrderDetailsTimelinePreparing'
+  | 'adminOrderDetailsTimelineReady'
+  | 'adminOrderDetailsTimelineCompleted'
+  | 'adminOrderDetailsTimelineCancelled'
+  | 'adminOrderDetailsTimelinePreparingHint'
+  | 'adminOrderDetailsTimelineReadyHint'
+  | 'adminOrderDetailsTimelineCompletedHint'
+  | 'adminOrderDetailsTimelineCancelledHint'
+  | 'adminOrderDetailsStatusActions'
+  | 'adminOrderDetailsClose'
+  | 'adminOrderDetailsPrint'
+  | 'adminOrderDetailsPrintUnavailable'
+  | 'adminOrderDetailsInvoiceTitle'
+  | 'adminOrderDetailsInvoiceThanks'
+  | 'adminOrderDetailsColLineTotal'
   | 'adminMenuPageTitle'
   | 'adminMenuPageLead'
   | 'adminMenuAddItem'
@@ -803,10 +839,10 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     kitchenMissingContextTitle: 'سياق المطعم غير متوفر',
     kitchenMissingContextDescription:
       'لا يمكن عرض لوحة المطبخ بدون معرف مطعم في الجلسة الحالية.',
-    adminOrdersEyebrow: 'الطلبات',
+    adminOrdersEyebrow: 'العمليات التشغيلية',
     adminOrdersTitle: 'إدارة الطلبات',
-    adminOrdersLead: 'اعرض طلبات المطعم وحدّث حالتها من مكان واحد.',
-    adminOrdersRefresh: 'تحديث',
+    adminOrdersLead: 'تحكم في تدفق الطلبات وحالاتها لضمان أفضل تجربة لضيوفك.',
+    adminOrdersRefresh: 'تحديث البيانات',
     adminOrdersRefreshing: 'جاري التحديث…',
     adminOrdersRetry: 'إعادة المحاولة',
     adminOrdersLoading: 'جاري تحميل الطلبات…',
@@ -814,7 +850,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminOrdersListError: 'حدث خطأ أثناء تحميل الطلبات. حاول مرة أخرى.',
     adminOrdersLoadMoreError: 'تعذر تحميل المزيد من الطلبات.',
     adminOrdersEmptyTitle: 'لا توجد طلبات',
-    adminOrdersEmptyDescription: 'لا توجد طلبات مطابقة للتصفية الحالية.',
+    adminOrdersEmptyDescription: 'لم يتم استلام أي طلبات بعد.',
     adminOrdersFiltersLabel: 'تصفية حسب الحالة',
     adminOrdersFilterAll: 'الكل',
     adminOrdersStatusNew: 'جديد',
@@ -832,7 +868,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminOrdersColStatus: 'الحالة',
     adminOrdersColTotal: 'الإجمالي',
     adminOrdersColActions: 'إجراءات',
-    adminOrdersViewDetails: 'عرض التفاصيل',
+    adminOrdersViewDetails: 'التفاصيل',
     adminOrdersActionStartPreparing: 'بدء التحضير',
     adminOrdersActionMarkReady: 'تعليم كجاهز',
     adminOrdersActionComplete: 'تعليم كمكتمل',
@@ -863,6 +899,42 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminOrdersMissingContextDescription:
       'لا يمكن إدارة الطلبات بدون معرف مطعم في الجلسة الحالية.',
     adminOrdersLoadMore: 'تحميل المزيد',
+    adminOrdersSearchLabel: 'بحث الطلبات',
+    adminOrdersSearchPlaceholder: 'رقم الطلب أو اسم الضيف...',
+    adminOrdersAdditionalFiltersLabel: 'فلاتر إضافية',
+    adminOrdersFilterTypeLabel: 'نوع الطلب',
+    adminOrdersFilterGuestLabel: 'الضيف',
+    adminOrdersFilterAllTypes: 'كل أنواع الطلبات',
+    adminOrdersFilterAllGuests: 'جميع الضيوف',
+    adminOrdersClearFilters: 'مسح الفلاتر',
+    adminOrdersShowing: 'عرض',
+    adminOrdersOf: 'من أصل',
+    adminOrdersOrdersWord: 'طلبات',
+    adminOrdersFilteredEmptyTitle: 'لا توجد نتائج مطابقة',
+    adminOrdersFilteredEmptyDescription: 'حاول تغيير الفلاتر أو الكلمات المفتاحية.',
+    adminOrdersGuestFallback: 'ضيف',
+    adminOrderDetailsLead: 'إدارة مراجعة طلبات العملاء',
+    adminOrderDetailsItemsHeading: 'بنود الطلب',
+    adminOrderDetailsColProduct: 'المنتج',
+    adminOrderDetailsColQuantity: 'الكمية',
+    adminOrderDetailsColPrice: 'السعر',
+    adminOrderDetailsTimelineTitle: 'حالة الطلب',
+    adminOrderDetailsTimelineCreated: 'تم إنشاء الطلب',
+    adminOrderDetailsTimelinePreparing: 'قيد التحضير',
+    adminOrderDetailsTimelineReady: 'جاهز',
+    adminOrderDetailsTimelineCompleted: 'مكتمل',
+    adminOrderDetailsTimelineCancelled: 'ملغى',
+    adminOrderDetailsTimelinePreparingHint: 'بدأ المطعم بتحضير الطلب',
+    adminOrderDetailsTimelineReadyHint: 'الطلب جاهز للتسليم أو الاستلام',
+    adminOrderDetailsTimelineCompletedHint: 'تم إكمال الطلب بنجاح',
+    adminOrderDetailsTimelineCancelledHint: 'تم إلغاء هذا الطلب',
+    adminOrderDetailsStatusActions: 'تحديث الحالة',
+    adminOrderDetailsClose: 'إغلاق',
+    adminOrderDetailsPrint: 'طباعة الفاتورة',
+    adminOrderDetailsPrintUnavailable: 'الطباعة غير متاحة حاليًا',
+    adminOrderDetailsInvoiceTitle: 'فاتورة الطلب',
+    adminOrderDetailsInvoiceThanks: 'شكرًا لاختياركم مطعمنا',
+    adminOrderDetailsColLineTotal: 'إجمالي البند',
     adminMenuPageTitle: 'إدارة القائمة',
     adminMenuPageLead: 'أدر التصنيفات والوجبات وصور الأطباق لمطعمك بلمسة عصرية.',
     adminMenuAddItem: 'إضافة وجبة',
@@ -1269,10 +1341,10 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     kitchenMissingContextTitle: 'Restaurant context unavailable',
     kitchenMissingContextDescription:
       'The kitchen dashboard requires a restaurant id in the current session.',
-    adminOrdersEyebrow: 'Orders',
-    adminOrdersTitle: 'Orders management',
-    adminOrdersLead: 'Review restaurant orders and update their status from one place.',
-    adminOrdersRefresh: 'Refresh',
+    adminOrdersEyebrow: 'Operational Workflow',
+    adminOrdersTitle: 'Orders Management',
+    adminOrdersLead: 'Manage order flow and statuses to deliver the best experience for your guests.',
+    adminOrdersRefresh: 'Refresh Data',
     adminOrdersRefreshing: 'Refreshing…',
     adminOrdersRetry: 'Retry',
     adminOrdersLoading: 'Loading orders…',
@@ -1280,7 +1352,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminOrdersListError: 'Something went wrong while loading orders. Please try again.',
     adminOrdersLoadMoreError: 'Unable to load more orders.',
     adminOrdersEmptyTitle: 'No orders found',
-    adminOrdersEmptyDescription: 'There are no orders for the current filter.',
+    adminOrdersEmptyDescription: 'No orders have been received yet.',
     adminOrdersFiltersLabel: 'Filter by status',
     adminOrdersFilterAll: 'All',
     adminOrdersStatusNew: 'New',
@@ -1298,7 +1370,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminOrdersColStatus: 'Status',
     adminOrdersColTotal: 'Total',
     adminOrdersColActions: 'Actions',
-    adminOrdersViewDetails: 'View details',
+    adminOrdersViewDetails: 'Details',
     adminOrdersActionStartPreparing: 'Start preparing',
     adminOrdersActionMarkReady: 'Mark as ready',
     adminOrdersActionComplete: 'Mark as completed',
@@ -1330,6 +1402,42 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     adminOrdersMissingContextDescription:
       'Orders management requires a restaurant id in the current session.',
     adminOrdersLoadMore: 'Load more',
+    adminOrdersSearchLabel: 'Search orders',
+    adminOrdersSearchPlaceholder: 'Order number or guest name...',
+    adminOrdersAdditionalFiltersLabel: 'Additional filters',
+    adminOrdersFilterTypeLabel: 'Order type',
+    adminOrdersFilterGuestLabel: 'Guest',
+    adminOrdersFilterAllTypes: 'All order types',
+    adminOrdersFilterAllGuests: 'All guests',
+    adminOrdersClearFilters: 'Clear filters',
+    adminOrdersShowing: 'Showing',
+    adminOrdersOf: 'of',
+    adminOrdersOrdersWord: 'orders',
+    adminOrdersFilteredEmptyTitle: 'No matching orders',
+    adminOrdersFilteredEmptyDescription: 'Try adjusting the filters or search terms.',
+    adminOrdersGuestFallback: 'Guest',
+    adminOrderDetailsLead: 'Review and manage customer orders',
+    adminOrderDetailsItemsHeading: 'Order Items',
+    adminOrderDetailsColProduct: 'Product',
+    adminOrderDetailsColQuantity: 'Quantity',
+    adminOrderDetailsColPrice: 'Price',
+    adminOrderDetailsTimelineTitle: 'Order Status',
+    adminOrderDetailsTimelineCreated: 'Order created',
+    adminOrderDetailsTimelinePreparing: 'Preparing',
+    adminOrderDetailsTimelineReady: 'Ready',
+    adminOrderDetailsTimelineCompleted: 'Completed',
+    adminOrderDetailsTimelineCancelled: 'Cancelled',
+    adminOrderDetailsTimelinePreparingHint: 'The restaurant started preparing the order',
+    adminOrderDetailsTimelineReadyHint: 'The order is ready for pickup or delivery',
+    adminOrderDetailsTimelineCompletedHint: 'The order was completed successfully',
+    adminOrderDetailsTimelineCancelledHint: 'This order was cancelled',
+    adminOrderDetailsStatusActions: 'Update status',
+    adminOrderDetailsClose: 'Close',
+    adminOrderDetailsPrint: 'Print Invoice',
+    adminOrderDetailsPrintUnavailable: 'Printing is not available yet',
+    adminOrderDetailsInvoiceTitle: 'Order invoice',
+    adminOrderDetailsInvoiceThanks: 'Thank you for choosing our restaurant',
+    adminOrderDetailsColLineTotal: 'Line total',
     adminMenuPageTitle: 'Menu management',
     adminMenuPageLead:
       'Manage categories, meals, and dish images for your restaurant with a modern experience.',
