@@ -1,14 +1,46 @@
-<nav class="category-nav" aria-label="Menu categories">
-  <div class="category-nav__scroll">
-    @for (category of visibleCategories(); track category.id) {
+<div class="public-menu-filter" data-testid="public-menu-filter-bar">
+  <nav class="public-menu-filter__categories" [attr.aria-label]="ui().menuTitle">
+    <div class="public-menu-filter__scroll" role="tablist">
       <button
         type="button"
-        class="category-nav__item"
-        [class.is-active]="category.id === activeCategoryId()"
-        (click)="categorySelected.emit(category.id)"
+        role="tab"
+        class="public-menu-filter__pill"
+        [class.public-menu-filter__pill--active]="activeCategoryId() === allCategoriesId"
+        [attr.aria-selected]="activeCategoryId() === allCategoriesId"
+        data-testid="public-menu-filter-all"
+        (click)="categorySelected.emit(allCategoriesId)"
       >
-        {{ categoryLabels().get(category.id) }}
+        {{ ui().publicMenuAllCategories }}
       </button>
-    }
-  </div>
-</nav>
+
+      @for (category of visibleCategories(); track category.id) {
+        <button
+          type="button"
+          role="tab"
+          class="public-menu-filter__pill"
+          [class.public-menu-filter__pill--active]="category.id === activeCategoryId()"
+          [attr.aria-selected]="category.id === activeCategoryId()"
+          [attr.data-testid]="'public-menu-filter-' + category.id"
+          (click)="categorySelected.emit(category.id)"
+        >
+          {{ categoryLabels().get(category.id) }}
+        </button>
+      }
+    </div>
+  </nav>
+
+  <label class="public-menu-filter__search">
+    <span class="visually-hidden">{{ ui().publicMenuSearchLabel }}</span>
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="1.9" />
+      <path d="m16 16 4 4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" />
+    </svg>
+    <input
+      type="search"
+      data-testid="public-menu-search"
+      [placeholder]="ui().publicMenuSearchPlaceholder"
+      [value]="searchQuery()"
+      (input)="onSearchInput($any($event.target).value)"
+    />
+  </label>
+</div>

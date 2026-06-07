@@ -1,0 +1,13 @@
+@if (visible() && cart.itemCount() > 0) {
+  <aside class="public-menu-floating-cart" data-testid="public-menu-floating-cart" aria-live="polite">
+    <div>
+      <strong>{{ ui().publicMenuCartReady }}</strong>
+      <small>
+        <bdi dir="ltr">{{ summaryLabel() }}</bdi>
+      </small>
+    </div>
+    <button type="button" class="public-menu-floating-cart__btn" (click)="viewCart.emit()">
+      {{ ui().publicMenuViewCart }}
+    </button>
+  </aside>
+}

@@ -2,41 +2,49 @@
   <div
     class="public-cart-drawer"
     role="presentation"
+    data-testid="public-cart-drawer"
     (click)="onBackdropClick($event)"
-    (keyup.escape)="closed.emit()"
   >
     <aside
       #panel
       class="public-cart-drawer__panel"
       role="dialog"
       aria-modal="true"
-      [attr.aria-label]="ui().publicCartTitle"
+      [attr.aria-labelledby]="'public-cart-drawer-title'"
       tabindex="-1"
       (click)="$event.stopPropagation()"
     >
       <header class="public-cart-drawer__header">
-        <h2>{{ ui().publicCartTitle }}</h2>
+        <div>
+          <h2 id="public-cart-drawer-title">{{ ui().publicCartTitle }}</h2>
+          <span class="public-cart-drawer__subtitle">{{ ui().publicMenuCartSubtitle }}</span>
+        </div>
         <button
           type="button"
           class="public-cart-drawer__close"
           [attr.aria-label]="ui().publicCartCloseAria"
           (click)="closed.emit()"
         >
-          ×
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
         </button>
       </header>
 
-      @if (cart.isEmpty()) {
-        <div class="public-cart-drawer__empty">
-          <p>{{ ui().publicCartEmpty }}</p>
-          <button type="button" class="public-cart-drawer__secondary" (click)="closed.emit()">
-            {{ ui().publicCartClose }}
-          </button>
-        </div>
-      } @else {
-        <ul class="public-cart-drawer__list">
+      <div class="public-cart-drawer__items">
+        @if (cart.isEmpty()) {
+          <div class="public-cart-drawer__empty">
+            <div class="public-cart-drawer__empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M6 8h12l-1 12H7L6 8Z" fill="none" stroke="currentColor" stroke-width="1.9" />
+                <path d="M9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.9" />
+              </svg>
+            </div>
+            <p>{{ ui().publicCartEmpty }}</p>
+          </div>
+        } @else {
           @for (line of cart.cartItems(); track line.menuItemId) {
-            <li class="public-cart-drawer__line">
+            <article class="public-cart-drawer__line">
               <div class="public-cart-drawer__thumb">
                 @if (line.imageUrl) {
                   <img [src]="line.imageUrl" [alt]="lineName(line)" loading="lazy" />
@@ -45,9 +53,33 @@
                 }
               </div>
 
-              <div class="public-cart-drawer__line-body">
-                <div class="public-cart-drawer__line-top">
-                  <h3>{{ lineName(line) }}</h3>
+              <div class="public-cart-drawer__line-main">
+                <strong>{{ lineName(line) }}</strong>
+                <small>
+                  <bdi dir="ltr">
+                    {{ formatMoney(unitPrice(line)) }} × {{ line.quantity }}
+                  </bdi>
+                </small>
+
+                <div class="public-cart-drawer__tools">
+                  <div class="public-cart-drawer__qty" role="group" [attr.aria-label]="ui().publicCartQuantity">
+                    <button
+                      type="button"
+                      class="public-cart-drawer__qty-btn"
+                      [attr.aria-label]="ui().publicCartQuantity"
+                      (click)="decrement(line.menuItemId)"
+                    >
+                      −
+                    </button>
+                    <span aria-live="polite">{{ line.quantity }}</span>
+                    <button
+                      type="button"
+                      class="public-cart-drawer__qty-btn"
+                      (click)="increment(line.menuItemId)"
+                    >
+                      +
+                    </button>
+                  </div>
                   <button
                     type="button"
                     class="public-cart-drawer__remove"
@@ -56,56 +88,43 @@
                     {{ ui().publicCartRemove }}
                   </button>
                 </div>
-
-                <div class="public-cart-drawer__prices">
-                  @if (line.discountPrice != null) {
-                    <span class="public-cart-drawer__price public-cart-drawer__price--sale">
-                      {{ formatMoney(line.discountPrice) }}
-                    </span>
-                    <span class="public-cart-drawer__price public-cart-drawer__price--old">
-                      {{ formatMoney(line.price) }}
-                    </span>
-                  } @else {
-                    <span class="public-cart-drawer__price">{{ formatMoney(line.price) }}</span>
-                  }
-                </div>
-
-                <div class="public-cart-drawer__qty" role="group" [attr.aria-label]="ui().publicCartQuantity">
-                  <button type="button" (click)="decrement(line.menuItemId)">−</button>
-                  <span aria-live="polite">{{ line.quantity }}</span>
-                  <button type="button" (click)="increment(line.menuItemId)">+</button>
-                </div>
-
-                <label class="public-cart-drawer__notes">
-                  <span>{{ ui().publicCartItemNotes }}</span>
-                  <textarea
-                    rows="2"
-                    [value]="line.notes ?? ''"
-                    (input)="onNotesInput(line.menuItemId, $any($event.target).value)"
-                  ></textarea>
-                </label>
               </div>
-            </li>
+
+              <strong class="public-cart-drawer__line-price">
+                <bdi dir="ltr">{{ formatMoney(unitPrice(line) * line.quantity) }}</bdi>
+              </strong>
+            </article>
           }
-        </ul>
+        }
+      </div>
 
-        <footer class="public-cart-drawer__footer">
-          <dl class="public-cart-drawer__totals">
-            <div>
-              <dt>{{ ui().publicCartSubtotal }}</dt>
-              <dd>{{ formatMoney(estimate().subtotal) }}</dd>
-            </div>
-          </dl>
-          <p class="public-cart-drawer__disclaimer">{{ ui().publicCheckoutEstimatedDisclaimer }}</p>
-
-          <button type="button" class="public-cart-drawer__clear" (click)="clearCart()">
-            {{ ui().publicCartClear }}
-          </button>
-          <button type="button" class="public-cart-drawer__primary" (click)="continueCheckout.emit()">
+      <footer class="public-cart-drawer__footer">
+        <div class="public-cart-drawer__total">
+          <span>{{ ui().publicCheckoutEstimatedTotal }}</span>
+          <strong>
+            <bdi dir="ltr">{{ formatMoney(estimate().subtotal) }}</bdi>
+          </strong>
+        </div>
+        <p class="public-cart-drawer__note">{{ ui().publicCheckoutEstimatedDisclaimer }}</p>
+        <div class="public-cart-drawer__actions">
+          <button
+            type="button"
+            class="public-cart-drawer__checkout"
+            [disabled]="cart.isEmpty()"
+            (click)="continueCheckout.emit()"
+          >
             {{ ui().publicCartContinueCheckout }}
           </button>
-        </footer>
-      }
+          <button
+            type="button"
+            class="public-cart-drawer__clear"
+            [disabled]="cart.isEmpty()"
+            (click)="clearCart()"
+          >
+            {{ ui().publicCartClear }}
+          </button>
+        </div>
+      </footer>
     </aside>
   </div>
 }

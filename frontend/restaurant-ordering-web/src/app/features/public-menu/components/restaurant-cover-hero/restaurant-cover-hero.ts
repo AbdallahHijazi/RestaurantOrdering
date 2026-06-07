@@ -30,6 +30,21 @@ export class RestaurantCoverHero {
     );
   });
 
+  protected readonly secondaryName = computed(() => {
+    const locale = this.activeLocale();
+    const restaurant = this.restaurant();
+    const secondary =
+      locale === 'ar'
+        ? restaurant.nameEn?.trim()
+        : restaurant.nameAr?.trim();
+
+    return secondary && secondary !== this.displayName() ? secondary : '';
+  });
+
+  protected readonly kickerLabel = computed(() =>
+    this.localeService.uiTextForLocale(this.activeLocale(), 'publicMenuHeroKicker'),
+  );
+
   protected readonly displayDescription = computed(() => {
     const locale = this.activeLocale();
     return this.localeService.pickTextForLocale(

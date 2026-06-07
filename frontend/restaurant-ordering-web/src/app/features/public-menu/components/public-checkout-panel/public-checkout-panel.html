@@ -1,14 +1,22 @@
 @if (open()) {
-  <div class="public-checkout" role="presentation" (click)="onBackdropClick($event)">
+  <div
+    class="public-checkout"
+    role="presentation"
+    data-testid="public-checkout-modal"
+    (click)="onBackdropClick($event)"
+  >
     <section
       class="public-checkout__panel"
       role="dialog"
       aria-modal="true"
-      [attr.aria-label]="ui().publicCheckoutTitle"
+      [attr.aria-labelledby]="'public-checkout-title'"
       (click)="$event.stopPropagation()"
     >
       <header class="public-checkout__header">
-        <h2>{{ ui().publicCheckoutTitle }}</h2>
+        <div>
+          <h2 id="public-checkout-title">{{ ui().publicCheckoutTitle }}</h2>
+          <p>{{ ui().publicMenuCheckoutDescription }}</p>
+        </div>
         <button
           type="button"
           class="public-checkout__close"
@@ -16,134 +24,147 @@
           [disabled]="submitting()"
           (click)="closed.emit()"
         >
-          ×
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
         </button>
       </header>
 
       @if (!servicesAvailable()) {
         <p class="public-checkout__alert">{{ ui().publicCheckoutAllServicesDisabled }}</p>
       } @else {
-        @if (isPreviewMode()) {
-          <p class="public-checkout__notice">{{ ui().publicCheckoutPreviewMode }}</p>
-        }
-
-        @if (errorMessage(); as message) {
-          <p class="public-checkout__alert" role="alert">{{ message }}</p>
-        }
-
         <form class="public-checkout__form" (submit)="$event.preventDefault(); submit()">
-          <fieldset class="public-checkout__types" [disabled]="submitting()">
-            <legend class="visually-hidden">{{ ui().publicCheckoutTitle }}</legend>
-            @if (orderSettings().isPickupEnabled) {
-              <label class="public-checkout__type">
-                <input
-                  type="radio"
-                  name="orderType"
-                  [checked]="orderType() === 1"
-                  (change)="selectPickup()"
-                />
-                {{ ui().publicCheckoutPickup }}
-              </label>
+          <div class="public-checkout__body">
+            @if (isPreviewMode()) {
+              <p class="public-checkout__notice">{{ ui().publicCheckoutPreviewMode }}</p>
             }
-            @if (orderSettings().isDeliveryEnabled) {
-              <label class="public-checkout__type">
-                <input
-                  type="radio"
-                  name="orderType"
-                  [checked]="orderType() === 2"
-                  (change)="selectDelivery()"
-                />
-                {{ ui().publicCheckoutDelivery }}
-              </label>
+
+            @if (errorMessage(); as message) {
+              <p class="public-checkout__alert" role="alert">{{ message }}</p>
             }
-          </fieldset>
 
-          <label>
-            <span>{{ ui().publicCheckoutGuestName }}</span>
-            <input
-              type="text"
-              name="guestName"
-              autocomplete="name"
+            <div class="public-checkout__field public-checkout__field--full">
+              <span class="public-checkout__label">{{ ui().publicCheckoutTitle }}</span>
+              <div class="public-checkout__types">
+                @if (orderSettings().isPickupEnabled) {
+                  <label class="public-checkout__type-card">
+                    <input
+                      type="radio"
+                      name="orderType"
+                      [checked]="orderType() === 1"
+                      [disabled]="submitting()"
+                      (change)="selectPickup()"
+                    />
+                    <span>{{ ui().publicCheckoutPickup }}</span>
+                  </label>
+                }
+                @if (orderSettings().isDeliveryEnabled) {
+                  <label class="public-checkout__type-card">
+                    <input
+                      type="radio"
+                      name="orderType"
+                      [checked]="orderType() === 2"
+                      [disabled]="submitting()"
+                      (change)="selectDelivery()"
+                    />
+                    <span>{{ ui().publicCheckoutDelivery }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+
+            <div class="public-checkout__grid">
+              <label class="public-checkout__field">
+                <span class="public-checkout__label">{{ ui().publicCheckoutGuestName }}</span>
+                <input
+                  type="text"
+                  name="guestName"
+                  autocomplete="name"
+                  required
+                  [disabled]="submitting()"
+                  [ngModel]="guestName()"
+                  (ngModelChange)="guestName.set($event)"
+                />
+              </label>
+
+              <label class="public-checkout__field">
+                <span class="public-checkout__label">{{ ui().publicCheckoutGuestPhone }}</span>
+                <input
+                  type="tel"
+                  name="guestPhone"
+                  autocomplete="tel"
+                  inputmode="tel"
+                  required
+                  [disabled]="submitting()"
+                  [ngModel]="guestPhone()"
+                  (ngModelChange)="guestPhone.set($event)"
+                />
+              </label>
+
+              @if (orderType() === 2) {
+                <label class="public-checkout__field public-checkout__field--full">
+                  <span class="public-checkout__label">{{ ui().publicCheckoutDeliveryAddress }}</span>
+                  <input
+                    type="text"
+                    name="deliveryAddress"
+                    autocomplete="street-address"
+                    required
+                    [disabled]="submitting()"
+                    [ngModel]="deliveryAddress()"
+                    (ngModelChange)="deliveryAddress.set($event)"
+                  />
+                </label>
+              }
+
+              <label class="public-checkout__field public-checkout__field--full">
+                <span class="public-checkout__label">
+                  {{ ui().publicCheckoutOrderNotes }}
+                </span>
+                <textarea
+                  rows="3"
+                  name="orderNotes"
+                  [disabled]="submitting()"
+                  [ngModel]="orderNotes()"
+                  (ngModelChange)="orderNotes.set($event)"
+                ></textarea>
+              </label>
+            </div>
+
+            <div class="public-checkout__summary">
+              <span>{{ ui().publicCheckoutEstimatedTotal }}</span>
+              <strong>
+                <bdi dir="ltr">{{ formatMoney(estimate().estimatedTotal) }}</bdi>
+              </strong>
+            </div>
+
+            @if (belowMinimum()) {
+              <p class="public-checkout__alert">{{ ui().publicCheckoutMinimumOrder }}</p>
+            }
+          </div>
+
+          <footer class="public-checkout__footer">
+            <button
+              type="button"
+              class="public-checkout__secondary"
               [disabled]="submitting()"
-              [ngModel]="guestName()"
-              (ngModelChange)="guestName.set($event)"
-            />
-          </label>
-
-          <label>
-            <span>{{ ui().publicCheckoutGuestPhone }}</span>
-            <input
-              type="tel"
-              name="guestPhone"
-              autocomplete="tel"
-              [disabled]="submitting()"
-              [ngModel]="guestPhone()"
-              (ngModelChange)="guestPhone.set($event)"
-            />
-          </label>
-
-          @if (orderType() === 2) {
-            <label>
-              <span>{{ ui().publicCheckoutDeliveryAddress }}</span>
-              <textarea
-                rows="3"
-                name="deliveryAddress"
-                [disabled]="submitting()"
-                [ngModel]="deliveryAddress()"
-                (ngModelChange)="deliveryAddress.set($event)"
-              ></textarea>
-            </label>
-          }
-
-          <label>
-            <span>{{ ui().publicCheckoutOrderNotes }}</span>
-            <textarea
-              rows="2"
-              name="orderNotes"
-              [disabled]="submitting()"
-              [ngModel]="orderNotes()"
-              (ngModelChange)="orderNotes.set($event)"
-            ></textarea>
-          </label>
-
-          <dl class="public-checkout__totals">
-            <div>
-              <dt>{{ ui().publicCartSubtotal }}</dt>
-              <dd>{{ formatMoney(estimate().subtotal) }}</dd>
-            </div>
-            <div>
-              <dt>{{ ui().publicCheckoutEstimatedTax }}</dt>
-              <dd>{{ formatMoney(estimate().estimatedTax) }}</dd>
-            </div>
-            <div>
-              <dt>{{ ui().publicCheckoutDeliveryFee }}</dt>
-              <dd>{{ formatMoney(estimate().deliveryFee) }}</dd>
-            </div>
-            <div class="public-checkout__total-row">
-              <dt>{{ ui().publicCheckoutEstimatedTotal }}</dt>
-              <dd>{{ formatMoney(estimate().estimatedTotal) }}</dd>
-            </div>
-          </dl>
-
-          <p class="public-checkout__disclaimer">{{ ui().publicCheckoutEstimatedDisclaimer }}</p>
-
-          @if (belowMinimum()) {
-            <p class="public-checkout__alert">{{ ui().publicCheckoutMinimumOrder }}</p>
-          }
-
-          <button
-            type="submit"
-            class="public-checkout__submit"
-            [disabled]="!canSubmit()"
-          >
-            {{
-              submitting()
-                ? ui().publicCheckoutSubmitting
-                : isPreviewMode()
-                  ? ui().publicCheckoutPreviewMode
-                  : ui().publicCheckoutSubmit
-            }}
-          </button>
+              (click)="closed.emit()"
+            >
+              {{ ui().publicMenuCancel }}
+            </button>
+            <button
+              type="submit"
+              class="public-checkout__primary"
+              [disabled]="!canSubmit()"
+            >
+              {{
+                submitting()
+                  ? ui().publicCheckoutSubmitting
+                  : isPreviewMode()
+                    ? ui().publicCheckoutPreviewMode
+                    : ui().publicMenuConfirmOrder
+              }}
+            </button>
+          </footer>
         </form>
       }
     </section>

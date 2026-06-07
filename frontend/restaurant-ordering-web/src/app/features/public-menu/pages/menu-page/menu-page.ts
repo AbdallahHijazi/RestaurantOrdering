@@ -1,7 +1,9 @@
 import {
   Component,
   ElementRef,
+  OnDestroy,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
@@ -11,7 +13,6 @@ import { finalize } from 'rxjs';
 import { LocaleService } from '../../../../core/localization/locale';
 import { RestaurantThemeService } from '../../../../core/theme/restaurant-theme';
 import { LanguageSwitcher } from '../../../../shared/ui/language-switcher/language-switcher';
-import { LoadingState } from '../../../../shared/ui/loading-state/loading-state';
 import { ErrorState } from '../../../../shared/ui/error-state/error-state';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { CategoryNavigation } from '../../components/category-navigation/category-navigation';
@@ -20,6 +21,8 @@ import { RestaurantCoverHero } from '../../components/restaurant-cover-hero/rest
 import { PublicCartDrawer } from '../../components/public-cart-drawer/public-cart-drawer';
 import { PublicCheckoutPanel } from '../../components/public-checkout-panel/public-checkout-panel';
 import { PublicOrderConfirmation } from '../../components/public-order-confirmation/public-order-confirmation';
+import { PublicMenuFloatingCart } from '../../components/public-menu-floating-cart/public-menu-floating-cart';
+import { PublicMenuToast } from '../../components/public-menu-toast/public-menu-toast';
 import { PublicCartService } from '../../data-access/public-cart.service';
 import {
   PublicMenuApiService,
@@ -27,7 +30,12 @@ import {
 } from '../../data-access/public-menu-api';
 import type { PublicOrderConfirmationApiDto } from '../../data-access/public-order.dto';
 import { MOCK_IMAGE_FALLBACK } from '../../data-access/public-menu-mock.data';
-import type { PublicMenuItem, PublicMenuPageData } from '../../models/public-menu.models';
+import type {
+  PublicMenuCategory,
+  PublicMenuItem,
+  PublicMenuPageData,
+} from '../../models/public-menu.models';
+import { PUBLIC_MENU_ALL_CATEGORIES_ID } from '../../public-menu.constants';
 import { readRouteParam } from './route-param.util';
 
 type PageState = 'loading' | 'success' | 'not-found' | 'error';
@@ -37,7 +45,6 @@ type PageState = 'loading' | 'success' | 'not-found' | 'error';
   imports: [
     RouterLink,
     LanguageSwitcher,
-    LoadingState,
     ErrorState,
     EmptyState,
     CategoryNavigation,
@@ -46,11 +53,13 @@ type PageState = 'loading' | 'success' | 'not-found' | 'error';
     PublicCartDrawer,
     PublicCheckoutPanel,
     PublicOrderConfirmation,
+    PublicMenuFloatingCart,
+    PublicMenuToast,
   ],
   templateUrl: './menu-page.html',
   styleUrl: './menu-page.scss',
 })
-export class MenuPage {
+export class MenuPage implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly menuApi = inject(PublicMenuApiService);
   protected readonly cart = inject(PublicCartService);
@@ -58,10 +67,15 @@ export class MenuPage {
   private readonly themeService = inject(RestaurantThemeService);
 
   private readonly menuSection = viewChild<ElementRef<HTMLElement>>('menuSection');
+  private lastFocusedElement: HTMLElement | null = null;
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
+  private floatingCartTimer: ReturnType<typeof setTimeout> | null = null;
+  protected readonly floatingCartVisible = signal(false);
 
   protected readonly pageState = signal<PageState>('loading');
   protected readonly menuData = signal<PublicMenuPageData | null>(null);
-  protected readonly activeCategoryId = signal<string | null>(null);
+  protected readonly activeCategoryId = signal<string>(PUBLIC_MENU_ALL_CATEGORIES_ID);
+  protected readonly searchQuery = signal('');
   protected readonly logoFailed = signal(false);
   protected readonly restaurantSlug = signal('');
 
@@ -69,6 +83,8 @@ export class MenuPage {
   protected readonly checkoutOpen = signal(false);
   protected readonly confirmationOpen = signal(false);
   protected readonly orderConfirmation = signal<PublicOrderConfirmationApiDto | null>(null);
+  protected readonly toastMessage = signal('');
+  protected readonly toastVisible = signal(false);
 
   protected readonly imageFallback = MOCK_IMAGE_FALLBACK;
 
@@ -121,14 +137,35 @@ export class MenuPage {
   protected readonly filteredItems = computed(() => {
     const data = this.menuData();
     const categoryId = this.activeCategoryId();
-    if (!data || !categoryId) {
+    const query = this.searchQuery().trim().toLowerCase();
+    if (!data) {
       return [];
     }
 
-    return data.items.filter((item) => item.categoryId === categoryId);
+    let items = data.items;
+    if (categoryId !== PUBLIC_MENU_ALL_CATEGORIES_ID) {
+      items = items.filter((item) => item.categoryId === categoryId);
+    }
+
+    if (!query) {
+      return items;
+    }
+
+    return items.filter((item) => this.matchesSearch(item, query, data.categories));
   });
 
+  protected readonly resultCountLabel = computed(() =>
+    this.ui()
+      .publicMenuResultCount.replace('{count}', String(this.filteredItems().length)),
+  );
+
   constructor() {
+    effect(() => {
+      if (this.cart.itemCount() === 0) {
+        this.hideFloatingCart();
+      }
+    });
+
     const slug = readRouteParam(this.route, 'slug');
 
     if (!slug.trim()) {
@@ -137,6 +174,18 @@ export class MenuPage {
     }
 
     this.loadMenu(slug);
+  }
+
+  ngOnDestroy(): void {
+    if (this.floatingCartTimer) {
+      clearTimeout(this.floatingCartTimer);
+      this.floatingCartTimer = null;
+    }
+
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+      this.toastTimer = null;
+    }
   }
 
   protected reload(): void {
@@ -150,19 +199,30 @@ export class MenuPage {
     this.activeCategoryId.set(categoryId);
   }
 
+  protected setSearchQuery(value: string): void {
+    this.searchQuery.set(value);
+  }
+
   protected scrollToMenu(): void {
     this.menuSection()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  protected quantityFor(itemId: string): number {
-    return this.cart.quantityFor(itemId);
-  }
+  protected onItemAdded(item: PublicMenuItem): void {
+    if (!this.cart.addMenuItem(item)) {
+      return;
+    }
 
-  protected onQuantityChange(item: PublicMenuItem, quantity: number): void {
-    this.cart.setQuantity(item, quantity);
+    const name = this.localeService.pickText(
+      { ar: item.nameAr, en: item.nameEn },
+      item.nameAr,
+    );
+    this.showToast(`${name} — ${this.ui().publicMenuToastAdded}`);
+    this.showFloatingCartTemporarily();
   }
 
   protected openCart(): void {
+    this.hideFloatingCart();
+    this.lastFocusedElement = document.activeElement as HTMLElement | null;
     this.cartOpen.set(true);
     this.setBodyScrollLocked(true);
   }
@@ -170,6 +230,7 @@ export class MenuPage {
   protected closeCart(): void {
     this.cartOpen.set(false);
     this.syncBodyScrollLock();
+    this.restoreFocus();
   }
 
   protected openCheckout(): void {
@@ -181,6 +242,7 @@ export class MenuPage {
   protected closeCheckout(): void {
     this.checkoutOpen.set(false);
     this.syncBodyScrollLock();
+    this.restoreFocus();
   }
 
   protected onOrderPlaced(confirmation: PublicOrderConfirmationApiDto): void {
@@ -194,6 +256,7 @@ export class MenuPage {
     this.confirmationOpen.set(false);
     this.orderConfirmation.set(null);
     this.syncBodyScrollLock();
+    this.restoreFocus();
   }
 
   protected returnToMenuFromConfirmation(): void {
@@ -218,7 +281,8 @@ export class MenuPage {
         next: (data) => {
           this.menuData.set(data);
           this.themeService.applyAccent(data.restaurant.primaryAccentColor);
-          this.activeCategoryId.set(data.categories[0]?.id ?? null);
+          this.activeCategoryId.set(PUBLIC_MENU_ALL_CATEGORIES_ID);
+          this.searchQuery.set('');
           this.pageState.set('success');
         },
         error: (error: { type?: PublicMenuLoadError }) => {
@@ -236,12 +300,74 @@ export class MenuPage {
       });
   }
 
+  private matchesSearch(
+    item: PublicMenuItem,
+    query: string,
+    categories: PublicMenuCategory[],
+  ): boolean {
+    const category = categories.find((entry) => entry.id === item.categoryId);
+    const haystack = [
+      item.nameAr,
+      item.nameEn,
+      item.descriptionAr,
+      item.descriptionEn,
+      category?.nameAr,
+      category?.nameEn,
+    ]
+      .filter((value): value is string => Boolean(value?.trim()))
+      .join(' ')
+      .toLowerCase();
+
+    return haystack.includes(query);
+  }
+
+  private showFloatingCartTemporarily(): void {
+    this.floatingCartVisible.set(true);
+
+    if (this.floatingCartTimer) {
+      clearTimeout(this.floatingCartTimer);
+    }
+
+    this.floatingCartTimer = setTimeout(() => {
+      this.floatingCartVisible.set(false);
+      this.floatingCartTimer = null;
+    }, 3000);
+  }
+
+  private hideFloatingCart(): void {
+    if (this.floatingCartTimer) {
+      clearTimeout(this.floatingCartTimer);
+      this.floatingCartTimer = null;
+    }
+
+    this.floatingCartVisible.set(false);
+  }
+
+  private showToast(message: string): void {
+    this.toastMessage.set(message);
+    this.toastVisible.set(true);
+
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+    }
+
+    this.toastTimer = setTimeout(() => {
+      this.toastVisible.set(false);
+      this.toastTimer = null;
+    }, 1600);
+  }
+
   private setBodyScrollLocked(locked: boolean): void {
     document.body.style.overflow = locked ? 'hidden' : '';
   }
 
   private syncBodyScrollLock(): void {
     this.setBodyScrollLocked(this.overlayOpen());
+  }
+
+  private restoreFocus(): void {
+    this.lastFocusedElement?.focus();
+    this.lastFocusedElement = null;
   }
 }
 

@@ -9,143 +9,27 @@
     (closed)="closed.emit()"
   >
     <div class="public-confirmation">
-      <div class="confirmation-success">
-        <span class="confirmation-success__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="28" height="28">
+      <div class="public-confirmation__success">
+        <span class="public-confirmation__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
             <path
               fill="currentColor"
               d="M9.55 16.45 5.1 12l1.41-1.41 3.04 3.04 8.94-8.94 1.41 1.41-10.35 10.35Z"
             />
           </svg>
         </span>
-        <p class="confirmation-success__lead">{{ instructions(order.orderType) }}</p>
+        <p class="public-confirmation__lead">{{ ui().publicConfirmationSuccessLead }}</p>
       </div>
 
-      <section class="public-confirmation__card" aria-label="Order summary">
-        <dl class="order-details-meta public-confirmation__meta">
-          <div>
-            <dt>{{ ui().publicConfirmationOrderNumber }}</dt>
-            <dd>
-              <bdi class="identifier-ltr" dir="ltr">{{ order.orderNumber }}</bdi>
-            </dd>
-          </div>
-          <div>
-            <dt>{{ ui().publicConfirmationOrderType }}</dt>
-            <dd>
-              <span
-                class="order-type-chip"
-                [class.order-type-chip--delivery]="order.orderType === ORDER_TYPE_DELIVERY"
-              >
-                {{ orderTypeLabel(order.orderType) }}
-              </span>
-            </dd>
-          </div>
-          <div>
-            <dt>{{ ui().publicConfirmationStatus }}</dt>
-            <dd>
-              <span class="order-status-chip" [attr.data-status]="order.orderStatus">
-                {{ statusLabel(order.orderStatus) }}
-              </span>
-            </dd>
-          </div>
-          <div>
-            <dt>{{ ui().publicConfirmationCreatedAt }}</dt>
-            <dd>
-              <bdi class="numeric-ltr" dir="ltr">{{ formatCreatedAt(order.createdAt) }}</bdi>
-            </dd>
-          </div>
-        </dl>
-      </section>
-
-      <section class="public-confirmation__section">
-        <h3>{{ ui().publicConfirmationItems }}</h3>
-        <ul class="order-items-list">
-          @for (line of order.items; track $index) {
-            <li>
-              <div class="order-items-list__head">
-                <strong>{{ lineName(line) }}</strong>
-                <span>× {{ line.quantity }}</span>
-              </div>
-              @if (line.unitPrice != null) {
-                <p class="public-confirmation__line-price">
-                  <span>{{ ui().publicConfirmationSubtotal }}</span>
-                  <bdi class="currency-ltr" dir="ltr">
-                    {{ formatMoney(line.unitPrice, order.currencyCode) }}
-                  </bdi>
-                  ·
-                  <bdi class="currency-ltr" dir="ltr">
-                    {{ formatMoney(line.totalPrice, order.currencyCode) }}
-                  </bdi>
-                </p>
-              } @else {
-                <p class="public-confirmation__line-price">
-                  <bdi class="currency-ltr" dir="ltr">
-                    {{ formatMoney(line.totalPrice, order.currencyCode) }}
-                  </bdi>
-                </p>
-              }
-              @if (line.notes?.trim()) {
-                <p class="order-items-list__notes">{{ line.notes }}</p>
-              }
-            </li>
-          }
-        </ul>
-      </section>
-
-      <dl class="order-financial-summary">
-        <div>
-          <dt>{{ ui().publicConfirmationSubtotal }}</dt>
-          <dd>
-            <bdi class="currency-ltr" dir="ltr">
-              {{ formatMoney(order.subtotal, order.currencyCode) }}
-            </bdi>
-          </dd>
-        </div>
-        @if (shouldShowFinancialAmount(order.discountAmount)) {
-          <div>
-            <dt>{{ ui().publicConfirmationDiscount }}</dt>
-            <dd>
-              <bdi class="currency-ltr" dir="ltr">
-                {{ formatMoney(order.discountAmount, order.currencyCode) }}
-              </bdi>
-            </dd>
-          </div>
-        }
-        @if (shouldShowFinancialAmount(order.taxAmount)) {
-          <div>
-            <dt>{{ ui().publicConfirmationTax }}</dt>
-            <dd>
-              <bdi class="currency-ltr" dir="ltr">
-                {{ formatMoney(order.taxAmount, order.currencyCode) }}
-              </bdi>
-            </dd>
-          </div>
-        }
-        @if (shouldShowFinancialAmount(order.deliveryFee)) {
-          <div>
-            <dt>{{ ui().publicConfirmationDeliveryFee }}</dt>
-            <dd>
-              <bdi class="currency-ltr" dir="ltr">
-                {{ formatMoney(order.deliveryFee, order.currencyCode) }}
-              </bdi>
-            </dd>
-          </div>
-        }
-        <div class="order-financial-summary__total">
-          <dt>{{ ui().publicConfirmationTotal }}</dt>
-          <dd>
-            <bdi class="currency-ltr" dir="ltr">
-              {{ formatMoney(order.totalAmount, order.currencyCode) }}
-            </bdi>
-          </dd>
-        </div>
-      </dl>
+      <div class="public-confirmation__order-number">
+        <span>{{ ui().publicConfirmationOrderNumber }}</span>
+        <strong>
+          <bdi class="identifier-ltr" dir="ltr">{{ order.orderNumber }}</bdi>
+        </strong>
+      </div>
     </div>
 
     <div orderModalFooter class="public-confirmation__footer">
-      <button type="button" class="button-secondary" (click)="closed.emit()">
-        {{ ui().publicConfirmationClose }}
-      </button>
       <button type="button" class="button-primary" (click)="returnToMenu.emit()">
         {{ ui().publicConfirmationReturnMenu }}
       </button>

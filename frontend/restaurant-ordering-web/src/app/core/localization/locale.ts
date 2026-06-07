@@ -576,6 +576,28 @@ type UiTextKey =
   | 'publicOrderStatusNew'
   | 'publicStaffLogin'
   | 'publicConfirmationSuccessTitle'
+  | 'publicConfirmationSuccessLead'
+  | 'publicMenuHeroKicker'
+  | 'publicMenuEyebrow'
+  | 'publicMenuLead'
+  | 'publicMenuSearchPlaceholder'
+  | 'publicMenuSearchLabel'
+  | 'publicMenuAllCategories'
+  | 'publicMenuFilteredEmpty'
+  | 'publicMenuResultCount'
+  | 'publicMenuChefChoice'
+  | 'publicMenuAvailable'
+  | 'publicMenuItemUnavailable'
+  | 'publicMenuAddToCart'
+  | 'publicMenuAddedCheck'
+  | 'publicMenuCartReady'
+  | 'publicMenuViewCart'
+  | 'publicMenuCartSubtitle'
+  | 'publicMenuCheckoutDescription'
+  | 'publicMenuConfirmOrder'
+  | 'publicMenuCancel'
+  | 'publicMenuFooterCopy'
+  | 'publicMenuToastAdded'
   | 'languageArabic'
   | 'languageEnglish';
 
@@ -1075,7 +1097,29 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     publicOrderTypeDelivery: 'توصيل',
     publicOrderStatusNew: 'جديد',
     publicStaffLogin: 'دخول الإدارة',
-    publicConfirmationSuccessTitle: 'تأكيد الطلب',
+    publicConfirmationSuccessTitle: 'تم استلام طلبك بنجاح',
+    publicConfirmationSuccessLead: 'سيتم تجهيز طلبك قريبًا.',
+    publicMenuHeroKicker: 'تجربة طعام مصممة بعناية',
+    publicMenuEyebrow: 'القائمة',
+    publicMenuLead: 'مجموعة من الأطباق المميزة ضمن تجربة طلب بسيطة وأنيقة.',
+    publicMenuSearchPlaceholder: 'ابحث عن طبق...',
+    publicMenuSearchLabel: 'البحث عن طبق',
+    publicMenuAllCategories: 'كل الأصناف',
+    publicMenuFilteredEmpty: 'لا توجد عناصر مطابقة للبحث أو التصنيف الحالي.',
+    publicMenuResultCount: 'عرض {count} عناصر',
+    publicMenuChefChoice: 'اختيار الشيف',
+    publicMenuAvailable: 'متاح الآن',
+    publicMenuItemUnavailable: 'غير متاح',
+    publicMenuAddToCart: 'إضافة إلى السلة',
+    publicMenuAddedCheck: 'تمت الإضافة ✓',
+    publicMenuCartReady: 'سلتك جاهزة',
+    publicMenuViewCart: 'عرض السلة',
+    publicMenuCartSubtitle: 'راجع طلبك وعدّل الكميات بسهولة.',
+    publicMenuCheckoutDescription: 'أدخل بيانات الطلب لإكمال العملية.',
+    publicMenuConfirmOrder: 'تأكيد الطلب',
+    publicMenuCancel: 'إلغاء',
+    publicMenuFooterCopy: '© تجربة طعام مصممة بذوق راقٍ.',
+    publicMenuToastAdded: 'تمت الإضافة إلى السلة',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
   },
@@ -1581,7 +1625,29 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     publicOrderTypeDelivery: 'Delivery',
     publicOrderStatusNew: 'New',
     publicStaffLogin: 'Staff login',
-    publicConfirmationSuccessTitle: 'Order confirmed',
+    publicConfirmationSuccessTitle: 'Your order has been received',
+    publicConfirmationSuccessLead: 'Your order will be prepared shortly.',
+    publicMenuHeroKicker: 'A thoughtfully crafted dining experience',
+    publicMenuEyebrow: 'Menu',
+    publicMenuLead: 'A curated selection of dishes in a simple and elegant ordering experience.',
+    publicMenuSearchPlaceholder: 'Search for a dish...',
+    publicMenuSearchLabel: 'Search for a dish',
+    publicMenuAllCategories: 'All items',
+    publicMenuFilteredEmpty: 'No items match the current search or category.',
+    publicMenuResultCount: '{count} items shown',
+    publicMenuChefChoice: "Chef's choice",
+    publicMenuAvailable: 'Available now',
+    publicMenuItemUnavailable: 'Unavailable',
+    publicMenuAddToCart: 'Add to cart',
+    publicMenuAddedCheck: 'Added ✓',
+    publicMenuCartReady: 'Your cart is ready',
+    publicMenuViewCart: 'View cart',
+    publicMenuCartSubtitle: 'Review your cart and adjust quantities easily.',
+    publicMenuCheckoutDescription: 'Enter your order details to complete the process.',
+    publicMenuConfirmOrder: 'Confirm order',
+    publicMenuCancel: 'Cancel',
+    publicMenuFooterCopy: '© A thoughtfully designed dining experience.',
+    publicMenuToastAdded: 'Added to cart',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
   },

@@ -1,0 +1,30 @@
+.public-menu-toast {
+  position: fixed;
+  top: calc(var(--menu-topbar-height, 4.75rem) + 1rem);
+  left: 50%;
+  z-index: 90;
+  opacity: 0;
+  pointer-events: none;
+  padding: 0.7rem 0.95rem;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--menu-dark, #191c1b);
+  box-shadow: var(--menu-shadow-md, 0 22px 50px rgb(22 25 24 / 0.1));
+  font-size: 0.75rem;
+  font-weight: 900;
+  transform: translateX(-50%) translateY(-14px);
+  transition:
+    opacity 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.public-menu-toast--show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-menu-toast {
+    transition: none;
+  }
+}

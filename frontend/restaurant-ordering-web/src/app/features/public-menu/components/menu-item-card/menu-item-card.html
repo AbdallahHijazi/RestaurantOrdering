@@ -1,9 +1,9 @@
 <article
-  class="menu-item-card"
-  [class.menu-item-card--sold-out]="!item().isAvailable"
-  [class.menu-item-card--in-cart]="quantity() > 0"
+  class="public-menu-card"
+  [class.public-menu-card--unavailable]="!item().isAvailable"
+  data-testid="public-menu-item-card"
 >
-  <div class="menu-item-card__media">
+  <div class="public-menu-card__media">
     @if (imageSrc(); as src) {
       <img
         [src]="src"
@@ -12,75 +12,69 @@
         (error)="onImageError()"
       />
     } @else {
-      <div class="menu-item-card__placeholder" aria-hidden="true"></div>
+      <div class="public-menu-card__placeholder" aria-hidden="true"></div>
     }
 
-    <div class="menu-item-card__badges">
-      @if (item().isPopular) {
-        <span class="menu-item-card__badge">{{ labels().popular }}</span>
-      }
-      @if (item().isVegetarian) {
-        <span class="menu-item-card__badge menu-item-card__badge--soft">{{ labels().vegetarian }}</span>
-      }
-    </div>
+    @if (item().isPopular) {
+      <span class="public-menu-card__badge">{{ ui().publicMenuChefChoice }}</span>
+    }
   </div>
 
-  <div class="menu-item-card__body">
-    <div class="menu-item-card__header">
-      <h3>{{ displayName() }}</h3>
-      <div class="menu-item-card__prices">
-        @if (displayDiscountPrice(); as discountPrice) {
-          <span class="menu-item-card__price menu-item-card__price--discount">{{ discountPrice }}</span>
-          <span class="menu-item-card__price menu-item-card__price--original">{{ displayPrice() }}</span>
+  <div class="public-menu-card__body">
+    <div class="public-menu-card__title-row">
+      <div class="public-menu-card__title-group">
+        <h3>{{ displayName() }}</h3>
+        @if (secondaryName()) {
+          <span class="public-menu-card__subtitle">{{ secondaryName() }}</span>
+        }
+      </div>
+
+      <div class="public-menu-card__price-stack">
+        @if (displaySalePrice(); as salePrice) {
+          <strong class="public-menu-card__price">{{ salePrice }}</strong>
+          <span class="public-menu-card__price public-menu-card__price--original">{{ displayPrice() }}</span>
         } @else {
-          <span class="menu-item-card__price">{{ displayPrice() }}</span>
+          <strong class="public-menu-card__price">{{ displayPrice() }}</strong>
         }
       </div>
     </div>
 
     @if (displayDescription()) {
-      <p class="menu-item-card__description">{{ displayDescription() }}</p>
+      <p class="public-menu-card__description">{{ displayDescription() }}</p>
     }
 
-    <div class="menu-item-card__actions">
-      @if (!item().isAvailable) {
-        <button type="button" class="menu-item-card__btn" disabled>
-          {{ labels().soldOut }}
-        </button>
-      } @else if (quantity() > 0) {
-        <div class="menu-item-card__quantity" role="group" [attr.aria-label]="displayName()">
-          <button
-            type="button"
-            class="menu-item-card__qty-btn"
-            (click)="decrement()"
-            [attr.aria-label]="quantityAriaLabel('decrease')"
-          >
-            −
-          </button>
-          <span class="menu-item-card__qty-value" aria-live="polite">{{ quantity() }}</span>
-          <button
-            type="button"
-            class="menu-item-card__qty-btn"
-            (click)="increment()"
-            [attr.aria-label]="quantityAriaLabel('increase')"
-          >
-            +
-          </button>
+    <div class="public-menu-card__foot">
+      <span class="public-menu-card__tag" [class.public-menu-card__tag--off]="!item().isAvailable">
+        {{ item().isAvailable ? ui().publicMenuAvailable : ui().publicMenuItemUnavailable }}
+      </span>
+
+      @if (quantity() > 0) {
+        <div class="public-menu-card__quantity" role="group" [attr.aria-label]="displayName()">
+          <button type="button" class="public-menu-card__qty-btn" (click)="decrement()">−</button>
+          <span aria-live="polite">{{ quantity() }}</span>
+          <button type="button" class="public-menu-card__qty-btn" (click)="increment()">+</button>
         </div>
       } @else {
         <button
           type="button"
-          class="menu-item-card__btn"
-          [class.menu-item-card__btn--added]="justAdded()"
-          (click)="addItem()"
+          class="public-menu-card__add"
+          [class.public-menu-card__add--added]="justAdded()"
+          [disabled]="!item().isAvailable"
+          data-testid="public-menu-add-to-cart"
           [attr.aria-live]="justAdded() ? 'polite' : null"
+          (click)="addItem()"
         >
-          @if (justAdded()) {
-            <span aria-hidden="true">✓</span>
-            {{ labels().added }}
-          } @else {
-            {{ labels().add }}
-          }
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M6 8h12l-1 12H7L6 8Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" />
+            <path d="M9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" />
+          </svg>
+          <span>
+            @if (justAdded()) {
+              {{ ui().publicMenuAddedCheck }}
+            } @else {
+              {{ ui().publicMenuAddToCart }}
+            }
+          </span>
         </button>
       }
     </div>

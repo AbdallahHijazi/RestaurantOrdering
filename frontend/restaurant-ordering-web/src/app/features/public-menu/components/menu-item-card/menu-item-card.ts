@@ -2,9 +2,9 @@ import { Component, computed, inject, input, output, signal } from '@angular/cor
 import { LocaleService, type SupportedLocale } from '../../../../core/localization/locale';
 import {
   PUBLIC_CART_MAX_QUANTITY,
-  getMenuItemLabels,
   type PublicMenuItem,
 } from '../../models/public-menu.models';
+import { hasValidDiscount } from '../../utils/menu-item-price.util';
 
 @Component({
   selector: 'app-menu-item-card',
@@ -19,17 +19,18 @@ export class MenuItemCard {
   readonly imageFallback = input<string | null>(null);
   readonly displayLocale = input<SupportedLocale | null>(null);
 
+  readonly added = output<PublicMenuItem>();
   readonly quantityChange = output<number>();
 
   protected readonly localeService = inject(LocaleService);
   protected readonly imageFailed = signal(false);
   protected readonly justAdded = signal(false);
 
+  protected readonly ui = this.localeService.ui;
+
   protected readonly activeLocale = computed(
     () => this.displayLocale() ?? this.localeService.locale(),
   );
-
-  protected readonly labels = computed(() => getMenuItemLabels(this.activeLocale()));
 
   protected readonly displayName = computed(() => {
     const locale = this.activeLocale();
@@ -38,6 +39,15 @@ export class MenuItemCard {
       { ar: this.item().nameAr, en: this.item().nameEn },
       this.item().nameAr,
     );
+  });
+
+  protected readonly secondaryName = computed(() => {
+    const locale = this.activeLocale();
+    const item = this.item();
+    const secondary =
+      locale === 'ar' ? item.nameEn?.trim() : item.nameAr?.trim();
+
+    return secondary && secondary !== this.displayName() ? secondary : '';
   });
 
   protected readonly displayDescription = computed(() => {
@@ -49,22 +59,22 @@ export class MenuItemCard {
     );
   });
 
-  protected readonly displayPrice = computed(() => {
-    return this.localeService.formatCurrency(
+  protected readonly displayPrice = computed(() =>
+    this.localeService.formatCurrency(
       this.item().price,
       this.currencyCode(),
       this.countryCode(),
-    );
-  });
+    ),
+  );
 
-  protected readonly displayDiscountPrice = computed(() => {
-    const discount = this.item().discountPrice;
-    if (discount == null) {
+  protected readonly displaySalePrice = computed(() => {
+    const item = this.item();
+    if (!hasValidDiscount(item.price, item.discountPrice)) {
       return null;
     }
 
     return this.localeService.formatCurrency(
-      discount,
+      item.discountPrice,
       this.currencyCode(),
       this.countryCode(),
     );
@@ -82,24 +92,15 @@ export class MenuItemCard {
     this.imageFailed.set(true);
   }
 
-  protected quantityAriaLabel(action: 'decrease' | 'increase'): string {
-    return this.activeLocale() === 'ar'
-      ? action === 'decrease'
-        ? 'إنقاص'
-        : 'زيادة'
-      : action === 'decrease'
-        ? 'Decrease'
-        : 'Increase';
-  }
-
   protected addItem(): void {
     if (!this.item().isAvailable) {
       return;
     }
 
-    this.quantityChange.emit(this.quantity() + 1);
+    const next = this.quantity() + 1;
+    this.quantityChange.emit(next);
+    this.added.emit(this.item());
     this.justAdded.set(true);
-
     window.setTimeout(() => this.justAdded.set(false), 1200);
   }
 

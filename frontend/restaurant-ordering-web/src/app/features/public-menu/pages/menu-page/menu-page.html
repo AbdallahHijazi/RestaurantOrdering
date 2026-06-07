@@ -1,5 +1,19 @@
 @if (pageState() === 'loading') {
-  <app-loading-state [locale]="localeService" />
+  <div class="menu-page">
+    <div class="menu-page__loading">
+      <div class="menu-page__skeleton-hero" aria-hidden="true"></div>
+      <div class="menu-page__skeleton-pills" aria-hidden="true">
+        @for (slot of [1, 2, 3, 4]; track slot) {
+          <div class="menu-page__skeleton-pill"></div>
+        }
+      </div>
+      <div class="menu-page__skeleton-grid" aria-hidden="true">
+        @for (slot of [1, 2, 3, 4, 5, 6]; track slot) {
+          <div class="menu-page__skeleton-card"></div>
+        }
+      </div>
+    </div>
+  </div>
 } @else if (pageState() === 'not-found') {
   <app-error-state
     [locale]="localeService"
@@ -20,6 +34,9 @@
     [style.--restaurant-accent]="menuAccentColor()"
     [style.--restaurant-accent-strong]="menuAccentStrongColor()"
     [style.--restaurant-accent-soft]="menuAccentSoftColor()"
+    [style.--menu-terracotta]="menuAccentColor()"
+    [style.--menu-terracotta-deep]="menuAccentStrongColor()"
+    [style.--menu-terracotta-soft]="menuAccentSoftColor()"
   >
     <header class="menu-page__header">
       <div class="menu-page__header-inner">
@@ -47,7 +64,9 @@
           <button
             type="button"
             class="menu-page__cart"
+            data-testid="public-menu-cart-button"
             [attr.aria-label]="ui().publicCartOpenAria"
+            [attr.aria-expanded]="cartOpen()"
             (click)="openCart()"
           >
             <span aria-hidden="true">🛒</span>
@@ -60,13 +79,13 @@
     </header>
 
     <main class="menu-page__main">
-      <div class="menu-page__container">
-        <app-restaurant-cover-hero
-          [restaurant]="data.restaurant"
-          [imageFallback]="imageFallback"
-          (exploreMenu)="scrollToMenu()"
-        />
+      <app-restaurant-cover-hero
+        [restaurant]="data.restaurant"
+        [imageFallback]="imageFallback"
+        (exploreMenu)="scrollToMenu()"
+      />
 
+      <div class="menu-page__container">
         @if (data.categories.length === 0 || data.items.length === 0) {
           <app-empty-state
             [title]="ui().publicMenuEmpty"
@@ -75,31 +94,40 @@
           />
         } @else {
           <section #menuSection class="menu-page__menu" aria-labelledby="menu-section-title">
-            <h2 id="menu-section-title" class="visually-hidden">
-              {{ ui().menuTitle }}
-            </h2>
-
             <app-category-navigation
               [categories]="data.categories"
-              [activeCategoryId]="activeCategoryId() ?? data.categories[0].id"
+              [activeCategoryId]="activeCategoryId()"
+              [searchQuery]="searchQuery()"
               (categorySelected)="selectCategory($event)"
+              (searchQueryChange)="setSearchQuery($event)"
             />
 
+            <div class="menu-page__section-head">
+              <div>
+                <span class="menu-page__eyebrow">{{ ui().publicMenuEyebrow }}</span>
+                <h2 id="menu-section-title" class="menu-page__section-title">
+                  {{ ui().menuTitle }}
+                </h2>
+                <p class="menu-page__section-lead">{{ ui().publicMenuLead }}</p>
+              </div>
+              <div class="menu-page__result-meta" aria-live="polite">
+                {{ resultCountLabel() }}
+              </div>
+            </div>
+
             @if (filteredItems().length === 0) {
-              <app-empty-state
-                [title]="ui().emptyItems"
-                [locale]="localeService"
-              />
+              <div class="menu-page__empty-filtered" data-testid="public-menu-filtered-empty">
+                <p>{{ ui().publicMenuFilteredEmpty }}</p>
+              </div>
             } @else {
-              <div class="menu-page__grid">
+              <div class="menu-page__grid" data-testid="public-menu-grid">
                 @for (item of filteredItems(); track item.id) {
                   <app-menu-item-card
                     [item]="item"
                     [currencyCode]="data.restaurant.currencyCode"
                     [countryCode]="data.restaurant.countryCode"
-                    [quantity]="quantityFor(item.id)"
                     [imageFallback]="imageFallback"
-                    (quantityChange)="onQuantityChange(item, $event)"
+                    (added)="onItemAdded($event)"
                   />
                 }
               </div>
@@ -110,28 +138,26 @@
     </main>
 
     <footer class="menu-page__footer">
-      <div class="menu-page__container menu-page__footer-grid">
-        <div>
-          <h2>{{ restaurantName() }}</h2>
-          <p>{{ restaurantAddress() }}</p>
+      <div class="menu-page__container menu-page__footer-inner">
+        <div class="menu-page__footer-brand">
+          <strong>{{ restaurantName() }}</strong>
+          <span>{{ ui().publicMenuFooterCopy }}</span>
         </div>
 
-        <div>
-          <h3>{{ ui().footerContact }}</h3>
-          @if (data.restaurant.phoneNumber) {
-            <p>{{ data.restaurant.phoneNumber }}</p>
-          }
-          @if (data.restaurant.whatsAppNumber) {
-            <p>{{ ui().whatsapp }}: {{ data.restaurant.whatsAppNumber }}</p>
-          }
-        </div>
-
-        <div>
-          <h3>{{ ui().footerInfo }}</h3>
-          <p>{{ ui().menuTitle }}</p>
+        <div class="menu-page__footer-links">
+          <a routerLink="/login" class="menu-page__admin-entry">{{ ui().publicStaffLogin }}</a>
         </div>
       </div>
     </footer>
+
+    <app-public-menu-floating-cart
+      [visible]="floatingCartVisible()"
+      [orderSettings]="data.orderSettings"
+      [countryCode]="data.restaurant.countryCode"
+      (viewCart)="openCart()"
+    />
+
+    <app-public-menu-toast [message]="toastMessage()" [visible]="toastVisible()" />
 
     <app-public-cart-drawer
       [open]="cartOpen()"

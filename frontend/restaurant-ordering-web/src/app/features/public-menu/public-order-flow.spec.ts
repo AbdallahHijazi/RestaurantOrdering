@@ -64,28 +64,12 @@ describe('Public order flow', () => {
     fixture.detectChanges();
 
     const plus = fixture.nativeElement.querySelector(
-      '.public-cart-drawer__qty button:last-child',
+      '.public-cart-drawer__qty-btn:last-child',
     ) as HTMLButtonElement;
     plus.click();
     fixture.detectChanges();
 
     expect(cart.quantityFor(item.id)).toBe(2);
-  });
-
-  it('persists item notes from drawer', async () => {
-    const fixture = TestBed.createComponent(PublicCartDrawer);
-    fixture.componentRef.setInput('open', true);
-    fixture.componentRef.setInput('orderSettings', settings);
-    fixture.detectChanges();
-
-    const textarea = fixture.nativeElement.querySelector(
-      '.public-cart-drawer__notes textarea',
-    ) as HTMLTextAreaElement;
-    textarea.value = 'extra lemon';
-    textarea.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-
-    expect(cart.cartItems()[0]?.notes).toBe('extra lemon');
   });
 
   it('shows empty cart state', async () => {
@@ -144,7 +128,7 @@ describe('Public order flow', () => {
     fixture.detectChanges();
 
     const submit = fixture.nativeElement.querySelector(
-      '.public-checkout__submit',
+      '.public-checkout__primary',
     ) as HTMLButtonElement;
     expect(submit.disabled).toBe(true);
   });
@@ -161,7 +145,7 @@ describe('Public order flow', () => {
     fixture.detectChanges();
 
     const submit = fixture.nativeElement.querySelector(
-      '.public-checkout__submit',
+      '.public-checkout__primary',
     ) as HTMLButtonElement;
     expect(submit).toBeFalsy();
   });
@@ -181,7 +165,7 @@ describe('Public order flow', () => {
     fixture.detectChanges();
 
     const submit = fixture.nativeElement.querySelector(
-      '.public-checkout__submit',
+      '.public-checkout__primary',
     ) as HTMLButtonElement;
     expect(submit.disabled).toBe(true);
   });
@@ -194,7 +178,6 @@ describe('Public order flow', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Estimated total');
-    expect(fixture.nativeElement.textContent).toContain('Estimated tax');
   });
 
   it('submits request without financial fields', async () => {
@@ -276,7 +259,7 @@ describe('Public order flow', () => {
     fixture.detectChanges();
 
     const submit = fixture.nativeElement.querySelector(
-      '.public-checkout__submit',
+      '.public-checkout__primary',
     ) as HTMLButtonElement;
     expect(submit.disabled).toBe(true);
 
@@ -407,29 +390,7 @@ describe('Public order flow', () => {
     fixture.detectChanges();
 
     expect(document.body.textContent).toContain('ORD-99');
-    expect(document.body.textContent).toContain('prepared for pickup');
-  });
-
-  it('shows delivery instructions for delivery orders', async () => {
-    const fixture = TestBed.createComponent(PublicOrderConfirmation);
-    fixture.componentRef.setInput('open', true);
-    fixture.componentRef.setInput('confirmation', {
-      orderId: '22222222-2222-2222-2222-222222222222',
-      orderNumber: 'ORD-D',
-      orderType: ORDER_TYPE_DELIVERY,
-      orderStatus: 1,
-      subtotal: 28,
-      discountAmount: 0,
-      taxAmount: 4.2,
-      deliveryFee: 12,
-      totalAmount: 44.2,
-      currencyCode: 'SAR',
-      createdAt: '2026-06-04T12:00:00Z',
-      items: [],
-    });
-    fixture.detectChanges();
-
-    expect(document.body.textContent).toContain('delivery to the provided address');
+    expect(document.body.textContent).toContain('Your order will be prepared shortly');
   });
 
   it('demo mode does not POST orders', async () => {
@@ -465,7 +426,7 @@ describe('Public order flow', () => {
     fixture.detectChanges();
 
     const submit = fixture.nativeElement.querySelector(
-      '.public-checkout__submit',
+      '.public-checkout__primary',
     ) as HTMLButtonElement;
     expect(submit.disabled).toBe(true);
     expect(fixture.nativeElement.textContent).toContain('Preview mode');

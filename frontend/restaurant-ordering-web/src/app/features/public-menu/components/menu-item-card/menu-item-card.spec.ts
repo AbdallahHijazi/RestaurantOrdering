@@ -26,7 +26,7 @@ describe('MenuItemCard', () => {
     fixture.detectChanges();
   });
 
-  it('disables add for sold out items', () => {
+  it('disables add for unavailable items', () => {
     const locale = TestBed.inject(LocaleService);
     locale.setLocale('en');
 
@@ -40,17 +40,20 @@ describe('MenuItemCard', () => {
     });
     fixture.detectChanges();
 
-    const button = fixture.nativeElement.querySelector('.menu-item-card__btn') as HTMLButtonElement;
+    const button = fixture.nativeElement.querySelector(
+      '[data-testid="public-menu-add-to-cart"]',
+    ) as HTMLButtonElement;
     expect(button.disabled).toBe(true);
-    expect(button.textContent).toContain('Sold Out');
+    expect(button.textContent).toContain('Add to cart');
+    expect(fixture.nativeElement.textContent).toContain('Unavailable');
   });
 
-  it('increases quantity locally on add', () => {
-    const emitted: number[] = [];
-    component.quantityChange.subscribe((value) => emitted.push(value));
+  it('emits added when the add button is clicked', () => {
+    const emitted: unknown[] = [];
+    component.added.subscribe((value) => emitted.push(value));
 
     component['addItem']();
-    expect(emitted).toEqual([1]);
+    expect(emitted).toHaveLength(1);
   });
 
   it('updates visible text when locale changes', () => {
@@ -64,18 +67,22 @@ describe('MenuItemCard', () => {
     expect(fixture.nativeElement.textContent).toContain('Dish');
   });
 
-  it('uses displayLocale for labels without changing admin locale', () => {
+  it('shows secondary name and strikethrough price for valid discounts', () => {
     const locale = TestBed.inject(LocaleService);
     locale.setLocale('en');
-    fixture.componentRef.setInput('displayLocale', 'ar');
-    fixture.componentRef.setInput('quantity', 1);
+
+    fixture.componentRef.setInput('item', {
+      id: '3',
+      categoryId: 'cat-1',
+      nameAr: 'طبق',
+      nameEn: 'Dish',
+      price: 30,
+      discountPrice: 24,
+      isAvailable: true,
+    });
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('طبق');
-    const decreaseButton = fixture.nativeElement.querySelector(
-      '.menu-item-card__qty-btn:first-child',
-    ) as HTMLButtonElement;
-    expect(decreaseButton.getAttribute('aria-label')).toBe('إنقاص');
-    expect(locale.locale()).toBe('en');
+    expect(fixture.nativeElement.querySelector('.public-menu-card__price--original')).toBeTruthy();
   });
 });

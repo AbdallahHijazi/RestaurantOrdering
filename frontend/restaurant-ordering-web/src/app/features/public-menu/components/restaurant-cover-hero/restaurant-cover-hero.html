@@ -1,33 +1,48 @@
-<section class="restaurant-hero" aria-labelledby="restaurant-hero-title">
-  <div class="restaurant-hero__media">
+<section class="public-menu-hero" aria-labelledby="public-menu-hero-title">
+  <div class="public-menu-hero__media">
     @if (coverSrc(); as src) {
       <img [src]="src" [alt]="displayName()" (error)="onCoverError()" />
     } @else {
-      <div class="restaurant-hero__fallback" aria-hidden="true"></div>
+      <div class="public-menu-hero__fallback" aria-hidden="true"></div>
     }
-    <div class="restaurant-hero__overlay"></div>
+    <div class="public-menu-hero__overlay" aria-hidden="true"></div>
   </div>
 
-  <div class="restaurant-hero__content">
-    <div class="restaurant-hero__inner">
-      @if (statusLabel(); as status) {
-        <span
-          class="restaurant-hero__status"
-          [class.restaurant-hero__status--closed]="restaurant().isOpen === false"
-        >
-          {{ status }}
-        </span>
+  <div class="public-menu-hero__content">
+    <div class="public-menu-hero__inner">
+      <span class="public-menu-hero__kicker">{{ kickerLabel() }}</span>
+
+      @if (secondaryName()) {
+        <span class="public-menu-hero__secondary-name">{{ secondaryName() }}</span>
       }
 
-      <h2 id="restaurant-hero-title">{{ displayName() }}</h2>
+      <h1 id="public-menu-hero-title" class="public-menu-hero__title">{{ displayName() }}</h1>
 
       @if (displayDescription()) {
-        <p>{{ displayDescription() }}</p>
+        <p class="public-menu-hero__lead">{{ displayDescription() }}</p>
       }
 
-      <button type="button" class="restaurant-hero__cta" (click)="exploreMenu.emit()">
-        {{ ctaLabel() }}
-      </button>
+      <div class="public-menu-hero__actions">
+        <button type="button" class="public-menu-hero__cta" (click)="exploreMenu.emit()">
+          <span>{{ ctaLabel() }}</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m7 10 5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+
+        @if (statusLabel(); as status) {
+          <span
+            class="public-menu-hero__hours"
+            [class.public-menu-hero__hours--closed]="restaurant().isOpen === false"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.9" />
+              <path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" />
+            </svg>
+            <span>{{ status }}</span>
+          </span>
+        }
+      </div>
     </div>
   </div>
 </section>
