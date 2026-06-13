@@ -50,6 +50,10 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
             .IsRequired()
             .HasDefaultValue("#B8663F");
 
+        builder.Property(r => r.ContentVersion)
+            .IsRequired()
+            .HasDefaultValue(1);
+
         builder.HasIndex(r => r.Slug)
             .IsUnique();
 
@@ -71,6 +75,11 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(r => r.CoverImageFileId);
+
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_Restaurants_ContentVersion", "[ContentVersion] >= 1");
+        });
 
         builder.HasQueryFilter(r => !r.IsDeleted);
     }

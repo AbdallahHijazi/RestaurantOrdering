@@ -159,6 +159,11 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("ContentVersion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -198,7 +203,101 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("RestaurantId", "IsActive", "IsDeleted");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", t =>
+                        {
+                            t.HasCheckConstraint("CK_Categories_ContentVersion", "[ContentVersion] >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.CategoryTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("DraftDescription")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("DraftGeneratedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DraftLastError")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("DraftName")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<byte?>("DraftSource")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int?>("DraftSourceVersion")
+                        .HasColumnType("int");
+
+                    b.Property<byte?>("DraftStatus")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("LocaleCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<byte?>("PublishedSource")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int?>("PublishedSourceVersion")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovedByUserId");
+
+                    b.HasIndex("LocaleCode");
+
+                    b.HasIndex("CategoryId", "LocaleCode")
+                        .IsUnique();
+
+                    b.ToTable("CategoryTranslations", t =>
+                        {
+                            t.HasCheckConstraint("CK_CategoryTranslations_Description", "[Description] IS NULL OR [Description] <> ''");
+
+                            t.HasCheckConstraint("CK_CategoryTranslations_DraftContent", "[DraftStatus] IS NULL OR ([DraftName] IS NOT NULL OR [DraftDescription] IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_CategoryTranslations_DraftSourceVersion", "[DraftSourceVersion] IS NULL OR [DraftSourceVersion] >= 1");
+
+                            t.HasCheckConstraint("CK_CategoryTranslations_DraftStatus", "[DraftStatus] IS NULL OR [DraftStatus] <> 3");
+
+                            t.HasCheckConstraint("CK_CategoryTranslations_LocaleCode", "[LocaleCode] <> ''");
+
+                            t.HasCheckConstraint("CK_CategoryTranslations_Name", "[Name] IS NULL OR [Name] <> ''");
+
+                            t.HasCheckConstraint("CK_CategoryTranslations_PublishedSourceVersion", "[PublishedSourceVersion] IS NULL OR [PublishedSourceVersion] >= 1");
+                        });
                 });
 
             modelBuilder.Entity("RestaurantOrdering.Domain.Entities.Customer", b =>
@@ -239,6 +338,124 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.LocaleDefinition", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<byte>("Direction")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("NativeName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("Code");
+
+                    b.ToTable("LocaleDefinitions", t =>
+                        {
+                            t.HasCheckConstraint("CK_LocaleDefinitions_Code", "[Code] <> ''");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Code = "ar",
+                            Direction = (byte)2,
+                            DisplayName = "Arabic",
+                            IsEnabled = true,
+                            NativeName = "العربية",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            Code = "en",
+                            Direction = (byte)1,
+                            DisplayName = "English",
+                            IsEnabled = true,
+                            NativeName = "English",
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            Code = "fr",
+                            Direction = (byte)1,
+                            DisplayName = "French",
+                            IsEnabled = true,
+                            NativeName = "Français",
+                            SortOrder = 3
+                        },
+                        new
+                        {
+                            Code = "de",
+                            Direction = (byte)1,
+                            DisplayName = "German",
+                            IsEnabled = true,
+                            NativeName = "Deutsch",
+                            SortOrder = 4
+                        },
+                        new
+                        {
+                            Code = "es",
+                            Direction = (byte)1,
+                            DisplayName = "Spanish",
+                            IsEnabled = true,
+                            NativeName = "Español",
+                            SortOrder = 5
+                        },
+                        new
+                        {
+                            Code = "it",
+                            Direction = (byte)1,
+                            DisplayName = "Italian",
+                            IsEnabled = true,
+                            NativeName = "Italiano",
+                            SortOrder = 6
+                        },
+                        new
+                        {
+                            Code = "tr",
+                            Direction = (byte)1,
+                            DisplayName = "Turkish",
+                            IsEnabled = true,
+                            NativeName = "Türkçe",
+                            SortOrder = 7
+                        },
+                        new
+                        {
+                            Code = "fa",
+                            Direction = (byte)2,
+                            DisplayName = "Persian",
+                            IsEnabled = true,
+                            NativeName = "فارسی",
+                            SortOrder = 8
+                        },
+                        new
+                        {
+                            Code = "he",
+                            Direction = (byte)2,
+                            DisplayName = "Hebrew",
+                            IsEnabled = true,
+                            NativeName = "עברית",
+                            SortOrder = 9
+                        });
                 });
 
             modelBuilder.Entity("RestaurantOrdering.Domain.Entities.MediaFile", b =>
@@ -313,6 +530,11 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("ContentVersion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -374,11 +596,104 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
 
                     b.ToTable("MenuItems", t =>
                         {
+                            t.HasCheckConstraint("CK_MenuItems_ContentVersion", "[ContentVersion] >= 1");
+
                             t.HasCheckConstraint("CK_MenuItems_DiscountPrice", "[DiscountPrice] IS NULL OR [DiscountPrice] >= 0");
 
                             t.HasCheckConstraint("CK_MenuItems_DiscountPrice_NotGreaterThanPrice", "[DiscountPrice] IS NULL OR [DiscountPrice] <= [Price]");
 
                             t.HasCheckConstraint("CK_MenuItems_Price", "[Price] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.MenuItemTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("DraftDescription")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("DraftGeneratedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DraftLastError")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("DraftName")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<byte?>("DraftSource")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int?>("DraftSourceVersion")
+                        .HasColumnType("int");
+
+                    b.Property<byte?>("DraftStatus")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("LocaleCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid>("MenuItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<byte?>("PublishedSource")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int?>("PublishedSourceVersion")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovedByUserId");
+
+                    b.HasIndex("LocaleCode");
+
+                    b.HasIndex("MenuItemId", "LocaleCode")
+                        .IsUnique();
+
+                    b.ToTable("MenuItemTranslations", t =>
+                        {
+                            t.HasCheckConstraint("CK_MenuItemTranslations_Description", "[Description] IS NULL OR [Description] <> ''");
+
+                            t.HasCheckConstraint("CK_MenuItemTranslations_DraftContent", "[DraftStatus] IS NULL OR ([DraftName] IS NOT NULL OR [DraftDescription] IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_MenuItemTranslations_DraftSourceVersion", "[DraftSourceVersion] IS NULL OR [DraftSourceVersion] >= 1");
+
+                            t.HasCheckConstraint("CK_MenuItemTranslations_DraftStatus", "[DraftStatus] IS NULL OR [DraftStatus] <> 3");
+
+                            t.HasCheckConstraint("CK_MenuItemTranslations_LocaleCode", "[LocaleCode] <> ''");
+
+                            t.HasCheckConstraint("CK_MenuItemTranslations_Name", "[Name] IS NULL OR [Name] <> ''");
+
+                            t.HasCheckConstraint("CK_MenuItemTranslations_PublishedSourceVersion", "[PublishedSourceVersion] IS NULL OR [PublishedSourceVersion] >= 1");
                         });
                 });
 
@@ -619,6 +934,11 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
+                    b.Property<int>("ContentVersion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.Property<Guid?>("CoverImageFileId")
                         .HasColumnType("uniqueidentifier");
 
@@ -690,7 +1010,10 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                     b.HasIndex("Slug")
                         .IsUnique();
 
-                    b.ToTable("Restaurants");
+                    b.ToTable("Restaurants", t =>
+                        {
+                            t.HasCheckConstraint("CK_Restaurants_ContentVersion", "[ContentVersion] >= 1");
+                        });
                 });
 
             modelBuilder.Entity("RestaurantOrdering.Domain.Entities.RestaurantSettings", b =>
@@ -706,6 +1029,13 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(3)
                         .HasColumnType("nvarchar(3)");
+
+                    b.Property<string>("DefaultLocale")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("ar");
 
                     b.Property<decimal>("DeliveryFee")
                         .HasPrecision(10, 2)
@@ -733,6 +1063,11 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<byte>("TranslationMode")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint")
+                        .HasDefaultValue((byte)2);
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -741,16 +1076,58 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DefaultLocale");
+
                     b.HasIndex("RestaurantId")
                         .IsUnique();
 
                     b.ToTable("RestaurantSettings", t =>
                         {
+                            t.HasCheckConstraint("CK_RestaurantSettings_DefaultLocale", "[DefaultLocale] <> ''");
+
                             t.HasCheckConstraint("CK_RestaurantSettings_DeliveryFee", "[DeliveryFee] >= 0");
 
                             t.HasCheckConstraint("CK_RestaurantSettings_MinimumOrderAmount", "[MinimumOrderAmount] >= 0");
 
                             t.HasCheckConstraint("CK_RestaurantSettings_TaxRate", "[TaxRate] >= 0 AND [TaxRate] <= 100");
+                        });
+                });
+
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.RestaurantSupportedLocale", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("LocaleCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocaleCode");
+
+                    b.HasIndex("RestaurantId", "LocaleCode")
+                        .IsUnique();
+
+                    b.ToTable("RestaurantSupportedLocales", t =>
+                        {
+                            t.HasCheckConstraint("CK_RestaurantSupportedLocales_LocaleCode", "[LocaleCode] <> ''");
                         });
                 });
 
@@ -794,6 +1171,237 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                     b.HasIndex("RestaurantId");
 
                     b.ToTable("RestaurantTables");
+                });
+
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.RestaurantTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("DraftAddress")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("DraftDescription")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("DraftGeneratedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DraftLastError")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("DraftName")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<byte?>("DraftSource")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int?>("DraftSourceVersion")
+                        .HasColumnType("int");
+
+                    b.Property<byte?>("DraftStatus")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("LocaleCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<byte?>("PublishedSource")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int?>("PublishedSourceVersion")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovedByUserId");
+
+                    b.HasIndex("LocaleCode");
+
+                    b.HasIndex("RestaurantId", "LocaleCode")
+                        .IsUnique();
+
+                    b.ToTable("RestaurantTranslations", t =>
+                        {
+                            t.HasCheckConstraint("CK_RestaurantTranslations_Address", "[Address] IS NULL OR [Address] <> ''");
+
+                            t.HasCheckConstraint("CK_RestaurantTranslations_Description", "[Description] IS NULL OR [Description] <> ''");
+
+                            t.HasCheckConstraint("CK_RestaurantTranslations_DraftContent", "[DraftStatus] IS NULL OR ([DraftName] IS NOT NULL OR [DraftDescription] IS NOT NULL OR [DraftAddress] IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_RestaurantTranslations_DraftSourceVersion", "[DraftSourceVersion] IS NULL OR [DraftSourceVersion] >= 1");
+
+                            t.HasCheckConstraint("CK_RestaurantTranslations_DraftStatus", "[DraftStatus] IS NULL OR [DraftStatus] <> 3");
+
+                            t.HasCheckConstraint("CK_RestaurantTranslations_LocaleCode", "[LocaleCode] <> ''");
+
+                            t.HasCheckConstraint("CK_RestaurantTranslations_Name", "[Name] IS NULL OR [Name] <> ''");
+
+                            t.HasCheckConstraint("CK_RestaurantTranslations_PublishedSourceVersion", "[PublishedSourceVersion] IS NULL OR [PublishedSourceVersion] >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.TranslationAuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ActorUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("EntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte?>("EntityType")
+                        .HasColumnType("tinyint");
+
+                    b.Property<byte>("EventType")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("LocaleCode")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PayloadJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorUserId");
+
+                    b.HasIndex("RestaurantId", "CreatedAt");
+
+                    b.ToTable("TranslationAuditLogs");
+                });
+
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.TranslationJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AttemptCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("EntityType")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(180)
+                        .HasColumnType("nvarchar(180)");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("MaxAttempts")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(3);
+
+                    b.Property<DateTime?>("NextAttemptAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SourceLocaleCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("SourceVersion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<byte>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint")
+                        .HasDefaultValue((byte)1);
+
+                    b.Property<string>("TargetLocaleCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique();
+
+                    b.HasIndex("RestaurantId");
+
+                    b.HasIndex("SourceLocaleCode");
+
+                    b.HasIndex("TargetLocaleCode");
+
+                    b.HasIndex("Status", "NextAttemptAt");
+
+                    b.ToTable("TranslationJobs", t =>
+                        {
+                            t.HasCheckConstraint("CK_TranslationJobs_AttemptCount", "[AttemptCount] >= 0");
+
+                            t.HasCheckConstraint("CK_TranslationJobs_MaxAttempts", "[MaxAttempts] >= 1");
+
+                            t.HasCheckConstraint("CK_TranslationJobs_SourceLocaleCode", "[SourceLocaleCode] <> ''");
+
+                            t.HasCheckConstraint("CK_TranslationJobs_SourceVersion", "[SourceVersion] >= 1");
+
+                            t.HasCheckConstraint("CK_TranslationJobs_TargetLocaleCode", "[TargetLocaleCode] <> ''");
+                        });
                 });
 
             modelBuilder.Entity("RestaurantOrdering.Infrastructure.Identity.ApplicationUser", b =>
@@ -945,6 +1553,30 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                     b.Navigation("Restaurant");
                 });
 
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.CategoryTranslation", b =>
+                {
+                    b.HasOne("RestaurantOrdering.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApprovedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("RestaurantOrdering.Domain.Entities.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RestaurantOrdering.Domain.Entities.LocaleDefinition", "Locale")
+                        .WithMany()
+                        .HasForeignKey("LocaleCode")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Locale");
+                });
+
             modelBuilder.Entity("RestaurantOrdering.Domain.Entities.Customer", b =>
                 {
                     b.HasOne("RestaurantOrdering.Domain.Entities.Restaurant", "Restaurant")
@@ -991,6 +1623,30 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                     b.Navigation("ImageFile");
 
                     b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.MenuItemTranslation", b =>
+                {
+                    b.HasOne("RestaurantOrdering.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApprovedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("RestaurantOrdering.Domain.Entities.LocaleDefinition", "Locale")
+                        .WithMany()
+                        .HasForeignKey("LocaleCode")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("RestaurantOrdering.Domain.Entities.MenuItem", "MenuItem")
+                        .WithMany()
+                        .HasForeignKey("MenuItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Locale");
+
+                    b.Navigation("MenuItem");
                 });
 
             modelBuilder.Entity("RestaurantOrdering.Domain.Entities.Order", b =>
@@ -1079,11 +1735,36 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("RestaurantOrdering.Domain.Entities.RestaurantSettings", b =>
                 {
+                    b.HasOne("RestaurantOrdering.Domain.Entities.LocaleDefinition", null)
+                        .WithMany()
+                        .HasForeignKey("DefaultLocale")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("RestaurantOrdering.Domain.Entities.Restaurant", "Restaurant")
                         .WithOne("Settings")
                         .HasForeignKey("RestaurantOrdering.Domain.Entities.RestaurantSettings", "RestaurantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.RestaurantSupportedLocale", b =>
+                {
+                    b.HasOne("RestaurantOrdering.Domain.Entities.LocaleDefinition", "Locale")
+                        .WithMany()
+                        .HasForeignKey("LocaleCode")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("RestaurantOrdering.Domain.Entities.Restaurant", "Restaurant")
+                        .WithMany()
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Locale");
 
                     b.Navigation("Restaurant");
                 });
@@ -1097,6 +1778,73 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.RestaurantTranslation", b =>
+                {
+                    b.HasOne("RestaurantOrdering.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApprovedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("RestaurantOrdering.Domain.Entities.LocaleDefinition", "Locale")
+                        .WithMany()
+                        .HasForeignKey("LocaleCode")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("RestaurantOrdering.Domain.Entities.Restaurant", "Restaurant")
+                        .WithMany()
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Locale");
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.TranslationAuditLog", b =>
+                {
+                    b.HasOne("RestaurantOrdering.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ActorUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("RestaurantOrdering.Domain.Entities.Restaurant", "Restaurant")
+                        .WithMany()
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.TranslationJob", b =>
+                {
+                    b.HasOne("RestaurantOrdering.Domain.Entities.Restaurant", "Restaurant")
+                        .WithMany()
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RestaurantOrdering.Domain.Entities.LocaleDefinition", "SourceLocale")
+                        .WithMany()
+                        .HasForeignKey("SourceLocaleCode")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("RestaurantOrdering.Domain.Entities.LocaleDefinition", "TargetLocale")
+                        .WithMany()
+                        .HasForeignKey("TargetLocaleCode")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Restaurant");
+
+                    b.Navigation("SourceLocale");
+
+                    b.Navigation("TargetLocale");
                 });
 
             modelBuilder.Entity("RestaurantOrdering.Infrastructure.Identity.ApplicationUser", b =>

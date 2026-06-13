@@ -21,6 +21,10 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(c => c.DescriptionEn)
             .HasMaxLength(300);
 
+        builder.Property(c => c.ContentVersion)
+            .IsRequired()
+            .HasDefaultValue(1);
+
         builder.HasIndex(c => new { c.RestaurantId, c.IsActive, c.IsDeleted });
 
         builder.HasOne(c => c.Restaurant)
@@ -29,5 +33,10 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasQueryFilter(c => !c.IsDeleted);
+
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_Categories_ContentVersion", "[ContentVersion] >= 1");
+        });
     }
 }

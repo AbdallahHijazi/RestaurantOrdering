@@ -21,6 +21,7 @@ public class Restaurant : AuditableEntity, ISoftDelete
     public decimal? Longitude { get; set; }
     public bool IsActive { get; set; } = true;
     public bool IsDeleted { get; set; }
+    public int ContentVersion { get; set; } = 1;
 
     public RestaurantSettings? Settings { get; set; }
     public ICollection<Category> Categories { get; set; } = new List<Category>();

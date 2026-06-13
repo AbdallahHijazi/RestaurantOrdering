@@ -12,6 +12,7 @@ public class Category : AuditableEntity, ISoftDelete
     public int DisplayOrder { get; set; }
     public bool IsActive { get; set; } = true;
     public bool IsDeleted { get; set; }
+    public int ContentVersion { get; set; } = 1;
 
     public Restaurant Restaurant { get; set; } = null!;
     public ICollection<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
