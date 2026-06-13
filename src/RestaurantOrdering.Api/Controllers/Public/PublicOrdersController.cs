@@ -42,6 +42,7 @@ public sealed class PublicOrdersController : ControllerBase
             request.DeliveryLatitude,
             request.DeliveryLongitude,
             request.Notes,
+            request.Locale,
             request.Items?
                 .Select(item => new ApplicationCreatePublicOrderItemRequest(
                     item.MenuItemId,

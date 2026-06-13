@@ -734,6 +734,11 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
 
+                    b.Property<bool>("FallbackApplied")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<string>("GuestName")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -759,6 +764,17 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
 
                     b.Property<byte>("OrderType")
                         .HasColumnType("tinyint");
+
+                    b.Property<string>("RequestedLocale")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("ResolvedLocale")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("ar");
 
                     b.Property<Guid>("RestaurantId")
                         .HasColumnType("uniqueidentifier");
@@ -822,6 +838,18 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("DisplayedItemName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("DisplayedLocale")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("ar");
 
                     b.Property<string>("ItemNameAr")
                         .IsRequired()

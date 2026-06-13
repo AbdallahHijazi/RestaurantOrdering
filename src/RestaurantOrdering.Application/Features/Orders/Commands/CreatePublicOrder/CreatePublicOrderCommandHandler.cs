@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RestaurantOrdering.Application.Common.Exceptions;
 using RestaurantOrdering.Application.Common.Interfaces;
+using RestaurantOrdering.Application.Common.Localization;
 using RestaurantOrdering.Application.Features.Orders.Common;
 using RestaurantOrdering.Application.Features.Orders.DTOs;
 using RestaurantOrdering.Application.Features.RestaurantTables.Common;
@@ -16,13 +17,16 @@ public sealed class CreatePublicOrderCommandHandler
 {
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTimeService;
+    private readonly IPublicLocaleResolver _publicLocaleResolver;
 
     public CreatePublicOrderCommandHandler(
         IApplicationDbContext context,
-        IDateTimeService dateTimeService)
+        IDateTimeService dateTimeService,
+        IPublicLocaleResolver publicLocaleResolver)
     {
         _context = context;
         _dateTimeService = dateTimeService;
+        _publicLocaleResolver = publicLocaleResolver;
     }
 
     public async Task<PublicOrderConfirmationDto> Handle(
@@ -73,6 +77,18 @@ public sealed class CreatePublicOrderCommandHandler
             tableId = table.Id;
         }
 
+        var localeContext = await PublicLocaleContextLoader.LoadAsync(
+            _context,
+            restaurant.Id,
+            settings.DefaultLocale,
+            cancellationToken);
+
+        var menuLocale = _publicLocaleResolver.ResolveMenuLocale(
+            request.Locale,
+            localeContext.DefaultLocale,
+            localeContext.SupportedLocales,
+            localeContext.LocaleDefinitions);
+
         var guestName = request.GuestName.Trim();
         var guestPhone = request.GuestPhone.Trim();
         var notes = TrimToOptional(request.Notes);
@@ -111,9 +127,14 @@ public sealed class CreatePublicOrderCommandHandler
 
         var menuItemsById = menuItems.ToDictionary(item => item.Id);
 
+        var menuItemTranslations = await PublicMenuTranslationLoader.LoadMenuItemsAsync(
+            _context,
+            menuItemIds,
+            cancellationToken);
+
         var utcNow = _dateTimeService.UtcNow;
         var orderItems = new List<OrderItem>();
-        decimal subtotal = 0m;
+        decimal subtotal = 0;
 
         foreach (var requestItem in request.Items)
         {
@@ -121,6 +142,18 @@ public sealed class CreatePublicOrderCommandHandler
             {
                 throw new NotFoundException("MenuItem", requestItem.MenuItemId);
             }
+
+            var localizedItem = _publicLocaleResolver.ResolveMenuItemContent(
+                menuLocale,
+                localeContext.DefaultLocale,
+                localeContext.SupportedLocales,
+                localeContext.LocaleDefinitions,
+                PublicMenuTranslationLoader.GetMenuItemTranslations(menuItemTranslations, menuItem.Id),
+                menuItem.ContentVersion,
+                menuItem.NameAr,
+                menuItem.NameEn,
+                menuItem.DescriptionAr,
+                menuItem.DescriptionEn);
 
             var unitPrice = menuItem.DiscountPrice ?? menuItem.Price;
             var totalPrice = unitPrice * requestItem.Quantity;
@@ -131,6 +164,8 @@ public sealed class CreatePublicOrderCommandHandler
                 MenuItemId = requestItem.MenuItemId,
                 ItemNameAr = menuItem.NameAr,
                 ItemNameEn = menuItem.NameEn,
+                DisplayedItemName = localizedItem.Name,
+                DisplayedLocale = localizedItem.ResolvedLocale,
                 UnitPrice = unitPrice,
                 Quantity = requestItem.Quantity,
                 TotalPrice = totalPrice,
@@ -175,6 +210,9 @@ public sealed class CreatePublicOrderCommandHandler
             TotalAmount = totalAmount,
             CurrencyCode = settings.CurrencyCode,
             Notes = notes,
+            RequestedLocale = menuLocale.RequestedLocale,
+            ResolvedLocale = menuLocale.ResolvedLocale,
+            FallbackApplied = menuLocale.FallbackApplied,
             IsDeleted = false,
             CreatedAt = utcNow,
             OrderItems = orderItems

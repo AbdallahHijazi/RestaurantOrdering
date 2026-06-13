@@ -24,6 +24,18 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.Notes)
             .HasMaxLength(500);
 
+        builder.Property(o => o.RequestedLocale)
+            .HasMaxLength(20);
+
+        builder.Property(o => o.ResolvedLocale)
+            .HasMaxLength(20)
+            .HasDefaultValue("ar")
+            .IsRequired();
+
+        builder.Property(o => o.FallbackApplied)
+            .HasDefaultValue(false)
+            .IsRequired();
+
         builder.Property(o => o.CurrencyCode)
             .HasMaxLength(3)
             .IsRequired();

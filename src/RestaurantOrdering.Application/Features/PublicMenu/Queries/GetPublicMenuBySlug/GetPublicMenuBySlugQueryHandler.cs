@@ -7,7 +7,6 @@ using RestaurantOrdering.Application.Features.PublicMenu.Common;
 using RestaurantOrdering.Application.Features.PublicMenu.DTOs;
 using RestaurantOrdering.Application.Features.Restaurants.Common;
 using RestaurantOrdering.Domain.Entities;
-using RestaurantOrdering.Domain.Enums;
 
 namespace RestaurantOrdering.Application.Features.PublicMenu.Queries.GetPublicMenuBySlug;
 
@@ -46,35 +45,15 @@ public sealed class GetPublicMenuBySlugQueryHandler
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.RestaurantId == restaurant.Id, cancellationToken);
 
-        var defaultLocale = string.IsNullOrWhiteSpace(settings?.DefaultLocale)
-            ? "ar"
-            : settings.DefaultLocale.Trim().ToLowerInvariant();
+        var localeContext = await PublicLocaleContextLoader.LoadAsync(
+            _context,
+            restaurant.Id,
+            settings?.DefaultLocale,
+            cancellationToken);
 
-        var supportedLocales = await _context.RestaurantSupportedLocales
-            .AsNoTracking()
-            .Where(item => item.RestaurantId == restaurant.Id)
-            .OrderBy(item => item.SortOrder)
-            .Select(item => new PublicRestaurantSupportedLocale(item.LocaleCode, item.IsEnabled, item.SortOrder))
-            .ToListAsync(cancellationToken);
-
-        if (supportedLocales.Count == 0)
-        {
-            supportedLocales =
-            [
-                new PublicRestaurantSupportedLocale("ar", true, 1),
-                new PublicRestaurantSupportedLocale("en", true, 2)
-            ];
-        }
-
-        var localeDefinitions = await _context.LocaleDefinitions
-            .AsNoTracking()
-            .Where(item => item.IsEnabled)
-            .ToDictionaryAsync(
-                item => item.Code,
-                item => new PublicLocaleDefinitionInfo(
-                    item.Code,
-                    item.Direction == TextDirection.Rtl ? "rtl" : "ltr"),
-                cancellationToken);
+        var defaultLocale = localeContext.DefaultLocale;
+        var supportedLocales = localeContext.SupportedLocales;
+        var localeDefinitions = localeContext.LocaleDefinitions;
 
         var menuLocale = _publicLocaleResolver.ResolveMenuLocale(
             request.Lang,

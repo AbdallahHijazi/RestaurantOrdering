@@ -15,6 +15,15 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         builder.Property(oi => oi.ItemNameEn)
             .HasMaxLength(150);
 
+        builder.Property(oi => oi.DisplayedItemName)
+            .HasMaxLength(150)
+            .IsRequired();
+
+        builder.Property(oi => oi.DisplayedLocale)
+            .HasMaxLength(20)
+            .HasDefaultValue("ar")
+            .IsRequired();
+
         builder.Property(oi => oi.UnitPrice)
             .HasPrecision(10, 2)
             .IsRequired();

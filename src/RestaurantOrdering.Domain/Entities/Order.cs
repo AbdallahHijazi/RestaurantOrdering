@@ -23,6 +23,9 @@ public class Order : AuditableEntity, ISoftDelete
     public decimal TotalAmount { get; set; }
     public string CurrencyCode { get; set; } = "USD";
     public string? Notes { get; set; }
+    public string? RequestedLocale { get; set; }
+    public string ResolvedLocale { get; set; } = "ar";
+    public bool FallbackApplied { get; set; }
     public bool IsDeleted { get; set; }
 
     public Restaurant Restaurant { get; set; } = null!;

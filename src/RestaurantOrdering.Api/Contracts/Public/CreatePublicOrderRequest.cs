@@ -12,6 +12,7 @@ public sealed class CreatePublicOrderRequest
     public decimal? DeliveryLatitude { get; init; }
     public decimal? DeliveryLongitude { get; init; }
     public string? Notes { get; init; }
+    public string? Locale { get; init; }
     public IReadOnlyList<CreatePublicOrderItemRequest> Items { get; init; } =
         Array.Empty<CreatePublicOrderItemRequest>();
 }
