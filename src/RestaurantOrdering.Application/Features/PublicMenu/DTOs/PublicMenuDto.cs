@@ -24,5 +24,12 @@ public class PublicMenuDto
     public decimal? MinimumOrderAmount { get; init; }
     public bool? IsDeliveryEnabled { get; init; }
     public bool? IsPickupEnabled { get; init; }
+    public string? RequestedLocale { get; init; }
+    public string ResolvedLocale { get; init; } = "ar";
+    public bool FallbackApplied { get; init; }
+    public string Direction { get; init; } = "ltr";
+    public string Name { get; init; } = string.Empty;
+    public string? Description { get; init; }
+    public string? Address { get; init; }
     public IReadOnlyList<PublicMenuCategoryDto> Categories { get; init; } = Array.Empty<PublicMenuCategoryDto>();
 }

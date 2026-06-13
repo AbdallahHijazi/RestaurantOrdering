@@ -7,6 +7,7 @@ using RestaurantOrdering.Application.Features.PublicMenu.Common;
 using RestaurantOrdering.Application.Features.PublicMenu.DTOs;
 using RestaurantOrdering.Application.Features.Restaurants.Common;
 using RestaurantOrdering.Domain.Entities;
+using RestaurantOrdering.Domain.Enums;
 
 namespace RestaurantOrdering.Application.Features.PublicMenu.Queries.GetPublicMenuBySlug;
 
@@ -14,10 +15,14 @@ public sealed class GetPublicMenuBySlugQueryHandler
     : IRequestHandler<GetPublicMenuBySlugQuery, PublicMenuDto>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IPublicLocaleResolver _publicLocaleResolver;
 
-    public GetPublicMenuBySlugQueryHandler(IApplicationDbContext context)
+    public GetPublicMenuBySlugQueryHandler(
+        IApplicationDbContext context,
+        IPublicLocaleResolver publicLocaleResolver)
     {
         _context = context;
+        _publicLocaleResolver = publicLocaleResolver;
     }
 
     public async Task<PublicMenuDto> Handle(
@@ -37,17 +42,72 @@ public sealed class GetPublicMenuBySlugQueryHandler
             throw new NotFoundException("Restaurant", normalizedSlug);
         }
 
-        var restaurantTranslations = await LegacyBilingualTranslationLoader.LoadRestaurantAsync(
+        var settings = await _context.RestaurantSettings
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.RestaurantId == restaurant.Id, cancellationToken);
+
+        var defaultLocale = string.IsNullOrWhiteSpace(settings?.DefaultLocale)
+            ? "ar"
+            : settings.DefaultLocale.Trim().ToLowerInvariant();
+
+        var supportedLocales = await _context.RestaurantSupportedLocales
+            .AsNoTracking()
+            .Where(item => item.RestaurantId == restaurant.Id)
+            .OrderBy(item => item.SortOrder)
+            .Select(item => new PublicRestaurantSupportedLocale(item.LocaleCode, item.IsEnabled, item.SortOrder))
+            .ToListAsync(cancellationToken);
+
+        if (supportedLocales.Count == 0)
+        {
+            supportedLocales =
+            [
+                new PublicRestaurantSupportedLocale("ar", true, 1),
+                new PublicRestaurantSupportedLocale("en", true, 2)
+            ];
+        }
+
+        var localeDefinitions = await _context.LocaleDefinitions
+            .AsNoTracking()
+            .Where(item => item.IsEnabled)
+            .ToDictionaryAsync(
+                item => item.Code,
+                item => new PublicLocaleDefinitionInfo(
+                    item.Code,
+                    item.Direction == TextDirection.Rtl ? "rtl" : "ltr"),
+                cancellationToken);
+
+        var menuLocale = _publicLocaleResolver.ResolveMenuLocale(
+            request.Lang,
+            defaultLocale,
+            supportedLocales,
+            localeDefinitions);
+
+        var legacyRestaurantTranslations = await LegacyBilingualTranslationLoader.LoadRestaurantAsync(
             _context,
             restaurant.Id,
             cancellationToken);
 
-        restaurantTranslations.TryGetValue("ar", out var restaurantArTranslation);
-        restaurantTranslations.TryGetValue("en", out var restaurantEnTranslation);
+        legacyRestaurantTranslations.TryGetValue("ar", out var restaurantArTranslation);
+        legacyRestaurantTranslations.TryGetValue("en", out var restaurantEnTranslation);
 
-        var settings = await _context.RestaurantSettings
-            .AsNoTracking()
-            .FirstOrDefaultAsync(s => s.RestaurantId == restaurant.Id, cancellationToken);
+        var restaurantTranslations = await PublicMenuTranslationLoader.LoadRestaurantAsync(
+            _context,
+            restaurant.Id,
+            cancellationToken);
+
+        var localizedRestaurant = _publicLocaleResolver.ResolveRestaurantContent(
+            menuLocale,
+            defaultLocale,
+            supportedLocales,
+            localeDefinitions,
+            restaurantTranslations,
+            restaurant.ContentVersion,
+            restaurant.NameAr,
+            restaurant.NameEn,
+            restaurant.DescriptionAr,
+            restaurant.DescriptionEn,
+            restaurant.AddressAr,
+            restaurant.AddressEn);
 
         var categories = await _context.Categories
             .AsNoTracking()
@@ -69,12 +129,22 @@ public sealed class GetPublicMenuBySlugQueryHandler
             .ThenBy(item => item.NameAr)
             .ToListAsync(cancellationToken);
 
-        var categoryTranslations = await LegacyBilingualTranslationLoader.LoadCategoriesAsync(
+        var legacyCategoryTranslations = await LegacyBilingualTranslationLoader.LoadCategoriesAsync(
             _context,
             categories.Select(c => c.Id).ToList(),
             cancellationToken);
 
-        var menuItemTranslations = await LegacyBilingualTranslationLoader.LoadMenuItemsAsync(
+        var legacyMenuItemTranslations = await LegacyBilingualTranslationLoader.LoadMenuItemsAsync(
+            _context,
+            menuItems.Select(item => item.Id).ToList(),
+            cancellationToken);
+
+        var categoryTranslations = await PublicMenuTranslationLoader.LoadCategoriesAsync(
+            _context,
+            categories.Select(c => c.Id).ToList(),
+            cancellationToken);
+
+        var menuItemTranslations = await PublicMenuTranslationLoader.LoadMenuItemsAsync(
             _context,
             menuItems.Select(item => item.Id).ToList(),
             cancellationToken);
@@ -123,10 +193,32 @@ public sealed class GetPublicMenuBySlugQueryHandler
             .ToDictionary(
                 group => group.Key,
                 group => (IReadOnlyList<PublicMenuItemDto>)group
-                    .Select(item => item.ToPublicMenuItemDto(
-                        ResolveImageUrl(item),
-                        LegacyBilingualTranslationLoader.GetMenuItemTranslation(menuItemTranslations, item.Id, "ar"),
-                        LegacyBilingualTranslationLoader.GetMenuItemTranslation(menuItemTranslations, item.Id, "en")))
+                    .Select(item =>
+                    {
+                        var localizedItem = _publicLocaleResolver.ResolveMenuItemContent(
+                            menuLocale,
+                            defaultLocale,
+                            supportedLocales,
+                            localeDefinitions,
+                            PublicMenuTranslationLoader.GetMenuItemTranslations(menuItemTranslations, item.Id),
+                            item.ContentVersion,
+                            item.NameAr,
+                            item.NameEn,
+                            item.DescriptionAr,
+                            item.DescriptionEn);
+
+                        return item.ToPublicMenuItemDto(
+                            ResolveImageUrl(item),
+                            LegacyBilingualTranslationLoader.GetMenuItemTranslation(
+                                legacyMenuItemTranslations,
+                                item.Id,
+                                "ar"),
+                            LegacyBilingualTranslationLoader.GetMenuItemTranslation(
+                                legacyMenuItemTranslations,
+                                item.Id,
+                                "en"),
+                            localizedItem);
+                    })
                     .ToList()
                     .AsReadOnly());
 
@@ -134,10 +226,29 @@ public sealed class GetPublicMenuBySlugQueryHandler
             .Select(category =>
             {
                 itemsByCategoryId.TryGetValue(category.Id, out var items);
+                var localizedCategory = _publicLocaleResolver.ResolveCategoryContent(
+                    menuLocale,
+                    defaultLocale,
+                    supportedLocales,
+                    localeDefinitions,
+                    PublicMenuTranslationLoader.GetCategoryTranslations(categoryTranslations, category.Id),
+                    category.ContentVersion,
+                    category.NameAr,
+                    category.NameEn,
+                    category.DescriptionAr,
+                    category.DescriptionEn);
+
                 return category.ToPublicMenuCategoryDto(
                     items ?? Array.Empty<PublicMenuItemDto>(),
-                    LegacyBilingualTranslationLoader.GetCategoryTranslation(categoryTranslations, category.Id, "ar"),
-                    LegacyBilingualTranslationLoader.GetCategoryTranslation(categoryTranslations, category.Id, "en"));
+                    LegacyBilingualTranslationLoader.GetCategoryTranslation(
+                        legacyCategoryTranslations,
+                        category.Id,
+                        "ar"),
+                    LegacyBilingualTranslationLoader.GetCategoryTranslation(
+                        legacyCategoryTranslations,
+                        category.Id,
+                        "en"),
+                    localizedCategory);
             })
             .ToList()
             .AsReadOnly();
@@ -147,13 +258,25 @@ public sealed class GetPublicMenuBySlugQueryHandler
             Id = restaurant.Id,
             Slug = restaurant.Slug,
             NameAr = PublishedTranslationDualRead.ResolveRequired(
-                restaurantArTranslation?.Name, restaurantArTranslation?.PublishedSourceVersion, restaurant.ContentVersion, restaurant.NameAr),
+                restaurantArTranslation?.Name,
+                restaurantArTranslation?.PublishedSourceVersion,
+                restaurant.ContentVersion,
+                restaurant.NameAr),
             NameEn = PublishedTranslationDualRead.ResolveOptional(
-                restaurantEnTranslation?.Name, restaurantEnTranslation?.PublishedSourceVersion, restaurant.ContentVersion, restaurant.NameEn),
+                restaurantEnTranslation?.Name,
+                restaurantEnTranslation?.PublishedSourceVersion,
+                restaurant.ContentVersion,
+                restaurant.NameEn),
             DescriptionAr = PublishedTranslationDualRead.ResolveOptional(
-                restaurantArTranslation?.Description, restaurantArTranslation?.PublishedSourceVersion, restaurant.ContentVersion, restaurant.DescriptionAr),
+                restaurantArTranslation?.Description,
+                restaurantArTranslation?.PublishedSourceVersion,
+                restaurant.ContentVersion,
+                restaurant.DescriptionAr),
             DescriptionEn = PublishedTranslationDualRead.ResolveOptional(
-                restaurantEnTranslation?.Description, restaurantEnTranslation?.PublishedSourceVersion, restaurant.ContentVersion, restaurant.DescriptionEn),
+                restaurantEnTranslation?.Description,
+                restaurantEnTranslation?.PublishedSourceVersion,
+                restaurant.ContentVersion,
+                restaurant.DescriptionEn),
             LogoFileId = restaurant.LogoFileId,
             LogoUrl = ResolveMediaUrl(restaurant.LogoFileId),
             CoverImageUrl = ResolveMediaUrl(restaurant.CoverImageFileId),
@@ -161,9 +284,15 @@ public sealed class GetPublicMenuBySlugQueryHandler
             PhoneNumber = restaurant.PhoneNumber,
             WhatsAppNumber = restaurant.WhatsAppNumber,
             AddressAr = PublishedTranslationDualRead.ResolveOptional(
-                restaurantArTranslation?.Address, restaurantArTranslation?.PublishedSourceVersion, restaurant.ContentVersion, restaurant.AddressAr),
+                restaurantArTranslation?.Address,
+                restaurantArTranslation?.PublishedSourceVersion,
+                restaurant.ContentVersion,
+                restaurant.AddressAr),
             AddressEn = PublishedTranslationDualRead.ResolveOptional(
-                restaurantEnTranslation?.Address, restaurantEnTranslation?.PublishedSourceVersion, restaurant.ContentVersion, restaurant.AddressEn),
+                restaurantEnTranslation?.Address,
+                restaurantEnTranslation?.PublishedSourceVersion,
+                restaurant.ContentVersion,
+                restaurant.AddressEn),
             Latitude = restaurant.Latitude,
             Longitude = restaurant.Longitude,
             CurrencyCode = settings?.CurrencyCode,
@@ -172,6 +301,13 @@ public sealed class GetPublicMenuBySlugQueryHandler
             MinimumOrderAmount = settings?.MinimumOrderAmount,
             IsDeliveryEnabled = settings?.IsDeliveryEnabled,
             IsPickupEnabled = settings?.IsPickupEnabled,
+            RequestedLocale = menuLocale.RequestedLocale,
+            ResolvedLocale = menuLocale.ResolvedLocale,
+            FallbackApplied = menuLocale.FallbackApplied,
+            Direction = menuLocale.Direction,
+            Name = localizedRestaurant.Name,
+            Description = localizedRestaurant.Description,
+            Address = localizedRestaurant.Address,
             Categories = categoryDtos
         };
     }

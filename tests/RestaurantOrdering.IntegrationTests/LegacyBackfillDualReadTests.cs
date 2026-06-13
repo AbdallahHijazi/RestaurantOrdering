@@ -276,7 +276,7 @@ public sealed class LegacyBackfillDualReadTests : IAsyncLifetime
 
         publicRestaurant.NameAr.Should().Be("Published Restaurant Arabic");
 
-        var publicMenu = await new GetPublicMenuBySlugQueryHandler(_context)
+        var publicMenu = await new GetPublicMenuBySlugQueryHandler(_context, new PublicLocaleResolver())
             .Handle(new GetPublicMenuBySlugQuery(restaurant.Slug), CancellationToken.None);
 
         publicMenu.Categories.Single().NameAr.Should().Be("Published Category Arabic");

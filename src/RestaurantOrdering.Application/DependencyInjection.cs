@@ -35,6 +35,7 @@ public static class DependencyInjection
         services.AddScoped<IPublishedTranslationWriter, PublishedTranslationWriter>();
         services.AddScoped<ITranslationJobEnqueuer, TranslationJobEnqueuer>();
         services.AddScoped<ITranslationJobProcessor, TranslationJobProcessor>();
+        services.AddScoped<IPublicLocaleResolver, PublicLocaleResolver>();
 
         return services;
     }

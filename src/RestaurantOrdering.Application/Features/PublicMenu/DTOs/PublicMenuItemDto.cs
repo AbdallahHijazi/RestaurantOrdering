@@ -13,4 +13,8 @@ public class PublicMenuItemDto
     public decimal Price { get; init; }
     public decimal? DiscountPrice { get; init; }
     public int DisplayOrder { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public string? Description { get; init; }
+    public string ResolvedLocale { get; init; } = "ar";
+    public bool FallbackApplied { get; init; }
 }
