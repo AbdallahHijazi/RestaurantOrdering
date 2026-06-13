@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { LocaleService } from '../../../../core/localization/locale';
 import { PublicCartService } from '../../data-access/public-cart.service';
+import { cartLineDisplayName, type PublicCartLineItem } from '../../models/public-cart.models';
 import type { PublicRestaurantOrderSettings } from '../../models/public-menu.models';
 import { displayUnitPrice, estimateOrderTotals } from '../../utils/order-estimate.util';
 import { ORDER_TYPE_PICKUP } from '../../models/public-menu.models';
@@ -26,6 +27,7 @@ export class PublicCartDrawer {
   readonly open = input(false);
   readonly orderSettings = input.required<PublicRestaurantOrderSettings>();
   readonly countryCode = input('SA');
+  readonly contentLocale = input<string>('ar');
   readonly imageFallback = input(MOCK_IMAGE_FALLBACK);
 
   readonly closed = output<void>();
@@ -60,8 +62,28 @@ export class PublicCartDrawer {
     }
   }
 
-  protected lineName(line: { nameAr: string; nameEn?: string | null }): string {
-    return this.localeService.pickText({ ar: line.nameAr, en: line.nameEn }, line.nameAr);
+  protected lineName(line: PublicCartLineItem): string {
+    return cartLineDisplayName(
+      line,
+      (locale, resolved, legacy, fallback) =>
+        this.localeService.pickResolvedTextForLocale(locale, resolved, legacy, fallback),
+      this.contentLocale(),
+    );
+  }
+
+  private menuItemFromLine(line: PublicCartLineItem) {
+    return {
+      id: line.menuItemId,
+      categoryId: '',
+      name: line.name ?? null,
+      nameAr: line.nameAr,
+      nameEn: line.nameEn,
+      resolvedLocale: line.resolvedLocale ?? null,
+      price: line.price,
+      discountPrice: line.discountPrice,
+      imageUrl: line.imageUrl,
+      isAvailable: true,
+    };
   }
 
   protected formatMoney(amount: number): string {
@@ -100,19 +122,7 @@ export class PublicCartDrawer {
       return;
     }
 
-    this.cart.setQuantity(
-      {
-        id: line.menuItemId,
-        categoryId: '',
-        nameAr: line.nameAr,
-        nameEn: line.nameEn,
-        price: line.price,
-        discountPrice: line.discountPrice,
-        imageUrl: line.imageUrl,
-        isAvailable: true,
-      },
-      line.quantity + 1,
-    );
+    this.cart.setQuantity(this.menuItemFromLine(line), line.quantity + 1);
   }
 
   protected decrement(lineId: string): void {
@@ -121,19 +131,7 @@ export class PublicCartDrawer {
       return;
     }
 
-    this.cart.setQuantity(
-      {
-        id: line.menuItemId,
-        categoryId: '',
-        nameAr: line.nameAr,
-        nameEn: line.nameEn,
-        price: line.price,
-        discountPrice: line.discountPrice,
-        imageUrl: line.imageUrl,
-        isAvailable: true,
-      },
-      line.quantity - 1,
-    );
+    this.cart.setQuantity(this.menuItemFromLine(line), line.quantity - 1);
   }
 
   protected remove(lineId: string): void {

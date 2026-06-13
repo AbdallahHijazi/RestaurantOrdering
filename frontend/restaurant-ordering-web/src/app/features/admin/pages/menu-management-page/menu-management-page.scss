@@ -41,6 +41,9 @@
 .menu-management-state,.menu-management-empty-filtered{padding:2rem 1rem;border:1px dashed var(--restaurant-border);border-radius:1rem;background:var(--restaurant-surface-soft);color:var(--menu-muted);text-align:center}
 .menu-management-state--error{border-color:var(--restaurant-danger);background:var(--menu-red-soft)}
 .menu-management-form{display:flex;flex-direction:column;gap:.75rem}
+.menu-management-form-notice{padding:.75rem .85rem;border-radius:.75rem;background:var(--restaurant-accent-soft);color:var(--menu-text);line-height:1.5}
+.menu-management-form-notice p{margin:0}
+.menu-management-form-notice p+p{margin-top:.35rem;font-weight:600}
 .menu-management-form label{display:flex;flex-direction:column;gap:.35rem;font-weight:600;color:var(--menu-text)}
 .menu-management-form input,.menu-management-form textarea,.menu-management-form select{font:inherit;border:1px solid var(--menu-line);border-radius:.75rem;padding:.55rem .65rem;background:var(--restaurant-surface-soft);color:var(--menu-text)}
 .menu-management-checkbox{flex-direction:row!important;align-items:center;gap:.5rem!important;font-weight:500!important}

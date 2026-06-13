@@ -105,7 +105,18 @@ describe('MenuManagementPage', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="menu-meals-count"]')?.textContent).toContain('1');
   });
 
-  it('opens add category modal and creates a category', () => {
+  it('opens add category modal with dynamic name field and primary language notice', () => {
+    fixture.nativeElement.querySelector('[data-testid="menu-add-category-button"]').click();
+    fixture.detectChanges();
+
+    expect(document.body.querySelector('[data-testid="menu-modal"]')).toBeTruthy();
+    expect(document.body.querySelector('input[formcontrolname="nameAr"]')).toBeNull();
+    expect(document.body.querySelector('input[formcontrolname="name"]')).toBeTruthy();
+    expect(document.body.querySelector('[data-testid="menu-catalog-primary-notice"]')).toBeTruthy();
+    expect(document.body.textContent).toContain('العربية');
+  });
+
+  it('opens add category modal and creates a category via catalog API', () => {
     fixture.nativeElement.querySelector('[data-testid="menu-add-category-button"]').click();
     fixture.detectChanges();
 
@@ -114,18 +125,23 @@ describe('MenuManagementPage', () => {
       document.body.querySelector('[data-testid="order-modal-close"]')?.classList.contains('modal-close-button'),
     ).toBe(true);
 
-    setInputValue('input[formcontrolname="nameAr"]', 'فئة جديدة');
+    setInputValue('input[formcontrolname="name"]', 'فئة جديدة');
     fixture.debugElement.query(By.css('form')).triggerEventHandler('submit', new Event('submit'));
     fixture.detectChanges();
 
-    httpMock
-      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/categories`)
-      .flush({
-        ...sampleCategory(),
-        id: 'new-category',
-        nameAr: 'فئة جديدة',
-        itemCount: 0,
-      });
+    const req = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/catalog/categories`,
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(
+      expect.objectContaining({ name: 'فئة جديدة', description: null }),
+    );
+    req.flush({
+      ...sampleCategory(),
+      id: 'new-category',
+      nameAr: 'فئة جديدة',
+      itemCount: 0,
+    });
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('[data-testid="menu-success-message"]')).toBeTruthy();
@@ -200,14 +216,15 @@ describe('MenuManagementPage', () => {
     fixture.nativeElement.querySelector(`[data-testid="menu-edit-category-${CATEGORY_ID}"]`).click();
     fixture.detectChanges();
 
-    setInputValue('input[formcontrolname="nameAr"]', 'فئة محدثة');
+    setInputValue('input[formcontrolname="name"]', 'فئة محدثة');
     fixture.debugElement.query(By.css('form')).triggerEventHandler('submit', new Event('submit'));
     fixture.detectChanges();
 
     const req = httpMock.expectOne(
-      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/categories/${CATEGORY_ID}`,
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/catalog/categories/${CATEGORY_ID}`,
     );
     expect(req.request.method).toBe('PUT');
+    expect(req.request.body.name).toBe('فئة محدثة');
     req.flush({ ...sampleCategory(), nameAr: 'فئة محدثة' });
     fixture.detectChanges();
 
@@ -223,12 +240,12 @@ describe('MenuManagementPage', () => {
     fixture.nativeElement.querySelector(`[data-testid="menu-edit-category-${CATEGORY_ID}"]`).click();
     fixture.detectChanges();
 
-    setInputValue('input[formcontrolname="nameAr"]', 'فئة محدثة');
+    setInputValue('input[formcontrolname="name"]', 'فئة محدثة');
     fixture.debugElement.query(By.css('form')).triggerEventHandler('submit', new Event('submit'));
     fixture.detectChanges();
 
     httpMock
-      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/categories/${CATEGORY_ID}`)
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/catalog/categories/${CATEGORY_ID}`)
       .flush('Bad Request', { status: 400, statusText: 'Bad Request' });
     fixture.detectChanges();
 
@@ -277,11 +294,11 @@ describe('MenuManagementPage', () => {
     fixture.detectChanges();
 
     const req = httpMock.expectOne(
-      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/menu-items/${ITEM_ID}`,
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/catalog/menu-items/${ITEM_ID}`,
     );
     expect(req.request.method).toBe('PUT');
     expect(req.request.body.isAvailable).toBe(false);
-    expect(req.request.body.nameAr).toBe('صنف');
+    expect(req.request.body.name).toBe('صنف');
     req.flush({ ...sampleItem(), isAvailable: false });
     fixture.detectChanges();
   });
@@ -345,7 +362,7 @@ describe('MenuManagementPage', () => {
     input.dispatchEvent(new Event('change'));
     fixture.detectChanges();
 
-    setInputValue('input[formcontrolname="nameAr"]', 'وجبة');
+    setInputValue('input[formcontrolname="name"]', 'وجبة');
     fixture.debugElement.query(By.css('form')).triggerEventHandler('submit', new Event('submit'));
     fixture.detectChanges();
 
@@ -360,9 +377,10 @@ describe('MenuManagementPage', () => {
     });
 
     const saveReq = httpMock.expectOne(
-      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/menu-items`,
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/catalog/menu-items`,
     );
     expect(saveReq.request.body.imageFileId).toBe('media-id');
+    expect(saveReq.request.body.name).toBe('وجبة');
     saveReq.flush(sampleItem());
     fixture.detectChanges();
   });
@@ -382,6 +400,17 @@ describe('MenuManagementPage', () => {
   });
 
   function flushInitialRequests(): void {
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`)
+      .flush({
+        defaultLocale: 'ar',
+        translationMode: 'ManualOnly',
+        supportedLocales: [{ code: 'ar', isEnabled: true, sortOrder: 1 }],
+        availableLocales: [
+          { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+        ],
+        canManageLocales: true,
+      });
     httpMock
       .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/categories`)
       .flush([sampleCategory()]);

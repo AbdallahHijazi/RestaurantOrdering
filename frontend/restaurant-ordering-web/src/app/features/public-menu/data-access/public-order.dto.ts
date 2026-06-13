@@ -10,6 +10,7 @@ export interface CreatePublicOrderApiRequest {
   deliveryLatitude?: number | null;
   deliveryLongitude?: number | null;
   notes?: string | null;
+  locale?: string | null;
   items: CreatePublicOrderItemApiRequest[];
 }
 

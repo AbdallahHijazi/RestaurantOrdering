@@ -6,6 +6,8 @@ import { AuthService } from '../../../core/auth/auth.service';
 import type {
   AdminCategory,
   AdminMenuItem,
+  SaveCatalogCategoryRequest,
+  SaveCatalogMenuItemRequest,
   SaveCategoryRequest,
   SaveMenuItemRequest,
   UploadedMediaFile,
@@ -44,10 +46,29 @@ export class AdminMenuService {
     );
   }
 
+  createCatalogCategory(request: SaveCatalogCategoryRequest): Observable<AdminCategory> {
+    const restaurantId = this.requireRestaurantId();
+    return this.http.post<AdminCategory>(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/catalog/categories`,
+      request,
+    );
+  }
+
   updateCategory(categoryId: string, request: SaveCategoryRequest): Observable<AdminCategory> {
     const restaurantId = this.requireRestaurantId();
     return this.http.put<AdminCategory>(
       `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/categories/${categoryId}`,
+      request,
+    );
+  }
+
+  updateCatalogCategory(
+    categoryId: string,
+    request: SaveCatalogCategoryRequest,
+  ): Observable<AdminCategory> {
+    const restaurantId = this.requireRestaurantId();
+    return this.http.put<AdminCategory>(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/catalog/categories/${categoryId}`,
       request,
     );
   }
@@ -87,10 +108,29 @@ export class AdminMenuService {
     );
   }
 
+  createCatalogMenuItem(request: SaveCatalogMenuItemRequest): Observable<AdminMenuItem> {
+    const restaurantId = this.requireRestaurantId();
+    return this.http.post<AdminMenuItem>(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/catalog/menu-items`,
+      request,
+    );
+  }
+
   updateMenuItem(menuItemId: string, request: SaveMenuItemRequest): Observable<AdminMenuItem> {
     const restaurantId = this.requireRestaurantId();
     return this.http.put<AdminMenuItem>(
       `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/menu-items/${menuItemId}`,
+      request,
+    );
+  }
+
+  updateCatalogMenuItem(
+    menuItemId: string,
+    request: SaveCatalogMenuItemRequest,
+  ): Observable<AdminMenuItem> {
+    const restaurantId = this.requireRestaurantId();
+    return this.http.put<AdminMenuItem>(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/catalog/menu-items/${menuItemId}`,
       request,
     );
   }

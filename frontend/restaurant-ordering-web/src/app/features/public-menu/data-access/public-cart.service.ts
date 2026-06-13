@@ -20,7 +20,7 @@ function isValidLine(raw: unknown): raw is PublicCartLineItem {
   return (
     typeof line.menuItemId === 'string' &&
     line.menuItemId.length > 0 &&
-    typeof line.nameAr === 'string' &&
+    (typeof line.nameAr === 'string' || typeof line.name === 'string') &&
     typeof line.price === 'number' &&
     Number.isFinite(line.price) &&
     typeof line.quantity === 'number' &&
@@ -57,6 +57,35 @@ export interface PublicTableSession {
   tableId: string;
   tableName: string;
   zone: string | null;
+}
+
+function createCartLineFromItem(item: PublicMenuItem, quantity: number): PublicCartLineItem {
+  return {
+    menuItemId: item.id,
+    name: item.name ?? null,
+    nameAr: item.nameAr || item.name || '',
+    nameEn: item.nameEn,
+    resolvedLocale: item.resolvedLocale ?? null,
+    imageUrl: item.imageUrl,
+    price: item.price,
+    discountPrice: item.discountPrice,
+    quantity,
+    notes: null,
+  };
+}
+
+function mergeCartLineWithItem(line: PublicCartLineItem, item: PublicMenuItem, quantity: number): PublicCartLineItem {
+  return {
+    ...line,
+    name: item.name ?? line.name ?? null,
+    nameAr: item.nameAr || item.name || '',
+    nameEn: item.nameEn,
+    resolvedLocale: item.resolvedLocale ?? line.resolvedLocale ?? null,
+    imageUrl: item.imageUrl,
+    price: item.price,
+    discountPrice: item.discountPrice,
+    quantity,
+  };
 }
 
 @Injectable({
@@ -123,19 +152,7 @@ export class PublicCartService {
       return this.setQuantity(item, Math.min(PUBLIC_CART_MAX_QUANTITY, existing.quantity + 1));
     }
 
-    this.items.update((lines) => [
-      ...lines,
-      {
-        menuItemId: item.id,
-        nameAr: item.nameAr,
-        nameEn: item.nameEn,
-        imageUrl: item.imageUrl,
-        price: item.price,
-        discountPrice: item.discountPrice,
-        quantity: PUBLIC_CART_MIN_QUANTITY,
-        notes: null,
-      },
-    ]);
+    this.items.update((lines) => [...lines, createCartLineFromItem(item, PUBLIC_CART_MIN_QUANTITY)]);
     this.persist();
     return true;
   }
@@ -154,33 +171,11 @@ export class PublicCartService {
     const existingIndex = this.items().findIndex((line) => line.menuItemId === item.id);
 
     if (existingIndex === -1) {
-      this.items.update((lines) => [
-        ...lines,
-        {
-          menuItemId: item.id,
-          nameAr: item.nameAr,
-          nameEn: item.nameEn,
-          imageUrl: item.imageUrl,
-          price: item.price,
-          discountPrice: item.discountPrice,
-          quantity: clamped,
-          notes: null,
-        },
-      ]);
+      this.items.update((lines) => [...lines, createCartLineFromItem(item, clamped)]);
     } else {
       this.items.update((lines) =>
         lines.map((line, index) =>
-          index === existingIndex
-            ? {
-                ...line,
-                nameAr: item.nameAr,
-                nameEn: item.nameEn,
-                imageUrl: item.imageUrl,
-                price: item.price,
-                discountPrice: item.discountPrice,
-                quantity: clamped,
-              }
-            : line,
+          index === existingIndex ? mergeCartLineWithItem(line, item, clamped) : line,
         ),
       );
     }

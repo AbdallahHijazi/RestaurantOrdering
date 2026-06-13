@@ -17,6 +17,8 @@ import {
 } from '@angular/forms';
 import { switchMap, of, finalize, type Observable } from 'rxjs';
 import { resolveApiAssetUrl } from '../../../../core/config/resolve-api-asset-url';
+import { DirectionService } from '../../../../core/localization/direction.service';
+import { LocaleApiService } from '../../../../core/localization/locale-api.service';
 import { LocaleService } from '../../../../core/localization/locale';
 import {
   createImagePreviewUrl,
@@ -26,11 +28,16 @@ import {
 import { AdminMenuService } from '../../data-access/admin-menu.service';
 import { MenuManagementMealCard } from './components/menu-management-meal-card/menu-management-meal-card';
 import {
+  formatPrimaryLanguageLabel,
+  primarySortName,
+  resolvePrimaryLocaleContent,
+} from './menu-catalog.util';
+import {
   ALL_MENU_ITEMS_FILTER,
   type AdminCategory,
   type AdminMenuItem,
-  type SaveCategoryRequest,
-  type SaveMenuItemRequest,
+  type SaveCatalogCategoryRequest,
+  type SaveCatalogMenuItemRequest,
   type UploadedMediaFile,
 } from '../../data-access/admin-menu.models';
 
@@ -46,6 +53,8 @@ type ModalKind = 'category' | 'item' | 'deleteCategory' | 'deleteItem' | null;
 export class MenuManagementPage {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly menuService = inject(AdminMenuService);
+  private readonly localeApi = inject(LocaleApiService);
+  private readonly directionService = inject(DirectionService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly locale = inject(LocaleService);
@@ -72,12 +81,12 @@ export class MenuManagementPage {
   protected readonly pendingImageFile = signal<File | null>(null);
   protected readonly uploadedMedia = signal<UploadedMediaFile | null>(null);
   protected readonly failedImageIds = signal<ReadonlySet<string>>(new Set());
+  protected readonly defaultLocale = signal('ar');
+  protected readonly primaryLanguageLabel = signal('Arabic');
 
   protected readonly categoryForm = this.fb.group({
-    nameAr: ['', [Validators.required, Validators.maxLength(200)]],
-    nameEn: ['', [Validators.maxLength(200)]],
-    descriptionAr: ['', [Validators.maxLength(1000)]],
-    descriptionEn: ['', [Validators.maxLength(1000)]],
+    name: ['', [Validators.required, Validators.maxLength(200)]],
+    description: ['', [Validators.maxLength(1000)]],
     displayOrder: [0, [Validators.required, Validators.min(0)]],
     isActive: [true],
   });
@@ -85,10 +94,8 @@ export class MenuManagementPage {
   protected readonly itemForm = this.fb.group(
     {
       categoryId: ['', [Validators.required]],
-      nameAr: ['', [Validators.required, Validators.maxLength(200)]],
-      nameEn: ['', [Validators.maxLength(200)]],
-      descriptionAr: ['', [Validators.maxLength(1000)]],
-      descriptionEn: ['', [Validators.maxLength(1000)]],
+      name: ['', [Validators.required, Validators.maxLength(200)]],
+      description: ['', [Validators.maxLength(1000)]],
       price: [0, [Validators.required, Validators.min(0)]],
       discountPrice: [null as number | null],
       displayOrder: [0, [Validators.required, Validators.min(0)]],
@@ -138,7 +145,36 @@ export class MenuManagementPage {
   });
 
   constructor() {
+    this.loadLocaleSettings();
     this.loadCategories();
+  }
+
+  protected catalogPrimaryNotice(): string {
+    return this.locale.uiText('adminMenuCatalogPrimaryNotice');
+  }
+
+  protected catalogPrimaryLanguageLine(): string {
+    return this.locale
+      .uiText('adminMenuCatalogPrimaryLanguage')
+      .replace('{language}', this.primaryLanguageLabel());
+  }
+
+  private loadLocaleSettings(): void {
+    const restaurantId = this.menuService.getRestaurantId();
+    if (!restaurantId) {
+      return;
+    }
+
+    this.localeApi
+      .getRestaurantLocaleSettings(restaurantId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (settings) => {
+          this.defaultLocale.set(settings.defaultLocale.trim().toLowerCase() || 'ar');
+          this.primaryLanguageLabel.set(formatPrimaryLanguageLabel(settings));
+          this.directionService.registerLocales(settings.availableLocales);
+        },
+      });
   }
 
   protected loadCategories(): void {
@@ -240,10 +276,8 @@ export class MenuManagementPage {
     this.resetModalState();
     this.editingCategory.set(null);
     this.categoryForm.reset({
-      nameAr: '',
-      nameEn: '',
-      descriptionAr: '',
-      descriptionEn: '',
+      name: '',
+      description: '',
       displayOrder: this.categories().length + 1,
       isActive: true,
     });
@@ -254,11 +288,10 @@ export class MenuManagementPage {
   protected openEditCategory(category: AdminCategory): void {
     this.resetModalState();
     this.editingCategory.set(category);
+    const primary = resolvePrimaryLocaleContent(this.defaultLocale(), category);
     this.categoryForm.reset({
-      nameAr: category.nameAr,
-      nameEn: category.nameEn ?? '',
-      descriptionAr: category.descriptionAr ?? '',
-      descriptionEn: category.descriptionEn ?? '',
+      name: primary.name,
+      description: primary.description,
       displayOrder: category.displayOrder,
       isActive: category.isActive,
     });
@@ -283,10 +316,8 @@ export class MenuManagementPage {
         selected === ALL_MENU_ITEMS_FILTER
           ? (this.categories()[0]?.id ?? '')
           : selected,
-      nameAr: '',
-      nameEn: '',
-      descriptionAr: '',
-      descriptionEn: '',
+      name: '',
+      description: '',
       price: 0,
       discountPrice: null,
       displayOrder: this.menuItems().length + 1,
@@ -318,12 +349,11 @@ export class MenuManagementPage {
       this.imagePreviewUrl.set(resolveApiAssetUrl(item.imageUrl));
     }
 
+    const primary = resolvePrimaryLocaleContent(this.defaultLocale(), item);
     this.itemForm.reset({
       categoryId: item.categoryId,
-      nameAr: item.nameAr,
-      nameEn: item.nameEn ?? '',
-      descriptionAr: item.descriptionAr ?? '',
-      descriptionEn: item.descriptionEn ?? '',
+      name: primary.name,
+      description: primary.description,
       price: item.price,
       discountPrice: item.discountPrice ?? null,
       displayOrder: item.displayOrder,
@@ -372,8 +402,8 @@ export class MenuManagementPage {
     this.modalErrorMessage.set(null);
 
     const save$ = editing
-      ? this.menuService.updateCategory(editing.id, request)
-      : this.menuService.createCategory(request);
+      ? this.menuService.updateCatalogCategory(editing.id, request)
+      : this.menuService.createCatalogCategory(request);
 
     save$
       .pipe(
@@ -459,8 +489,8 @@ export class MenuManagementPage {
             media?.id ?? editing?.imageFileId ?? null,
           );
           return editing
-            ? this.menuService.updateMenuItem(editing.id, request)
-            : this.menuService.createMenuItem(request);
+            ? this.menuService.updateCatalogMenuItem(editing.id, request)
+            : this.menuService.createCatalogMenuItem(request);
         }),
         finalize(() => this.modalSubmitting.set(false)),
         takeUntilDestroyed(this.destroyRef),
@@ -551,10 +581,10 @@ export class MenuManagementPage {
     }
 
     this.availabilityBusyId.set(item.id);
-    const request = this.toItemRequestFromExisting(item, { isAvailable: !item.isAvailable });
+    const request = this.toCatalogItemRequestFromExisting(item, { isAvailable: !item.isAvailable });
 
     this.menuService
-      .updateMenuItem(item.id, request)
+      .updateCatalogMenuItem(item.id, request)
       .pipe(
         finalize(() => this.availabilityBusyId.set(null)),
         takeUntilDestroyed(this.destroyRef),
@@ -680,23 +710,29 @@ export class MenuManagementPage {
   }
 
   private sortCategories(categories: AdminCategory[]): AdminCategory[] {
+    const defaultLocale = this.defaultLocale();
     return [...categories].sort(
-      (a, b) => a.displayOrder - b.displayOrder || a.nameAr.localeCompare(b.nameAr),
+      (a, b) =>
+        a.displayOrder - b.displayOrder ||
+        primarySortName(defaultLocale, a).localeCompare(primarySortName(defaultLocale, b)),
     );
   }
 
   private sortItems(items: AdminMenuItem[]): AdminMenuItem[] {
+    const defaultLocale = this.defaultLocale();
     return [...items].sort(
-      (a, b) => a.displayOrder - b.displayOrder || a.nameAr.localeCompare(b.nameAr),
+      (a, b) =>
+        a.displayOrder - b.displayOrder ||
+        primarySortName(defaultLocale, a).localeCompare(primarySortName(defaultLocale, b)),
     );
   }
 
-  private toCategoryRequest(raw: ReturnType<typeof this.categoryForm.getRawValue>): SaveCategoryRequest {
+  private toCategoryRequest(
+    raw: ReturnType<typeof this.categoryForm.getRawValue>,
+  ): SaveCatalogCategoryRequest {
     return {
-      nameAr: raw.nameAr.trim(),
-      nameEn: raw.nameEn.trim() || null,
-      descriptionAr: raw.descriptionAr.trim() || null,
-      descriptionEn: raw.descriptionEn.trim() || null,
+      name: raw.name.trim(),
+      description: raw.description.trim() || null,
       displayOrder: raw.displayOrder,
       isActive: raw.isActive,
     };
@@ -705,14 +741,12 @@ export class MenuManagementPage {
   private toItemRequest(
     raw: ReturnType<typeof this.itemForm.getRawValue>,
     imageFileId: string | null,
-  ): SaveMenuItemRequest {
+  ): SaveCatalogMenuItemRequest {
     return {
       categoryId: raw.categoryId,
       imageFileId,
-      nameAr: raw.nameAr.trim(),
-      nameEn: raw.nameEn.trim() || null,
-      descriptionAr: raw.descriptionAr.trim() || null,
-      descriptionEn: raw.descriptionEn.trim() || null,
+      name: raw.name.trim(),
+      description: raw.description.trim() || null,
       price: raw.price,
       discountPrice: raw.discountPrice,
       displayOrder: raw.displayOrder,
@@ -721,17 +755,16 @@ export class MenuManagementPage {
     };
   }
 
-  private toItemRequestFromExisting(
+  private toCatalogItemRequestFromExisting(
     item: AdminMenuItem,
-    overrides: Partial<SaveMenuItemRequest>,
-  ): SaveMenuItemRequest {
+    overrides: Partial<SaveCatalogMenuItemRequest>,
+  ): SaveCatalogMenuItemRequest {
+    const primary = resolvePrimaryLocaleContent(this.defaultLocale(), item);
     return {
       categoryId: item.categoryId,
       imageFileId: item.imageFileId ?? null,
-      nameAr: item.nameAr,
-      nameEn: item.nameEn ?? null,
-      descriptionAr: item.descriptionAr ?? null,
-      descriptionEn: item.descriptionEn ?? null,
+      name: primary.name,
+      description: primary.description || null,
       price: item.price,
       discountPrice: item.discountPrice ?? null,
       displayOrder: item.displayOrder,

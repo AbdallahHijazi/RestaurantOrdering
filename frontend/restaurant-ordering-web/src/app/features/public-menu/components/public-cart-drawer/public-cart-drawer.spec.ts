@@ -49,7 +49,20 @@ describe('PublicCartDrawer', () => {
     expect(closed).toHaveBeenCalled();
   });
 
+  it('renders cart item with resolved name when present', () => {
+    cart.clearCart();
+    cart.addMenuItem({ ...item, name: 'Resolved Dish', nameEn: 'Legacy EN' });
+    fixture.componentRef.setInput('contentLocale', 'fr');
+    fixture.detectChanges();
+
+    const line = fixture.nativeElement.querySelector('[data-testid="public-cart-line-' + item.id + '"]');
+    expect(line?.textContent).toContain('Resolved Dish');
+    expect(line?.textContent).not.toContain('Legacy EN');
+  });
+
   it('renders cart item with localized name and prices', () => {
+    fixture.componentRef.setInput('contentLocale', 'en');
+    fixture.detectChanges();
     const line = fixture.nativeElement.querySelector('[data-testid="public-cart-line-' + item.id + '"]');
     expect(line?.textContent).toContain(item.nameEn ?? item.nameAr);
     expect(line?.querySelector('.public-cart-drawer__line-unit')).toBeTruthy();

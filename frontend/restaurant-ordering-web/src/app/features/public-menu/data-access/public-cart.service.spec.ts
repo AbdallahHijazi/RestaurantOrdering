@@ -32,6 +32,21 @@ describe('PublicCartService', () => {
     sessionStorage.clear();
   });
 
+  it('stores resolved name when adding item', () => {
+    service.initForRestaurant('cafe-a');
+    expect(
+      service.addMenuItem({
+        ...sampleItem,
+        name: 'Plat du jour',
+        nameAr: 'طبق',
+        nameEn: 'Dish',
+        resolvedLocale: 'fr',
+      }),
+    ).toBe(true);
+    expect(service.cartItems()[0]?.name).toBe('Plat du jour');
+    expect(service.cartItems()[0]?.resolvedLocale).toBe('fr');
+  });
+
   it('adds an item', () => {
     service.initForRestaurant('cafe-a');
     expect(service.addMenuItem(sampleItem)).toBe(true);

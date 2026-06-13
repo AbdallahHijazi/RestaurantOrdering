@@ -38,6 +38,7 @@ export class PublicCheckoutPanel {
   readonly slug = input.required<string>();
   readonly orderSettings = input.required<PublicRestaurantOrderSettings>();
   readonly countryCode = input('SA');
+  readonly contentLocale = input<string>('ar');
 
   readonly closed = output<void>();
   readonly orderPlaced = output<PublicOrderConfirmationApiDto>();
@@ -231,6 +232,7 @@ export class PublicCheckoutPanel {
       deliveryLatitude: null,
       deliveryLongitude: null,
       notes: this.orderNotes().trim() || null,
+      locale: this.contentLocale().trim().toLowerCase() || null,
       items: this.cart.cartItems().map((line) => ({
         menuItemId: line.menuItemId,
         quantity: line.quantity,

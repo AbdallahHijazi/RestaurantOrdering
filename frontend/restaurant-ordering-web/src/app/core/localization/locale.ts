@@ -650,6 +650,10 @@ export type UiTextKey =
   | 'adminMenuEditItemTitle'
   | 'adminMenuFormNameAr'
   | 'adminMenuFormNameEn'
+  | 'adminMenuFormName'
+  | 'adminMenuFormDescription'
+  | 'adminMenuCatalogPrimaryNotice'
+  | 'adminMenuCatalogPrimaryLanguage'
   | 'adminMenuFormDescriptionAr'
   | 'adminMenuFormDescriptionEn'
   | 'adminMenuFormDisplayOrder'
@@ -1344,6 +1348,11 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminMenuEditItemTitle: 'تعديل وجبة',
     adminMenuFormNameAr: 'الاسم بالعربية',
     adminMenuFormNameEn: 'الاسم بالإنجليزية (اختياري)',
+    adminMenuFormName: 'الاسم',
+    adminMenuFormDescription: 'الوصف (اختياري)',
+    adminMenuCatalogPrimaryNotice:
+      'أدخل المحتوى باللغة الأساسية الحالية للمطعم. سيتم إنشاء ترجمات لباقي اللغات حسب إعدادات الترجمة.',
+    adminMenuCatalogPrimaryLanguage: 'اللغة الأساسية: {language}',
     adminMenuFormDescriptionAr: 'الوصف بالعربية (اختياري)',
     adminMenuFormDescriptionEn: 'الوصف بالإنجليزية (اختياري)',
     adminMenuFormDisplayOrder: 'ترتيب العرض',
@@ -2049,6 +2058,11 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminMenuEditItemTitle: 'Edit menu item',
     adminMenuFormNameAr: 'Arabic name',
     adminMenuFormNameEn: 'English name (optional)',
+    adminMenuFormName: 'Name',
+    adminMenuFormDescription: 'Description (optional)',
+    adminMenuCatalogPrimaryNotice:
+      'Enter content in the restaurant primary language. Translations for other languages will be generated according to the translation settings.',
+    adminMenuCatalogPrimaryLanguage: 'Primary language: {language}',
     adminMenuFormDescriptionAr: 'Arabic description (optional)',
     adminMenuFormDescriptionEn: 'English description (optional)',
     adminMenuFormDisplayOrder: 'Display order',

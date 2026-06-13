@@ -204,6 +204,7 @@ describe('Public order flow', () => {
       deliveryLatitude: null,
       deliveryLongitude: null,
       notes: null,
+      locale: 'ar',
       items: [
         {
           menuItemId: item.id,

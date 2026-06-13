@@ -23,6 +23,14 @@ export interface SaveCategoryRequest {
   isActive: boolean;
 }
 
+/** Backend contract: CreateCatalogCategoryRequest / UpdateCatalogCategoryRequest */
+export interface SaveCatalogCategoryRequest {
+  name: string;
+  description?: string | null;
+  displayOrder: number;
+  isActive: boolean;
+}
+
 /** Backend contract: MenuItemDto */
 export interface AdminMenuItem {
   id: string;
@@ -53,6 +61,19 @@ export interface SaveMenuItemRequest {
   descriptionEn?: string | null;
   price: number;
   discountPrice?: number | null;
+  displayOrder: number;
+  isAvailable: boolean;
+  isActive: boolean;
+}
+
+/** Backend contract: CreateCatalogMenuItemRequest / UpdateCatalogMenuItemRequest */
+export interface SaveCatalogMenuItemRequest {
+  categoryId: string;
+  name: string;
+  description?: string | null;
+  price: number;
+  discountPrice?: number | null;
+  imageFileId?: string | null;
   displayOrder: number;
   isAvailable: boolean;
   isActive: boolean;

@@ -49,7 +49,26 @@ describe('AdminMenuService', () => {
     req.flush([sampleCategory()]);
   });
 
-  it('creates, updates, and deletes categories', () => {
+  it('creates and updates categories via catalog API', () => {
+    const payload = {
+      name: 'Category',
+      description: null,
+      displayOrder: 1,
+      isActive: true,
+    };
+
+    service.createCatalogCategory(payload).subscribe();
+    httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/catalog/categories`,
+    ).flush(sampleCategory());
+
+    service.updateCatalogCategory(CATEGORY_ID, payload).subscribe();
+    httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/catalog/categories/${CATEGORY_ID}`,
+    ).flush(sampleCategory());
+  });
+
+  it('creates, updates, and deletes categories with legacy endpoints', () => {
     const payload = {
       nameAr: 'فئة',
       nameEn: 'Category',
@@ -84,6 +103,30 @@ describe('AdminMenuService', () => {
       );
     });
     req.flush([sampleItem()]);
+  });
+
+  it('creates and updates menu items via catalog API', () => {
+    const payload = {
+      categoryId: CATEGORY_ID,
+      imageFileId: null,
+      name: 'Item',
+      description: null,
+      price: 10,
+      discountPrice: null,
+      displayOrder: 1,
+      isAvailable: true,
+      isActive: true,
+    };
+
+    service.createCatalogMenuItem(payload).subscribe();
+    httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/catalog/menu-items`,
+    ).flush(sampleItem());
+
+    service.updateCatalogMenuItem(ITEM_ID, payload).subscribe();
+    httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/catalog/menu-items/${ITEM_ID}`,
+    ).flush(sampleItem());
   });
 
   it('creates, updates, and deletes menu items', () => {

@@ -103,6 +103,17 @@ describe('PublicCheckoutPanel', () => {
     expect(fixture.nativeElement.querySelector('[name="deliveryAddress"]')).toBeTruthy();
   });
 
+  it('includes locale in submit payload', () => {
+    fixture.componentRef.setInput('contentLocale', 'fr');
+    fixture.detectChanges();
+    fixture.componentInstance['guestName'].set('Guest');
+    fixture.componentInstance['guestPhone'].set('+966500000000');
+
+    const request = fixture.componentInstance['buildRequest']();
+    expect(request.locale).toBe('fr');
+    expect(request.items.every((line) => !('name' in line) && !('nameAr' in line))).toBe(true);
+  });
+
   it('includes tableToken only for dine-in submit payload', () => {
     cart.setTableSession(
       {

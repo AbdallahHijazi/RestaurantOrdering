@@ -250,21 +250,17 @@
           [formGroup]="categoryForm"
           (ngSubmit)="submitCategory()"
         >
+          <div class="menu-management-form-notice" data-testid="menu-catalog-primary-notice">
+            <p>{{ catalogPrimaryNotice() }}</p>
+            <p data-testid="menu-catalog-primary-language">{{ catalogPrimaryLanguageLine() }}</p>
+          </div>
           <label>
-            {{ locale.uiText('adminMenuFormNameAr') }}
-            <input type="text" formControlName="nameAr" />
+            {{ locale.uiText('adminMenuFormName') }}
+            <input type="text" formControlName="name" data-testid="menu-category-name" />
           </label>
           <label>
-            {{ locale.uiText('adminMenuFormNameEn') }}
-            <input type="text" formControlName="nameEn" />
-          </label>
-          <label>
-            {{ locale.uiText('adminMenuFormDescriptionAr') }}
-            <textarea rows="2" formControlName="descriptionAr"></textarea>
-          </label>
-          <label>
-            {{ locale.uiText('adminMenuFormDescriptionEn') }}
-            <textarea rows="2" formControlName="descriptionEn"></textarea>
+            {{ locale.uiText('adminMenuFormDescription') }}
+            <textarea rows="2" formControlName="description" data-testid="menu-category-description"></textarea>
           </label>
           <label>
             {{ locale.uiText('adminMenuFormDisplayOrder') }}
@@ -284,6 +280,10 @@
           [formGroup]="itemForm"
           (ngSubmit)="submitItem()"
         >
+          <div class="menu-management-form-notice" data-testid="menu-catalog-primary-notice">
+            <p>{{ catalogPrimaryNotice() }}</p>
+            <p data-testid="menu-catalog-primary-language">{{ catalogPrimaryLanguageLine() }}</p>
+          </div>
           <label>
             {{ locale.uiText('adminMenuFormCategory') }}
             <select formControlName="categoryId">
@@ -293,20 +293,12 @@
             </select>
           </label>
           <label>
-            {{ locale.uiText('adminMenuFormNameAr') }}
-            <input type="text" formControlName="nameAr" />
+            {{ locale.uiText('adminMenuFormName') }}
+            <input type="text" formControlName="name" data-testid="menu-item-name" />
           </label>
           <label>
-            {{ locale.uiText('adminMenuFormNameEn') }}
-            <input type="text" formControlName="nameEn" />
-          </label>
-          <label>
-            {{ locale.uiText('adminMenuFormDescriptionAr') }}
-            <textarea rows="2" formControlName="descriptionAr"></textarea>
-          </label>
-          <label>
-            {{ locale.uiText('adminMenuFormDescriptionEn') }}
-            <textarea rows="2" formControlName="descriptionEn"></textarea>
+            {{ locale.uiText('adminMenuFormDescription') }}
+            <textarea rows="2" formControlName="description" data-testid="menu-item-description"></textarea>
           </label>
           <label>
             {{ locale.uiText('adminMenuFormPrice') }}
