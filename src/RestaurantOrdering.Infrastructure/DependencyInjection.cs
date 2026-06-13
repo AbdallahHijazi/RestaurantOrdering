@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using RestaurantOrdering.Application.Common.Interfaces;
+using RestaurantOrdering.Application.Common.Translation;
 using RestaurantOrdering.Infrastructure.Authentication;
 using RestaurantOrdering.Infrastructure.Files;
 using RestaurantOrdering.Infrastructure.Identity;
@@ -122,6 +123,36 @@ public static class DependencyInjection
                 "Jwt:AccessTokenLifetimeMinutes must be between 1 and 1440.")
             .ValidateOnStart();
 
+        services.AddOptions<TranslationProviderOptions>()
+            .Configure(options =>
+            {
+                var section = configuration.GetSection(TranslationProviderOptions.SectionName);
+                options.Provider = section[nameof(TranslationProviderOptions.Provider)]
+                    ?? TranslationProviderNames.NoOp;
+            })
+            .ValidateOnStart();
+
+        services.AddOptions<AzureTranslatorOptions>()
+            .Configure(options =>
+            {
+                var section = configuration.GetSection(AzureTranslatorOptions.SectionName);
+                options.Endpoint = section[nameof(AzureTranslatorOptions.Endpoint)] ?? string.Empty;
+                options.Region = section[nameof(AzureTranslatorOptions.Region)] ?? string.Empty;
+                options.TimeoutSeconds = int.TryParse(
+                    section[nameof(AzureTranslatorOptions.TimeoutSeconds)],
+                    out var timeoutSeconds)
+                    ? timeoutSeconds
+                    : 30;
+                options.SubscriptionKey = configuration["TranslationProvider:AzureTranslator:SubscriptionKey"]
+                    ?? string.Empty;
+            })
+            .ValidateOnStart();
+
+        services.AddSingleton<IValidateOptions<TranslationProviderOptions>, TranslationProviderOptionsValidator>();
+        services.AddSingleton<IValidateOptions<AzureTranslatorOptions>, AzureTranslatorOptionsValidator>();
+
+        RegisterTranslationProvider(services);
+
         services.AddOptions<TranslationWorkerOptions>()
             .Configure(options =>
             {
@@ -161,5 +192,29 @@ public static class DependencyInjection
         services.AddHostedService<TranslationJobWorker>();
 
         return services;
+    }
+
+    private static void RegisterTranslationProvider(IServiceCollection services)
+    {
+        services.AddHttpClient(AzureTranslatorProvider.HttpClientName, (serviceProvider, client) =>
+        {
+            var azureOptions = serviceProvider.GetRequiredService<IOptions<AzureTranslatorOptions>>().Value;
+            client.BaseAddress = new Uri(azureOptions.Endpoint.TrimEnd('/') + "/");
+            client.Timeout = TimeSpan.FromSeconds(azureOptions.TimeoutSeconds);
+        });
+
+        services.AddScoped<NoOpTranslationProvider>();
+        services.AddScoped<AzureTranslatorProvider>();
+        services.AddScoped<ITranslationProvider>(serviceProvider =>
+        {
+            var providerOptions = serviceProvider.GetRequiredService<IOptions<TranslationProviderOptions>>().Value;
+
+            return string.Equals(
+                providerOptions.Provider,
+                TranslationProviderNames.AzureTranslator,
+                StringComparison.OrdinalIgnoreCase)
+                ? serviceProvider.GetRequiredService<AzureTranslatorProvider>()
+                : serviceProvider.GetRequiredService<NoOpTranslationProvider>();
+        });
     }
 }

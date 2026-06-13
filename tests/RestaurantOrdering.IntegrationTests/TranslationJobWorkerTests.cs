@@ -238,18 +238,18 @@ public sealed class TranslationJobWorkerTests : IClassFixture<TestWebApplication
     }
 
     [Fact]
-    public void ApplicationRegistersNoOpTranslationProvider_NotExternalProvider()
+    public void InfrastructureRegistersNoOpTranslationProviderByDefault_NotExternalProvider()
     {
         var dependencyInjectionPath = Path.GetFullPath(Path.Combine(
             AppContext.BaseDirectory,
             "..", "..", "..", "..", "..",
-            "src", "RestaurantOrdering.Application", "DependencyInjection.cs"));
+            "src", "RestaurantOrdering.Infrastructure", "DependencyInjection.cs"));
 
         var content = File.ReadAllText(dependencyInjectionPath);
         content.Should().Contain("NoOpTranslationProvider");
+        content.Should().Contain("AzureTranslatorProvider");
         content.Should().NotContain("Google");
         content.Should().NotContain("DeepL");
-        content.Should().NotContain("Azure");
     }
 
     private async Task<Guid> SeedQueuedCategoryJobAsync(
