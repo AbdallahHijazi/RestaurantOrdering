@@ -280,6 +280,18 @@
         </section>
         }
 
+        @if (activeWorkspaceTab() === 'languages') {
+        <section
+          class="profile-console__panel"
+          role="tabpanel"
+          [id]="workspaceTabPanelId('languages')"
+          [attr.aria-labelledby]="'profile-tab-languages'"
+          data-testid="profile-tabpanel-languages"
+        >
+          <app-restaurant-locale-settings-panel [active]="true" />
+        </section>
+        }
+
         @if (activeWorkspaceTab() === 'contact') {
         <section
           class="profile-console__panel"

@@ -23,6 +23,7 @@ import {
 import { LocaleService, type SupportedLocale } from '../../../../../core/localization/locale';
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { RestaurantLivePreview } from '../../components/restaurant-live-preview/restaurant-live-preview';
+import { RestaurantLocaleSettingsPanel } from '../../components/restaurant-locale-settings-panel/restaurant-locale-settings-panel';
 import { AdminBrandingService } from '../../../../../core/layouts/admin-layout/admin-branding.service';
 import { RestaurantProfileApiService, type BrandingSaveError } from '../../data-access/restaurant-profile-api';
 import {
@@ -58,9 +59,9 @@ import type {
 
 type PageLoadState = 'loading' | 'ready' | 'settings-error' | 'demo';
 type ProfileSavePhase = 'idle' | 'uploading-logo' | 'uploading-cover' | 'saving';
-type WorkspaceTab = 'identity' | 'localization' | 'contact' | 'delivery';
+type WorkspaceTab = 'identity' | 'localization' | 'languages' | 'contact' | 'delivery';
 
-const WORKSPACE_TABS: WorkspaceTab[] = ['identity', 'localization', 'contact', 'delivery'];
+const WORKSPACE_TABS: WorkspaceTab[] = ['identity', 'localization', 'languages', 'contact', 'delivery'];
 
 const CURRENCY_CODE_PATTERN = /^[A-Za-z]{3}$/;
 
@@ -101,7 +102,7 @@ function orderingMethodsValidator(control: AbstractControl): ValidationErrors | 
 
 @Component({
   selector: 'app-restaurant-profile-setup-page',
-  imports: [ReactiveFormsModule, RestaurantLivePreview],
+  imports: [ReactiveFormsModule, RestaurantLivePreview, RestaurantLocaleSettingsPanel],
   templateUrl: './restaurant-profile-setup-page.html',
   styleUrl: './restaurant-profile-setup-page.scss',
 })
@@ -176,6 +177,8 @@ export class RestaurantProfileSetupPage {
         return this.localeService.uiText('profileTabIdentity');
       case 'localization':
         return this.localeService.uiText('profileTabLocalization');
+      case 'languages':
+        return this.localeService.uiText('profileTabLanguages');
       case 'contact':
         return this.localeService.uiText('profileTabContact');
       case 'delivery':

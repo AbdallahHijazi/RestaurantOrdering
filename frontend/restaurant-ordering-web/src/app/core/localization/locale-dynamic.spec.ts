@@ -9,6 +9,7 @@ describe('LocaleService admin UI compatibility', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(LocaleService);
+    service.setLocale('ar');
   });
 
   it('keeps admin UI locale restricted to ar/en', () => {

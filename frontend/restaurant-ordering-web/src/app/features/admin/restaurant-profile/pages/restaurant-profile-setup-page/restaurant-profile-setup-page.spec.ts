@@ -131,6 +131,7 @@ describe('RestaurantProfileSetupPage', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="profile-console-tabs"]')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[data-testid="profile-tab-identity"]')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[data-testid="profile-tab-localization"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-tab-languages"]')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[data-testid="profile-tab-contact"]')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[data-testid="profile-tab-delivery"]')).toBeTruthy();
   });
@@ -470,6 +471,24 @@ describe('RestaurantProfileSetupPage', () => {
     ).toBe('true');
   });
 
+  function flushLocaleSettingsRequest(): void {
+    const localeReq = httpMock.match(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
+    );
+    if (localeReq.length > 0) {
+      localeReq[0]?.flush({
+        defaultLocale: 'ar',
+        translationMode: 'ManualOnly',
+        supportedLocales: [{ code: 'ar', isEnabled: true, sortOrder: 1 }],
+        availableLocales: [
+          { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+        ],
+        canManageLocales: true,
+      });
+      fixture.detectChanges();
+    }
+  }
+
   it('supports keyboard tab navigation with ArrowLeft and ArrowRight', () => {
     flushLoadedSettings();
     selectTab('localization');
@@ -479,9 +498,10 @@ describe('RestaurantProfileSetupPage', () => {
     localizationTab.focus();
     localizationTab.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     fixture.detectChanges();
+    flushLocaleSettingsRequest();
     expect(
       (
-        fixture.nativeElement.querySelector('[data-testid="profile-tab-contact"]') as HTMLButtonElement
+        fixture.nativeElement.querySelector('[data-testid="profile-tab-languages"]') as HTMLButtonElement
       ).getAttribute('aria-selected'),
     ).toBe('true');
 
@@ -513,9 +533,10 @@ describe('RestaurantProfileSetupPage', () => {
 
     localizationTab.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
     fixture.detectChanges();
+    flushLocaleSettingsRequest();
     expect(
       (
-        fixture.nativeElement.querySelector('[data-testid="profile-tab-contact"]') as HTMLButtonElement
+        fixture.nativeElement.querySelector('[data-testid="profile-tab-languages"]') as HTMLButtonElement
       ).getAttribute('aria-selected'),
     ).toBe('true');
   });
