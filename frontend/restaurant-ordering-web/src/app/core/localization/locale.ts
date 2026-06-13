@@ -754,7 +754,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     profileCoverUploadFailed: 'تعذر رفع صورة الغلاف. حاول مجددًا.',
     profileUnsupportedImageType: 'نوع الصورة غير مدعوم. استخدم JPEG أو PNG أو WebP.',
     profileImageTooLarge: 'حجم الصورة كبير جدًا. الحد الأقصى 5 ميجابايت.',
-    profileInvalidAccentColor: 'لون Accent غير صالح. استخدم صيغة مثل #B8663F.',
+    profileInvalidAccentColor: 'لون Accent غير صالح. استخدم صيغة مثل #6E7B4E.',
     profileUnsavedBrandingPreview: 'معاينة الهوية غير محفوظة — اضغط حفظ ملف المطعم للاحتفاظ بالتغييرات.',
     profileReloadFailed: 'تم الحفظ لكن تعذر إعادة تحميل الملف. حاول تحديث الصفحة.',
     profileSaveOrderingSettings: 'حفظ إعدادات التوصيل والطلبات',
@@ -1361,7 +1361,7 @@ const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
     profileCoverUploadFailed: 'The cover image could not be uploaded. Please try again.',
     profileUnsupportedImageType: 'Unsupported image type. Use JPEG, PNG, or WebP.',
     profileImageTooLarge: 'The image is too large. Maximum size is 5 MB.',
-    profileInvalidAccentColor: 'Invalid accent color. Use a value like #B8663F.',
+    profileInvalidAccentColor: 'Invalid accent color. Use a value like #6E7B4E.',
     profileUnsavedBrandingPreview:
       'Branding preview is unsaved — click Save restaurant profile to keep your changes.',
     profileReloadFailed: 'Saved, but the profile could not be reloaded. Try refreshing the page.',

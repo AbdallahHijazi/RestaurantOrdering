@@ -28,7 +28,7 @@
     color-mix(in srgb, var(--table-card-surface-soft) 72%, var(--table-card-border)) 62%,
     color-mix(in srgb, var(--table-card-surface-soft) 58%, var(--table-card-border))
   );
-  box-shadow: var(--restaurant-shadow-sm, 0 10px 28px rgb(32 28 24 / 0.06));
+  box-shadow: var(--restaurant-shadow-sm);
   color: var(--table-card-text);
 }
 
@@ -54,7 +54,7 @@
   height: 8.5rem;
   bottom: -4.5rem;
   inset-inline-end: -3.75rem;
-  background: color-mix(in srgb, var(--restaurant-sage, #4f8c76) 8%, transparent);
+  background: color-mix(in srgb, var(--restaurant-sage) 8%, transparent);
 }
 
 .table-qr-card__inner {
@@ -93,6 +93,52 @@
 .table-qr-card__table-meta {
   gap: 0.2rem;
   margin-top: 0.125rem;
+}
+
+.table-qr-card--preview,
+.table-qr-card--print {
+  --table-card-accent: var(--restaurant-print-text);
+  --table-card-accent-strong: var(--restaurant-print-text);
+  --table-card-accent-soft: var(--restaurant-print-surface-soft);
+  --table-card-surface: var(--restaurant-print-surface);
+  --table-card-surface-soft: var(--restaurant-print-surface);
+  --table-card-text: var(--restaurant-print-text);
+  --table-card-muted: var(--restaurant-print-muted);
+  --table-card-border: var(--restaurant-print-border);
+
+  background: linear-gradient(
+    155deg,
+    var(--restaurant-print-surface-soft),
+    var(--restaurant-print-surface) 62%,
+    color-mix(in srgb, var(--restaurant-print-surface) 88%, var(--restaurant-print-border))
+  );
+  color: var(--restaurant-print-text);
+  box-shadow: none;
+}
+
+.table-qr-card--preview::before,
+.table-qr-card--preview::after,
+.table-qr-card--print::before,
+.table-qr-card--print::after {
+  display: none;
+}
+
+.table-qr-card--preview .table-qr-card__qr-box,
+.table-qr-card--print .table-qr-card__qr-box {
+  background: var(--restaurant-print-surface);
+  box-shadow: none;
+}
+
+.table-qr-card--preview .table-qr-card__logo,
+.table-qr-card--print .table-qr-card__logo {
+  background: var(--restaurant-print-surface);
+  border-color: var(--restaurant-print-border);
+  box-shadow: none;
+}
+
+.table-qr-card--preview .table-qr-card__table-name,
+.table-qr-card--print .table-qr-card__table-name {
+  color: var(--restaurant-print-text);
 }
 
 .table-qr-card--preview {
@@ -137,9 +183,9 @@
   place-items: center;
   overflow: hidden;
   border-radius: 1.125rem;
-  border: 1px solid color-mix(in srgb, var(--table-card-border) 90%, white);
+  border: 1px solid color-mix(in srgb, var(--table-card-border) 90%, var(--restaurant-palette-ivory));
   background: var(--table-card-surface);
-  box-shadow: 0 12px 20px rgb(40 33 26 / 0.1);
+  box-shadow: var(--restaurant-shadow-sm);
 }
 
 .table-qr-card--print .table-qr-card__logo {
@@ -195,7 +241,7 @@
   place-items: center;
   border-radius: 0.8125rem;
   background: var(--table-card-surface);
-  box-shadow: 0 7px 15px rgb(30 26 22 / 0.07);
+  box-shadow: var(--restaurant-shadow-xs);
 }
 
 .table-qr-card--print .table-qr-card__qr-box {
@@ -225,7 +271,7 @@
   width: 100%;
   height: 100%;
   border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--table-card-border) 55%, white);
+  background: color-mix(in srgb, var(--table-card-border) 55%, var(--restaurant-palette-ivory));
 }
 
 .table-qr-card__qr-empty {

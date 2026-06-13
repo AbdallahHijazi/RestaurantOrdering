@@ -1,7 +1,7 @@
 .tables-form-modal{display:grid;gap:.875rem;min-width:0}
 .tables-form-modal__field{display:grid;gap:.4375rem}
-.tables-form-modal__field span{font-size:.8125rem;font-weight:800;color:#5e6662}
-.tables-form-modal__field input{height:2.875rem;padding-inline:.75rem;border:1px solid var(--tables-line);border-radius:.75rem;background:var(--restaurant-surface-white);outline:none;font:inherit;width:100%}
-.tables-form-modal__field input:focus{border-color:var(--tables-terracotta);box-shadow:0 0 0 4px rgb(184 102 63/.1)}
+.tables-form-modal__field span{font-size:.8125rem;font-weight:800;color:var(--restaurant-muted-text)}
+.tables-form-modal__field input{height:2.875rem;padding-inline:.75rem;border:1px solid var(--tables-line);border-radius:.75rem;background:var(--restaurant-surface-soft);color:var(--tables-text,var(--restaurant-text));outline:none;font:inherit;width:100%}
+.tables-form-modal__field input:focus{border-color:var(--tables-terracotta);box-shadow:0 0 0 4px var(--restaurant-accent-soft)}
 .tables-form-modal__checkbox{display:flex;align-items:center;gap:.5rem;color:var(--tables-muted);font-size:.875rem;font-weight:700}
 .tables-form-modal__error{margin:.5rem 0 0;color:var(--tables-red);font-size:.875rem}

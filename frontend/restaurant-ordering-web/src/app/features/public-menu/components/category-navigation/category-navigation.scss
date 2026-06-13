@@ -8,9 +8,9 @@
   gap: 1rem;
   margin: -2.5rem 0 1rem;
   padding: 1rem 1.1rem;
-  border: 1px solid rgb(225 215 202 / 0.92);
+  border: 1px solid var(--restaurant-border-strong);
   border-radius: 1.375rem;
-  background: rgb(255 252 248 / 0.9);
+  background: var(--restaurant-surface-glass);
   backdrop-filter: blur(18px);
   box-shadow: var(--menu-shadow-md);
 }
@@ -45,7 +45,7 @@
   border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
-  color: #666d69;
+  color: var(--restaurant-muted-text);
   font: inherit;
   font-size: 0.75rem;
   font-weight: 900;
@@ -60,15 +60,15 @@
 
 .public-menu-filter__pill:hover {
   color: var(--menu-terracotta);
-  background: var(--restaurant-surface-white);
-  border-color: #e7d8c8;
+  background: var(--restaurant-surface-muted);
+  border-color: var(--restaurant-border);
 }
 
 .public-menu-filter__pill--active {
   color: var(--menu-terracotta);
-  background: var(--restaurant-surface-white);
-  border-color: #ecd9ca;
-  box-shadow: 0 8px 16px rgb(35 36 32 / 0.06);
+  background: var(--restaurant-accent-soft);
+  border-color: var(--restaurant-accent-border);
+  box-shadow: var(--menu-shadow-sm);
 }
 
 .public-menu-filter__pill--active::after {
@@ -83,7 +83,7 @@
 
 .public-menu-filter__pill:focus-visible,
 .public-menu-filter__search input:focus-visible {
-  outline: 3px solid rgb(184 102 63 / 0.26);
+  outline: 3px solid var(--restaurant-accent-border);
   outline-offset: 3px;
 }
 
@@ -100,7 +100,7 @@
   transform: translateY(-50%);
   width: 1.125rem;
   height: 1.125rem;
-  color: #8c837b;
+  color: var(--restaurant-subtle-text);
   pointer-events: none;
 }
 
@@ -110,16 +110,20 @@
   padding-inline: 2.7rem 0.9rem;
   border: 1px solid var(--menu-line);
   border-radius: 999px;
-  background: var(--restaurant-surface-white);
-  color: var(--menu-text, #1f2421);
+  background: var(--restaurant-surface);
+  color: var(--menu-text);
   font: inherit;
   outline: none;
   transition: border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
+.public-menu-filter__search input::placeholder {
+  color: var(--restaurant-subtle-text);
+}
+
 .public-menu-filter__search input:focus {
   border-color: var(--menu-terracotta);
-  box-shadow: 0 0 0 4px rgb(184 102 63 / 0.1);
+  box-shadow: 0 0 0 4px var(--restaurant-accent-soft);
 }
 
 .visually-hidden {

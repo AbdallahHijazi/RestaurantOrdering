@@ -78,7 +78,7 @@ describe('RestaurantProfileApiService branding', () => {
     slug: 'restaurant-a',
     logoUrl: null,
     coverImageUrl: null,
-    primaryAccentColor: '#B8663F',
+    primaryAccentColor: '#c6a15b',
     countryCode: 'SA',
     defaultLocale: 'ar' as const,
     supportedLocales: ['ar', 'en'] as ('ar' | 'en')[],
@@ -124,13 +124,13 @@ describe('RestaurantProfileApiService branding', () => {
     const req = httpMock.expectOne(
       `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}`,
     );
-    expect(req.request.body.accentColor).toBe('#B8663F');
+    expect(req.request.body.accentColor).toBe('#c6a15b');
     req.flush({
       id: RESTAURANT_ID,
       ownerId: 'o',
       slug: 'restaurant-a',
       nameAr: 'مطعم',
-      accentColor: '#B8663F',
+      accentColor: '#c6a15b',
       phoneNumber: '+966500000000',
       isActive: true,
     });
@@ -155,7 +155,7 @@ describe('RestaurantProfileApiService branding', () => {
       nameAr: 'مطعم',
       coverImageFileId: 'media-cover',
       coverImageUrl: '/uploads/test/cover.png',
-      accentColor: '#B8663F',
+      accentColor: '#c6a15b',
       phoneNumber: '+966500000000',
       isActive: true,
     });
@@ -194,7 +194,7 @@ describe('RestaurantProfileApiService branding', () => {
         ownerId: 'o',
         slug: 'restaurant-a',
         nameAr: 'مطعم',
-        accentColor: '#B8663F',
+        accentColor: '#c6a15b',
         phoneNumber: '+966500000000',
         isActive: true,
       });
@@ -207,7 +207,7 @@ describe('RestaurantProfileApiService branding', () => {
         slug: 'restaurant-a',
         logoFileId: 'media-logo',
         logoUrl: '/uploads/test/logo.png',
-        accentColor: '#B8663F',
+        accentColor: '#c6a15b',
         phoneNumber: '+966500000000',
         isActive: true,
       });
@@ -221,16 +221,16 @@ describe('RestaurantThemeService accent', () => {
     TestBed.configureTestingModule({});
   });
 
-  it('accepts #B8663F and applies derived css variables', () => {
+  it('accepts #c6a15b but applies olive accent to the UI', () => {
     const theme = TestBed.inject(RestaurantThemeService);
-    const accent = theme.applyAccent('#B8663F');
-    expect(accent).toBe('#B8663F');
-    expect(document.documentElement.style.getPropertyValue('--restaurant-accent')).toBe('#B8663F');
+    const accent = theme.applyAccent('#c6a15b');
+    expect(accent).toBe('#c6a15b');
+    expect(document.documentElement.style.getPropertyValue('--restaurant-accent')).toBe('#6e7b4e');
   });
 
   it('falls back for invalid accent values', () => {
     const theme = TestBed.inject(RestaurantThemeService);
-    expect(theme.sanitizeAccentColor('red')).toBe('#B8663F');
+    expect(theme.sanitizeAccentColor('red')).toBe('#6e7b4e');
   });
 });
 

@@ -22,7 +22,7 @@ describe('RestaurantProfileApiService', () => {
     slug: 'restaurant-a',
     logoUrl: null,
     coverImageUrl: null,
-    primaryAccentColor: '#B8663F',
+    primaryAccentColor: '#c6a15b',
     countryCode: 'SA',
     defaultLocale: 'ar' as const,
     supportedLocales: ['ar', 'en'] as ('ar' | 'en')[],

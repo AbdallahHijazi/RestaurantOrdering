@@ -21,8 +21,9 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  color: var(--confirmation-accent, var(--restaurant-accent));
-  background: var(--confirmation-accent-soft, var(--restaurant-accent-soft));
+  color: var(--restaurant-success);
+  background: var(--restaurant-success-soft);
+  border: 1px solid color-mix(in srgb, var(--restaurant-success) 35%, transparent);
 }
 
 .public-confirmation__icon svg {

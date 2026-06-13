@@ -1,17 +1,17 @@
 .menu-page {
-  --menu-bg: var(--restaurant-background-menu);
+  --menu-bg: var(--restaurant-background);
   --menu-bg-soft: var(--restaurant-background-soft);
-  --menu-surface: var(--restaurant-surface-white);
-  --menu-surface-soft: var(--restaurant-neutral-100);
-  --menu-line: var(--restaurant-border-menu);
-  --menu-line-strong: var(--restaurant-border-menu-strong);
-  --menu-text: #1f2421;
-  --menu-muted: #727975;
+  --menu-surface: var(--restaurant-surface);
+  --menu-surface-soft: var(--restaurant-surface-soft);
+  --menu-line: var(--restaurant-border);
+  --menu-line-strong: var(--restaurant-border-strong);
+  --menu-text: var(--restaurant-text);
+  --menu-muted: var(--restaurant-muted-text);
   --menu-muted-soft: var(--restaurant-subtle-text);
   --menu-dark: var(--restaurant-dark);
   --menu-dark-deep: var(--restaurant-dark-deep);
   --menu-terracotta: var(--restaurant-accent);
-  --menu-terracotta-deep: #97512d;
+  --menu-terracotta-deep: var(--restaurant-accent-strong);
   --menu-terracotta-soft: var(--restaurant-accent-soft);
   --menu-sage: var(--restaurant-sage-menu);
   --menu-sage-soft: var(--restaurant-sage-soft-menu);
@@ -24,10 +24,7 @@
   min-height: 100vh;
   overflow-x: hidden;
   color: var(--menu-text);
-  background:
-    radial-gradient(circle at 8% 14%, rgb(227 214 197 / 0.5), transparent 19rem),
-    radial-gradient(circle at 92% 10%, rgb(255 255 255 / 0.88), transparent 24rem),
-    linear-gradient(135deg, #faf7f2 0%, #fcfbf8 45%, #f3ede5 100%);
+  background: var(--menu-bg);
 }
 
 .menu-page__header {
@@ -35,8 +32,8 @@
   top: 0;
   z-index: 30;
   backdrop-filter: blur(12px);
-  background: rgb(246 240 231 / 0.88);
-  border-bottom: 1px solid var(--restaurant-border);
+  background: var(--restaurant-surface-glass);
+  border-bottom: 1px solid var(--restaurant-border-strong);
 }
 
 .menu-page__header-inner,
@@ -64,6 +61,7 @@
   font-size: 0.82rem;
   text-decoration: none;
   white-space: nowrap;
+  color: var(--restaurant-muted-text);
 }
 
 .menu-page__brand h1 {
@@ -73,17 +71,18 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--restaurant-text);
 }
 
 .menu-page__table-badge {
   margin: 0.2rem 0 0;
-  color: #5f6762;
+  color: var(--restaurant-muted-text);
   font-size: 0.8125rem;
   font-weight: 700;
 }
 
 .menu-page__table-badge--error {
-  color: #b42318;
+  color: var(--restaurant-danger);
 }
 
 .menu-page__logo {
@@ -91,7 +90,10 @@
   height: 2.5rem;
   border-radius: 999px;
   object-fit: cover;
-  border: 1px solid var(--restaurant-border);
+  border: 1px solid var(--restaurant-accent-border);
+  box-shadow:
+    0 0 0 1px var(--restaurant-gold-dark),
+    inset 0 1px 0 color-mix(in srgb, var(--restaurant-palette-ivory) 28%, transparent);
 }
 
 .menu-page__actions {
@@ -104,9 +106,10 @@
   position: relative;
   width: 2.75rem;
   height: 2.75rem;
-  border: 1px solid var(--restaurant-border);
+  border: 1px solid var(--restaurant-border-strong);
   border-radius: 999px;
   background: var(--restaurant-surface);
+  color: var(--restaurant-text);
   cursor: pointer;
 }
 
@@ -119,7 +122,7 @@
   padding: 0 0.25rem;
   border-radius: 999px;
   background: var(--restaurant-accent);
-  color: #fff;
+  color: var(--restaurant-text-on-accent);
   font-size: 0.75rem;
   font-weight: 700;
   display: grid;
@@ -153,10 +156,11 @@
 
 .menu-page__section-title {
   margin: 0.45rem 0 0;
+  font-family: var(--font-display);
   font-size: clamp(1.75rem, 4vw, 2.35rem);
   line-height: 1.1;
   font-weight: 900;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
 }
 
 .menu-page__section-lead {
@@ -187,7 +191,7 @@
   border-radius: 1.375rem;
   text-align: center;
   color: var(--menu-muted);
-  background: rgb(255 255 255 / 0.72);
+  background: var(--restaurant-surface-soft);
 }
 
 .menu-page__empty-filtered p {
@@ -206,14 +210,15 @@
   justify-content: space-between;
   gap: 1.1rem;
   padding-top: 1.35rem;
-  border-top: 1px solid rgb(209 199 188 / 0.64);
+  border-top: 1px solid var(--restaurant-border);
 }
 
 .menu-page__footer-brand strong {
   display: block;
+  font-family: var(--font-display);
   font-size: 1.55rem;
-  font-style: italic;
   font-weight: 900;
+  color: var(--restaurant-text);
 }
 
 .menu-page__footer-brand span {
@@ -256,7 +261,12 @@
 .menu-page__skeleton-pill,
 .menu-page__skeleton-card {
   border-radius: 1.375rem;
-  background: linear-gradient(90deg, #efe9e2 0%, #f8f4ef 50%, #efe9e2 100%);
+  background: linear-gradient(
+    90deg,
+    var(--restaurant-surface) 0%,
+    var(--restaurant-surface-muted) 50%,
+    var(--restaurant-surface) 100%
+  );
   background-size: 200% 100%;
   animation: public-menu-skeleton 1.4s ease-in-out infinite;
 }

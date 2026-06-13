@@ -65,7 +65,7 @@ describe('Public order flow', () => {
     fixture.detectChanges();
 
     const plus = fixture.nativeElement.querySelector(
-      '.public-cart-drawer__qty-btn:last-child',
+      '[data-testid="public-cart-increase"]',
     ) as HTMLButtonElement;
     plus.click();
     fixture.detectChanges();
@@ -81,6 +81,7 @@ describe('Public order flow', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Your cart is empty');
+    expect(fixture.nativeElement.querySelector('[data-testid="public-cart-drawer-explore"]')).toBeTruthy();
   });
 
   it('closes drawer on escape', async () => {
@@ -457,7 +458,7 @@ describe('Public order flow', () => {
     fixture.detectChanges();
 
     expect(document.documentElement.dir).toBe('ltr');
-    expect(fixture.nativeElement.textContent).toContain('Checkout');
+    expect(fixture.nativeElement.textContent).toContain('Complete your order');
   });
 
   it('uses dine-in checkout when table session is active', async () => {
@@ -477,7 +478,8 @@ describe('Public order flow', () => {
     fixture.componentRef.setInput('orderSettings', settings);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('[data-testid="public-checkout-dine-in"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="public-checkout-type-dine-in"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="public-checkout-table-badge"]')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[name="deliveryAddress"]')).toBeNull();
     expect(fixture.componentInstance['orderType']()).toBe(ORDER_TYPE_DINE_IN);
   });

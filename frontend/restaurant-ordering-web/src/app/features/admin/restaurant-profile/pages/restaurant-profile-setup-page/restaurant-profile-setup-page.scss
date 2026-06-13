@@ -22,8 +22,8 @@
   gap: 0.75rem;
   flex-shrink: 0;
   padding: 0.375rem clamp(0.75rem, 3vw, 2rem);
-  background: rgb(255 255 255 / 0.96);
-  border-bottom: 1px solid #c4c7c3;
+  background: var(--restaurant-surface);
+  border-bottom: 1px solid var(--restaurant-border);
 }
 
 .profile-console__subheader-actions {
@@ -40,8 +40,8 @@
   border: none;
   border-radius: 999px;
   padding: 0.5rem 1rem;
-  background: #171c19;
-  color: var(--restaurant-surface-white);
+  background: var(--restaurant-accent);
+  color: var(--restaurant-text-on-accent);
   font-size: 0.8125rem;
   font-weight: 700;
   cursor: pointer;
@@ -60,7 +60,7 @@
 .profile-console__publish-hint {
   margin: 0;
   max-width: 16rem;
-  color: #434845;
+  color: var(--restaurant-muted-text);
   font-size: 0.75rem;
   line-height: 1.4;
 }
@@ -88,7 +88,7 @@
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
   background: transparent;
-  color: #434845;
+  color: var(--restaurant-muted-text);
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
@@ -103,7 +103,7 @@
 }
 
 .profile-console__tab.is-active {
-  background: #f5f2ed;
+  background: var(--restaurant-accent-soft);
   color: var(--restaurant-accent);
   font-weight: 700;
 }
@@ -133,8 +133,8 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: clamp(1rem, 2.5vw, 1.75rem);
-  background: var(--restaurant-surface-white);
-  border-inline-end: 1px solid #c4c7c3;
+  background: var(--restaurant-background);
+  border-inline-end: 1px solid var(--restaurant-border);
 }
 
 .profile-console__panel {
@@ -147,11 +147,12 @@
   font-family: var(--font-display);
   font-size: 1.5rem;
   font-weight: 700;
+  color: var(--restaurant-text);
 }
 
 .profile-console__panel-heading p {
   margin: 0;
-  color: #434845;
+  color: var(--restaurant-muted-text);
   font-size: 0.875rem;
 }
 
@@ -173,17 +174,18 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #434845;
+  color: var(--restaurant-muted-text);
 }
 
 .profile-console__field input,
 .profile-console__field textarea,
 .profile-console__field select {
   width: 100%;
-  border: 1px solid #c4c7c3;
+  border: 1px solid var(--restaurant-border);
   border-radius: 0.75rem;
   padding: 1rem;
-  background: #f5f2ed;
+  background: var(--restaurant-surface-soft);
+  color: var(--restaurant-text);
   outline: none;
   transition:
     border-color 250ms ease,
@@ -200,8 +202,8 @@
 .profile-console__field textarea:focus-visible,
 .profile-console__field select:focus-visible {
   border-color: var(--restaurant-accent);
-  box-shadow: 0 0 0 4px rgb(184 102 63 / 0.18);
-  background: var(--restaurant-surface-white);
+  box-shadow: 0 0 0 4px var(--restaurant-accent-soft);
+  background: var(--restaurant-surface);
 }
 
 .profile-console__technical {
@@ -210,7 +212,7 @@
 }
 
 .profile-console__hint {
-  color: #434845;
+  color: var(--restaurant-muted-text);
   font-size: 0.8125rem;
 }
 
@@ -223,8 +225,8 @@
   margin: 0;
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
-  background: #fff7ed;
-  color: #9a3412;
+  background: var(--restaurant-warning-soft);
+  color: var(--restaurant-warning);
   font-size: 0.875rem;
   font-weight: 600;
 }
@@ -233,8 +235,8 @@
   margin: 0 1rem;
   padding: 0.85rem 1rem;
   border-radius: 0.75rem;
-  background: #fef2f2;
-  color: #991b1b;
+  background: var(--restaurant-danger-soft);
+  color: var(--restaurant-danger);
 }
 
 .profile-console__toggle {
@@ -243,9 +245,10 @@
   justify-content: space-between;
   gap: 0.75rem;
   padding: 1rem;
-  border: 1px solid #c4c7c3;
+  border: 1px solid var(--restaurant-border);
   border-radius: 0.75rem;
-  background: #f5f2ed;
+  background: var(--restaurant-surface-soft);
+  color: var(--restaurant-text);
   font-weight: 700;
   font-size: 0.875rem;
 }
@@ -260,9 +263,9 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.625rem;
-  border: 1px solid #c4c7c3;
+  border: 1px solid var(--restaurant-border);
   border-radius: 0.75rem;
-  background: #f5f2ed;
+  background: var(--restaurant-surface-soft);
 }
 
 .profile-console__color-input {
@@ -287,14 +290,14 @@
 .profile-console__upload-card {
   gap: 0.75rem;
   padding: 0.85rem;
-  border: 1px dashed #c4c7c3;
+  border: 1px dashed var(--restaurant-border);
   border-radius: 0.75rem;
-  background: #f5f2ed;
+  background: var(--restaurant-surface-soft);
 }
 
 .profile-console__upload-card:hover {
   border-color: var(--restaurant-accent);
-  background: var(--restaurant-surface-white);
+  background: var(--restaurant-surface);
 }
 
 .profile-console__upload-thumb {
@@ -317,7 +320,7 @@
   width: 4rem;
   height: 4rem;
   border-radius: 0.5rem;
-  color: #434845;
+  color: var(--restaurant-muted-text);
 }
 
 .profile-console__file-input {
@@ -331,7 +334,7 @@
 .profile-console__file-name,
 .profile-console__upload-status {
   font-size: 0.8125rem;
-  color: #434845;
+  color: var(--restaurant-muted-text);
 }
 
 .profile-console__btn {
@@ -348,14 +351,14 @@
 
 .profile-console__btn--primary {
   border: none;
-  background: #171c19;
-  color: var(--restaurant-surface-white);
+  background: var(--restaurant-accent);
+  color: var(--restaurant-text-on-accent);
 }
 
 .profile-console__btn--secondary {
-  border: 1px solid #c4c7c3;
-  background: var(--restaurant-surface-white);
-  color: #1a1c1a;
+  border: 1px solid var(--restaurant-border);
+  background: var(--restaurant-surface);
+  color: var(--restaurant-text);
 }
 
 .profile-console__btn--panel-save {
@@ -371,8 +374,8 @@
 .profile-console__spinner {
   width: 0.95rem;
   height: 0.95rem;
-  border: 2px solid rgb(255 255 255 / 0.35);
-  border-top-color: var(--restaurant-surface-white);
+  border: 2px solid color-mix(in srgb, var(--restaurant-text-on-accent) 35%, transparent);
+  border-top-color: var(--restaurant-text-on-accent);
   border-radius: 50%;
   animation: profile-console-spin 720ms linear infinite;
 }
@@ -389,7 +392,7 @@
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  background: #f5f5f3;
+  background: var(--restaurant-background-soft);
   overflow: hidden;
 }
 

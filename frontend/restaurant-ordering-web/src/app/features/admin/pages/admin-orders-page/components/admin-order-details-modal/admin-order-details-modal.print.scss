@@ -37,14 +37,14 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #64748b;
+  color: var(--restaurant-print-muted);
 }
 
 .order-invoice-print-area__meta dd {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #111;
+  color: var(--restaurant-print-text);
 }
 
 .order-invoice-print-area__ltr {
@@ -62,21 +62,21 @@
 .order-invoice-print-area__table th,
 .order-invoice-print-area__table td {
   padding: 0.55rem 0.65rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--restaurant-print-border);
   text-align: start;
   vertical-align: top;
 }
 
 .order-invoice-print-area__table thead th {
-  background: #f8fafc;
-  color: #334155;
+  background: var(--restaurant-print-surface-soft);
+  color: var(--restaurant-print-text);
   font-weight: 800;
 }
 
 .order-invoice-print-area__summary {
   margin-block-end: 1.5rem;
   padding-block-start: 0.5rem;
-  border-block-start: 1px solid #d1d5db;
+  border-block-start: 1px solid var(--restaurant-print-border);
 }
 
 .order-invoice-print-area__summary-line {
@@ -85,23 +85,23 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.4rem 0;
-  color: #334155;
+  color: var(--restaurant-print-text);
   font-size: 0.9rem;
 }
 
 .order-invoice-print-area__summary-line--total {
   margin-block-start: 0.35rem;
   padding-block-start: 0.55rem;
-  border-block-start: 1px solid #111;
+  border-block-start: 1px solid var(--restaurant-print-text);
   font-size: 1rem;
   font-weight: 800;
-  color: #111;
+  color: var(--restaurant-print-text);
 }
 
 .order-invoice-print-area__thanks {
   margin: 0;
   text-align: center;
-  color: #64748b;
+  color: var(--restaurant-print-muted);
   font-size: 0.9rem;
 }
 
@@ -130,7 +130,7 @@
     width: 100%;
     padding: 0;
     background: var(--restaurant-surface-white) !important;
-    color: #111 !important;
+    color: var(--restaurant-print-text) !important;
     box-shadow: none !important;
     border: 0 !important;
   }

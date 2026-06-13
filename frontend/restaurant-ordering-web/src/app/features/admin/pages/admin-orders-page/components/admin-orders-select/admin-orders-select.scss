@@ -8,7 +8,7 @@
   margin-block-end: 0.35rem;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--orders-bluegray, var(--restaurant-neutral-500));
+  color: var(--orders-bluegray, var(--restaurant-muted-text));
 }
 
 .admin-orders-select__trigger {
@@ -19,10 +19,10 @@
   justify-content: space-between;
   gap: 0.5rem;
   padding-inline: 0.9rem;
-  border: 1px solid var(--orders-line, var(--restaurant-border-orders));
+  border: 1px solid var(--orders-line, var(--restaurant-border));
   border-radius: 0.75rem;
-  background: var(--orders-surface, var(--restaurant-surface-white));
-  color: var(--orders-charcoal, var(--restaurant-neutral-900));
+  background: var(--orders-surface, var(--restaurant-surface-soft));
+  color: var(--orders-charcoal, var(--restaurant-text));
   font: inherit;
   font-size: 0.875rem;
   font-weight: 600;
@@ -31,11 +31,11 @@
 }
 
 .admin-orders-select__trigger:hover:not(:disabled) {
-  border-color: rgb(184 102 63 / 0.45);
+  border-color: var(--restaurant-accent-border);
 }
 
 .admin-orders-select__trigger:focus-visible {
-  outline: 2px solid rgb(184 102 63 / 0.35);
+  outline: 2px solid var(--restaurant-accent-border);
   outline-offset: 2px;
 }
 
@@ -56,7 +56,7 @@
   inline-size: 1rem;
   block-size: 1rem;
   flex-shrink: 0;
-  color: var(--orders-bluegray, var(--restaurant-neutral-500));
+  color: var(--orders-bluegray, var(--restaurant-subtle-text));
   transition: transform 0.2s ease;
 }
 
@@ -72,10 +72,10 @@
   min-inline-size: 100%;
   z-index: 80;
   overflow-y: auto;
-  border: 1px solid var(--orders-line, var(--restaurant-border-orders));
+  border: 1px solid var(--orders-line, var(--restaurant-border));
   border-radius: 0.75rem;
-  background: var(--orders-surface, var(--restaurant-surface-white));
-  box-shadow: 0 16px 36px rgb(23 32 29 / 0.12);
+  background: var(--orders-surface, var(--restaurant-surface-elevated));
+  box-shadow: var(--restaurant-shadow-md);
 }
 
 .admin-orders-select--open-up .admin-orders-select__panel {
@@ -92,7 +92,7 @@
   padding: 0.65rem 0.9rem;
   border: 0;
   background: transparent;
-  color: var(--orders-charcoal, var(--restaurant-neutral-900));
+  color: var(--orders-charcoal, var(--restaurant-text));
   font: inherit;
   font-size: 0.875rem;
   text-align: start;
@@ -101,7 +101,7 @@
 
 .admin-orders-select__option:hover,
 .admin-orders-select__option:focus-visible {
-  background: var(--orders-terracotta-soft, #fff1e9);
+  background: var(--orders-terracotta-soft, var(--restaurant-accent-soft));
   outline: none;
 }
 
@@ -122,4 +122,3 @@
     transition-duration: 0.01ms !important;
   }
 }
-

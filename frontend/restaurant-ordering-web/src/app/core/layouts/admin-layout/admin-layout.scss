@@ -175,8 +175,9 @@
 }
 
 .admin-layout__nav a.is-active {
-  background: var(--restaurant-console-charcoal);
-  color: var(--restaurant-surface-white);
+  background: var(--restaurant-accent-soft);
+  color: var(--restaurant-accent);
+  border: 1px solid var(--restaurant-accent-border);
 }
 
 .admin-layout__menu-btn {
@@ -200,8 +201,8 @@
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: rgb(250 249 246 / 0.92);
-  border-bottom: 1px solid var(--admin-border);
+  background: var(--restaurant-surface-glass);
+  border-bottom: 1px solid var(--restaurant-border-strong);
   backdrop-filter: blur(10px);
 }
 
@@ -282,8 +283,8 @@
 }
 
 .admin-layout__lang button.is-active {
-  background: var(--restaurant-console-charcoal);
-  color: var(--restaurant-surface-white);
+  background: var(--restaurant-accent-soft);
+  color: var(--restaurant-accent);
 }
 
 .admin-layout__content {

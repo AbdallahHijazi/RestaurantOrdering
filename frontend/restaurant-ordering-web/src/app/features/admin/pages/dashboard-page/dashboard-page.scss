@@ -93,7 +93,7 @@
   width: 2.75rem;
   height: 2.75rem;
   border-radius: var(--radius-md);
-  background: rgb(184 102 63 / 0.12);
+  background: var(--restaurant-accent-soft);
   color: var(--restaurant-accent);
   flex-shrink: 0;
 }
@@ -112,14 +112,15 @@
   font-family: var(--font-display);
   font-size: clamp(1.75rem, 4vw, 2.25rem);
   font-weight: 700;
-  color: var(--dashboard-charcoal);
+  color: var(--restaurant-text);
 }
 
 .admin-dashboard__ready-card {
   padding: 1.15rem 1.35rem;
   border-radius: var(--radius-lg);
-  background: var(--dashboard-charcoal);
-  color: var(--dashboard-text-on-dark);
+  background: var(--restaurant-surface-elevated);
+  border: 1px solid var(--restaurant-border-strong);
+  color: var(--restaurant-text);
 }
 
 .admin-dashboard__ready-card h3 {
@@ -130,7 +131,7 @@
 
 .admin-dashboard__ready-card p {
   margin: 0 0 0.85rem;
-  color: var(--dashboard-text-on-dark-muted);
+  color: var(--restaurant-muted-text);
 }
 
 .admin-dashboard__cta {
@@ -150,7 +151,7 @@
   padding: 1rem 1.1rem;
   border-radius: var(--radius-md);
   border: 1px dashed var(--dashboard-outline);
-  background: rgb(255 253 252 / 0.7);
+  background: var(--restaurant-surface-soft);
 }
 
 .admin-dashboard__placeholder-card h3 {

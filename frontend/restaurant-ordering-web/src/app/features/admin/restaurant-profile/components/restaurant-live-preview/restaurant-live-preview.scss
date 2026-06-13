@@ -6,8 +6,8 @@
 }
 
 .live-preview {
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--restaurant-surface);
+  border: 1px solid var(--restaurant-border);
   border-radius: var(--radius-lg);
   padding: 1rem;
 }
@@ -31,9 +31,9 @@
   gap: 0.75rem 1rem;
   flex: 0 0 auto;
   padding: 0.625rem clamp(0.75rem, 2vw, 1.5rem);
-  background: #fff;
-  border-bottom: 1px solid #c4c7c3;
-  box-shadow: 0 1px 0 rgb(0 0 0 / 0.04);
+  background: var(--restaurant-surface);
+  border-bottom: 1px solid var(--restaurant-border);
+  box-shadow: var(--restaurant-shadow-sm);
 }
 
 .live-preview__toolbar-start,
@@ -57,16 +57,16 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #434845;
+  color: var(--restaurant-muted-text);
 }
 
 .live-preview__device-group {
   display: flex;
   gap: 0.25rem;
   padding: 0.25rem;
-  border: 1px solid #c4c7c3;
+  border: 1px solid var(--restaurant-border);
   border-radius: 0.5rem;
-  background: #efeeeb;
+  background: var(--restaurant-surface-soft);
 }
 
 .live-preview__device-btn {
@@ -77,7 +77,7 @@
   border: none;
   border-radius: 0.375rem;
   background: transparent;
-  color: #434845;
+  color: var(--restaurant-muted-text);
   cursor: pointer;
   transition: background-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
 }
@@ -88,18 +88,18 @@
 }
 
 .live-preview__device-btn.is-active {
-  background: #b8663f;
-  color: #fff;
-  box-shadow: 0 5px 14px rgb(184 102 63 / 0.24);
+  background: var(--restaurant-accent);
+  color: var(--restaurant-text-on-accent);
+  box-shadow: var(--restaurant-shadow-sm);
 }
 
 .live-preview__lang-toggle {
   display: flex;
   gap: 0.25rem;
   padding: 0.25rem;
-  border: 1px solid #c4c7c3;
+  border: 1px solid var(--restaurant-border);
   border-radius: 999px;
-  background: #efeeeb;
+  background: var(--restaurant-surface-soft);
 }
 
 .live-preview__lang-toggle button {
@@ -107,16 +107,16 @@
   border-radius: 999px;
   padding: 0.375rem 1.25rem;
   background: transparent;
-  color: #434845;
+  color: var(--restaurant-muted-text);
   font-size: 0.6875rem;
   font-weight: 700;
   cursor: pointer;
 }
 
 .live-preview__lang-toggle button.is-active {
-  background: #fff;
-  color: #171c19;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+  background: var(--restaurant-accent-soft);
+  color: var(--restaurant-accent);
+  box-shadow: var(--restaurant-shadow-sm);
 }
 
 .live-preview__sync-capsule {
@@ -125,10 +125,10 @@
   gap: 0.5rem;
   margin: 0;
   padding: 0.375rem 1rem;
-  border: 1px solid #dcfce7;
+  border: 1px solid color-mix(in srgb, var(--restaurant-success) 35%, transparent);
   border-radius: 999px;
-  background: #f0fdf4;
-  color: #15803d;
+  background: var(--restaurant-success-soft);
+  color: var(--restaurant-success);
   font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -136,9 +136,9 @@
 }
 
 .live-preview__sync-capsule--unsaved {
-  border-color: #ffedd5;
-  background: #fff7ed;
-  color: #9a3412;
+  border-color: color-mix(in srgb, var(--restaurant-warning) 35%, transparent);
+  background: var(--restaurant-warning-soft);
+  color: var(--restaurant-warning);
 }
 
 .live-preview__sync-dot {
@@ -146,11 +146,11 @@
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
-  background: #22c55e;
+  background: var(--restaurant-success);
 }
 
 .live-preview__sync-capsule--unsaved .live-preview__sync-dot {
-  background: #f97316;
+  background: var(--restaurant-warning);
 }
 
 .live-preview__frame-wrapper {
@@ -182,7 +182,7 @@
 }
 
 .live-preview--studio .live-preview__canvas {
-  background: #f5f5f3;
+  background: var(--restaurant-background-soft);
 }
 
 .live-preview--studio .live-preview__frame {
@@ -200,9 +200,9 @@
   max-height: 100%;
   min-height: 0;
   border-width: 1px;
-  border-color: #e3e2e0;
+  border-color: var(--restaurant-border);
   border-radius: 0.5rem;
-  box-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.12);
+  box-shadow: var(--restaurant-shadow-md);
 }
 
 .live-preview--studio .live-preview__frame--tablet,
@@ -244,7 +244,7 @@
 .live-preview__mode {
   margin: 0;
   font-size: 0.82rem;
-  color: #5d635f;
+  color: var(--restaurant-muted-text);
 }
 
 .live-preview__toolbar-actions {
@@ -265,17 +265,18 @@
 }
 
 .live-preview__controls button {
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--restaurant-border);
   border-radius: 999px;
   padding: 0.35rem 0.75rem;
-  background: #fff;
+  background: var(--restaurant-surface-soft);
+  color: var(--restaurant-text);
   cursor: pointer;
 }
 
 .live-preview__controls button.is-active {
   background: var(--restaurant-accent);
   border-color: var(--restaurant-accent);
-  color: #fff;
+  color: var(--restaurant-text-on-accent);
 }
 
 .live-preview__full {
@@ -283,14 +284,14 @@
   border: 1px solid var(--restaurant-accent);
   border-radius: 999px;
   padding: 0.35rem 0.75rem;
-  background: #fff;
+  background: var(--restaurant-surface);
   color: var(--restaurant-accent);
   cursor: pointer;
 }
 
 .live-preview__full:hover {
   background: var(--restaurant-accent);
-  color: #fff;
+  color: var(--restaurant-text-on-accent);
 }
 
 .live-preview__frame {
@@ -307,9 +308,9 @@
   width: min(768px, 100%);
   max-height: 100%;
   margin-inline: auto;
-  border: 8px solid #1a1c1b;
+  border: 8px solid var(--restaurant-surface-elevated);
   border-radius: 2.5rem;
-  box-shadow: 0 20px 50px -12px rgb(0 0 0 / 0.15);
+  box-shadow: var(--restaurant-shadow-lg);
 }
 
 .live-preview__frame--tablet {
@@ -323,9 +324,9 @@
   width: min(375px, 100%);
   max-height: 100%;
   margin-inline: auto;
-  border: 8px solid #1a1c1b;
+  border: 8px solid var(--restaurant-surface-elevated);
   border-radius: 3rem;
-  box-shadow: 0 20px 50px -12px rgb(0 0 0 / 0.15);
+  box-shadow: var(--restaurant-shadow-lg);
 }
 
 .live-preview__frame--mobile {
@@ -342,7 +343,7 @@
   align-items: center;
   gap: 0.65rem;
   padding: 0.75rem 1rem;
-  background: rgb(246 240 231 / 0.92);
+  background: var(--restaurant-surface-glass);
   border-bottom: 1px solid var(--restaurant-border);
 }
 
@@ -392,7 +393,7 @@
   display: grid;
   place-items: center;
   padding: clamp(0.75rem, 3vw, 1.5rem);
-  background: rgb(17 24 20 / 0.46);
+  background: var(--restaurant-console-backdrop);
   backdrop-filter: blur(2px);
 }
 
@@ -416,7 +417,7 @@
   overflow: hidden;
   background: var(--restaurant-background);
   border-radius: var(--radius-lg);
-  box-shadow: 0 24px 48px rgb(17 24 39 / 0.18);
+  box-shadow: var(--restaurant-shadow-lg);
   isolation: isolate;
 }
 
@@ -428,7 +429,7 @@
   flex-shrink: 0;
   padding: 0.85rem 1rem;
   border-bottom: 1px solid var(--restaurant-border);
-  background: #fff;
+  background: var(--restaurant-surface);
 }
 
 .live-preview__modal-body {

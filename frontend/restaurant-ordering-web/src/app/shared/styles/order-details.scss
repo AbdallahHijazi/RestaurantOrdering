@@ -12,31 +12,31 @@
 .order-status-chip[data-status='1'] {
   background: var(--restaurant-info-soft);
   color: var(--restaurant-info);
-  border-color: rgb(59 130 246 / 0.25);
+  border-color: color-mix(in srgb, var(--restaurant-info) 28%, transparent);
 }
 
 .order-status-chip[data-status='2'] {
-  background: rgb(217 119 6 / 0.14);
+  background: var(--restaurant-warning-soft);
   color: var(--restaurant-warning);
-  border-color: rgb(217 119 6 / 0.28);
+  border-color: color-mix(in srgb, var(--restaurant-warning) 28%, transparent);
 }
 
 .order-status-chip[data-status='3'] {
   background: var(--restaurant-success-soft);
   color: var(--restaurant-success);
-  border-color: rgb(47 122 79 / 0.28);
+  border-color: color-mix(in srgb, var(--restaurant-success) 28%, transparent);
 }
 
 .order-status-chip[data-status='4'] {
-  background: rgb(100 116 139 / 0.14);
-  color: var(--restaurant-neutral-700);
-  border-color: rgb(100 116 139 / 0.28);
+  background: var(--restaurant-surface-muted);
+  color: var(--restaurant-muted-text);
+  border-color: var(--restaurant-border);
 }
 
 .order-status-chip[data-status='5'] {
   background: var(--restaurant-danger-soft);
   color: var(--restaurant-danger);
-  border-color: rgb(176 59 59 / 0.28);
+  border-color: color-mix(in srgb, var(--restaurant-danger) 28%, transparent);
 }
 
 .order-type-chip {
@@ -51,7 +51,7 @@
 }
 
 .order-type-chip--delivery {
-  background: rgb(184 102 63 / 0.14);
+  background: var(--restaurant-accent-soft);
   color: var(--restaurant-accent);
 }
 

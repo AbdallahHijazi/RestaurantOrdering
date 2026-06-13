@@ -2,7 +2,7 @@
   --checkout-accent: var(--restaurant-accent);
   --checkout-accent-strong: var(--restaurant-accent-strong);
   --checkout-accent-soft: var(--restaurant-accent-soft);
-  --checkout-surface: var(--restaurant-surface-white);
+  --checkout-surface: var(--restaurant-surface);
   --checkout-surface-soft: var(--restaurant-surface-soft);
   --checkout-text: var(--restaurant-text);
   --checkout-muted: var(--restaurant-muted-text);
@@ -18,7 +18,7 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: rgb(26 28 27 / 0.4);
+  background: var(--restaurant-overlay-backdrop);
   backdrop-filter: blur(8px);
 }
 
@@ -29,10 +29,10 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--checkout-border) 55%, white);
+  border: 1px solid var(--restaurant-border-strong);
   border-radius: 2rem;
   background: var(--checkout-surface);
-  box-shadow: 0 20px 40px -15px rgb(145 71 35 / 0.1);
+  box-shadow: var(--restaurant-shadow-md);
   animation: public-checkout-in 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -42,7 +42,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1.75rem 1.75rem 1rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--checkout-border) 70%, white);
+  border-bottom: 1px solid var(--checkout-border);
   background: var(--checkout-surface);
 }
 
@@ -167,7 +167,7 @@
 
 .public-checkout__field input::placeholder,
 .public-checkout__field textarea::placeholder {
-  color: color-mix(in srgb, var(--checkout-muted) 72%, white);
+  color: var(--restaurant-subtle-text);
 }
 
 .public-checkout__field input:focus,
@@ -221,7 +221,7 @@
 }
 
 .public-checkout__type-card:hover:not(:disabled):not(.public-checkout__type-card--active) {
-  background: color-mix(in srgb, var(--checkout-surface-soft) 70%, white);
+  background: var(--restaurant-surface-muted);
   transform: translateY(-2px);
 }
 
@@ -311,7 +311,7 @@
   gap: 0;
   margin-top: 2rem;
   padding: 1.5rem;
-  border: 1px solid color-mix(in srgb, var(--checkout-border) 55%, white);
+  border: 1px solid color-mix(in srgb, var(--checkout-border) 55%, var(--restaurant-palette-ivory));
   border-radius: 1rem;
   background: var(--checkout-surface-soft);
 }
@@ -344,7 +344,7 @@
 }
 
 .public-checkout__summary-row--total strong {
-  color: var(--checkout-accent);
+  color: var(--restaurant-gold-light);
   font-size: clamp(1.5rem, 2.5vw, 2rem);
   font-weight: 700;
 }
@@ -360,8 +360,8 @@
 }
 
 .public-checkout__alert {
-  color: #8f3232;
-  background: #fff2f2;
+  color: var(--restaurant-danger);
+  background: var(--restaurant-danger-soft);
 }
 
 .public-checkout__notice {
@@ -375,8 +375,8 @@
   gap: 1rem;
   padding: 1.5rem 1.75rem;
   padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid color-mix(in srgb, var(--checkout-border) 35%, transparent);
-  background: color-mix(in srgb, var(--checkout-surface-soft) 50%, white);
+  border-top: 1px solid var(--checkout-border);
+  background: var(--checkout-surface-soft);
 }
 
 .public-checkout__secondary,
@@ -399,10 +399,22 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border: 0;
-  color: var(--checkout-surface);
-  background: var(--checkout-accent);
-  box-shadow: 0 12px 20px color-mix(in srgb, var(--checkout-accent) 24%, transparent);
+  border: 1px solid var(--restaurant-accent-border);
+  color: var(--restaurant-primary-button-text);
+  background-color: var(--restaurant-olive);
+  background-image: var(--restaurant-primary-button-bg);
+  box-shadow: var(--restaurant-primary-button-shadow);
+}
+
+.public-checkout__primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background-image: var(--restaurant-primary-button-bg-hover);
+  box-shadow: var(--restaurant-primary-button-shadow-hover);
+}
+
+.public-checkout__primary:active:not(:disabled) {
+  transform: scale(0.98);
+  background-image: var(--restaurant-primary-button-bg-active);
 }
 
 .public-checkout__primary svg {
@@ -410,16 +422,11 @@
   height: 1.25rem;
 }
 
-.public-checkout__primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 16px 26px color-mix(in srgb, var(--checkout-accent) 30%, transparent);
-}
-
 .public-checkout__secondary {
   flex: 1 1 12rem;
-  border: 1px solid color-mix(in srgb, var(--checkout-border) 55%, white);
+  border: 1px solid var(--checkout-border);
   color: var(--checkout-text);
-  background: color-mix(in srgb, var(--checkout-surface-soft) 80%, white);
+  background: var(--checkout-surface);
 }
 
 .public-checkout__secondary:hover:not(:disabled) {

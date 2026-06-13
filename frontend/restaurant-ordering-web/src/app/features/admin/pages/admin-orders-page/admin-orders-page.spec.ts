@@ -161,7 +161,7 @@ describe('AdminOrdersPage', () => {
       .join('\n');
     expect(iconCss).toContain('orders-management-page__extra-filters-icon');
     expect(iconCss).toContain('20px');
-    expect(iconCss).toContain('stroke: var(--orders-charcoal)');
+    expect(iconCss).toContain('stroke: var(--restaurant-text)');
     expect(iconCss).toContain('height: 46px');
     expect(iconCss).toContain('align-self: center');
 

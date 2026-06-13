@@ -46,7 +46,7 @@ export const MOCK_PUBLIC_MENU: PublicMenuPageData = {
       'A seasonal culinary experience blending local heritage with botanical elegance.',
     logoUrl: IMAGE.logo,
     coverImageUrl: IMAGE.cover,
-    primaryAccentColor: '#B8663F',
+    primaryAccentColor: '#6E7B4E',
     countryCode: 'SA',
     currencyCode: 'SAR',
     timeZone: 'Asia/Riyadh',

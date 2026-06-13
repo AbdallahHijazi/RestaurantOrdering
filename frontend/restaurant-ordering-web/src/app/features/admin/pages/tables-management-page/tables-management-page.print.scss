@@ -9,7 +9,7 @@
   }
 
   body.tables-print-active {
-    background: var(--restaurant-surface-white, #fff) !important;
+    background: var(--restaurant-surface-white) !important;
   }
 
   body.tables-print-active * {
@@ -43,8 +43,8 @@
     padding: 0;
     align-items: center;
     justify-content: center;
-    background: var(--restaurant-surface-white, #fff) !important;
-    color: var(--restaurant-text, #202522) !important;
+    background: var(--restaurant-surface-white) !important;
+    color: var(--restaurant-print-text) !important;
     box-shadow: none !important;
     border: 0 !important;
   }

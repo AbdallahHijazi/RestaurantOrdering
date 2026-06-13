@@ -65,7 +65,7 @@ describe('MenuManagementPage', () => {
       '[data-testid="menu-add-item-button"]',
     ) as HTMLButtonElement;
     expect(addButton.closest('.menu-management-toolbar')).toBeTruthy();
-    expect(getComputedStyle(addButton).color).toBe('var(--restaurant-surface-white)');
+    expect(getComputedStyle(addButton).color).toBe('var(--restaurant-primary-button-text)');
     addButton.click();
     fixture.detectChanges();
     expect(document.body.querySelector('[data-testid="menu-modal"]')).toBeTruthy();

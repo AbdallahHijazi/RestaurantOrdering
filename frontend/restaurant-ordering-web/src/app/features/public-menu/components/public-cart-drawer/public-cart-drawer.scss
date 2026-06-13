@@ -2,7 +2,7 @@
   --cart-accent: var(--restaurant-accent);
   --cart-accent-strong: var(--restaurant-accent-strong);
   --cart-accent-soft: var(--restaurant-accent-soft);
-  --cart-surface: var(--restaurant-surface-white);
+  --cart-surface: var(--restaurant-surface);
   --cart-surface-soft: var(--restaurant-surface-soft);
   --cart-text: var(--restaurant-text);
   --cart-muted: var(--restaurant-muted-text);
@@ -17,7 +17,7 @@
   z-index: 100;
   display: flex;
   justify-content: flex-end;
-  background: rgb(23 29 26 / 0.38);
+  background: var(--restaurant-overlay-backdrop);
   backdrop-filter: blur(5px);
 }
 
@@ -28,8 +28,8 @@
   height: 100dvh;
   max-height: 100dvh;
   overflow: hidden;
-  background: rgb(255 255 255 / 0.98);
-  box-shadow: var(--cart-shadow, 0 28px 74px rgb(29 34 31 / 0.18));
+  background: var(--cart-surface);
+  box-shadow: var(--cart-shadow, var(--restaurant-shadow-lg));
   outline: none;
   animation: public-cart-drawer-in 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -41,7 +41,7 @@
   gap: 1rem;
   padding: 1.5rem 1.5rem 1.125rem;
   border-bottom: 1px solid var(--cart-border);
-  background: linear-gradient(180deg, var(--cart-surface), var(--cart-surface-soft));
+  background: var(--cart-surface-soft);
 }
 
 .public-cart-drawer__title-wrap {
@@ -126,9 +126,7 @@
   min-height: 0;
   overflow: auto;
   padding: 1.125rem;
-  background:
-    radial-gradient(circle at 100% 0%, rgb(255 248 240 / 0.82), transparent 17rem),
-    var(--cart-surface);
+  background: var(--cart-surface);
 }
 
 .public-cart-drawer__items {
@@ -144,7 +142,7 @@
   border: 1px solid var(--cart-border);
   border-radius: 1rem;
   background: var(--cart-surface-soft);
-  box-shadow: var(--restaurant-shadow-sm, 0 10px 24px rgb(29 34 31 / 0.06));
+  box-shadow: var(--restaurant-shadow-sm);
   transition:
     transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
     border-color 0.28s ease,
@@ -163,8 +161,8 @@
   height: 4.5rem;
   overflow: hidden;
   border-radius: 0.875rem;
-  background: #eee7df;
-  border: 1px solid color-mix(in srgb, var(--cart-border) 80%, white);
+  background: var(--restaurant-surface-muted);
+  border: 1px solid var(--cart-border);
 }
 
 .public-cart-drawer__thumb img {
@@ -228,7 +226,7 @@
   padding: 0.25rem;
   border: 1px solid var(--cart-border);
   border-radius: 999px;
-  background: #f8f3ed;
+  background: var(--restaurant-surface-muted);
 }
 
 .public-cart-drawer__qty-btn {
@@ -239,7 +237,7 @@
   border: 0;
   border-radius: 50%;
   background: var(--cart-surface);
-  color: #38403c;
+  color: var(--restaurant-text);
   cursor: pointer;
   transition:
     transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
@@ -253,7 +251,7 @@
 }
 
 .public-cart-drawer__qty-btn:hover {
-  color: var(--cart-surface);
+  color: var(--restaurant-text-on-accent);
   background: var(--cart-accent);
   transform: scale(1.06);
 }
@@ -290,7 +288,7 @@
 }
 
 .public-cart-drawer__remove:hover {
-  color: #9f3333;
+  color: var(--cart-danger);
   transform: translateX(2px);
 }
 
@@ -338,30 +336,11 @@
   height: 2.125rem;
 }
 
-.public-cart-drawer__explore {
-  min-height: 2.625rem;
-  margin-top: 1rem;
-  padding-inline: 0.9375rem;
-  border: 0;
-  border-radius: 0.6875rem;
-  color: var(--cart-surface);
-  background: linear-gradient(135deg, var(--cart-accent), var(--cart-accent-strong));
-  font: inherit;
-  font-size: 0.8125rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.public-cart-drawer__explore:hover {
-  transform: translateY(-2px);
-}
-
 .public-cart-drawer__footer {
   flex: 0 0 auto;
   padding: 1.0625rem 1.125rem 1.125rem;
   border-top: 1px solid var(--cart-border);
-  background: linear-gradient(135deg, #fffaf6, #f7efe6);
+  background: var(--cart-surface-soft);
 }
 
 .public-cart-drawer__summary {
@@ -381,24 +360,24 @@
 }
 
 .public-cart-drawer__summary-row + .public-cart-drawer__summary-row {
-  border-top: 1px solid rgb(221 205 191 / 0.64);
+  border-top: 1px solid var(--cart-border);
 }
 
 .public-cart-drawer__summary-row strong {
-  color: #343a37;
+  color: var(--cart-text);
   font-size: 0.875rem;
   font-weight: 800;
 }
 
 .public-cart-drawer__summary-row--total {
   padding-top: 0.75rem;
-  color: #262b28;
+  color: var(--cart-text);
   font-size: 1.0625rem;
   font-weight: 800;
 }
 
 .public-cart-drawer__summary-row--total strong {
-  color: var(--cart-accent);
+  color: var(--restaurant-gold-light);
   font-size: 1.5rem;
 }
 
@@ -432,10 +411,17 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border: 0;
-  color: var(--cart-surface);
-  background: linear-gradient(135deg, var(--cart-accent), var(--cart-accent-strong));
-  box-shadow: 0 12px 20px rgb(189 109 63 / 0.22);
+  border: 1px solid var(--restaurant-accent-border);
+  color: var(--restaurant-primary-button-text);
+  background-color: var(--restaurant-olive);
+  background-image: var(--restaurant-primary-button-bg);
+  box-shadow: var(--restaurant-primary-button-shadow);
+}
+
+.public-cart-drawer__checkout:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background-image: var(--restaurant-primary-button-bg-hover);
+  box-shadow: var(--restaurant-primary-button-shadow-hover);
 }
 
 .public-cart-drawer__checkout svg {
@@ -447,21 +433,42 @@
   transform: scaleX(-1);
 }
 
-.public-cart-drawer__checkout:hover:not(:disabled) {
+.public-cart-drawer__explore {
+  min-height: 2.625rem;
+  margin-top: 1rem;
+  padding-inline: 0.9375rem;
+  border: 1px solid var(--restaurant-accent-border);
+  border-radius: 0.6875rem;
+  color: var(--restaurant-primary-button-text);
+  background-color: var(--restaurant-olive);
+  background-image: var(--restaurant-primary-button-bg-soft);
+  box-shadow: var(--restaurant-primary-button-shadow);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    background-image 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.public-cart-drawer__explore:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 26px rgb(189 109 63 / 0.28);
+  background-image: var(--restaurant-primary-button-bg-hover);
+  box-shadow: var(--restaurant-primary-button-shadow-hover);
 }
 
 .public-cart-drawer__clear {
   padding-inline: 0.875rem;
   border: 1px solid var(--cart-border);
-  color: #737b76;
+  color: var(--cart-muted);
   background: var(--cart-surface);
 }
 
 .public-cart-drawer__clear:hover:not(:disabled) {
   color: var(--cart-danger);
-  border-color: #efd0d0;
+  border-color: color-mix(in srgb, var(--cart-danger) 35%, transparent);
   background: var(--cart-danger-soft);
 }
 

@@ -1,109 +1,241 @@
 .button-primary,
+
 .button-secondary,
+
 .button-ghost,
+
 .button-danger,
+
 .button-success,
+
 .button-icon {
+
   display: inline-flex;
+
   align-items: center;
+
   justify-content: center;
+
   gap: 0.35rem;
+
   min-height: 2.5rem;
+
   padding: 0.55rem 1rem;
+
   border-radius: var(--radius-md);
+
   border: 1px solid transparent;
+
   font-weight: 600;
+
   line-height: 1.2;
+
   cursor: pointer;
+
   transition:
-    background-color 200ms ease,
-    border-color 200ms ease,
-    color 200ms ease,
-    box-shadow 200ms ease;
+
+    background-color var(--restaurant-motion-normal) ease,
+
+    background-image var(--restaurant-motion-normal) ease,
+
+    border-color var(--restaurant-motion-normal) ease,
+
+    color var(--restaurant-motion-normal) ease,
+
+    box-shadow var(--restaurant-motion-normal) ease,
+
+    transform var(--restaurant-motion-fast) ease;
+
 }
+
+
 
 .button-primary {
-  background: var(--restaurant-accent);
-  color: var(--restaurant-surface-white);
-  border-color: var(--restaurant-accent);
+
+  background-color: var(--restaurant-olive);
+
+  background-image: var(--restaurant-primary-button-bg);
+
+  color: var(--restaurant-primary-button-text);
+
+  border-color: var(--restaurant-accent-border);
+
+  box-shadow: var(--restaurant-primary-button-shadow);
+
 }
+
+
 
 .button-primary:hover:not(:disabled) {
-  filter: brightness(1.05);
-  box-shadow: 0 6px 16px rgb(184 102 63 / 0.28);
+
+  background-image: var(--restaurant-primary-button-bg-hover);
+
+  box-shadow: var(--restaurant-primary-button-shadow-hover);
+
 }
+
+
+
+.button-primary:active:not(:disabled) {
+
+  transform: scale(0.98);
+
+  background-image: var(--restaurant-primary-button-bg-active);
+
+}
+
+
 
 .button-secondary {
+
   background: var(--restaurant-surface);
+
   color: var(--restaurant-text);
-  border-color: var(--restaurant-border);
+
+  border-color: var(--restaurant-border-strong);
+
 }
+
+
 
 .button-secondary:hover:not(:disabled) {
-  background: var(--restaurant-alternate-surface);
+
+  background: var(--restaurant-surface-soft);
+
+  border-color: var(--restaurant-accent-border);
+
 }
+
+
 
 .button-ghost {
+
   background: transparent;
-  color: var(--restaurant-text);
+
+  color: var(--restaurant-text-soft);
+
   border-color: transparent;
+
 }
+
+
 
 .button-ghost:hover:not(:disabled) {
-  background: rgb(184 102 63 / 0.08);
+
+  background: var(--restaurant-accent-soft);
+
+  color: var(--restaurant-text);
+
 }
+
+
 
 .button-danger {
+
   background: var(--restaurant-danger-soft);
+
   color: var(--restaurant-danger);
-  border-color: rgb(176 59 59 / 0.35);
+
+  border-color: color-mix(in srgb, var(--restaurant-danger) 35%, transparent);
+
 }
+
+
 
 .button-danger:hover:not(:disabled) {
-  background: rgb(176 59 59 / 0.16);
+
+  background: color-mix(in srgb, var(--restaurant-danger) 22%, transparent);
+
 }
+
+
 
 .button-success {
+
   background: var(--restaurant-success-soft);
+
   color: var(--restaurant-success);
-  border-color: rgb(47 122 79 / 0.35);
+
+  border-color: color-mix(in srgb, var(--restaurant-success) 35%, transparent);
+
 }
+
+
 
 .button-success:hover:not(:disabled) {
-  background: rgb(47 122 79 / 0.2);
+
+  background: color-mix(in srgb, var(--restaurant-success) 22%, transparent);
+
 }
+
+
 
 .button-icon {
+
   min-height: 2.25rem;
+
   min-width: 2.25rem;
+
   padding: 0.35rem;
+
   border-radius: var(--radius-sm);
+
   background: transparent;
+
   color: var(--restaurant-muted-text);
+
   border-color: transparent;
+
 }
+
+
 
 .button-icon:hover:not(:disabled) {
-  background: var(--restaurant-alternate-surface);
+
+  background: var(--restaurant-surface-muted);
+
   color: var(--restaurant-text);
+
 }
+
+
 
 .button-primary:disabled,
+
 .button-secondary:disabled,
+
 .button-ghost:disabled,
+
 .button-danger:disabled,
+
 .button-success:disabled,
+
 .button-icon:disabled {
+
   opacity: 0.55;
+
   cursor: not-allowed;
+
 }
 
+
+
 .button-primary:focus-visible,
+
 .button-secondary:focus-visible,
+
 .button-ghost:focus-visible,
+
 .button-danger:focus-visible,
+
 .button-success:focus-visible,
+
 .button-icon:focus-visible {
-  outline: 2px solid var(--restaurant-accent);
+
+  outline: 2px solid var(--restaurant-focus-ring);
+
   outline-offset: 2px;
+
 }
+
+

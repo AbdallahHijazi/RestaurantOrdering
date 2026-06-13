@@ -16,6 +16,7 @@ import {
   type ValidationErrors,
 } from '@angular/forms';
 import {
+  DEFAULT_RESTAURANT_ACCENT,
   RESTAURANT_ACCENT_HEX_PATTERN,
   RestaurantThemeService,
 } from '../../../../../core/theme/restaurant-theme';
@@ -262,7 +263,7 @@ export class RestaurantProfileSetupPage {
         Validators.pattern(SLUG_PATTERN),
       ]),
       primaryAccentColor: this.fb.control(
-        MOCK_PUBLIC_MENU.restaurant.primaryAccentColor ?? '#B8663F',
+        MOCK_PUBLIC_MENU.restaurant.primaryAccentColor ?? DEFAULT_RESTAURANT_ACCENT,
         [Validators.required, Validators.pattern(RESTAURANT_ACCENT_HEX_PATTERN)],
       ),
       countryCode: this.fb.control(MOCK_PUBLIC_MENU.restaurant.countryCode, [

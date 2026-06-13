@@ -13,7 +13,7 @@ const PREVIEW: RestaurantProfilePreviewData = {
   descriptionEn: 'Description',
   logoUrl: null,
   coverImageUrl: null,
-  primaryAccentColor: '#B8663F',
+  primaryAccentColor: '#c6a15b',
   countryCode: 'SA',
   currencyCode: 'SAR',
   timeZone: 'Asia/Riyadh',

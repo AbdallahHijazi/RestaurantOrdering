@@ -1,4 +1,4 @@
-.menu-management-page{--menu-line:var(--restaurant-border-admin);--menu-text:#202522;--menu-muted:#6f756f;--menu-green-deep:#2f6f5c;--menu-green-soft:#edf7f2;--menu-terracotta:var(--restaurant-accent);--menu-red:var(--restaurant-danger-admin);--menu-red-soft:#fff3f2;--menu-shadow-sm:var(--restaurant-shadow-admin-sm);--menu-shadow-md:var(--restaurant-shadow-admin-md);min-height:100%;padding-top:clamp(1.25rem,2vw,2rem);padding-bottom:clamp(1.5rem,3vw,4rem);padding-inline:clamp(.75rem,4vw,4rem);background:linear-gradient(135deg,#faf7f3,#fdfbf8 52%,#f6f0e9);overflow:hidden}
+.menu-management-page{--menu-line:var(--restaurant-border);--menu-text:var(--restaurant-text);--menu-muted:var(--restaurant-muted-text);--menu-green-deep:var(--restaurant-success);--menu-green-soft:var(--restaurant-success-soft);--menu-terracotta:var(--restaurant-accent);--menu-red:var(--restaurant-danger);--menu-red-soft:var(--restaurant-danger-soft);--menu-shadow-sm:var(--restaurant-shadow-sm);--menu-shadow-md:var(--restaurant-shadow-md);min-height:100%;padding-top:clamp(1.25rem,2vw,2rem);padding-bottom:clamp(1.5rem,3vw,4rem);padding-inline:clamp(.75rem,4vw,4rem);background:var(--restaurant-background);overflow:hidden}
 .menu-management-shell{max-width:82.5rem;margin-inline:auto}
 .menu-management-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-block-end:1.625rem}
 .menu-management-title h1{margin:0;color:var(--menu-text);font-family:var(--font-display);font-size:clamp(1.75rem,3vw,2.125rem);font-weight:800;letter-spacing:-.02em}
@@ -7,49 +7,49 @@
 [dir="rtl"] .menu-management-toolbar{flex-direction:row-reverse}
 .menu-management-search{position:relative;flex:0 1 18.75rem;min-width:12rem;max-width:18.75rem}
 .menu-management-search__label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
-.menu-management-search__icon{position:absolute;inset-inline-end:.9375rem;top:50%;transform:translateY(-50%);width:1.125rem;height:1.125rem;color:#7a817d;pointer-events:none}
-.menu-management-search input{width:100%;height:3.125rem;padding-inline:1rem 2.875rem;border:1px solid var(--menu-line);border-radius:var(--restaurant-radius-pill);background:rgb(255 255 255/.92);font:inherit;box-shadow:var(--menu-shadow-sm)}
-.menu-management-search input:focus{border-color:var(--menu-terracotta);outline:2px solid rgb(184 102 63/.2);outline-offset:0}
+.menu-management-search__icon{position:absolute;inset-inline-end:.9375rem;top:50%;transform:translateY(-50%);width:1.125rem;height:1.125rem;color:var(--restaurant-subtle-text);pointer-events:none}
+.menu-management-search input{width:100%;height:3.125rem;padding-inline:1rem 2.875rem;border:1px solid var(--menu-line);border-radius:var(--restaurant-radius-pill);background:var(--restaurant-surface-soft);color:var(--menu-text);font:inherit;box-shadow:var(--menu-shadow-sm)}
+.menu-management-search input:focus{border-color:var(--menu-terracotta);outline:2px solid var(--restaurant-accent-border);outline-offset:0}
 .menu-management-primary,.menu-management-secondary,.menu-management-category-pill,.menu-management-icon-btn,.menu-management-add-card{font:inherit;cursor:pointer;border-radius:.75rem}
-.menu-management-primary{min-height:3.125rem;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding-inline:1.25rem;border:0;color:var(--restaurant-surface-white);background:linear-gradient(135deg,#202824,#111815);font-weight:800;box-shadow:0 12px 22px rgb(24 32 29/.18)}
-.menu-management-toolbar .menu-management-primary{background:linear-gradient(135deg,#c2764d,#ad5d37);box-shadow:0 12px 22px rgb(184 102 63/.22)}
-.menu-management-toolbar .menu-management-primary:hover:not(:disabled){filter:brightness(1.05);transform:translateY(-2px)}
+.menu-management-primary{min-height:3.125rem;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding-inline:1.25rem;border:1px solid var(--restaurant-accent-border);color:var(--restaurant-primary-button-text);background-color:var(--restaurant-olive);background-image:var(--restaurant-primary-button-bg);font-weight:800;box-shadow:var(--restaurant-primary-button-shadow)}
+.menu-management-toolbar .menu-management-primary{background-color:var(--restaurant-olive);background-image:var(--restaurant-primary-button-bg);box-shadow:var(--restaurant-primary-button-shadow)}
+.menu-management-toolbar .menu-management-primary:hover:not(:disabled){background-image:var(--restaurant-primary-button-bg-hover);transform:translateY(-2px);box-shadow:var(--restaurant-primary-button-shadow-hover)}
 .menu-management-toolbar .menu-management-primary:active:not(:disabled){transform:scale(.97)}
-.menu-management-toolbar .menu-management-primary:focus-visible{outline:2px solid rgb(184 102 63/.35);outline-offset:2px}
+.menu-management-toolbar .menu-management-primary:focus-visible{outline:2px solid var(--restaurant-accent-border);outline-offset:2px}
 .menu-management-primary svg{width:1.25rem;height:1.25rem}
-.menu-management-primary--danger{background:var(--menu-red)}
+.menu-management-primary--danger{background:var(--menu-red);color:var(--restaurant-text)}
 .menu-management-primary:disabled,.menu-management-secondary:disabled{opacity:.55;cursor:not-allowed}
-.menu-management-secondary{border:1px solid var(--menu-line);padding:.5rem .9rem;background:var(--restaurant-surface-white);font-weight:700}
+.menu-management-secondary{border:1px solid var(--menu-line);padding:.5rem .9rem;background:var(--restaurant-surface);color:var(--restaurant-muted-text);font-weight:700}
 .menu-management-success{margin:0 0 1rem;padding:.75rem 1rem;border-radius:.75rem;background:var(--menu-green-soft);color:var(--menu-green-deep)}
-.menu-management-categories{display:flex;align-items:center;flex-wrap:wrap;gap:.625rem;padding:.875rem;margin-block-end:1.375rem;border:1px solid var(--menu-line);border-radius:1.125rem;background:rgb(255 255 255/.85);box-shadow:var(--menu-shadow-sm)}
+.menu-management-categories{display:flex;align-items:center;flex-wrap:wrap;gap:.625rem;padding:.875rem;margin-block-end:1.375rem;border:1px solid var(--menu-line);border-radius:1.125rem;background:var(--restaurant-surface);box-shadow:var(--menu-shadow-sm)}
 .menu-management-category-wrap{display:inline-flex;align-items:center;gap:.25rem}
-.menu-management-category-pill{min-height:2.5rem;display:inline-flex;align-items:center;gap:.4375rem;padding-inline:.9375rem;border:1px solid var(--menu-line);border-radius:var(--restaurant-radius-pill);color:#59615d;background:var(--restaurant-surface-white);font-size:.8125rem;font-weight:800}
-.menu-management-category-pill.is-active{color:var(--restaurant-surface-white);border-color:var(--menu-terracotta);background:linear-gradient(135deg,#c2764d,#ad5d37)}
+.menu-management-category-pill{min-height:2.5rem;display:inline-flex;align-items:center;gap:.4375rem;padding-inline:.9375rem;border:1px solid var(--menu-line);border-radius:var(--restaurant-radius-pill);color:var(--restaurant-muted-text);background:var(--restaurant-surface-soft);font-size:.8125rem;font-weight:800}
+.menu-management-category-pill.is-active{color:var(--restaurant-text-on-accent);border-color:var(--menu-terracotta);background:var(--restaurant-accent)}
 .menu-management-category-pill--add{width:2.5rem;padding:0;justify-content:center;color:var(--menu-terracotta);border-style:dashed}
 .menu-management-category-pill--add svg{width:1.1875rem;height:1.1875rem}
-.menu-management-icon-btn{display:inline-grid;place-items:center;width:1.75rem;height:1.75rem;border:1px solid var(--menu-line);background:var(--restaurant-surface-white);color:var(--menu-muted)}
+.menu-management-icon-btn{display:inline-grid;place-items:center;width:1.75rem;height:1.75rem;border:1px solid var(--menu-line);background:var(--restaurant-surface-soft);color:var(--menu-muted)}
 .menu-management-icon-btn svg{width:.875rem;height:.875rem}
 .menu-management-icon-btn--danger{color:var(--menu-red)}
 .menu-management-section-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-block-end:1rem}
-.menu-management-section-head h2{margin:0;font-size:1.25rem;font-weight:800}
+.menu-management-section-head h2{margin:0;font-size:1.25rem;font-weight:800;color:var(--menu-text)}
 .menu-management-count{color:var(--menu-muted);font-size:.8125rem;font-weight:700}
 .menu-management-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.375rem}
-.menu-management-add-card{border:1px solid var(--menu-line);border-radius:1.375rem;background:var(--restaurant-surface-white);box-shadow:var(--menu-shadow-sm);overflow:hidden;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;padding:1.5rem;border:2px dashed #d8cec5;background:#fffdfa;color:var(--menu-muted);text-align:center;font:inherit;cursor:pointer}
-.menu-management-add-card:hover{transform:translateY(-4px);box-shadow:var(--menu-shadow-md)}
-.menu-management-add-card__icon{display:inline-flex;align-items:center;justify-content:center;width:3rem;height:3rem;padding:0;line-height:1;border-radius:50%;background:linear-gradient(135deg,#c2764d,#ad5d37);color:var(--restaurant-surface-white);box-shadow:0 8px 18px rgb(184 102 63/.2)}
+.menu-management-add-card{border:1px solid var(--menu-line);border-radius:1.375rem;background:var(--restaurant-surface-soft);box-shadow:var(--menu-shadow-sm);overflow:hidden;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;padding:1.5rem;border:2px dashed var(--restaurant-border);color:var(--menu-muted);text-align:center;font:inherit;cursor:pointer}
+.menu-management-add-card:hover{transform:translateY(-4px);border-color:var(--restaurant-card-hover-border);box-shadow:var(--restaurant-card-hover-shadow)}
+.menu-management-add-card__icon{display:inline-flex;align-items:center;justify-content:center;width:3rem;height:3rem;padding:0;line-height:1;border-radius:50%;background-color:var(--restaurant-olive);background-image:var(--restaurant-primary-button-bg-soft);color:var(--restaurant-primary-button-text);box-shadow:var(--restaurant-primary-button-shadow)}
 .menu-management-add-card__icon svg{display:block;width:1.5rem;height:1.5rem}
-.menu-management-state,.menu-management-empty-filtered{padding:2rem 1rem;border:1px dashed #ddcfc2;border-radius:1rem;background:rgb(255 255 255/.72);color:var(--menu-muted);text-align:center}
-.menu-management-state--error{border-color:#f0d2d2;background:var(--menu-red-soft)}
+.menu-management-state,.menu-management-empty-filtered{padding:2rem 1rem;border:1px dashed var(--restaurant-border);border-radius:1rem;background:var(--restaurant-surface-soft);color:var(--menu-muted);text-align:center}
+.menu-management-state--error{border-color:var(--restaurant-danger);background:var(--menu-red-soft)}
 .menu-management-form{display:flex;flex-direction:column;gap:.75rem}
-.menu-management-form label{display:flex;flex-direction:column;gap:.35rem;font-weight:600}
-.menu-management-form input,.menu-management-form textarea,.menu-management-form select{font:inherit;border:1px solid var(--menu-line);border-radius:.75rem;padding:.55rem .65rem}
+.menu-management-form label{display:flex;flex-direction:column;gap:.35rem;font-weight:600;color:var(--menu-text)}
+.menu-management-form input,.menu-management-form textarea,.menu-management-form select{font:inherit;border:1px solid var(--menu-line);border-radius:.75rem;padding:.55rem .65rem;background:var(--restaurant-surface-soft);color:var(--menu-text)}
 .menu-management-checkbox{flex-direction:row!important;align-items:center;gap:.5rem!important;font-weight:500!important}
 .menu-management-field-error,.menu-management-modal-error{margin:0;color:var(--menu-red)}
 .menu-management-help{margin:0;color:var(--menu-muted);font-size:.85rem}
 .menu-management-image-preview{max-width:100%}
 .menu-management-modal-actions{display:flex;justify-content:flex-end;gap:.5rem;flex-wrap:wrap}
-.menu-management-delete-confirm{background:var(--menu-red,var(--restaurant-danger-admin));color:var(--restaurant-surface-white);border-color:var(--menu-red,var(--restaurant-danger-admin))}
-.menu-management-delete-confirm:hover:not(:disabled){filter:brightness(1.05)}
+.menu-management-delete-confirm{background:var(--menu-red,var(--restaurant-danger));color:var(--restaurant-text);border-color:var(--menu-red,var(--restaurant-danger))}
+.menu-management-delete-confirm:hover:not(:disabled){background:color-mix(in srgb,var(--menu-red,var(--restaurant-danger)) 88%,var(--restaurant-sage))}
 .menu-management-warning{color:var(--menu-red);font-weight:700}
 @media (max-width:68.74rem){.menu-management-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:47.99rem){.menu-management-hero{flex-direction:column;align-items:stretch}.menu-management-toolbar{flex-wrap:wrap;width:100%}.menu-management-search{flex:1 1 100%;max-width:none;min-width:0}.menu-management-primary{width:100%}.menu-management-categories{overflow-x:auto;flex-wrap:nowrap}.menu-management-category-wrap,.menu-management-category-pill{flex:0 0 auto}.menu-management-grid{grid-template-columns:1fr}}

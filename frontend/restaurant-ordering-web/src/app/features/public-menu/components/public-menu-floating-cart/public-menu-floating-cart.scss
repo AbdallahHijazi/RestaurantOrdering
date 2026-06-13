@@ -9,11 +9,11 @@
   justify-content: space-between;
   gap: 0.9rem;
   padding: 0.8rem 0.8rem 0.8rem 0.95rem;
-  border: 1px solid rgb(255 255 255 / 0.12);
+  border: 1px solid var(--restaurant-border-strong);
   border-radius: 1.05rem;
-  color: var(--restaurant-surface-white);
-  background: linear-gradient(135deg, var(--menu-dark), var(--menu-dark-deep));
-  box-shadow: 0 24px 46px rgb(17 19 18 / 0.26);
+  color: var(--restaurant-text);
+  background: linear-gradient(135deg, var(--restaurant-surface-elevated), var(--restaurant-background-deep));
+  box-shadow: var(--restaurant-shadow-md);
   animation: public-menu-float-in 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -25,25 +25,40 @@
 .public-menu-floating-cart small {
   display: block;
   margin-top: 0.3rem;
-  color: rgb(255 255 255 / 0.66);
+  color: var(--restaurant-muted-text);
   font-size: 0.68rem;
 }
 
 .public-menu-floating-cart__btn {
   min-height: 2.5rem;
   padding: 0 0.8rem;
-  border: 0;
+  border: 1px solid var(--restaurant-accent-border);
   border-radius: 0.7rem;
-  color: var(--restaurant-surface-white);
-  background: linear-gradient(135deg, var(--menu-terracotta), var(--menu-terracotta-deep, #97512d));
+  color: var(--restaurant-primary-button-text);
+  background-color: var(--restaurant-olive);
+  background-image: var(--restaurant-primary-button-bg);
+  box-shadow: var(--restaurant-primary-button-shadow);
   font: inherit;
   font-size: 0.68rem;
   font-weight: 900;
   cursor: pointer;
+  transition:
+    background-image var(--restaurant-motion-normal) ease,
+    box-shadow var(--restaurant-motion-normal) ease,
+    transform var(--restaurant-motion-fast) ease;
+}
+
+.public-menu-floating-cart__btn:hover {
+  background-image: var(--restaurant-primary-button-bg-hover);
+  box-shadow: var(--restaurant-primary-button-shadow-hover);
+}
+
+.public-menu-floating-cart__btn:active {
+  transform: scale(0.98);
 }
 
 .public-menu-floating-cart__btn:focus-visible {
-  outline: 3px solid rgb(255 255 255 / 0.35);
+  outline: 3px solid var(--restaurant-accent-border);
   outline-offset: 3px;
 }
 

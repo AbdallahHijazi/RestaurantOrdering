@@ -1,29 +1,29 @@
 .staff-roster__desktop{display:none;overflow-x:auto}
 .staff-roster__desktop table{width:100%;border-collapse:collapse;min-width:40rem}
-.staff-roster__desktop th,.staff-roster__desktop td{padding:1rem 1.125rem;border-bottom:1px solid #eee8e1;text-align:start;font-size:.9375rem}
-.staff-roster__desktop th{color:#69716c;background:#fcfaf7;border-bottom:1px solid var(--staff-line,var(--restaurant-border-admin));font-size:.8125rem;font-weight:700}
+.staff-roster__desktop th,.staff-roster__desktop td{padding:1rem 1.125rem;border-bottom:1px solid var(--restaurant-border);text-align:start;font-size:.9375rem;color:var(--staff-text,var(--restaurant-text))}
+.staff-roster__desktop th{color:var(--restaurant-muted-text);background:var(--restaurant-surface-soft);border-bottom:1px solid var(--staff-line,var(--restaurant-border));font-size:.8125rem;font-weight:700}
 .staff-roster__desktop tbody tr{transition:background .22s}
-.staff-roster__desktop tbody tr:hover{background:#fcfaf7}
+.staff-roster__desktop tbody tr:hover{background:var(--restaurant-surface-soft)}
 .staff-roster__desktop tbody tr:last-child td{border-bottom:0}
 .staff-roster__employee{display:flex;align-items:center;gap:.75rem;min-width:13.75rem}
 .staff-roster__name{display:block;font-weight:800}
-.staff-roster__employee small{display:block;margin-top:.1875rem;color:#737a75;font-size:.75rem}
-.staff-roster__avatar{width:2.625rem;height:2.625rem;display:grid;place-items:center;border-radius:.8125rem;color:var(--restaurant-surface-white);background:linear-gradient(135deg,#5d8879,#2e6151);font-size:.875rem;font-weight:800;flex-shrink:0}
-.staff-roster__avatar--terra{background:linear-gradient(135deg,#c58355,#9e5732)}
+.staff-roster__employee small{display:block;margin-top:.1875rem;color:var(--restaurant-muted-text);font-size:.75rem}
+.staff-roster__avatar{width:2.625rem;height:2.625rem;display:grid;place-items:center;border-radius:.8125rem;color:var(--restaurant-text-on-accent);background:linear-gradient(135deg,var(--restaurant-success),color-mix(in srgb,var(--restaurant-success) 70%,var(--restaurant-palette-olive)));font-size:.875rem;font-weight:800;flex-shrink:0}
+.staff-roster__avatar--terra{background:linear-gradient(135deg,var(--restaurant-accent),var(--restaurant-accent-strong))}
 .staff-roster__ltr{direction:ltr;display:inline-block;font-family:Arial,sans-serif}
 .staff-roster__badge{display:inline-flex;align-items:center;gap:.375rem;min-height:1.875rem;padding-inline:.625rem;border-radius:var(--restaurant-radius-pill);font-size:.75rem;font-weight:800;white-space:nowrap}
-.staff-roster__badge--role{color:#725130;background:#faf2e9;border:1px solid #ead6c3}
-.staff-roster__badge--status{color:#317057;background:#e9f5ef;border:1px solid #cce6da}
-.staff-roster__badge--status-inactive{color:#626a65;background:#f3f1ee;border-color:#e3e2e0}
-.staff-roster__dot{width:.4375rem;height:.4375rem;border-radius:50%;background:#57a17e;box-shadow:0 0 0 3px rgb(87 161 126/.13)}
-.staff-roster__action{min-height:2.375rem;display:inline-flex;align-items:center;gap:.375rem;padding-inline:.75rem;border:1px solid #ead7c9;border-radius:.6875rem;color:#9a5d32;background:#fffaf6;font:inherit;font-size:.8125rem;font-weight:800;cursor:pointer;transition:transform .24s cubic-bezier(.22,1,.36,1),background .24s,color .24s,border-color .24s}
+.staff-roster__badge--role{color:var(--restaurant-accent);background:var(--restaurant-accent-soft);border:1px solid var(--restaurant-accent-border)}
+.staff-roster__badge--status{color:var(--restaurant-success);background:var(--restaurant-success-soft);border:1px solid color-mix(in srgb,var(--restaurant-success) 35%,transparent)}
+.staff-roster__badge--status-inactive{color:var(--restaurant-muted-text);background:var(--restaurant-surface-muted);border-color:var(--restaurant-border)}
+.staff-roster__dot{width:.4375rem;height:.4375rem;border-radius:50%;background:var(--restaurant-success);box-shadow:0 0 0 3px var(--restaurant-success-soft)}
+.staff-roster__action{min-height:2.375rem;display:inline-flex;align-items:center;gap:.375rem;padding-inline:.75rem;border:1px solid var(--restaurant-accent-border);border-radius:.6875rem;color:var(--restaurant-accent);background:var(--restaurant-accent-soft);font:inherit;font-size:.8125rem;font-weight:800;cursor:pointer;transition:transform .24s cubic-bezier(.22,1,.36,1),background .24s,color .24s,border-color .24s}
 .staff-roster__action svg{width:1.0625rem;height:1.0625rem;display:block}
-.staff-roster__action:hover{color:var(--restaurant-surface-white);background:var(--staff-terracotta,var(--restaurant-accent));border-color:var(--staff-terracotta,var(--restaurant-accent));transform:translateY(-2px)}
-.staff-roster__action:focus-visible{outline:2px solid rgb(184 102 63/.35);outline-offset:2px}
+.staff-roster__action:hover{color:var(--restaurant-text-on-accent);background:var(--staff-terracotta,var(--restaurant-accent));border-color:var(--staff-terracotta,var(--restaurant-accent));transform:translateY(-2px)}
+.staff-roster__action:focus-visible{outline:2px solid var(--restaurant-accent-border);outline-offset:2px}
 .staff-roster__mobile{display:grid;gap:.75rem;padding:.875rem}
-.staff-roster__card{padding:.9375rem;border:1px solid var(--staff-line,var(--restaurant-border-admin));border-radius:1rem;background:var(--restaurant-surface-white);box-shadow:var(--staff-shadow,var(--restaurant-shadow-admin-sm))}
+.staff-roster__card{padding:.9375rem;border:1px solid var(--staff-line,var(--restaurant-border));border-radius:1rem;background:var(--restaurant-surface);box-shadow:var(--staff-shadow,var(--restaurant-shadow-sm))}
 .staff-roster__card-top{display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start}
-.staff-roster__card-meta{display:grid;gap:.5rem;margin-top:.875rem;color:#626a65;font-size:.8125rem}
-.staff-roster__card-actions{display:flex;justify-content:flex-end;margin-top:.875rem;padding-top:.75rem;border-top:1px solid #eee8e2}
+.staff-roster__card-meta{display:grid;gap:.5rem;margin-top:.875rem;color:var(--restaurant-muted-text);font-size:.8125rem}
+.staff-roster__card-actions{display:flex;justify-content:flex-end;margin-top:.875rem;padding-top:.75rem;border-top:1px solid var(--restaurant-border)}
 @media (min-width:51.25rem){.staff-roster__desktop{display:block}.staff-roster__mobile{display:none}}
 @media (prefers-reduced-motion:reduce){.staff-roster__action{transition-duration:.01ms!important}}

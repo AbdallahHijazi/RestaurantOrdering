@@ -23,7 +23,7 @@
 }
 
 .public-menu-hero__fallback {
-  background: linear-gradient(135deg, var(--menu-bg-soft), #d8c3ae);
+  background: linear-gradient(135deg, var(--restaurant-background-deep), var(--restaurant-surface));
 }
 
 .public-menu-hero__overlay {
@@ -33,11 +33,16 @@
   background:
     linear-gradient(
       180deg,
-      rgb(15 18 17 / 0.56) 0%,
-      rgb(17 21 19 / 0.28) 34%,
-      rgb(17 21 19 / 0) 62%
+      color-mix(in srgb, var(--restaurant-palette-olive) 72%, transparent) 0%,
+      color-mix(in srgb, var(--restaurant-palette-olive) 48%, transparent) 34%,
+      color-mix(in srgb, var(--restaurant-palette-olive) 12%, transparent) 62%
     ),
-    linear-gradient(90deg, rgb(19 23 21 / 0.62), rgb(19 23 21 / 0.16) 58%, rgb(19 23 21 / 0.08));
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--restaurant-palette-olive) 78%, transparent),
+      color-mix(in srgb, var(--restaurant-palette-olive) 32%, transparent) 58%,
+      color-mix(in srgb, var(--restaurant-palette-olive) 16%, transparent)
+    );
 }
 
 .public-menu-hero::after {
@@ -50,9 +55,9 @@
   z-index: 2;
   background: linear-gradient(
     to bottom,
-    rgb(250 248 244 / 0) 0%,
-    rgb(250 248 244 / 0.18) 32%,
-    rgb(250 248 244 / 0.62) 70%,
+    color-mix(in srgb, var(--restaurant-palette-olive) 0%, transparent) 0%,
+    color-mix(in srgb, var(--restaurant-palette-olive) 28%, transparent) 32%,
+    color-mix(in srgb, var(--restaurant-palette-olive) 72%, transparent) 70%,
     var(--menu-bg) 100%
   );
 }
@@ -63,7 +68,7 @@
   width: min(860px, 100%);
   padding: clamp(4.5rem, 10vw, 6rem) clamp(1rem, 3vw, 1.25rem) clamp(4rem, 9vw, 5.5rem);
   text-align: center;
-  color: var(--restaurant-surface-white);
+  color: var(--restaurant-text-on-dark);
   animation: public-menu-hero-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -79,11 +84,11 @@
   gap: 0.55rem;
   min-height: 2rem;
   padding: 0 0.8rem;
-  border: 1px solid rgb(255 255 255 / 0.26);
+  border: 1px solid var(--restaurant-accent-border);
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.12);
+  background: color-mix(in srgb, var(--restaurant-palette-olive) 42%, transparent);
   backdrop-filter: blur(10px);
-  color: #f7efe5;
+  color: var(--restaurant-champagne);
   font-size: 0.68rem;
   font-weight: 900;
   letter-spacing: 0.16em;
@@ -92,26 +97,38 @@
 
 .public-menu-hero__secondary-name {
   display: block;
-  color: #f6ede2;
+  font-family: var(--font-display);
+  color: var(--restaurant-champagne);
   font-size: clamp(2.4rem, 6vw, 4.5rem);
   line-height: 1;
-  font-style: italic;
   font-weight: 900;
-  text-shadow: 0 8px 26px rgb(0 0 0 / 0.22);
+  letter-spacing: 0.04em;
+  text-shadow: 0 8px 26px color-mix(in srgb, var(--restaurant-palette-olive) 42%, transparent);
 }
 
 .public-menu-hero__title {
   margin: 0;
+  font-family: var(--font-display);
   font-size: clamp(1.9rem, 4vw, 3.1rem);
   line-height: 1.18;
   font-weight: 900;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
+  color: var(--restaurant-gold-light);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .public-menu-hero__title {
+    background: var(--restaurant-gold-shine);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 }
 
 .public-menu-hero__lead {
   max-width: 43rem;
   margin: 0;
-  color: rgb(255 255 255 / 0.86);
+  color: var(--restaurant-text-soft);
   font-size: clamp(0.95rem, 2vw, 1.05rem);
   line-height: 1.8;
 }
@@ -139,11 +156,27 @@
 }
 
 .public-menu-hero__cta {
-  border: 0;
-  color: var(--restaurant-surface-white);
-  background: linear-gradient(135deg, var(--menu-terracotta), var(--menu-terracotta-deep, #97512d));
-  box-shadow: 0 16px 26px rgb(184 102 63 / 0.28);
+  border: 1px solid var(--restaurant-accent-border);
+  color: var(--restaurant-primary-button-text);
+  background-color: var(--restaurant-olive);
+  background-image: var(--restaurant-primary-button-bg);
+  box-shadow: var(--restaurant-primary-button-shadow);
   cursor: pointer;
+  transition:
+    transform 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+    background-image 0.26s ease,
+    box-shadow 0.26s ease;
+}
+
+.public-menu-hero__cta:hover {
+  transform: translateY(-3px);
+  background-image: var(--restaurant-primary-button-bg-hover);
+  box-shadow: var(--restaurant-primary-button-shadow-hover);
+}
+
+.public-menu-hero__cta:active {
+  transform: translateY(-1px) scale(0.98);
+  background-image: var(--restaurant-primary-button-bg-active);
 }
 
 .public-menu-hero__cta svg {
@@ -151,25 +184,22 @@
   height: 1rem;
 }
 
-.public-menu-hero__cta:hover {
-  transform: translateY(-3px);
-}
-
 .public-menu-hero__cta:focus-visible {
-  outline: 3px solid rgb(255 255 255 / 0.45);
+  outline: 3px solid var(--restaurant-accent-border);
   outline-offset: 3px;
 }
 
 .public-menu-hero__hours {
-  border: 1px solid rgb(255 255 255 / 0.24);
-  background: rgb(255 255 255 / 0.1);
+  border: 1px solid var(--restaurant-border-strong);
+  background: color-mix(in srgb, var(--restaurant-palette-olive) 48%, transparent);
   backdrop-filter: blur(10px);
-  color: var(--restaurant-surface-white);
+  color: var(--restaurant-text-on-dark);
 }
 
 .public-menu-hero__hours--closed {
-  border-color: rgb(255 255 255 / 0.18);
-  background: rgb(0 0 0 / 0.22);
+  border-color: var(--restaurant-border);
+  background: color-mix(in srgb, var(--restaurant-palette-olive) 55%, transparent);
+  color: var(--restaurant-text-soft);
 }
 
 .public-menu-hero__hours svg {

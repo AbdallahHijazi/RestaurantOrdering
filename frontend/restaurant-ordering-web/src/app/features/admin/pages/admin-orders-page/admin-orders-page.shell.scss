@@ -1,19 +1,19 @@
 .orders-management-page {
-  --orders-bg: var(--restaurant-background-orders);
-  --orders-surface: var(--restaurant-surface-white);
-  --orders-charcoal: var(--restaurant-neutral-900);
+  --orders-bg: var(--restaurant-background);
+  --orders-surface: var(--restaurant-surface);
+  --orders-charcoal: var(--restaurant-text);
   --orders-terracotta: var(--restaurant-accent);
   --orders-terracotta-soft: var(--restaurant-accent-soft);
-  --orders-sage: var(--restaurant-sage);
-  --orders-sage-soft: var(--restaurant-sage-soft);
-  --orders-amber: var(--restaurant-amber);
-  --orders-amber-soft: var(--restaurant-amber-soft);
-  --orders-bluegray: var(--restaurant-neutral-500);
-  --orders-muted: var(--restaurant-neutral-500);
-  --orders-bluegray-soft: #eef2f6;
-  --orders-red: var(--restaurant-danger-medium);
-  --orders-red-soft: var(--restaurant-danger-surface);
-  --orders-line: var(--restaurant-border-orders);
+  --orders-sage: var(--restaurant-success);
+  --orders-sage-soft: var(--restaurant-success-soft);
+  --orders-amber: var(--restaurant-warning);
+  --orders-amber-soft: var(--restaurant-warning-soft);
+  --orders-bluegray: var(--restaurant-muted-text);
+  --orders-muted: var(--restaurant-muted-text);
+  --orders-bluegray-soft: var(--restaurant-info-soft);
+  --orders-red: var(--restaurant-danger);
+  --orders-red-soft: var(--restaurant-danger-soft);
+  --orders-line: var(--restaurant-border);
 
   width: min(100%, 87.5rem);
   margin-inline: auto;
@@ -23,11 +23,8 @@
   flex-direction: column;
   gap: 1.25rem;
   min-width: 0;
-  color: var(--orders-charcoal);
-  background:
-    radial-gradient(circle at 0% 0%, rgb(184 102 63 / 0.06), transparent 42%),
-    radial-gradient(circle at 100% 12%, rgb(79 140 118 / 0.05), transparent 36%),
-    var(--orders-bg);
+  color: var(--restaurant-text);
+  background: var(--orders-bg);
   border-radius: 1.25rem;
 }
 
@@ -91,10 +88,12 @@
   gap: 0.5rem;
   min-height: 2.75rem;
   padding-inline: 1.1rem;
-  border: 0;
-  background: var(--orders-charcoal);
-  color: var(--orders-surface);
+  border: 1px solid var(--restaurant-accent-border);
+  background-color: var(--restaurant-olive);
+  background-image: var(--restaurant-primary-button-bg);
+  color: var(--restaurant-primary-button-text);
   font-weight: 700;
+  box-shadow: var(--restaurant-primary-button-shadow);
 }
 
 .orders-management-page__refresh svg {
@@ -104,7 +103,8 @@
 
 .orders-management-page__refresh:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgb(23 32 29 / 0.16);
+  background-image: var(--restaurant-primary-button-bg-hover);
+  box-shadow: var(--restaurant-primary-button-shadow-hover);
 }
 
 .orders-management-page__refresh:active:not(:disabled) {
@@ -117,7 +117,7 @@
 .orders-management-page__clear-filters:focus-visible,
 .orders-management-page__details-btn:focus-visible,
 .orders-management-page__danger:focus-visible {
-  outline: 2px solid rgb(184 102 63 / 0.35);
+  outline: 2px solid var(--restaurant-accent-border);
   outline-offset: 2px;
 }
 
@@ -131,7 +131,7 @@
   padding: 0.7rem 0.9rem;
   border-radius: 0.75rem;
   background: var(--orders-terracotta-soft);
-  color: var(--orders-charcoal);
+  color: var(--restaurant-text);
 }
 
 .orders-management-page__toolbar {
@@ -159,7 +159,7 @@
   border-radius: var(--restaurant-radius-pill);
   padding: 0.45rem 0.95rem;
   background: var(--orders-surface);
-  color: var(--orders-charcoal);
+  color: var(--restaurant-text);
   font: inherit;
   font-size: 0.875rem;
   font-weight: 700;
@@ -174,9 +174,9 @@
 }
 
 .orders-management-page__status-pill--active {
-  background: var(--orders-charcoal);
-  border-color: var(--orders-charcoal);
-  color: var(--orders-surface);
+  background: var(--restaurant-accent);
+  border-color: var(--restaurant-accent);
+  color: var(--restaurant-text-on-accent);
 }
 
 .orders-management-page__search {
@@ -213,21 +213,21 @@
   border: 1px solid var(--orders-line);
   border-radius: 0.75rem;
   background: var(--orders-surface);
-  color: var(--orders-charcoal);
+  color: var(--restaurant-text);
   font: inherit;
 }
 
 .orders-management-page__search input:focus {
-  outline: 2px solid rgb(184 102 63 / 0.25);
+  outline: 2px solid var(--restaurant-accent-border);
   outline-offset: 1px;
-  border-color: rgb(184 102 63 / 0.45);
+  border-color: var(--restaurant-accent-border);
 }
 
 .orders-management-page__extra-filters {
   padding: 1rem 1.1rem;
   border: 1px solid var(--orders-line);
   border-radius: 1rem;
-  background: rgb(255 255 255 / 0.72);
+  background: var(--restaurant-surface-soft);
 }
 
 .orders-management-page__extra-filters,
@@ -252,7 +252,7 @@
   font-weight: 800;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: var(--orders-charcoal);
+  color: var(--restaurant-text);
   white-space: nowrap;
 }
 
@@ -262,7 +262,7 @@
   block-size: 20px;
   flex: 0 0 20px;
   fill: none;
-  stroke: var(--orders-charcoal);
+  stroke: var(--restaurant-text);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -272,7 +272,7 @@
 
 .orders-management-page__extra-filters-icon path {
   fill: none;
-  stroke: var(--orders-charcoal);
+  stroke: var(--restaurant-text);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -290,7 +290,7 @@
   padding-inline: 1rem;
   border: 1px solid var(--orders-line);
   background: var(--orders-surface);
-  color: var(--orders-charcoal);
+  color: var(--restaurant-text);
   font-weight: 700;
 }
 

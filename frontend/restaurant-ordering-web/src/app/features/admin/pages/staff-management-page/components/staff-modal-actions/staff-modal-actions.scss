@@ -28,20 +28,21 @@
   padding-inline: 1rem;
   border: 0;
   border-radius: 11px;
-  color: var(--restaurant-surface-white);
-  background: linear-gradient(135deg, #c2764d, #ad5d37);
+  color: var(--restaurant-primary-button-text);
+  background-color: var(--restaurant-olive);
+  background-image: var(--restaurant-primary-button-bg);
   font: inherit;
   font-weight: 800;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 0 12px 22px rgb(184 102 63 / 0.22);
-  transition: transform 0.24s, filter 0.24s, box-shadow 0.24s;
+  box-shadow: var(--restaurant-primary-button-shadow);
+  transition: transform 0.24s, background-image 0.24s, box-shadow 0.24s;
 }
 
 .staff-modal-actions__save:hover:not(:disabled) {
-  filter: brightness(1.05);
+  background-image: var(--restaurant-primary-button-bg-hover);
   transform: translateY(-2px);
-  box-shadow: 0 16px 26px rgb(184 102 63 / 0.28);
+  box-shadow: var(--restaurant-primary-button-shadow-hover);
 }
 
 .staff-modal-actions__save:active:not(:disabled) {
@@ -49,7 +50,7 @@
 }
 
 .staff-modal-actions__save:focus-visible {
-  outline: 2px solid rgb(184 102 63 / 0.35);
+  outline: 2px solid var(--restaurant-accent-border);
   outline-offset: 2px;
 }
 
@@ -75,10 +76,10 @@
   align-items: center;
   justify-content: center;
   padding-inline: 1rem;
-  border: 1px solid #e2d8cf;
+  border: 1px solid var(--restaurant-border);
   border-radius: 11px;
-  color: #4f5753;
-  background: var(--restaurant-surface-white);
+  color: var(--restaurant-muted-text);
+  background: var(--restaurant-surface);
   font: inherit;
   font-weight: 800;
   line-height: 1;
@@ -88,12 +89,12 @@
 
 .staff-modal-actions__cancel:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: var(--restaurant-shadow-admin-sm);
-  background: #fcfaf7;
+  box-shadow: var(--restaurant-shadow-sm);
+  background: var(--restaurant-surface-soft);
 }
 
 .staff-modal-actions__cancel:focus-visible {
-  outline: 2px solid rgb(184 102 63 / 0.35);
+  outline: 2px solid var(--restaurant-accent-border);
   outline-offset: 2px;
 }
 

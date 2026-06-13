@@ -7,7 +7,7 @@
   padding: 2rem 1.25rem;
   border: 1px dashed var(--orders-line);
   border-radius: 1rem;
-  background: rgb(255 255 255 / 0.65);
+  background: var(--restaurant-surface-soft);
   text-align: center;
 }
 
@@ -20,11 +20,13 @@
 
 .orders-management-page__primary {
   margin-block-start: 0.5rem;
-  border: 0;
+  border: 1px solid var(--restaurant-accent-border);
   padding: 0.6rem 1rem;
-  background: var(--orders-charcoal);
-  color: var(--orders-surface);
+  background-color: var(--restaurant-olive);
+  background-image: var(--restaurant-primary-button-bg);
+  color: var(--restaurant-primary-button-text);
   font-weight: 700;
+  box-shadow: var(--restaurant-primary-button-shadow);
 }
 
 .orders-management-page__skeleton-grid {
@@ -36,7 +38,7 @@
 .orders-management-page__skeleton-card {
   min-height: 12rem;
   border-radius: 1rem;
-  background: linear-gradient(90deg, #efe9e2 0%, #f8f4ef 50%, #efe9e2 100%);
+  background: linear-gradient(90deg, var(--restaurant-surface-muted) 0%, var(--restaurant-surface-soft) 50%, var(--restaurant-surface-muted) 100%);
   background-size: 200% 100%;
   animation: orders-skeleton 1.4s ease-in-out infinite;
 }
@@ -56,13 +58,14 @@
   border: 1px solid var(--orders-line);
   border-radius: 1rem;
   background: var(--orders-surface);
-  box-shadow: 0 8px 24px rgb(23 32 29 / 0.04);
+  box-shadow: var(--restaurant-shadow-sm);
   transition: transform 0.22s ease, box-shadow 0.22s ease;
 }
 
 .orders-management-page__card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 14px 30px rgb(23 32 29 / 0.08);
+  border-color: var(--restaurant-card-hover-border);
+  box-shadow: var(--restaurant-card-hover-shadow);
 }
 
 .orders-management-page__card-head {
@@ -216,9 +219,9 @@
   gap: 0.45rem;
   min-height: 2.65rem;
   padding-inline: 1rem;
-  border: 1px solid var(--orders-charcoal);
+  border: 1px solid var(--restaurant-accent);
   background: transparent;
-  color: var(--orders-charcoal);
+  color: var(--restaurant-accent);
   font-weight: 800;
 }
 
@@ -228,8 +231,8 @@
 }
 
 .orders-management-page__details-btn:hover {
-  background: var(--orders-charcoal);
-  color: var(--orders-surface);
+  background: var(--restaurant-accent);
+  color: var(--restaurant-text-on-accent);
 }
 
 .orders-management-page__pagination {
@@ -249,7 +252,7 @@
   border: 0;
   margin: 0;
   padding: 0;
-  background: rgb(23 32 29 / 0.45);
+  background: var(--restaurant-console-backdrop);
   cursor: pointer;
 }
 
@@ -262,7 +265,7 @@
   border-radius: 1rem;
   border: 1px solid var(--orders-line);
   background: var(--orders-surface);
-  box-shadow: 0 20px 40px rgb(23 32 29 / 0.12);
+  box-shadow: var(--restaurant-shadow-md);
 }
 
 .orders-management-page__confirm-actions {
@@ -273,7 +276,7 @@
 }
 
 .orders-management-page__danger {
-  border: 1px solid #fecaca;
+  border: 1px solid color-mix(in srgb, var(--restaurant-danger) 35%, transparent);
   padding: 0.5rem 0.9rem;
   background: var(--orders-red-soft);
   color: var(--orders-red);
