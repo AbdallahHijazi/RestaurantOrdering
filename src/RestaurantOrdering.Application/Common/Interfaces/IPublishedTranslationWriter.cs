@@ -26,4 +26,33 @@ public interface IPublishedTranslationWriter
         MenuItem menuItem,
         bool isManualEdit,
         CancellationToken cancellationToken);
+
+    Task<string> GetRestaurantDefaultLocaleAsync(
+        Guid restaurantId,
+        CancellationToken cancellationToken);
+
+    Task UpsertCategoryPrimaryLocaleTranslationAsync(
+        Category category,
+        string localeCode,
+        string name,
+        string? description,
+        bool isManualEdit,
+        CancellationToken cancellationToken);
+
+    Task UpsertMenuItemPrimaryLocaleTranslationAsync(
+        MenuItem menuItem,
+        string localeCode,
+        string name,
+        string? description,
+        bool isManualEdit,
+        CancellationToken cancellationToken);
+
+    Task UpsertRestaurantPrimaryLocaleTranslationAsync(
+        Restaurant restaurant,
+        string localeCode,
+        string name,
+        string? description,
+        string? address,
+        bool isManualEdit,
+        CancellationToken cancellationToken);
 }

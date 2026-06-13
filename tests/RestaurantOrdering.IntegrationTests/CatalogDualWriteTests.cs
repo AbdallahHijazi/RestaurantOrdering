@@ -537,6 +537,56 @@ public sealed class CatalogDualWriteTests : IClassFixture<TestWebApplicationFact
             bool isManualEdit,
             CancellationToken cancellationToken) =>
             _inner.UpsertMenuItemPublishedTranslationsAsync(menuItem, isManualEdit, cancellationToken);
+
+        public Task<string> GetRestaurantDefaultLocaleAsync(Guid restaurantId, CancellationToken cancellationToken) =>
+            _inner.GetRestaurantDefaultLocaleAsync(restaurantId, cancellationToken);
+
+        public Task UpsertCategoryPrimaryLocaleTranslationAsync(
+            Category category,
+            string localeCode,
+            string name,
+            string? description,
+            bool isManualEdit,
+            CancellationToken cancellationToken) =>
+            _inner.UpsertCategoryPrimaryLocaleTranslationAsync(
+                category,
+                localeCode,
+                name,
+                description,
+                isManualEdit,
+                cancellationToken);
+
+        public Task UpsertMenuItemPrimaryLocaleTranslationAsync(
+            MenuItem menuItem,
+            string localeCode,
+            string name,
+            string? description,
+            bool isManualEdit,
+            CancellationToken cancellationToken) =>
+            _inner.UpsertMenuItemPrimaryLocaleTranslationAsync(
+                menuItem,
+                localeCode,
+                name,
+                description,
+                isManualEdit,
+                cancellationToken);
+
+        public Task UpsertRestaurantPrimaryLocaleTranslationAsync(
+            Restaurant restaurant,
+            string localeCode,
+            string name,
+            string? description,
+            string? address,
+            bool isManualEdit,
+            CancellationToken cancellationToken) =>
+            _inner.UpsertRestaurantPrimaryLocaleTranslationAsync(
+                restaurant,
+                localeCode,
+                name,
+                description,
+                address,
+                isManualEdit,
+                cancellationToken);
     }
 
     private async Task SetDefaultLocaleAsync(Guid restaurantId, string localeCode)

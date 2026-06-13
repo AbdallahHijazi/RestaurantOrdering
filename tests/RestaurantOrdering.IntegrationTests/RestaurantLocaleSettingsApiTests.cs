@@ -516,7 +516,7 @@ public sealed class RestaurantLocaleSettingsApiTests : IClassFixture<TestWebAppl
     }
 
     [Fact]
-    public async Task PutRestaurantLocales_ChangeDefaultToFrenchFailsEvenWhenTranslationsComplete()
+    public async Task PutRestaurantLocales_ChangeDefaultToFrench_SucceedsWhenTranslationsComplete()
     {
         await TestDataSeeder.SeedAsync(_factory.Services);
         await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "en", "fr");
@@ -538,14 +538,13 @@ public sealed class RestaurantLocaleSettingsApiTests : IClassFixture<TestWebAppl
                 ],
                 translationMode: "ManualOnly"));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var body = await response.Content.ReadAsStringAsync();
-        body.Should().Contain("dynamic catalog authoring is enabled");
-        body.Should().Contain("fr");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var settings = await response.Content.ReadFromJsonAsync<RestaurantLocaleSettingsResponse>(JsonOptions);
+        settings!.DefaultLocale.Should().Be("fr");
     }
 
     [Fact]
-    public async Task PutRestaurantLocales_ChangeDefaultToGermanFailsWhenCurrentDefaultIsEnglish()
+    public async Task PutRestaurantLocales_ChangeDefaultToGerman_SucceedsWhenTranslationsComplete()
     {
         await TestDataSeeder.SeedAsync(_factory.Services);
         await SetDefaultLocaleAsync(TestDataSeeder.RestaurantAId, "en");
@@ -567,19 +566,17 @@ public sealed class RestaurantLocaleSettingsApiTests : IClassFixture<TestWebAppl
                 ],
                 translationMode: "ManualOnly"));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var body = await response.Content.ReadAsStringAsync();
-        body.Should().Contain("dynamic catalog authoring is enabled");
-        body.Should().Contain("de");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var settings = await response.Content.ReadFromJsonAsync<RestaurantLocaleSettingsResponse>(JsonOptions);
+        settings!.DefaultLocale.Should().Be("de");
     }
 
     [Fact]
-    public async Task PutRestaurantLocales_ChangeDefaultToFrench_DoesNotPartiallyUpdateSettingsOrCreateJobs()
+    public async Task PutRestaurantLocales_ChangeDefaultToFrench_DoesNotPartiallyUpdateSettingsWhenTranslationsMissing()
     {
         await TestDataSeeder.SeedAsync(_factory.Services);
         await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "fr");
         await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "ar");
-        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "fr");
 
         var snapshotBefore = await GetLocaleSettingsSnapshotAsync();
         var jobsBefore = await CountTranslationJobsAsync();
@@ -600,6 +597,8 @@ public sealed class RestaurantLocaleSettingsApiTests : IClassFixture<TestWebAppl
                 translationMode: "AutoPublish"));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("missingRestaurantTranslations");
 
         var snapshotAfter = await GetLocaleSettingsSnapshotAsync();
         snapshotAfter.Should().BeEquivalentTo(snapshotBefore);
