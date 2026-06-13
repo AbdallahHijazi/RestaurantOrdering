@@ -661,6 +661,7 @@ export type UiTextKey =
   | 'adminMenuFormDescription'
   | 'adminMenuCatalogPrimaryNotice'
   | 'adminMenuCatalogPrimaryLanguage'
+  | 'adminMenuCatalogEditMissingPrimaryLocale'
   | 'adminMenuFormDescriptionAr'
   | 'adminMenuFormDescriptionEn'
   | 'adminMenuFormDisplayOrder'
@@ -1368,6 +1369,8 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminMenuCatalogPrimaryNotice:
       'أدخل المحتوى باللغة الأساسية الحالية للمطعم. سيتم إنشاء ترجمات لباقي اللغات حسب إعدادات الترجمة.',
     adminMenuCatalogPrimaryLanguage: 'اللغة الأساسية: {language}',
+    adminMenuCatalogEditMissingPrimaryLocale:
+      'لا توجد نسخة منشورة باللغة الأساسية الحالية. سيتم حفظ أي تعديل كلغة أساسية جديدة.',
     adminMenuFormDescriptionAr: 'الوصف بالعربية (اختياري)',
     adminMenuFormDescriptionEn: 'الوصف بالإنجليزية (اختياري)',
     adminMenuFormDisplayOrder: 'ترتيب العرض',
@@ -2086,6 +2089,8 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminMenuCatalogPrimaryNotice:
       'Enter content in the restaurant primary language. Translations for other languages will be generated according to the translation settings.',
     adminMenuCatalogPrimaryLanguage: 'Primary language: {language}',
+    adminMenuCatalogEditMissingPrimaryLocale:
+      'No published content exists in the current primary language. Saving will create/update primary-language content.',
     adminMenuFormDescriptionAr: 'Arabic description (optional)',
     adminMenuFormDescriptionEn: 'English description (optional)',
     adminMenuFormDisplayOrder: 'Display order',

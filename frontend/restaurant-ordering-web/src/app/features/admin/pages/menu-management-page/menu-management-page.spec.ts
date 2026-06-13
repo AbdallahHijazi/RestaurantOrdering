@@ -485,3 +485,145 @@ function sampleItem(): AdminMenuItem {
     createdAt: '2026-01-01T00:00:00Z',
   };
 }
+
+describe('MenuManagementPage primary-locale edit (7A.19.2)', () => {
+  let fixture: ComponentFixture<MenuManagementPage>;
+  let httpMock: HttpTestingController;
+  let session: AuthSessionService;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [MenuManagementPage],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
+
+    httpMock = TestBed.inject(HttpTestingController);
+    session = TestBed.inject(AuthSessionService);
+    session.clearSession();
+    session.saveSession(createTestSession(ApplicationRoles.RestaurantOwner, RESTAURANT_ID));
+    TestBed.inject(AuthService).restoreSessionFromStorage();
+    TestBed.inject(LocaleService).setLocale('en');
+
+    fixture = TestBed.createComponent(MenuManagementPage);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    document.body.classList.remove('order-modal-scroll-lock');
+    document.querySelectorAll('app-modal-shell, app-order-modal-shell').forEach((node) => node.remove());
+    httpMock.match(() => true).forEach((req) => {
+      if (!req.cancelled) {
+        req.flush([]);
+      }
+    });
+    httpMock.verify();
+    session.clearSession();
+  });
+
+  function flushWithLocale(
+    defaultLocale: string,
+    category: AdminCategory,
+    items: AdminMenuItem[] = [sampleItem()],
+  ): void {
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`)
+      .flush({
+        defaultLocale,
+        translationMode: 'ManualOnly',
+        supportedLocales: [
+          { code: 'ar', isEnabled: true, sortOrder: 1 },
+          { code: defaultLocale, isEnabled: true, sortOrder: 2 },
+        ],
+        availableLocales: [
+          { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+          {
+            code: defaultLocale,
+            displayName: defaultLocale === 'fr' ? 'French' : 'German',
+            nativeName: defaultLocale === 'fr' ? 'Français' : 'Deutsch',
+            direction: 'ltr',
+          },
+        ],
+        canManageLocales: true,
+      });
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/categories`)
+      .flush([category]);
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/menu-items`)
+      .flush(items);
+    fixture.detectChanges();
+  }
+
+  it('prefills category edit name from primaryName for French default locale', () => {
+    flushWithLocale('fr', {
+      ...sampleCategory(),
+      primaryName: 'Catégorie FR',
+      primaryDescription: 'Description FR',
+      primaryLocale: 'fr',
+      primaryFallbackApplied: false,
+    });
+
+    fixture.nativeElement.querySelector(`[data-testid="menu-edit-category-${CATEGORY_ID}"]`).click();
+    fixture.detectChanges();
+
+    const nameInput = document.body.querySelector(
+      '[data-testid="menu-category-name"]',
+    ) as HTMLInputElement;
+    expect(nameInput.value).toBe('Catégorie FR');
+    expect(document.body.querySelector('[data-testid="menu-catalog-missing-primary-locale"]')).toBeNull();
+  });
+
+  it('prefills menu item edit name from primaryName for German default locale', () => {
+    flushWithLocale('de', sampleCategory(), [
+      {
+        ...sampleItem(),
+        primaryName: 'Gericht DE',
+        primaryDescription: 'Beschreibung DE',
+        primaryLocale: 'de',
+        primaryFallbackApplied: false,
+      },
+    ]);
+
+    fixture.nativeElement.querySelector(`[data-testid="menu-edit-item-${ITEM_ID}"]`)?.click();
+    fixture.detectChanges();
+
+    const nameInput = document.body.querySelector('[data-testid="menu-item-name"]') as HTMLInputElement;
+    expect(nameInput.value).toBe('Gericht DE');
+    expect(document.body.querySelector('[data-testid="menu-catalog-missing-primary-locale"]')).toBeNull();
+  });
+
+  it('shows warning and leaves name empty when fr fallback is applied', () => {
+    flushWithLocale('fr', {
+      ...sampleCategory(),
+      primaryName: 'فئة',
+      primaryLocale: 'ar',
+      primaryFallbackApplied: true,
+    });
+
+    fixture.nativeElement.querySelector(`[data-testid="menu-edit-category-${CATEGORY_ID}"]`).click();
+    fixture.detectChanges();
+
+    const nameInput = document.body.querySelector(
+      '[data-testid="menu-category-name"]',
+    ) as HTMLInputElement;
+    expect(nameInput.value).toBe('');
+    expect(document.body.querySelector('[data-testid="menu-catalog-missing-primary-locale"]')).toBeTruthy();
+    expect(document.body.textContent).toContain(
+      'No published content exists in the current primary language',
+    );
+  });
+
+  it('does not show missing-primary warning on create modal', () => {
+    flushWithLocale('fr', {
+      ...sampleCategory(),
+      primaryName: 'فئة',
+      primaryLocale: 'ar',
+      primaryFallbackApplied: true,
+    });
+
+    fixture.nativeElement.querySelector('[data-testid="menu-add-category-button"]').click();
+    fixture.detectChanges();
+
+    expect(document.body.querySelector('[data-testid="menu-catalog-missing-primary-locale"]')).toBeNull();
+  });
+});

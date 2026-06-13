@@ -30,6 +30,8 @@ import { MenuManagementMealCard } from './components/menu-management-meal-card/m
 import {
   formatPrimaryLanguageLabel,
   primarySortName,
+  resolveCatalogSaveContent,
+  resolveEditPrimaryContent,
   resolvePrimaryLocaleContent,
 } from './menu-catalog.util';
 import {
@@ -83,6 +85,7 @@ export class MenuManagementPage {
   protected readonly failedImageIds = signal<ReadonlySet<string>>(new Set());
   protected readonly defaultLocale = signal('ar');
   protected readonly primaryLanguageLabel = signal('Arabic');
+  protected readonly catalogEditWarning = signal(false);
 
   protected readonly categoryForm = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(200)]],
@@ -275,6 +278,7 @@ export class MenuManagementPage {
   protected openCreateCategory(): void {
     this.resetModalState();
     this.editingCategory.set(null);
+    this.catalogEditWarning.set(false);
     this.categoryForm.reset({
       name: '',
       description: '',
@@ -288,10 +292,11 @@ export class MenuManagementPage {
   protected openEditCategory(category: AdminCategory): void {
     this.resetModalState();
     this.editingCategory.set(category);
-    const primary = resolvePrimaryLocaleContent(this.defaultLocale(), category);
+    const resolved = resolveEditPrimaryContent(this.defaultLocale(), category);
+    this.catalogEditWarning.set(resolved.missingPrimaryLocale);
     this.categoryForm.reset({
-      name: primary.name,
-      description: primary.description,
+      name: resolved.content.name,
+      description: resolved.content.description,
       displayOrder: category.displayOrder,
       isActive: category.isActive,
     });
@@ -310,6 +315,7 @@ export class MenuManagementPage {
     this.resetModalState();
     const selected = this.selectedCategoryId();
     this.editingItem.set(null);
+    this.catalogEditWarning.set(false);
     this.resetItemFormState();
     this.itemForm.reset({
       categoryId:
@@ -349,11 +355,12 @@ export class MenuManagementPage {
       this.imagePreviewUrl.set(resolveApiAssetUrl(item.imageUrl));
     }
 
-    const primary = resolvePrimaryLocaleContent(this.defaultLocale(), item);
+    const resolved = resolveEditPrimaryContent(this.defaultLocale(), item);
+    this.catalogEditWarning.set(resolved.missingPrimaryLocale);
     this.itemForm.reset({
       categoryId: item.categoryId,
-      name: primary.name,
-      description: primary.description,
+      name: resolved.content.name,
+      description: resolved.content.description,
       price: item.price,
       discountPrice: item.discountPrice ?? null,
       displayOrder: item.displayOrder,
@@ -373,6 +380,7 @@ export class MenuManagementPage {
 
   protected closeModal(): void {
     this.resetItemFormState();
+    this.catalogEditWarning.set(false);
     this.modalKind.set(null);
     this.modalSubmitting.set(false);
     this.modalErrorMessage.set(null);
@@ -759,7 +767,7 @@ export class MenuManagementPage {
     item: AdminMenuItem,
     overrides: Partial<SaveCatalogMenuItemRequest>,
   ): SaveCatalogMenuItemRequest {
-    const primary = resolvePrimaryLocaleContent(this.defaultLocale(), item);
+    const primary = resolveCatalogSaveContent(this.defaultLocale(), item);
     return {
       categoryId: item.categoryId,
       imageFileId: item.imageFileId ?? null,

@@ -1,3 +1,4 @@
+using RestaurantOrdering.Application.Common.Interfaces;
 using RestaurantOrdering.Application.Common.Localization;
 using RestaurantOrdering.Application.Features.MenuItems.DTOs;
 using RestaurantOrdering.Domain.Entities;
@@ -10,7 +11,8 @@ public static class MenuItemMappings
         this MenuItem menuItem,
         string? imageUrl = null,
         MenuItemTranslation? arTranslation = null,
-        MenuItemTranslation? enTranslation = null) => new()
+        MenuItemTranslation? enTranslation = null,
+        PublicLocalizedContent? primaryContent = null) => new()
     {
         Id = menuItem.Id,
         RestaurantId = menuItem.RestaurantId,
@@ -31,6 +33,10 @@ public static class MenuItemMappings
         IsAvailable = menuItem.IsAvailable,
         IsActive = menuItem.IsActive,
         CreatedAt = menuItem.CreatedAt,
-        UpdatedAt = menuItem.UpdatedAt
+        UpdatedAt = menuItem.UpdatedAt,
+        PrimaryName = primaryContent?.Name,
+        PrimaryDescription = primaryContent?.Description,
+        PrimaryLocale = primaryContent?.ResolvedLocale,
+        PrimaryFallbackApplied = primaryContent?.FallbackApplied ?? false
     };
 }

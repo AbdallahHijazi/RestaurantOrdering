@@ -158,6 +158,48 @@ public sealed class PublicLocaleResolver : IPublicLocaleResolver
             legacyDescriptionAr,
             legacyDescriptionEn);
 
+    public PublicLocalizedContent ResolveAdminCatalogPrimaryContent(
+        PublicMenuLocaleResolution menuLocale,
+        string defaultLocale,
+        IReadOnlyCollection<PublicRestaurantSupportedLocale> supportedLocales,
+        IReadOnlyDictionary<string, PublicLocaleDefinitionInfo> localeDefinitions,
+        IReadOnlyDictionary<string, PublicPublishedTranslationContent> translationsByLocale,
+        int contentVersion,
+        string legacyNameAr,
+        string? legacyNameEn,
+        string? legacyDescriptionAr,
+        string? legacyDescriptionEn)
+    {
+        var name = ResolveRequiredField(
+            menuLocale.ResolvedLocale,
+            defaultLocale,
+            supportedLocales,
+            localeDefinitions,
+            translationsByLocale,
+            contentVersion,
+            legacyNameAr,
+            legacyNameEn,
+            fieldSelector: static translation => translation.Name);
+
+        var description = ResolveOptionalField(
+            menuLocale.ResolvedLocale,
+            defaultLocale,
+            supportedLocales,
+            localeDefinitions,
+            translationsByLocale,
+            contentVersion,
+            legacyDescriptionAr,
+            legacyDescriptionEn,
+            fieldSelector: static translation => translation.Description);
+
+        return new PublicLocalizedContent(
+            name.Value,
+            description.Value,
+            Address: null,
+            name.ResolvedLocale,
+            name.FallbackApplied);
+    }
+
     private static ResolvedFieldResult ResolveRequiredField(
         string preferredLocale,
         string defaultLocale,
@@ -282,7 +324,8 @@ public sealed class PublicLocaleResolver : IPublicLocaleResolver
         {
             "ar" => legacyNameAr,
             "en" => PublishedTranslationDualRead.ResolveOptional(legacyNameEn, legacyNameAr),
-            _ when locale == defaultLocale => TryResolveLegacyName(defaultLocale, defaultLocale, legacyNameAr, legacyNameEn),
+            _ when locale == defaultLocale && defaultLocale is "ar" or "en" =>
+                TryResolveLegacyName(defaultLocale, defaultLocale, legacyNameAr, legacyNameEn),
             _ => null
         };
 
@@ -295,7 +338,8 @@ public sealed class PublicLocaleResolver : IPublicLocaleResolver
         {
             "ar" => PublishedTranslationDualRead.ResolveOptional(legacyPrimary, legacySecondary),
             "en" => PublishedTranslationDualRead.ResolveOptional(legacySecondary, legacyPrimary),
-            _ when locale == defaultLocale => TryResolveLegacyOptional(defaultLocale, defaultLocale, legacyPrimary, legacySecondary),
+            _ when locale == defaultLocale && defaultLocale is "ar" or "en" =>
+                TryResolveLegacyOptional(defaultLocale, defaultLocale, legacyPrimary, legacySecondary),
             _ => null
         };
 

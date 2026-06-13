@@ -254,6 +254,15 @@
             <p>{{ catalogPrimaryNotice() }}</p>
             <p data-testid="menu-catalog-primary-language">{{ catalogPrimaryLanguageLine() }}</p>
           </div>
+          @if (catalogEditWarning()) {
+            <p
+              class="menu-management-form-alert"
+              role="alert"
+              data-testid="menu-catalog-missing-primary-locale"
+            >
+              {{ locale.uiText('adminMenuCatalogEditMissingPrimaryLocale') }}
+            </p>
+          }
           <label>
             {{ locale.uiText('adminMenuFormName') }}
             <input type="text" formControlName="name" data-testid="menu-category-name" />
@@ -284,6 +293,15 @@
             <p>{{ catalogPrimaryNotice() }}</p>
             <p data-testid="menu-catalog-primary-language">{{ catalogPrimaryLanguageLine() }}</p>
           </div>
+          @if (catalogEditWarning()) {
+            <p
+              class="menu-management-form-alert"
+              role="alert"
+              data-testid="menu-catalog-missing-primary-locale"
+            >
+              {{ locale.uiText('adminMenuCatalogEditMissingPrimaryLocale') }}
+            </p>
+          }
           <label>
             {{ locale.uiText('adminMenuFormCategory') }}
             <select formControlName="categoryId">

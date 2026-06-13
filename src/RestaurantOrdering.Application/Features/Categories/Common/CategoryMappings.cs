@@ -1,3 +1,4 @@
+using RestaurantOrdering.Application.Common.Interfaces;
 using RestaurantOrdering.Application.Common.Localization;
 using RestaurantOrdering.Application.Features.Categories.DTOs;
 using RestaurantOrdering.Domain.Entities;
@@ -10,7 +11,8 @@ public static class CategoryMappings
         this Category category,
         int itemCount = 0,
         CategoryTranslation? arTranslation = null,
-        CategoryTranslation? enTranslation = null) => new()
+        CategoryTranslation? enTranslation = null,
+        PublicLocalizedContent? primaryContent = null) => new()
     {
         Id = category.Id,
         RestaurantId = category.RestaurantId,
@@ -26,6 +28,10 @@ public static class CategoryMappings
         IsActive = category.IsActive,
         ItemCount = itemCount,
         CreatedAt = category.CreatedAt,
-        UpdatedAt = category.UpdatedAt
+        UpdatedAt = category.UpdatedAt,
+        PrimaryName = primaryContent?.Name,
+        PrimaryDescription = primaryContent?.Description,
+        PrimaryLocale = primaryContent?.ResolvedLocale,
+        PrimaryFallbackApplied = primaryContent?.FallbackApplied ?? false
     };
 }

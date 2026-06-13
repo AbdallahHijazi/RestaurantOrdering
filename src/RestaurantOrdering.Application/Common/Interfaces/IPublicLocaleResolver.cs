@@ -45,6 +45,18 @@ public interface IPublicLocaleResolver
         string? legacyNameEn,
         string? legacyDescriptionAr,
         string? legacyDescriptionEn);
+
+    PublicLocalizedContent ResolveAdminCatalogPrimaryContent(
+        PublicMenuLocaleResolution menuLocale,
+        string defaultLocale,
+        IReadOnlyCollection<PublicRestaurantSupportedLocale> supportedLocales,
+        IReadOnlyDictionary<string, PublicLocaleDefinitionInfo> localeDefinitions,
+        IReadOnlyDictionary<string, PublicPublishedTranslationContent> translationsByLocale,
+        int contentVersion,
+        string legacyNameAr,
+        string? legacyNameEn,
+        string? legacyDescriptionAr,
+        string? legacyDescriptionEn);
 }
 
 public sealed record PublicMenuLocaleResolution(

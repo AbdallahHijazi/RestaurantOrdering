@@ -6,6 +6,10 @@ export interface AdminCategory {
   nameEn?: string | null;
   descriptionAr?: string | null;
   descriptionEn?: string | null;
+  primaryName?: string | null;
+  primaryDescription?: string | null;
+  primaryLocale?: string | null;
+  primaryFallbackApplied?: boolean;
   displayOrder: number;
   isActive: boolean;
   itemCount: number;
@@ -42,6 +46,10 @@ export interface AdminMenuItem {
   nameEn?: string | null;
   descriptionAr?: string | null;
   descriptionEn?: string | null;
+  primaryName?: string | null;
+  primaryDescription?: string | null;
+  primaryLocale?: string | null;
+  primaryFallbackApplied?: boolean;
   price: number;
   discountPrice?: number | null;
   displayOrder: number;
