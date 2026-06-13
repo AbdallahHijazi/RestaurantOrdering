@@ -32,6 +32,7 @@ public class ApplicationDbContext
     public DbSet<MenuItemTranslation> MenuItemTranslations => Set<MenuItemTranslation>();
     public DbSet<TranslationJob> TranslationJobs => Set<TranslationJob>();
     public DbSet<TranslationAuditLog> TranslationAuditLogs => Set<TranslationAuditLog>();
+    public DbSet<RestaurantUserPermissionGrant> RestaurantUserPermissionGrants => Set<RestaurantUserPermissionGrant>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -22,6 +22,7 @@ public interface IApplicationDbContext
     DbSet<MenuItemTranslation> MenuItemTranslations { get; }
     DbSet<TranslationJob> TranslationJobs { get; }
     DbSet<TranslationAuditLog> TranslationAuditLogs { get; }
+    DbSet<RestaurantUserPermissionGrant> RestaurantUserPermissionGrants { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

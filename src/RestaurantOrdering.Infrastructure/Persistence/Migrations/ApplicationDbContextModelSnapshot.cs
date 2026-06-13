@@ -1274,6 +1274,42 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.RestaurantUserPermissionGrant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("GrantedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("Permission")
+                        .HasColumnType("tinyint");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GrantedByUserId");
+
+                    b.HasIndex("RestaurantId", "UserId");
+
+                    b.HasIndex("UserId", "RestaurantId", "Permission")
+                        .IsUnique();
+
+                    b.ToTable("RestaurantUserPermissionGrants", t =>
+                        {
+                            t.HasCheckConstraint("CK_RestaurantUserPermissionGrants_Permission", "[Permission] >= 1 AND [Permission] <= 9");
+                        });
+                });
+
             modelBuilder.Entity("RestaurantOrdering.Domain.Entities.TranslationAuditLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1800,6 +1836,28 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Locale");
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("RestaurantOrdering.Domain.Entities.RestaurantUserPermissionGrant", b =>
+                {
+                    b.HasOne("RestaurantOrdering.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("GrantedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("RestaurantOrdering.Domain.Entities.Restaurant", "Restaurant")
+                        .WithMany()
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RestaurantOrdering.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Restaurant");
                 });
