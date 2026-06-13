@@ -6,6 +6,7 @@ using RestaurantOrdering.Application.Common.Localization;
 using RestaurantOrdering.Application.Features.Categories.Common;
 using RestaurantOrdering.Application.Features.Categories.DTOs;
 using RestaurantOrdering.Domain.Entities;
+using RestaurantOrdering.Domain.Enums;
 
 namespace RestaurantOrdering.Application.Features.Catalog.Commands.CreateCatalogCategory;
 
@@ -15,15 +16,18 @@ public sealed class CreateCatalogCategoryCommandHandler
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTimeService;
     private readonly IPublishedTranslationWriter _publishedTranslationWriter;
+    private readonly ITranslationJobEnqueuer _translationJobEnqueuer;
 
     public CreateCatalogCategoryCommandHandler(
         IApplicationDbContext context,
         IDateTimeService dateTimeService,
-        IPublishedTranslationWriter publishedTranslationWriter)
+        IPublishedTranslationWriter publishedTranslationWriter,
+        ITranslationJobEnqueuer translationJobEnqueuer)
     {
         _context = context;
         _dateTimeService = dateTimeService;
         _publishedTranslationWriter = publishedTranslationWriter;
+        _translationJobEnqueuer = translationJobEnqueuer;
     }
 
     public async Task<CategoryDto> Handle(
@@ -63,6 +67,13 @@ public sealed class CreateCatalogCategoryCommandHandler
             name,
             description,
             isManualEdit: false,
+            cancellationToken);
+
+        await _translationJobEnqueuer.EnqueueForEntityAsync(
+            request.RestaurantId,
+            TranslatableEntityType.Category,
+            category.Id,
+            category.ContentVersion,
             cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);

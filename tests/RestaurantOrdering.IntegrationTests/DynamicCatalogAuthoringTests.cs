@@ -416,8 +416,13 @@ public sealed class DynamicCatalogAuthoringTests : IClassFixture<TestWebApplicat
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var dateTimeService = scope.ServiceProvider.GetRequiredService<IDateTimeService>();
         var innerWriter = scope.ServiceProvider.GetRequiredService<IPublishedTranslationWriter>();
+        var enqueuer = scope.ServiceProvider.GetRequiredService<ITranslationJobEnqueuer>();
         var failingWriter = new FailingPrimaryLocaleTranslationWriter(innerWriter);
-        var handler = new CreateCatalogCategoryCommandHandler(context, dateTimeService, failingWriter);
+        var handler = new CreateCatalogCategoryCommandHandler(
+            context,
+            dateTimeService,
+            failingWriter,
+            enqueuer);
 
         var countBefore = await context.Categories.CountAsync(item => item.RestaurantId == TestDataSeeder.RestaurantAId);
 
@@ -461,9 +466,10 @@ public sealed class DynamicCatalogAuthoringTests : IClassFixture<TestWebApplicat
     }
 
     [Fact]
-    public async Task DynamicCatalogWrite_DoesNotCreateTranslationJobs()
+    public async Task DynamicCatalogWrite_WithManualOnly_DoesNotCreateTranslationJobs()
     {
         await TestDataSeeder.SeedAsync(_factory.Services);
+        await SetTranslationModeAsync(TestDataSeeder.RestaurantAId, TranslationMode.ManualOnly);
         await SetDefaultLocaleAsync(TestDataSeeder.RestaurantAId, "fr");
         await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "fr");
 
@@ -555,6 +561,15 @@ public sealed class DynamicCatalogAuthoringTests : IClassFixture<TestWebApplicat
                 address,
                 isManualEdit,
                 cancellationToken);
+    }
+
+    private async Task SetTranslationModeAsync(Guid restaurantId, TranslationMode mode)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var settings = await context.RestaurantSettings.SingleAsync(item => item.RestaurantId == restaurantId);
+        settings.TranslationMode = mode;
+        await context.SaveChangesAsync();
     }
 
     private async Task SetDefaultLocaleAsync(Guid restaurantId, string localeCode)

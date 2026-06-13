@@ -6,7 +6,9 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using RestaurantOrdering.Application.Common.Interfaces;
 using RestaurantOrdering.Infrastructure.Persistence;
+using RestaurantOrdering.IntegrationTests.Infrastructure;
 
 namespace RestaurantOrdering.IntegrationTests.Infrastructure;
 
@@ -72,6 +74,9 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
                     .UseInMemoryDatabase(_databaseName)
                     .ConfigureWarnings(warnings =>
                         warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
+
+            services.RemoveAll<ITranslationProvider>();
+            services.AddSingleton<ITranslationProvider, FakeTranslationProvider>();
         });
     }
 

@@ -5,6 +5,7 @@ using RestaurantOrdering.Application.Common.Interfaces;
 using RestaurantOrdering.Application.Common.Localization;
 using RestaurantOrdering.Application.Features.MenuItems.Common;
 using RestaurantOrdering.Application.Features.MenuItems.DTOs;
+using RestaurantOrdering.Domain.Enums;
 
 namespace RestaurantOrdering.Application.Features.Catalog.Commands.UpdateCatalogMenuItem;
 
@@ -14,15 +15,18 @@ public sealed class UpdateCatalogMenuItemCommandHandler
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTimeService;
     private readonly IPublishedTranslationWriter _publishedTranslationWriter;
+    private readonly ITranslationJobEnqueuer _translationJobEnqueuer;
 
     public UpdateCatalogMenuItemCommandHandler(
         IApplicationDbContext context,
         IDateTimeService dateTimeService,
-        IPublishedTranslationWriter publishedTranslationWriter)
+        IPublishedTranslationWriter publishedTranslationWriter,
+        ITranslationJobEnqueuer translationJobEnqueuer)
     {
         _context = context;
         _dateTimeService = dateTimeService;
         _publishedTranslationWriter = publishedTranslationWriter;
+        _translationJobEnqueuer = translationJobEnqueuer;
     }
 
     public async Task<MenuItemDto> Handle(
@@ -99,6 +103,13 @@ public sealed class UpdateCatalogMenuItemCommandHandler
                 name,
                 description,
                 isManualEdit: true,
+                cancellationToken);
+
+            await _translationJobEnqueuer.EnqueueForEntityAsync(
+                request.RestaurantId,
+                TranslatableEntityType.MenuItem,
+                menuItem.Id,
+                menuItem.ContentVersion,
                 cancellationToken);
         }
 

@@ -18,19 +18,22 @@ public sealed class UpdateRestaurantProfileContentCommandHandler
     private readonly IRestaurantPermissionService _permissionService;
     private readonly IDateTimeService _dateTimeService;
     private readonly IPublishedTranslationWriter _publishedTranslationWriter;
+    private readonly ITranslationJobEnqueuer _translationJobEnqueuer;
 
     public UpdateRestaurantProfileContentCommandHandler(
         IApplicationDbContext context,
         ICurrentUserService currentUserService,
         IRestaurantPermissionService permissionService,
         IDateTimeService dateTimeService,
-        IPublishedTranslationWriter publishedTranslationWriter)
+        IPublishedTranslationWriter publishedTranslationWriter,
+        ITranslationJobEnqueuer translationJobEnqueuer)
     {
         _context = context;
         _currentUserService = currentUserService;
         _permissionService = permissionService;
         _dateTimeService = dateTimeService;
         _publishedTranslationWriter = publishedTranslationWriter;
+        _translationJobEnqueuer = translationJobEnqueuer;
     }
 
     public async Task<RestaurantDto> Handle(
@@ -88,6 +91,13 @@ public sealed class UpdateRestaurantProfileContentCommandHandler
                 description,
                 address,
                 isManualEdit: true,
+                cancellationToken);
+
+            await _translationJobEnqueuer.EnqueueForEntityAsync(
+                request.RestaurantId,
+                TranslatableEntityType.Restaurant,
+                restaurant.Id,
+                restaurant.ContentVersion,
                 cancellationToken);
         }
 

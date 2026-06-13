@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RestaurantOrdering.Application.Common.Behaviors;
 using RestaurantOrdering.Application.Common.Interfaces;
 using RestaurantOrdering.Application.Common.Localization;
+using RestaurantOrdering.Application.Common.Translation;
 using RestaurantOrdering.Application.Common.Security;
 using System.Reflection;
 
@@ -32,6 +33,9 @@ public static class DependencyInjection
         services.AddScoped<IRestaurantAuthorizationService, RestaurantAuthorizationService>();
         services.AddScoped<ICurrentRequestDashboardAccess, CurrentRequestDashboardAccess>();
         services.AddScoped<IPublishedTranslationWriter, PublishedTranslationWriter>();
+        services.AddScoped<ITranslationJobEnqueuer, TranslationJobEnqueuer>();
+        services.AddScoped<ITranslationJobProcessor, TranslationJobProcessor>();
+        services.AddScoped<ITranslationProvider, NoOpTranslationProvider>();
 
         return services;
     }
