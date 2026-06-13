@@ -164,6 +164,42 @@ describe('PublicOrderConfirmation', () => {
 
     expect(document.body.querySelector('[data-testid="public-order-confirmation-modal"]')).toBeNull();
   });
+
+  it('lineName prefers displayedItemName over UI locale bilingual fields', () => {
+    locale.setLocale('en');
+    const component = fixture.componentInstance as PublicOrderConfirmation & {
+      lineName(line: {
+        displayedItemName?: string | null;
+        itemNameAr: string;
+        itemNameEn?: string | null;
+      }): string;
+    };
+
+    expect(
+      component.lineName({
+        displayedItemName: 'Item FR',
+        itemNameAr: 'صنف',
+        itemNameEn: 'Item EN',
+      }),
+    ).toBe('Item FR');
+  });
+
+  it('lineName falls back to legacy item names when displayedItemName is missing', () => {
+    const component = fixture.componentInstance as PublicOrderConfirmation & {
+      lineName(line: {
+        displayedItemName?: string | null;
+        itemNameAr: string;
+        itemNameEn?: string | null;
+      }): string;
+    };
+
+    expect(
+      component.lineName({
+        itemNameAr: 'صنف',
+        itemNameEn: null,
+      }),
+    ).toBe('صنف');
+  });
 });
 
 function baseConfirmation() {

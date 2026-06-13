@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { OrderStatus, OrderType } from '../../features/kitchen/data-access/kitchen-orders.models';
-import { shouldShowFinancialAmount } from './order-display.util';
+import { shouldShowFinancialAmount, orderItemDisplayName } from './order-display.util';
 import { formatOrderDateTime } from './order-date-time.util';
 import { formatOrderCurrency } from './order-money.util';
 import { getOrderStatusLabel } from './order-status-label.util';
@@ -40,5 +40,31 @@ describe('order presentation utils', () => {
     expect(shouldShowFinancialAmount(0.0)).toBe(false);
     expect(shouldShowFinancialAmount(null)).toBe(false);
     expect(shouldShowFinancialAmount(2.5)).toBe(true);
+  });
+
+  it('prefers displayedItemName over legacy bilingual fields', () => {
+    expect(
+      orderItemDisplayName({
+        displayedItemName: 'Item FR',
+        itemNameAr: 'صنف',
+        itemNameEn: 'Item EN',
+      }),
+    ).toBe('Item FR');
+  });
+
+  it('falls back to legacy item names when displayedItemName is missing', () => {
+    expect(
+      orderItemDisplayName({
+        itemNameAr: 'صنف',
+        itemNameEn: null,
+      }),
+    ).toBe('صنف');
+
+    expect(
+      orderItemDisplayName({
+        itemNameAr: '',
+        itemNameEn: 'Item EN',
+      }),
+    ).toBe('Item EN');
   });
 });

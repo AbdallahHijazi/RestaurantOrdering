@@ -222,6 +222,51 @@ describe('AdminOrderDetailsModal', () => {
     expect(printRules).toContain('.order-invoice-print-area');
     expect(printRules).not.toMatch(/\.modal-overlay[^}]*display:\s*none/i);
   });
+
+  it('prefers displayedItemName even when admin UI locale is English', () => {
+    const details = createDetails();
+    details.items = [
+      {
+        id: 'item-fr',
+        menuItemId: null,
+        itemNameAr: 'صنف',
+        itemNameEn: 'Item EN',
+        displayedItemName: 'Item FR',
+        displayedLocale: 'fr',
+        unitPrice: 10,
+        quantity: 1,
+        totalPrice: 10,
+        notes: null,
+      },
+    ];
+    fixture.componentRef.setInput('details', details);
+    locale.setLocale('en');
+    fixture.detectChanges();
+
+    expect(root().textContent).toContain('Item FR');
+    expect(root().textContent).not.toContain('Item EN');
+  });
+
+  it('falls back to legacy item names when displayedItemName is missing', () => {
+    const details = createDetails();
+    details.items = [
+      {
+        id: 'item-legacy',
+        menuItemId: null,
+        itemNameAr: 'سلطة',
+        itemNameEn: null,
+        unitPrice: 10,
+        quantity: 1,
+        totalPrice: 10,
+        notes: null,
+      },
+    ];
+    fixture.componentRef.setInput('details', details);
+    locale.setLocale('en');
+    fixture.detectChanges();
+
+    expect(root().textContent).toContain('سلطة');
+  });
 });
 
 function collectPortalCssText(): string {

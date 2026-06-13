@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter, Router, RouterOutlet } from '@angular/router';
 import { ApplicationRoles } from '../../auth/application-roles';
 import { AuthService } from '../../auth/auth.service';
+import { authGuard } from '../../auth/auth.guard';
+import { roleGuard } from '../../auth/role.guard';
 import { AuthSessionService } from '../../auth/auth-session.service';
 import { createTestSession } from '../../auth/test-jwt.util';
 import { API_BASE_URL } from '../../config/api-config';
@@ -13,6 +13,9 @@ import { LocaleService } from '../../localization/locale';
 import { routes } from '../../../app.routes';
 import { AdminBrandingService } from './admin-branding.service';
 import { AdminLayout } from './admin-layout';
+import { ProfileConsoleLayout } from '../profile-console-layout/profile-console-layout';
+
+const adminRoles = [ApplicationRoles.RestaurantOwner, ApplicationRoles.RestaurantManager];
 
 describe('AdminLayout', () => {
   let fixture: ComponentFixture<AdminLayout>;
@@ -333,23 +336,66 @@ describe('Admin shell routing', () => {
   });
 
   it('renders unified top bar for all main admin routes without legacy sidebar', async () => {
+    @Component({ template: '' })
+    class StubPage {}
+
     @Component({ template: '<router-outlet />', imports: [RouterOutlet] })
     class Host {}
 
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
-      imports: [Host],
-      providers: [provideRouter(routes), provideHttpClient(), provideHttpClientTesting()],
+      imports: [Host, ProfileConsoleLayout],
+      providers: [
+        provideRouter([
+          {
+            path: 'admin',
+            canActivate: [authGuard, roleGuard],
+            canActivateChild: [roleGuard],
+            data: { roles: adminRoles },
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+              {
+                path: '',
+                component: ProfileConsoleLayout,
+                children: [
+                  { path: 'dashboard', component: StubPage },
+                  {
+                    path: 'restaurant-profile',
+                    data: { roles: [ApplicationRoles.RestaurantOwner] },
+                    component: StubPage,
+                  },
+                  {
+                    path: 'translation-review',
+                    data: { roles: [ApplicationRoles.RestaurantOwner] },
+                    component: StubPage,
+                  },
+                  { path: 'orders', component: StubPage },
+                  { path: 'menu', component: StubPage },
+                  {
+                    path: 'staff',
+                    data: { roles: [ApplicationRoles.RestaurantOwner] },
+                    component: StubPage,
+                  },
+                  {
+                    path: 'tables',
+                    data: { roles: [ApplicationRoles.RestaurantOwner] },
+                    component: StubPage,
+                  },
+                ],
+              },
+            ],
+          },
+        ]),
+      ],
     }).compileComponents();
 
     session = TestBed.inject(AuthSessionService);
     router = TestBed.inject(Router);
-    const httpMock = TestBed.inject(HttpTestingController);
     session.clearSession();
     session.saveSession(createTestSession(ApplicationRoles.RestaurantOwner));
+    TestBed.inject(AuthService).restoreSessionFromStorage();
 
     const hostFixture = TestBed.createComponent(Host);
-    const restaurantId = session.getRestaurantId()!;
     const adminPaths = [
       '/admin/dashboard',
       '/admin/restaurant-profile',
@@ -360,105 +406,16 @@ describe('Admin shell routing', () => {
       '/admin/tables',
     ];
 
-    const flushOpenHttpRequests = (): void => {
-      for (const request of httpMock.match(() => true)) {
-        if (request.cancelled) {
-          continue;
-        }
-
-        const url = request.request.url;
-
-        if (url.endsWith(`/restaurants/${restaurantId}`)) {
-          request.flush({
-            id: restaurantId,
-            ownerId: 'owner-id',
-            slug: 'demo-restaurant',
-            nameAr: 'مطعم',
-            nameEn: 'Restaurant',
-            phoneNumber: '+966500000000',
-            isActive: true,
-          });
-          continue;
-        }
-
-        if (url.includes('/settings')) {
-          request.flush({
-            id: 'settings-id',
-            restaurantId,
-            currencyCode: 'SAR',
-            timeZone: 'Asia/Riyadh',
-            taxRate: 15,
-            deliveryFee: 0,
-            minimumOrderAmount: 0,
-            isDeliveryEnabled: true,
-            isPickupEnabled: true,
-          });
-          continue;
-        }
-
-        if (url.includes('/orders')) {
-          request.flush({ items: [], totalCount: 0, pageNumber: 1, pageSize: 20 });
-          continue;
-        }
-
-        if (url.includes('/tables')) {
-          request.flush([]);
-          continue;
-        }
-
-        if (url.includes('/categories') || url.includes('/users')) {
-          request.flush([]);
-          continue;
-        }
-
-        if (url.includes('/locales')) {
-          request.flush({
-            defaultLocale: 'ar',
-            translationMode: 'ManualOnly',
-            supportedLocales: [{ code: 'ar', isEnabled: true, sortOrder: 1 }],
-            availableLocales: [
-              { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
-            ],
-            canManageLocales: true,
-          });
-          continue;
-        }
-
-        if (url.includes('/translations')) {
-          request.flush({ items: [], page: 1, pageSize: 50, totalCount: 0 });
-          continue;
-        }
-
-        if (url.includes('/public/restaurants/') && url.endsWith('/menu')) {
-          request.flush({
-            id: restaurantId,
-            slug: 'demo-restaurant',
-            nameAr: 'مطعم',
-            nameEn: 'Restaurant',
-            categories: [],
-            items: [],
-          });
-          continue;
-        }
-
-        request.flush([]);
-      }
-    };
-
     for (const path of adminPaths) {
       await router.navigateByUrl(path);
+      await hostFixture.whenStable();
       hostFixture.detectChanges();
-      flushOpenHttpRequests();
-      hostFixture.detectChanges();
-      flushOpenHttpRequests();
 
       expect(hostFixture.nativeElement.querySelector('app-admin-layout')).toBeNull();
       expect(hostFixture.nativeElement.querySelector('[data-testid="profile-console"]')).toBeTruthy();
       expect(hostFixture.nativeElement.querySelector('[data-testid="admin-sidebar"]')).toBeNull();
       expect(hostFixture.nativeElement.querySelectorAll('[data-testid="profile-console-header"]').length).toBe(1);
     }
-
-    httpMock.verify();
   });
 
   it('redirects RestaurantManager from /admin/restaurant-profile to /admin/dashboard', async () => {

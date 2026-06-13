@@ -32,6 +32,8 @@ export interface OrderDetailsItem {
   menuItemId: string | null;
   itemNameAr: string;
   itemNameEn: string | null;
+  displayedItemName?: string;
+  displayedLocale?: string;
   unitPrice: number;
   quantity: number;
   totalPrice: number;

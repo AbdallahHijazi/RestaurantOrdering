@@ -1,7 +1,7 @@
 import { Component, HostListener, inject, input, output } from '@angular/core';
 import { LocaleService } from '../../../../core/localization/locale';
 import { OrderModalShell } from '../../../../shared/components/order-modal-shell/order-modal-shell';
-import { shouldShowFinancialAmount } from '../../../../shared/orders/order-display.util';
+import { shouldShowFinancialAmount, orderItemDisplayName } from '../../../../shared/orders/order-display.util';
 import { formatOrderDateTime } from '../../../../shared/orders/order-date-time.util';
 import { formatOrderCurrency } from '../../../../shared/orders/order-money.util';
 import { getOrderStatusLabel } from '../../../../shared/orders/order-status-label.util';
@@ -51,13 +51,11 @@ export class PublicOrderConfirmation {
   }
 
   protected lineName(line: {
+    displayedItemName?: string | null;
     itemNameAr: string;
     itemNameEn?: string | null;
   }): string {
-    return this.localeService.pickText(
-      { ar: line.itemNameAr, en: line.itemNameEn },
-      line.itemNameAr,
-    );
+    return orderItemDisplayName(line);
   }
 
   protected formatMoney(amount: number, currencyCode: string): string {

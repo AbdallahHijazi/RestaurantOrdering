@@ -247,6 +247,43 @@ describe('KitchenDashboardPage', () => {
     expect(body.textContent).toContain('Delivery fee');
   });
 
+  it('prefers displayedItemName even when kitchen UI locale is English', () => {
+    fixture.detectChanges();
+    flushBoard({
+      newOrders: [createSummary('order-fr', OrderStatus.New, 'A-200')],
+    });
+
+    root()
+      .querySelector<HTMLButtonElement>('[data-testid="kitchen-details-order-fr"]')!
+      .click();
+
+    const detailsReq = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders/order-fr`,
+    );
+    const details = createDetails('order-fr', OrderStatus.New);
+    details.items = [
+      {
+        id: 'item-1',
+        menuItemId: null,
+        itemNameAr: 'صنف',
+        itemNameEn: 'Item EN',
+        displayedItemName: 'Item FR',
+        displayedLocale: 'fr',
+        unitPrice: 10,
+        quantity: 1,
+        totalPrice: 10,
+        notes: null,
+      },
+    ];
+    detailsReq.flush(details);
+
+    TestBed.inject(LocaleService).setLocale('en');
+    fixture.detectChanges();
+
+    expect(document.body.textContent).toContain('Item FR');
+    expect(document.body.textContent).not.toContain('Item EN');
+  });
+
   it('falls back from itemNameEn to itemNameAr when English name is missing', () => {
     fixture.detectChanges();
     flushBoard({

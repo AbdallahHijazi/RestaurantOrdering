@@ -1,6 +1,6 @@
 import { Component, ViewEncapsulation, computed, inject, input, output } from '@angular/core';
 import { LocaleService } from '../../../../../../core/localization/locale';
-import { shouldShowFinancialAmount } from '../../../../../../shared/orders/order-display.util';
+import { shouldShowFinancialAmount, orderItemDisplayName } from '../../../../../../shared/orders/order-display.util';
 import { formatOrderDateTime } from '../../../../../../shared/orders/order-date-time.util';
 import { formatOrderCurrency } from '../../../../../../shared/orders/order-money.util';
 import { getOrderStatusLabel } from '../../../../../../shared/orders/order-status-label.util';
@@ -71,11 +71,7 @@ export class AdminOrderDetailsModal {
   }
 
   protected itemName(item: OrderDetailsItem): string {
-    if (this.locale.locale() === 'en') {
-      return item.itemNameEn?.trim() || item.itemNameAr;
-    }
-
-    return item.itemNameAr;
+    return orderItemDisplayName(item);
   }
 
   protected formatMoney(amount: number, currencyCode: string): string {

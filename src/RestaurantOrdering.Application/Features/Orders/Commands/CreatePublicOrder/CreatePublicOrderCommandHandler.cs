@@ -236,16 +236,7 @@ public sealed class CreatePublicOrderCommandHandler
             CurrencyCode = order.CurrencyCode,
             CreatedAt = order.CreatedAt,
             Items = orderItems
-                .Select(item => new PublicOrderConfirmationItemDto
-                {
-                    MenuItemId = item.MenuItemId,
-                    ItemNameAr = item.ItemNameAr,
-                    ItemNameEn = item.ItemNameEn,
-                    UnitPrice = item.UnitPrice,
-                    Quantity = item.Quantity,
-                    TotalPrice = item.TotalPrice,
-                    Notes = item.Notes
-                })
+                .Select(item => OrderItemDisplayProjection.ToConfirmationItemDto(item, order.ResolvedLocale))
                 .ToList()
                 .AsReadOnly()
         };
