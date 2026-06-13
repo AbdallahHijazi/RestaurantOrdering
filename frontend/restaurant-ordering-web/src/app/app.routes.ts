@@ -87,6 +87,16 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'translation-review',
+            data: {
+              roles: [ApplicationRoles.RestaurantOwner],
+            },
+            loadComponent: () =>
+              import(
+                './features/admin/pages/translation-review-page/translation-review-page'
+              ).then((m) => m.TranslationReviewPage),
+          },
+          {
             path: 'staff',
             data: {
               roles: [ApplicationRoles.RestaurantOwner],

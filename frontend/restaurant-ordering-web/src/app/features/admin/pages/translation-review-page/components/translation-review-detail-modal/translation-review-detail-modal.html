@@ -1,0 +1,139 @@
+@if (currentItem(); as item) {
+  <div class="translation-review-detail" data-testid="translation-review-detail">
+    <div class="translation-review-detail__meta">
+      <span class="translation-review-detail__badge" data-testid="translation-review-detail-entity-type">
+        {{ entityTypeLabel(item.entityType) }}
+      </span>
+      <span class="translation-review-detail__badge" data-testid="translation-review-detail-locale">
+        {{ item.locale }}
+        <span class="translation-review-detail__direction">{{ directionBadge(item.locale) }}</span>
+      </span>
+      <span class="translation-review-detail__badge" data-testid="translation-review-detail-status">
+        {{ draftStatusLabel(item.draftStatus) }}
+      </span>
+      @if (item.isStale) {
+        <span
+          class="translation-review-detail__badge translation-review-detail__badge--stale"
+          data-testid="translation-review-detail-stale"
+        >
+          {{ localeService.uiText('translationReviewStaleBadge') }}
+        </span>
+      }
+    </div>
+
+    @if (item.isStale) {
+      <div class="translation-review-detail__alert" role="alert" data-testid="translation-review-detail-stale-warning">
+        {{ localeService.uiText('translationReviewStaleWarning') }}
+      </div>
+    }
+
+    @if (actionError()) {
+      <div class="translation-review-detail__alert" role="alert" data-testid="translation-review-detail-action-error">
+        {{ actionError() }}
+      </div>
+    }
+
+    @if (validationError()) {
+      <div class="translation-review-detail__alert" role="alert" data-testid="translation-review-detail-validation-error">
+        {{ validationError() }}
+      </div>
+    }
+
+    <div class="translation-review-detail__grid">
+      <section class="translation-review-detail__section">
+        <h3>{{ localeService.uiText('translationReviewPublishedHeading') }}</h3>
+        <dl class="translation-review-detail__fields">
+          <div>
+            <dt>{{ localeService.uiText('translationReviewFieldName') }}</dt>
+            <dd data-testid="translation-review-published-name">{{ item.publishedName || '—' }}</dd>
+          </div>
+          <div>
+            <dt>{{ localeService.uiText('translationReviewFieldDescription') }}</dt>
+            <dd data-testid="translation-review-published-description">
+              {{ item.publishedDescription || '—' }}
+            </dd>
+          </div>
+          @if (showAddressFields(item)) {
+            <div>
+              <dt>{{ localeService.uiText('translationReviewFieldAddress') }}</dt>
+              <dd data-testid="translation-review-published-address">{{ item.publishedAddress || '—' }}</dd>
+            </div>
+          }
+        </dl>
+      </section>
+
+      <section class="translation-review-detail__section">
+        <h3>{{ localeService.uiText('translationReviewDraftHeading') }}</h3>
+        <div class="translation-review-detail__form">
+          <label>
+            <span>{{ localeService.uiText('translationReviewFieldName') }}</span>
+            <input
+              type="text"
+              data-testid="translation-review-draft-name"
+              [value]="draft().name"
+              (input)="setDraftName($any($event.target).value)"
+            />
+          </label>
+
+          <label>
+            <span>{{ localeService.uiText('translationReviewFieldDescription') }}</span>
+            <textarea
+              rows="3"
+              data-testid="translation-review-draft-description"
+              [value]="draft().description"
+              (input)="setDraftDescription($any($event.target).value)"
+            ></textarea>
+          </label>
+
+          @if (showAddressFields(item)) {
+            <label>
+              <span>{{ localeService.uiText('translationReviewFieldAddress') }}</span>
+              <input
+                type="text"
+                data-testid="translation-review-draft-address"
+                [value]="draft().address"
+                (input)="setDraftAddress($any($event.target).value)"
+              />
+            </label>
+          }
+        </div>
+      </section>
+    </div>
+
+    <div class="translation-review-detail__actions">
+      <button
+        type="button"
+        class="translation-review-detail__secondary"
+        data-testid="translation-review-save-draft"
+        [disabled]="saving()"
+        (click)="onSaveDraft()"
+      >
+        {{ saving() ? localeService.uiText('translationReviewSavingDraft') : localeService.uiText('translationReviewSaveDraft') }}
+      </button>
+
+      @if (canRetry(item)) {
+        <button
+          type="button"
+          class="translation-review-detail__secondary"
+          data-testid="translation-review-retry"
+          [disabled]="saving()"
+          (click)="onRetry()"
+        >
+          {{ localeService.uiText('translationReviewRetry') }}
+        </button>
+      }
+
+      @if (canApprove(item)) {
+        <button
+          type="button"
+          class="translation-review-detail__primary"
+          data-testid="translation-review-approve"
+          [disabled]="saving()"
+          (click)="onApprove()"
+        >
+          {{ localeService.uiText('translationReviewApprove') }}
+        </button>
+      }
+    </div>
+  </div>
+}

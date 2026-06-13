@@ -1,0 +1,248 @@
+<div class="translation-review-page" data-testid="translation-review-page">
+  <header class="translation-review-page__header">
+    <div class="translation-review-page__intro">
+      <p class="translation-review-page__eyebrow">{{ locale.uiText('translationReviewEyebrow') }}</p>
+      <h1 class="translation-review-page__title">{{ locale.uiText('translationReviewTitle') }}</h1>
+      <p class="translation-review-page__lead">{{ locale.uiText('translationReviewLead') }}</p>
+    </div>
+
+    <button
+      type="button"
+      class="translation-review-page__refresh"
+      data-testid="translation-review-refresh"
+      [disabled]="pageState() === 'loading' || refreshing()"
+      (click)="refreshList()"
+    >
+      @if (refreshing()) {
+        {{ locale.uiText('translationReviewRefreshing') }}
+      } @else {
+        {{ locale.uiText('translationReviewRefresh') }}
+      }
+    </button>
+  </header>
+
+  @if (feedbackMessage()) {
+    <p class="translation-review-page__feedback" role="status" data-testid="translation-review-feedback">
+      {{ feedbackMessage() }}
+    </p>
+  }
+
+  @if (pageState() === 'ready') {
+    <div class="translation-review-page__toolbar" data-testid="translation-review-filters">
+      <label>
+        <span>{{ locale.uiText('translationReviewFilterLocale') }}</span>
+        <select
+          data-testid="translation-review-filter-locale"
+          [ngModel]="localeFilter()"
+          (ngModelChange)="setLocaleFilter($event)"
+        >
+          <option value="all">{{ locale.uiText('translationReviewFilterAll') }}</option>
+          @for (option of localeOptions(); track option.code) {
+            <option [value]="option.code">{{ option.nativeName }} — {{ option.displayName }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>{{ locale.uiText('translationReviewFilterEntityType') }}</span>
+        <select
+          data-testid="translation-review-filter-entity-type"
+          [ngModel]="entityTypeFilter()"
+          (ngModelChange)="setEntityTypeFilter($event)"
+        >
+          @for (filter of entityTypeFilters; track filter) {
+            <option [value]="filter">
+              @if (filter === 'all') {
+                {{ locale.uiText('translationReviewFilterAll') }}
+              } @else {
+                {{ entityTypeLabel(filter) }}
+              }
+            </option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>{{ locale.uiText('translationReviewFilterStatus') }}</span>
+        <select
+          data-testid="translation-review-filter-status"
+          [ngModel]="statusFilter()"
+          (ngModelChange)="setStatusFilter($event)"
+        >
+          @for (filter of statusFilters; track filter) {
+            <option [value]="filter">
+              @if (filter === 'all') {
+                {{ locale.uiText('translationReviewFilterAll') }}
+              } @else {
+                {{ statusLabel(filter) }}
+              }
+            </option>
+          }
+        </select>
+      </label>
+
+      <button
+        type="button"
+        class="translation-review-page__bulk"
+        data-testid="translation-review-bulk-approve"
+        [disabled]="!bulkApproveEnabled()"
+        (click)="bulkApproveSelected()"
+      >
+        {{ locale.uiText('translationReviewBulkApprove') }}
+      </button>
+    </div>
+  }
+
+  @switch (pageState()) {
+    @case ('missing-context') {
+      <section class="translation-review-page__state" data-testid="translation-review-missing-context">
+        <h3>{{ locale.uiText('translationReviewDemoTitle') }}</h3>
+        <p>{{ locale.uiText('translationReviewDemoNotice') }}</p>
+      </section>
+    }
+
+    @case ('loading') {
+      <section class="translation-review-page__state" aria-busy="true" data-testid="translation-review-loading">
+        <p>{{ locale.uiText('translationReviewLoading') }}</p>
+      </section>
+    }
+
+    @case ('error') {
+      <section class="translation-review-page__state" data-testid="translation-review-error">
+        <h3>{{ locale.uiText('translationReviewListErrorTitle') }}</h3>
+        <p>{{ listError() }}</p>
+        <button type="button" data-testid="translation-review-retry-load" (click)="retryLoad()">
+          {{ locale.uiText('translationReviewRetryLoad') }}
+        </button>
+      </section>
+    }
+
+    @case ('ready') {
+      @if (items().length === 0) {
+        <section class="translation-review-page__state" data-testid="translation-review-empty">
+          <h3>{{ locale.uiText('translationReviewEmptyTitle') }}</h3>
+          <p>{{ locale.uiText('translationReviewEmptyDescription') }}</p>
+        </section>
+      } @else {
+        <div class="translation-review-page__table-wrap">
+          <table class="translation-review-page__table" data-testid="translation-review-table">
+            <thead>
+              <tr>
+                <th scope="col">
+                  <input
+                    type="checkbox"
+                    data-testid="translation-review-select-all"
+                    [checked]="allVisibleSelected()"
+                    (change)="toggleSelectAllVisible($any($event.target).checked)"
+                  />
+                </th>
+                <th scope="col">{{ locale.uiText('translationReviewColEntity') }}</th>
+                <th scope="col">{{ locale.uiText('translationReviewColType') }}</th>
+                <th scope="col">{{ locale.uiText('translationReviewColLocale') }}</th>
+                <th scope="col">{{ locale.uiText('translationReviewColStatus') }}</th>
+                <th scope="col">{{ locale.uiText('translationReviewColSource') }}</th>
+                <th scope="col">{{ locale.uiText('translationReviewColUpdated') }}</th>
+                <th scope="col">{{ locale.uiText('translationReviewColActions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of items(); track item.translationId) {
+                <tr [attr.data-testid]="'translation-review-row-' + item.translationId">
+                  <td>
+                    <input
+                      type="checkbox"
+                      [attr.data-testid]="'translation-review-select-' + item.translationId"
+                      [checked]="isRowSelected(item)"
+                      [disabled]="!isRowSelectable(item)"
+                      (change)="toggleRowSelection(item, $any($event.target).checked)"
+                    />
+                  </td>
+                  <td>{{ item.entityDisplayName }}</td>
+                  <td>
+                    <span class="translation-review-page__badge" [attr.data-testid]="'translation-review-entity-' + item.translationId">
+                      {{ entityTypeLabel(item.entityType) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="translation-review-page__badge" [attr.data-testid]="'translation-review-locale-' + item.translationId">
+                      {{ item.locale }}
+                      <span class="translation-review-page__direction">{{ directionBadge(item.locale) }}</span>
+                    </span>
+                  </td>
+                  <td>
+                    <span class="translation-review-page__badge" [attr.data-testid]="'translation-review-status-' + item.translationId">
+                      {{ statusLabel(item.draftStatus) }}
+                    </span>
+                    @if (item.isStale) {
+                      <span
+                        class="translation-review-page__badge translation-review-page__badge--stale"
+                        [attr.data-testid]="'translation-review-stale-' + item.translationId"
+                      >
+                        {{ locale.uiText('translationReviewStaleBadge') }}
+                      </span>
+                    }
+                  </td>
+                  <td>{{ draftSourceLabel(item.draftSource) }}</td>
+                  <td>{{ formatUpdatedAt(item.updatedAt) }}</td>
+                  <td class="translation-review-page__actions">
+                    <button
+                      type="button"
+                      class="translation-review-page__action"
+                      [attr.data-testid]="'translation-review-edit-' + item.translationId"
+                      (click)="openReview(item)"
+                    >
+                      {{ locale.uiText('translationReviewReviewEdit') }}
+                    </button>
+
+                    @if (canApproveRow(item)) {
+                      <button
+                        type="button"
+                        class="translation-review-page__action translation-review-page__action--primary"
+                        [attr.data-testid]="'translation-review-approve-' + item.translationId"
+                        [disabled]="isRowBusy(item.translationId)"
+                        (click)="approveRow(item)"
+                      >
+                        {{ locale.uiText('translationReviewApprove') }}
+                      </button>
+                    }
+
+                    @if (canRetryRow(item)) {
+                      <button
+                        type="button"
+                        class="translation-review-page__action"
+                        [attr.data-testid]="'translation-review-retry-' + item.translationId"
+                        [disabled]="isRowBusy(item.translationId)"
+                        (click)="retryRow(item)"
+                      >
+                        {{ locale.uiText('translationReviewRetry') }}
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  }
+</div>
+
+<app-order-modal-shell
+  [wide]="true"
+  [open]="reviewOpen()"
+  [title]="locale.uiText('translationReviewModalTitle')"
+  [closeLabel]="locale.uiText('translationReviewCloseModal')"
+  testId="translation-review-modal"
+  [blockCloseWhileBusy]="reviewSaving()"
+  (closed)="closeReview()"
+>
+  <app-translation-review-detail-modal
+    [item]="reviewItem()"
+    [saving]="reviewSaving()"
+    [actionError]="reviewError()"
+    (saveDraft)="saveDraft($event)"
+    (approve)="approveFromReview()"
+    (retry)="retryFromReview()"
+  />
+</app-order-modal-shell>

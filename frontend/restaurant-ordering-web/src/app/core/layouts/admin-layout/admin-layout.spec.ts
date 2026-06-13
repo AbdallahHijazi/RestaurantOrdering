@@ -353,6 +353,7 @@ describe('Admin shell routing', () => {
     const adminPaths = [
       '/admin/dashboard',
       '/admin/restaurant-profile',
+      '/admin/translation-review',
       '/admin/orders',
       '/admin/menu',
       '/admin/staff',
@@ -407,6 +408,24 @@ describe('Admin shell routing', () => {
 
         if (url.includes('/categories') || url.includes('/users')) {
           request.flush([]);
+          continue;
+        }
+
+        if (url.includes('/locales')) {
+          request.flush({
+            defaultLocale: 'ar',
+            translationMode: 'ManualOnly',
+            supportedLocales: [{ code: 'ar', isEnabled: true, sortOrder: 1 }],
+            availableLocales: [
+              { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+            ],
+            canManageLocales: true,
+          });
+          continue;
+        }
+
+        if (url.includes('/translations')) {
+          request.flush({ items: [], page: 1, pageSize: 50, totalCount: 0 });
           continue;
         }
 

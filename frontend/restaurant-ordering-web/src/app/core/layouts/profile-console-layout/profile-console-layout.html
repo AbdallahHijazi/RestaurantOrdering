@@ -70,6 +70,13 @@
         {{ localeService.uiText('adminNavMenu') }}
       </a>
       @if (isOwner()) {
+        <a
+          routerLink="/admin/translation-review"
+          routerLinkActive="is-active"
+          data-testid="profile-console-nav-translation-review"
+        >
+          {{ localeService.uiText('adminNavTranslationReview') }}
+        </a>
         <a routerLink="/admin/staff" routerLinkActive="is-active" data-testid="profile-console-nav-staff">
           {{ localeService.uiText('adminNavStaff') }}
         </a>
