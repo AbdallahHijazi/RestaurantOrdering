@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RestaurantOrdering.Application.Common.Exceptions;
 using RestaurantOrdering.Application.Common.Interfaces;
+using RestaurantOrdering.Application.Common.Localization;
 using RestaurantOrdering.Application.Features.Restaurants.Common;
 using RestaurantOrdering.Application.Features.Restaurants.DTOs;
 
@@ -55,6 +56,14 @@ public sealed class SetRestaurantCoverImageCommandHandler
             restaurant.CoverImageFileId,
             cancellationToken);
 
-        return restaurant.ToDto(logoUrl, coverImageUrl);
+        var translations = await LegacyBilingualTranslationLoader.LoadRestaurantAsync(
+            _context,
+            restaurant.Id,
+            cancellationToken);
+
+        translations.TryGetValue("ar", out var arTranslation);
+        translations.TryGetValue("en", out var enTranslation);
+
+        return restaurant.ToDto(logoUrl, coverImageUrl, arTranslation, enTranslation);
     }
 }

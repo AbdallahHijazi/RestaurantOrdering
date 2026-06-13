@@ -15,6 +15,13 @@ public interface IApplicationDbContext
     DbSet<MediaFile> MediaFiles { get; }
     DbSet<QrCode> QrCodes { get; }
     DbSet<RestaurantTable> RestaurantTables { get; }
+    DbSet<LocaleDefinition> LocaleDefinitions { get; }
+    DbSet<RestaurantSupportedLocale> RestaurantSupportedLocales { get; }
+    DbSet<RestaurantTranslation> RestaurantTranslations { get; }
+    DbSet<CategoryTranslation> CategoryTranslations { get; }
+    DbSet<MenuItemTranslation> MenuItemTranslations { get; }
+    DbSet<TranslationJob> TranslationJobs { get; }
+    DbSet<TranslationAuditLog> TranslationAuditLogs { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

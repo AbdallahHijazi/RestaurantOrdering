@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RestaurantOrdering.Application.Common.Exceptions;
 using RestaurantOrdering.Application.Common.Interfaces;
+using RestaurantOrdering.Application.Common.Localization;
 using RestaurantOrdering.Application.Features.MenuItems.DTOs;
 using RestaurantOrdering.Domain.Entities;
 
@@ -40,12 +41,35 @@ public static class MenuItemDtoProjections
         Guid restaurantId,
         CancellationToken cancellationToken)
     {
-        var dto = await context.MenuItems
+        var menuItem = await context.MenuItems
             .AsNoTracking()
-            .Where(item => item.Id == menuItemId && item.RestaurantId == restaurantId)
-            .ProjectToDto(context.MediaFiles.AsNoTracking())
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(
+                item => item.Id == menuItemId && item.RestaurantId == restaurantId,
+                cancellationToken);
 
-        return dto ?? throw new NotFoundException("MenuItem", menuItemId);
+        if (menuItem is null)
+        {
+            throw new NotFoundException("MenuItem", menuItemId);
+        }
+
+        string? imageUrl = null;
+        if (menuItem.ImageFileId.HasValue)
+        {
+            imageUrl = await context.MediaFiles
+                .AsNoTracking()
+                .Where(media => media.Id == menuItem.ImageFileId.Value)
+                .Select(media => media.FileUrl)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        var translations = await LegacyBilingualTranslationLoader.LoadMenuItemsAsync(
+            context,
+            [menuItem.Id],
+            cancellationToken);
+
+        return menuItem.ToDto(
+            imageUrl,
+            LegacyBilingualTranslationLoader.GetMenuItemTranslation(translations, menuItem.Id, "ar"),
+            LegacyBilingualTranslationLoader.GetMenuItemTranslation(translations, menuItem.Id, "en"));
     }
 }

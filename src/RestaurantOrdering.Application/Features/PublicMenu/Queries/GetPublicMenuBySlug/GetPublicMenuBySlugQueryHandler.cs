@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using RestaurantOrdering.Application.Common.Exceptions;
 using RestaurantOrdering.Application.Common.Interfaces;
+using RestaurantOrdering.Application.Common.Localization;
 using RestaurantOrdering.Application.Features.PublicMenu.Common;
 using RestaurantOrdering.Application.Features.PublicMenu.DTOs;
 using RestaurantOrdering.Application.Features.Restaurants.Common;
@@ -36,6 +37,14 @@ public sealed class GetPublicMenuBySlugQueryHandler
             throw new NotFoundException("Restaurant", normalizedSlug);
         }
 
+        var restaurantTranslations = await LegacyBilingualTranslationLoader.LoadRestaurantAsync(
+            _context,
+            restaurant.Id,
+            cancellationToken);
+
+        restaurantTranslations.TryGetValue("ar", out var restaurantArTranslation);
+        restaurantTranslations.TryGetValue("en", out var restaurantEnTranslation);
+
         var settings = await _context.RestaurantSettings
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.RestaurantId == restaurant.Id, cancellationToken);
@@ -59,6 +68,16 @@ public sealed class GetPublicMenuBySlugQueryHandler
             .OrderBy(item => item.DisplayOrder)
             .ThenBy(item => item.NameAr)
             .ToListAsync(cancellationToken);
+
+        var categoryTranslations = await LegacyBilingualTranslationLoader.LoadCategoriesAsync(
+            _context,
+            categories.Select(c => c.Id).ToList(),
+            cancellationToken);
+
+        var menuItemTranslations = await LegacyBilingualTranslationLoader.LoadMenuItemsAsync(
+            _context,
+            menuItems.Select(item => item.Id).ToList(),
+            cancellationToken);
 
         var imageFileIds = menuItems
             .Where(item => item.ImageFileId.HasValue)
@@ -104,7 +123,10 @@ public sealed class GetPublicMenuBySlugQueryHandler
             .ToDictionary(
                 group => group.Key,
                 group => (IReadOnlyList<PublicMenuItemDto>)group
-                    .Select(item => item.ToPublicMenuItemDto(ResolveImageUrl(item)))
+                    .Select(item => item.ToPublicMenuItemDto(
+                        ResolveImageUrl(item),
+                        LegacyBilingualTranslationLoader.GetMenuItemTranslation(menuItemTranslations, item.Id, "ar"),
+                        LegacyBilingualTranslationLoader.GetMenuItemTranslation(menuItemTranslations, item.Id, "en")))
                     .ToList()
                     .AsReadOnly());
 
@@ -112,7 +134,10 @@ public sealed class GetPublicMenuBySlugQueryHandler
             .Select(category =>
             {
                 itemsByCategoryId.TryGetValue(category.Id, out var items);
-                return category.ToPublicMenuCategoryDto(items ?? Array.Empty<PublicMenuItemDto>());
+                return category.ToPublicMenuCategoryDto(
+                    items ?? Array.Empty<PublicMenuItemDto>(),
+                    LegacyBilingualTranslationLoader.GetCategoryTranslation(categoryTranslations, category.Id, "ar"),
+                    LegacyBilingualTranslationLoader.GetCategoryTranslation(categoryTranslations, category.Id, "en"));
             })
             .ToList()
             .AsReadOnly();
@@ -121,18 +146,24 @@ public sealed class GetPublicMenuBySlugQueryHandler
         {
             Id = restaurant.Id,
             Slug = restaurant.Slug,
-            NameAr = restaurant.NameAr,
-            NameEn = restaurant.NameEn,
-            DescriptionAr = restaurant.DescriptionAr,
-            DescriptionEn = restaurant.DescriptionEn,
+            NameAr = PublishedTranslationDualRead.ResolveRequired(
+                restaurantArTranslation?.Name, restaurantArTranslation?.PublishedSourceVersion, restaurant.ContentVersion, restaurant.NameAr),
+            NameEn = PublishedTranslationDualRead.ResolveOptional(
+                restaurantEnTranslation?.Name, restaurantEnTranslation?.PublishedSourceVersion, restaurant.ContentVersion, restaurant.NameEn),
+            DescriptionAr = PublishedTranslationDualRead.ResolveOptional(
+                restaurantArTranslation?.Description, restaurantArTranslation?.PublishedSourceVersion, restaurant.ContentVersion, restaurant.DescriptionAr),
+            DescriptionEn = PublishedTranslationDualRead.ResolveOptional(
+                restaurantEnTranslation?.Description, restaurantEnTranslation?.PublishedSourceVersion, restaurant.ContentVersion, restaurant.DescriptionEn),
             LogoFileId = restaurant.LogoFileId,
             LogoUrl = ResolveMediaUrl(restaurant.LogoFileId),
             CoverImageUrl = ResolveMediaUrl(restaurant.CoverImageFileId),
             AccentColor = restaurant.AccentColor,
             PhoneNumber = restaurant.PhoneNumber,
             WhatsAppNumber = restaurant.WhatsAppNumber,
-            AddressAr = restaurant.AddressAr,
-            AddressEn = restaurant.AddressEn,
+            AddressAr = PublishedTranslationDualRead.ResolveOptional(
+                restaurantArTranslation?.Address, restaurantArTranslation?.PublishedSourceVersion, restaurant.ContentVersion, restaurant.AddressAr),
+            AddressEn = PublishedTranslationDualRead.ResolveOptional(
+                restaurantEnTranslation?.Address, restaurantEnTranslation?.PublishedSourceVersion, restaurant.ContentVersion, restaurant.AddressEn),
             Latitude = restaurant.Latitude,
             Longitude = restaurant.Longitude,
             CurrencyCode = settings?.CurrencyCode,

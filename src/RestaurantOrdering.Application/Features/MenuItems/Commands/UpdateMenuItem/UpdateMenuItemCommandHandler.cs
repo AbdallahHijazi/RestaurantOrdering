@@ -4,6 +4,7 @@ using RestaurantOrdering.Application.Common.Exceptions;
 using RestaurantOrdering.Application.Common.Interfaces;
 using RestaurantOrdering.Application.Features.MenuItems.Common;
 using RestaurantOrdering.Application.Features.MenuItems.DTOs;
+using RestaurantOrdering.Application.Common.Localization;
 
 namespace RestaurantOrdering.Application.Features.MenuItems.Commands.UpdateMenuItem;
 
@@ -60,10 +61,23 @@ public sealed class UpdateMenuItemCommandHandler
 
         menuItem.CategoryId = request.CategoryId;
         menuItem.ImageFileId = request.ImageFileId;
-        menuItem.NameAr = request.NameAr.Trim();
-        menuItem.NameEn = request.NameEn?.Trim();
-        menuItem.DescriptionAr = request.DescriptionAr?.Trim();
-        menuItem.DescriptionEn = request.DescriptionEn?.Trim();
+
+        var nameAr = request.NameAr.Trim();
+        var nameEn = request.NameEn?.Trim();
+        var descriptionAr = request.DescriptionAr?.Trim();
+        var descriptionEn = request.DescriptionEn?.Trim();
+
+        TranslatableContentVersion.BumpMenuItemIfTranslatableContentChanged(
+            menuItem,
+            nameAr,
+            nameEn,
+            descriptionAr,
+            descriptionEn);
+
+        menuItem.NameAr = nameAr;
+        menuItem.NameEn = nameEn;
+        menuItem.DescriptionAr = descriptionAr;
+        menuItem.DescriptionEn = descriptionEn;
         menuItem.Price = request.Price;
         menuItem.DiscountPrice = request.DiscountPrice;
         menuItem.DisplayOrder = request.DisplayOrder;

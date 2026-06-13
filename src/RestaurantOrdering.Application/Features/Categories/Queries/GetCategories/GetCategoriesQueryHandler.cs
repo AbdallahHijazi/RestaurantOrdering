@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using RestaurantOrdering.Application.Common.Exceptions;
 using RestaurantOrdering.Application.Common.Interfaces;
+using RestaurantOrdering.Application.Common.Localization;
 using RestaurantOrdering.Application.Features.Categories.Common;
 using RestaurantOrdering.Application.Features.Categories.DTOs;
 
@@ -20,12 +22,29 @@ public sealed class GetCategoriesQueryHandler
         GetCategoriesQuery request,
         CancellationToken cancellationToken)
     {
-        return await _context.Categories
+        var categories = await _context.Categories
             .AsNoTracking()
             .Where(c => c.RestaurantId == request.RestaurantId)
             .OrderBy(c => c.DisplayOrder)
             .ThenBy(c => c.NameAr)
-            .ProjectToDto()
+            .Select(c => new
+            {
+                Category = c,
+                ItemCount = c.MenuItems.Count()
+            })
             .ToListAsync(cancellationToken);
+
+        var translations = await LegacyBilingualTranslationLoader.LoadCategoriesAsync(
+            _context,
+            categories.Select(item => item.Category.Id).ToList(),
+            cancellationToken);
+
+        return categories
+            .Select(item => item.Category.ToDto(
+                itemCount: item.ItemCount,
+                arTranslation: LegacyBilingualTranslationLoader.GetCategoryTranslation(translations, item.Category.Id, "ar"),
+                enTranslation: LegacyBilingualTranslationLoader.GetCategoryTranslation(translations, item.Category.Id, "en")))
+            .ToList()
+            .AsReadOnly();
     }
 }

@@ -1,3 +1,4 @@
+using RestaurantOrdering.Application.Common.Localization;
 using RestaurantOrdering.Application.Features.Categories.DTOs;
 using RestaurantOrdering.Domain.Entities;
 
@@ -5,14 +6,22 @@ namespace RestaurantOrdering.Application.Features.Categories.Common;
 
 public static class CategoryMappings
 {
-    public static CategoryDto ToDto(this Category category, int itemCount = 0) => new()
+    public static CategoryDto ToDto(
+        this Category category,
+        int itemCount = 0,
+        CategoryTranslation? arTranslation = null,
+        CategoryTranslation? enTranslation = null) => new()
     {
         Id = category.Id,
         RestaurantId = category.RestaurantId,
-        NameAr = category.NameAr,
-        NameEn = category.NameEn,
-        DescriptionAr = category.DescriptionAr,
-        DescriptionEn = category.DescriptionEn,
+        NameAr = PublishedTranslationDualRead.ResolveRequired(
+            arTranslation?.Name, arTranslation?.PublishedSourceVersion, category.ContentVersion, category.NameAr),
+        NameEn = PublishedTranslationDualRead.ResolveOptional(
+            enTranslation?.Name, enTranslation?.PublishedSourceVersion, category.ContentVersion, category.NameEn),
+        DescriptionAr = PublishedTranslationDualRead.ResolveOptional(
+            arTranslation?.Description, arTranslation?.PublishedSourceVersion, category.ContentVersion, category.DescriptionAr),
+        DescriptionEn = PublishedTranslationDualRead.ResolveOptional(
+            enTranslation?.Description, enTranslation?.PublishedSourceVersion, category.ContentVersion, category.DescriptionEn),
         DisplayOrder = category.DisplayOrder,
         IsActive = category.IsActive,
         ItemCount = itemCount,

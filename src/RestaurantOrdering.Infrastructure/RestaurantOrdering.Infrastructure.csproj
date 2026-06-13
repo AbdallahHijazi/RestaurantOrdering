@@ -35,4 +35,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="RestaurantOrdering.IntegrationTests" />
+  </ItemGroup>
+
 </Project>
