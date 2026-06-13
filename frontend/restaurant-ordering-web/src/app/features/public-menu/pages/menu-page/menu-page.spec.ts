@@ -11,6 +11,15 @@ import { MenuPage } from './menu-page';
 
 const FLOATING_CART = '[data-testid="public-menu-floating-cart"]';
 
+function expectMenuRequest(httpMock: HttpTestingController, slug: string, lang = 'ar') {
+  return httpMock.expectOne(
+    (req) =>
+      req.url === `${API_BASE_URL}/api/v1/public/restaurants/${slug}/menu` &&
+      req.method === 'GET' &&
+      req.params.get('lang') === lang,
+  );
+}
+
 function addFirstItem(fixture: ComponentFixture<MenuPage>): void {
   const button = (fixture.nativeElement as HTMLElement).querySelector(
     '[data-testid="public-menu-add-to-cart"]',
@@ -106,7 +115,7 @@ describe('MenuPage', () => {
   it('requests API for a real slug and renders the response', async () => {
     const fixture = await createPage('the-botanist');
 
-    const req = httpMock.expectOne(`${API_BASE_URL}/api/v1/public/restaurants/the-botanist/menu`);
+    const req = expectMenuRequest(httpMock, 'the-botanist');
     req.flush({
       id: '11111111-1111-1111-1111-111111111111',
       slug: 'the-botanist',
@@ -128,7 +137,7 @@ describe('MenuPage', () => {
   it('shows restaurant not found for a real slug that returns 404', async () => {
     const fixture = await createPage('missing-restaurant');
 
-    const req = httpMock.expectOne(`${API_BASE_URL}/api/v1/public/restaurants/missing-restaurant/menu`);
+    const req = expectMenuRequest(httpMock, 'missing-restaurant');
     req.flush('Not found', { status: 404, statusText: 'Not Found' });
 
     await settle(fixture);
@@ -140,7 +149,7 @@ describe('MenuPage', () => {
   it('shows empty state for a real slug with no menu items', async () => {
     const fixture = await createPage('empty-menu');
 
-    const req = httpMock.expectOne(`${API_BASE_URL}/api/v1/public/restaurants/empty-menu/menu`);
+    const req = expectMenuRequest(httpMock, 'empty-menu');
     req.flush({
       id: '11111111-1111-1111-1111-111111111111',
       slug: 'empty-menu',
@@ -156,7 +165,7 @@ describe('MenuPage', () => {
   it('shows error state with retry for a real slug network failure', async () => {
     const fixture = await createPage('the-botanist');
 
-    const req = httpMock.expectOne(`${API_BASE_URL}/api/v1/public/restaurants/the-botanist/menu`);
+    const req = expectMenuRequest(httpMock, 'the-botanist');
     req.error(new ProgressEvent('error'), { status: 0, statusText: 'Unknown Error' });
 
     await settle(fixture);

@@ -11,6 +11,8 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { LocaleService } from '../../../../core/localization/locale';
+import { DirectionService } from '../../../../core/localization/direction.service';
+import { normalizeContentLocale } from '../../../../core/localization/content-locale.util';
 import { RestaurantThemeService } from '../../../../core/theme/restaurant-theme';
 import { LanguageSwitcher } from '../../../../shared/ui/language-switcher/language-switcher';
 import { ErrorState } from '../../../../shared/ui/error-state/error-state';
@@ -66,6 +68,7 @@ export class MenuPage implements OnDestroy {
   private readonly tablesApi = inject(PublicTablesApiService);
   protected readonly cart = inject(PublicCartService);
   protected readonly localeService = inject(LocaleService);
+  private readonly directionService = inject(DirectionService);
   private readonly themeService = inject(RestaurantThemeService);
 
   private readonly menuSection = viewChild<ElementRef<HTMLElement>>('menuSection');
@@ -92,6 +95,22 @@ export class MenuPage implements OnDestroy {
 
   protected readonly resolvedTable = this.cart.resolvedTable;
 
+  protected readonly menuDirection = computed(() =>
+    this.directionService.getDirection(this.contentLocale()),
+  );
+
+  protected readonly contentLocale = computed(
+    () =>
+      this.requestedContentLocale() ??
+      this.menuData()?.locale.resolvedLocale ??
+      this.localeService.locale(),
+  );
+
+  private readonly requestedContentLocale = signal<string | null>(null);
+  private lastMenuRequestKey: string | null = null;
+  private lastTableResolveKey: string | null = null;
+  private menuRequestInFlight = false;
+
   protected readonly imageFallback = MOCK_IMAGE_FALLBACK;
 
   protected readonly restaurantName = computed(() => {
@@ -100,8 +119,9 @@ export class MenuPage implements OnDestroy {
       return '—';
     }
 
-    this.localeService.locale();
-    return this.localeService.pickText(
+    return this.localeService.pickResolvedTextForLocale(
+      this.contentLocale(),
+      restaurant.name,
       { ar: restaurant.nameAr, en: restaurant.nameEn },
       restaurant.nameAr,
     );
@@ -113,8 +133,9 @@ export class MenuPage implements OnDestroy {
       return '—';
     }
 
-    this.localeService.locale();
-    return this.localeService.pickText(
+    return this.localeService.pickResolvedTextForLocale(
+      this.contentLocale(),
+      restaurant.address,
       { ar: restaurant.addressAr, en: restaurant.addressEn },
       '—',
     );
@@ -172,15 +193,36 @@ export class MenuPage implements OnDestroy {
       }
     });
 
-    const slug = readRouteParam(this.route, 'slug');
+    effect(() => {
+      const localeContext = this.menuData()?.locale;
+      const locale = this.contentLocale();
+      if (!localeContext && !locale) {
+        return;
+      }
 
-    if (!slug.trim()) {
-      this.pageState.set('not-found');
-      return;
-    }
+      this.directionService.applyDocumentDirection(locale);
+    });
 
-    this.loadMenu(slug);
-    this.resolveTableFromQuery(slug);
+    effect(() => {
+      const slug = readRouteParam(this.route, 'slug');
+      if (!slug.trim()) {
+        return;
+      }
+
+      this.resolveTableFromQuery(slug);
+    });
+
+    effect(() => {
+      const slug = readRouteParam(this.route, 'slug');
+      const lang = this.resolveRequestedLang();
+      if (!slug.trim()) {
+        this.pageState.set('not-found');
+        return;
+      }
+
+      this.requestedContentLocale.set(lang);
+      this.loadMenu(slug, lang);
+    });
   }
 
   ngOnDestroy(): void {
@@ -198,7 +240,7 @@ export class MenuPage implements OnDestroy {
   protected reload(): void {
     const slug = readRouteParam(this.route, 'slug');
     if (slug.trim()) {
-      this.loadMenu(slug);
+      this.loadMenu(slug, this.resolveRequestedLang(), true);
     }
   }
 
@@ -219,7 +261,9 @@ export class MenuPage implements OnDestroy {
       return;
     }
 
-    const name = this.localeService.pickText(
+    const name = this.localeService.pickResolvedTextForLocale(
+      this.contentLocale(),
+      item.name,
       { ar: item.nameAr, en: item.nameEn },
       item.nameAr,
     );
@@ -292,12 +336,19 @@ export class MenuPage implements OnDestroy {
   private resolveTableFromQuery(slug: string): void {
     const token = this.route.snapshot.queryParamMap?.get('table')?.trim();
     if (!token) {
+      this.lastTableResolveKey = null;
       this.cart.clearTableSession();
       this.tableResolveState.set('idle');
       this.tableResolveError.set(null);
       return;
     }
 
+    const resolveKey = `${slug.trim().toLowerCase()}|${token}`;
+    if (this.lastTableResolveKey === resolveKey) {
+      return;
+    }
+
+    this.lastTableResolveKey = resolveKey;
     this.tableResolveState.set('loading');
     this.tableResolveError.set(null);
 
@@ -314,15 +365,40 @@ export class MenuPage implements OnDestroy {
     });
   }
 
-  private loadMenu(slug: string): void {
-    this.pageState.set('loading');
+  private resolveRequestedLang(): string {
+    const queryLang = normalizeContentLocale(this.route.snapshot.queryParamMap.get('lang'));
+    return queryLang ?? this.localeService.locale();
+  }
+
+  private loadMenu(slug: string, lang?: string | null, force = false): void {
     const normalized = slug.trim().toLowerCase();
+    const langKey = (lang ?? this.localeService.locale()).trim().toLowerCase();
+    const requestKey = `${normalized}|${langKey}`;
+    const state = this.pageState();
+
+    if (
+      !force &&
+      this.lastMenuRequestKey === requestKey &&
+      (this.menuRequestInFlight ||
+        state === 'success' ||
+        state === 'loading' ||
+        state === 'error' ||
+        state === 'not-found')
+    ) {
+      return;
+    }
+
+    this.lastMenuRequestKey = requestKey;
+    this.menuRequestInFlight = true;
+    this.pageState.set('loading');
     this.restaurantSlug.set(normalized);
     this.cart.initForRestaurant(normalized);
 
     this.menuApi
-      .getMenuBySlug(normalized)
-      .pipe(finalize(() => undefined))
+      .getMenuBySlug(normalized, lang)
+      .pipe(finalize(() => {
+        this.menuRequestInFlight = false;
+      }))
       .subscribe({
         next: (data) => {
           this.menuData.set(data);
@@ -353,10 +429,13 @@ export class MenuPage implements OnDestroy {
   ): boolean {
     const category = categories.find((entry) => entry.id === item.categoryId);
     const haystack = [
+      item.name,
       item.nameAr,
       item.nameEn,
+      item.description,
       item.descriptionAr,
       item.descriptionEn,
+      category?.name,
       category?.nameAr,
       category?.nameEn,
     ]

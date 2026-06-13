@@ -22,6 +22,13 @@ export interface PublicMenuApiDto {
   minimumOrderAmount?: number | null;
   isDeliveryEnabled?: boolean | null;
   isPickupEnabled?: boolean | null;
+  requestedLocale?: string | null;
+  resolvedLocale?: string | null;
+  fallbackApplied?: boolean | null;
+  direction?: string | null;
+  name?: string | null;
+  description?: string | null;
+  address?: string | null;
   categories: PublicMenuCategoryApiDto[];
 }
 
@@ -32,6 +39,10 @@ export interface PublicMenuCategoryApiDto {
   descriptionAr?: string | null;
   descriptionEn?: string | null;
   displayOrder: number;
+  name?: string | null;
+  description?: string | null;
+  resolvedLocale?: string | null;
+  fallbackApplied?: boolean | null;
   items: PublicMenuItemApiDto[];
 }
 
@@ -47,6 +58,10 @@ export interface PublicMenuItemApiDto {
   discountPrice?: number | null;
   displayOrder: number;
   imageUrl?: string | null;
+  name?: string | null;
+  description?: string | null;
+  resolvedLocale?: string | null;
+  fallbackApplied?: boolean | null;
 }
 
 /** Backend contract: PUT /api/v1/admin/restaurants/{restaurantId} */

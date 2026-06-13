@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { LocaleService, type SupportedLocale } from '../../../core/localization/locale';
+import { LocaleService, type AdminUiLocale } from '../../../core/localization/locale';
 
 @Component({
   selector: 'app-language-switcher',
@@ -9,7 +9,7 @@ import { LocaleService, type SupportedLocale } from '../../../core/localization/
 export class LanguageSwitcher {
   protected readonly localeService = inject(LocaleService);
 
-  protected setLocale(locale: SupportedLocale): void {
+  protected setLocale(locale: AdminUiLocale): void {
     this.localeService.setLocale(locale);
   }
 }

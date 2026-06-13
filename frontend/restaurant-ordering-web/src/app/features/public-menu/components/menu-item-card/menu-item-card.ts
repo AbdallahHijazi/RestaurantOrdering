@@ -1,5 +1,8 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
-import { LocaleService, type SupportedLocale } from '../../../../core/localization/locale';
+import { pickSecondaryLegacyText } from '../../../../core/localization/content-locale.util';
+import { DirectionService } from '../../../../core/localization/direction.service';
+import { LocaleService } from '../../../../core/localization/locale';
+import type { ContentLocale } from '../../../../core/localization/locale.types';
 import {
   PUBLIC_CART_MAX_QUANTITY,
   type PublicMenuItem,
@@ -17,12 +20,13 @@ export class MenuItemCard {
   readonly countryCode = input('SA');
   readonly quantity = input(0);
   readonly imageFallback = input<string | null>(null);
-  readonly displayLocale = input<SupportedLocale | null>(null);
+  readonly displayLocale = input<ContentLocale | null>(null);
 
   readonly added = output<PublicMenuItem>();
   readonly quantityChange = output<number>();
 
   protected readonly localeService = inject(LocaleService);
+  private readonly directionService = inject(DirectionService);
   protected readonly imageFailed = signal(false);
   protected readonly justAdded = signal(false);
 
@@ -33,28 +37,31 @@ export class MenuItemCard {
   );
 
   protected readonly displayName = computed(() => {
-    const locale = this.activeLocale();
-    return this.localeService.pickTextForLocale(
-      locale,
-      { ar: this.item().nameAr, en: this.item().nameEn },
-      this.item().nameAr,
+    const item = this.item();
+    return this.localeService.pickResolvedTextForLocale(
+      this.activeLocale(),
+      item.name,
+      { ar: item.nameAr, en: item.nameEn },
+      item.nameAr,
     );
   });
 
   protected readonly secondaryName = computed(() => {
-    const locale = this.activeLocale();
     const item = this.item();
-    const secondary =
-      locale === 'ar' ? item.nameEn?.trim() : item.nameAr?.trim();
-
-    return secondary && secondary !== this.displayName() ? secondary : '';
+    return pickSecondaryLegacyText(
+      this.activeLocale(),
+      { ar: item.nameAr, en: item.nameEn },
+      this.displayName(),
+      (code) => this.directionService.getDirection(code),
+    );
   });
 
   protected readonly displayDescription = computed(() => {
-    const locale = this.activeLocale();
-    return this.localeService.pickTextForLocale(
-      locale,
-      { ar: this.item().descriptionAr, en: this.item().descriptionEn },
+    const item = this.item();
+    return this.localeService.pickResolvedTextForLocale(
+      this.activeLocale(),
+      item.description,
+      { ar: item.descriptionAr, en: item.descriptionEn },
       '',
     );
   });

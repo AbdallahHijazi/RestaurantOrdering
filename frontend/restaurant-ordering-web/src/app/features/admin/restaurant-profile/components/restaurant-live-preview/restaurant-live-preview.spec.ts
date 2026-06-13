@@ -44,8 +44,9 @@ type PreviewHarness = RestaurantLivePreview & {
   selectCategory: (categoryId: string) => void;
   activeCategoryId: () => string;
   filteredPreviewItems: () => Array<{ id: string; nameEn?: string | null }>;
-  previewLocale: () => 'ar' | 'en';
-  setPreviewLocale: (locale: 'ar' | 'en') => void;
+  previewLocale: () => string;
+  setPreviewLocale: (locale: string) => void;
+  previewDirection: () => 'rtl' | 'ltr';
 };
 
 function getPreviewModal(fixture: ComponentFixture<RestaurantLivePreview>): HTMLElement | null {
@@ -357,5 +358,15 @@ describe('RestaurantLivePreview', () => {
       '.live-preview__modal-body',
     ) as HTMLElement;
     expect(rtlModalBody.getAttribute('dir')).toBe('rtl');
+  });
+
+  it('accepts fr/de preview locale strings and resolves direction centrally', () => {
+    component.setPreviewLocale('fr');
+    expect(component.previewLocale()).toBe('fr');
+    expect(component.previewDirection()).toBe('ltr');
+
+    component.setPreviewLocale('de');
+    expect(component.previewLocale()).toBe('de');
+    expect(component.previewDirection()).toBe('ltr');
   });
 });

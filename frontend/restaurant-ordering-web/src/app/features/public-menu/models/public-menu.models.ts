@@ -1,11 +1,19 @@
-import type { LocalizedText, SupportedLocale } from '../../../core/localization/locale';
+import type {
+  AdminUiLocale,
+  ContentLocale,
+  LocalizedText,
+  PublicMenuLocaleContext,
+} from '../../../core/localization/locale.types';
+import { getFallbackDirection } from '../../../core/localization/direction.service';
 
 export interface RestaurantPublicProfile {
   slug: string;
   nameAr: string;
   nameEn?: string | null;
+  name?: string | null;
   descriptionAr?: string | null;
   descriptionEn?: string | null;
+  description?: string | null;
   logoUrl?: string | null;
   coverImageUrl?: string | null;
   primaryAccentColor?: string | null;
@@ -16,6 +24,7 @@ export interface RestaurantPublicProfile {
   whatsAppNumber?: string | null;
   addressAr?: string | null;
   addressEn?: string | null;
+  address?: string | null;
   isOpen?: boolean | null;
 }
 
@@ -23,8 +32,12 @@ export interface PublicMenuCategory {
   id: string;
   nameAr: string;
   nameEn?: string | null;
+  name?: string | null;
+  description?: string | null;
   displayOrder: number;
   isActive: boolean;
+  resolvedLocale?: string | null;
+  fallbackApplied?: boolean;
 }
 
 export interface PublicMenuItem {
@@ -32,14 +45,18 @@ export interface PublicMenuItem {
   categoryId: string;
   nameAr: string;
   nameEn?: string | null;
+  name?: string | null;
   descriptionAr?: string | null;
   descriptionEn?: string | null;
+  description?: string | null;
   price: number;
   discountPrice?: number | null;
   imageUrl?: string | null;
   isAvailable: boolean;
   isPopular?: boolean;
   isVegetarian?: boolean;
+  resolvedLocale?: string | null;
+  fallbackApplied?: boolean;
 }
 
 export interface PublicRestaurantOrderSettings {
@@ -56,6 +73,7 @@ export interface PublicMenuPageData {
   orderSettings: PublicRestaurantOrderSettings;
   categories: PublicMenuCategory[];
   items: PublicMenuItem[];
+  locale: PublicMenuLocaleContext;
 }
 
 /** Backend OrderType: Pickup = 1, Delivery = 2, DineIn = 3 */
@@ -81,7 +99,7 @@ export interface MenuItemCardLabels {
   vegetarian: string;
 }
 
-export function getMenuItemLabels(locale: SupportedLocale): MenuItemCardLabels {
+export function getMenuItemLabels(locale: AdminUiLocale): MenuItemCardLabels {
   return locale === 'ar'
     ? {
         add: 'أضف',
@@ -99,4 +117,15 @@ export function getMenuItemLabels(locale: SupportedLocale): MenuItemCardLabels {
       };
 }
 
-export type { LocalizedText, SupportedLocale };
+export function createDefaultPublicMenuLocaleContext(
+  resolvedLocale: ContentLocale = 'ar',
+): PublicMenuLocaleContext {
+  return {
+    requestedLocale: null,
+    resolvedLocale,
+    fallbackApplied: false,
+    direction: getFallbackDirection(resolvedLocale),
+  };
+}
+
+export type { AdminUiLocale, ContentLocale, LocalizedText, PublicMenuLocaleContext };

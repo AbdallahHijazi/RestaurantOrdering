@@ -124,7 +124,7 @@
         [class.live-preview__frame--desktop]="viewport() === 'desktop'"
         [class.live-preview__frame--tablet]="viewport() === 'tablet'"
         [class.live-preview__frame--mobile]="viewport() === 'mobile'"
-        [attr.dir]="previewLocale() === 'ar' ? 'rtl' : 'ltr'"
+        [attr.dir]="previewDirection()"
       >
         <div class="live-preview__mini-header">
           @if (restaurantProfile().logoUrl; as logo) {
@@ -182,7 +182,7 @@
 
       <div
         class="live-preview__modal-body"
-        [attr.dir]="previewLocale() === 'ar' ? 'rtl' : 'ltr'"
+        [attr.dir]="previewDirection()"
       >
         <ng-container
           [ngTemplateOutlet]="previewMenuBody"

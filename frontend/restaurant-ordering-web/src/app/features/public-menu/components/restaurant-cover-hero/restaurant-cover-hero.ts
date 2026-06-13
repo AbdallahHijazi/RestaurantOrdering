@@ -1,5 +1,8 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
-import { LocaleService, type SupportedLocale } from '../../../../core/localization/locale';
+import { pickSecondaryLegacyText } from '../../../../core/localization/content-locale.util';
+import { DirectionService } from '../../../../core/localization/direction.service';
+import { LocaleService } from '../../../../core/localization/locale';
+import type { AdminUiLocale, ContentLocale } from '../../../../core/localization/locale.types';
 import type { RestaurantPublicProfile } from '../../models/public-menu.models';
 
 @Component({
@@ -10,11 +13,12 @@ import type { RestaurantPublicProfile } from '../../models/public-menu.models';
 export class RestaurantCoverHero {
   readonly restaurant = input.required<RestaurantPublicProfile>();
   readonly imageFallback = input<string | null>(null);
-  readonly displayLocale = input<SupportedLocale | null>(null);
+  readonly displayLocale = input<ContentLocale | null>(null);
 
   readonly exploreMenu = output<void>();
 
   protected readonly localeService = inject(LocaleService);
+  private readonly directionService = inject(DirectionService);
   protected readonly coverFailed = signal(false);
 
   protected readonly activeLocale = computed(
@@ -22,37 +26,35 @@ export class RestaurantCoverHero {
   );
 
   protected readonly displayName = computed(() => {
-    const locale = this.activeLocale();
-    return this.localeService.pickTextForLocale(
-      locale,
-      { ar: this.restaurant().nameAr, en: this.restaurant().nameEn },
-      this.restaurant().nameAr,
+    const restaurant = this.restaurant();
+    return this.localeService.pickResolvedTextForLocale(
+      this.activeLocale(),
+      restaurant.name,
+      { ar: restaurant.nameAr, en: restaurant.nameEn },
+      restaurant.nameAr,
     );
   });
 
   protected readonly secondaryName = computed(() => {
-    const locale = this.activeLocale();
     const restaurant = this.restaurant();
-    const secondary =
-      locale === 'ar'
-        ? restaurant.nameEn?.trim()
-        : restaurant.nameAr?.trim();
-
-    return secondary && secondary !== this.displayName() ? secondary : '';
+    return pickSecondaryLegacyText(
+      this.activeLocale(),
+      { ar: restaurant.nameAr, en: restaurant.nameEn },
+      this.displayName(),
+      (code) => this.directionService.getDirection(code),
+    );
   });
 
   protected readonly kickerLabel = computed(() =>
-    this.localeService.uiTextForLocale(this.activeLocale(), 'publicMenuHeroKicker'),
+    this.localeService.uiTextForLocale(this.uiLocale(), 'publicMenuHeroKicker'),
   );
 
   protected readonly displayDescription = computed(() => {
-    const locale = this.activeLocale();
-    return this.localeService.pickTextForLocale(
-      locale,
-      {
-        ar: this.restaurant().descriptionAr,
-        en: this.restaurant().descriptionEn,
-      },
+    const restaurant = this.restaurant();
+    return this.localeService.pickResolvedTextForLocale(
+      this.activeLocale(),
+      restaurant.description,
+      { ar: restaurant.descriptionAr, en: restaurant.descriptionEn },
       '',
     );
   });
@@ -71,17 +73,22 @@ export class RestaurantCoverHero {
       return null;
     }
 
-    const locale = this.activeLocale();
+    const locale = this.uiLocale();
     return isOpen
       ? this.localeService.uiTextForLocale(locale, 'openNow')
       : this.localeService.uiTextForLocale(locale, 'closedNow');
   });
 
   protected readonly ctaLabel = computed(() =>
-    this.localeService.uiTextForLocale(this.activeLocale(), 'viewMenu'),
+    this.localeService.uiTextForLocale(this.uiLocale(), 'viewMenu'),
   );
 
   protected onCoverError(): void {
     this.coverFailed.set(true);
+  }
+
+  private uiLocale(): AdminUiLocale {
+    const locale = this.activeLocale();
+    return locale === 'en' ? 'en' : 'ar';
   }
 }

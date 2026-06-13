@@ -19,7 +19,7 @@ export function isDemoMenuSlug(slug: string): boolean {
 export class PublicMenuApiService {
   private readonly http = inject(HttpClient);
 
-  getMenuBySlug(slug: string): Observable<PublicMenuPageData> {
+  getMenuBySlug(slug: string, lang?: string | null): Observable<PublicMenuPageData> {
     const normalizedSlug = slug.trim().toLowerCase();
 
     if (!normalizedSlug) {
@@ -30,8 +30,12 @@ export class PublicMenuApiService {
       return of(structuredClone(MOCK_PUBLIC_MENU));
     }
 
+    const params = lang?.trim() ? { lang: lang.trim() } : undefined;
+
     return this.http
-      .get<PublicMenuApiDto>(`${API_BASE_URL}/api/v1/public/restaurants/${normalizedSlug}/menu`)
+      .get<PublicMenuApiDto>(`${API_BASE_URL}/api/v1/public/restaurants/${normalizedSlug}/menu`, {
+        params,
+      })
       .pipe(
         map(mapPublicMenuApiDto),
         catchError((error: unknown) => this.handleError(error)),

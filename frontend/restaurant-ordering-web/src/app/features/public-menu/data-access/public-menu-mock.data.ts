@@ -1,4 +1,5 @@
 import type { PublicMenuPageData } from '../models/public-menu.models';
+import { createDefaultPublicMenuLocaleContext } from '../models/public-menu.models';
 
 export const DEMO_RESTAURANT_SLUG = 'demo';
 
@@ -189,6 +190,7 @@ export const MOCK_PUBLIC_MENU: PublicMenuPageData = {
       isAvailable: true,
     },
   ],
+  locale: createDefaultPublicMenuLocaleContext('ar'),
 };
 
 export const MOCK_IMAGE_FALLBACK =

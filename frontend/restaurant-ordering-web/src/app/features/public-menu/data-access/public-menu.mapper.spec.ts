@@ -29,5 +29,6 @@ describe('mapPublicMenuApiDto', () => {
       isPickupEnabled: false,
     });
     expect(mapped.restaurant.currencyCode).toBe('SAR');
+    expect(mapped.locale.resolvedLocale).toBe('ar');
   });
 });

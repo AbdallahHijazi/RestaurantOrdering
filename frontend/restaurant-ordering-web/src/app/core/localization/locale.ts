@@ -1,13 +1,30 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { formatOrderCurrency } from '../../shared/orders/order-money.util';
+import {
+  pickLegacyBilingualText,
+  pickResolvedOrLegacyText,
+} from './content-locale.util';
+import { DirectionService } from './direction.service';
+import type {
+  AdminUiLocale,
+  ContentLocale,
+  LocalizedText,
+  SupportedLocale,
+  TextDirection,
+} from './locale.types';
 
-export type SupportedLocale = 'ar' | 'en';
-export type TextDirection = 'rtl' | 'ltr';
-
-export interface LocalizedText {
-  ar?: string | null;
-  en?: string | null;
-}
+export type {
+  AdminUiLocale,
+  ContentLocale,
+  LocaleMetadata,
+  LocalizedText,
+  PublicMenuLocaleContext,
+  RestaurantLocaleSettings,
+  RestaurantSupportedLocale,
+  SupportedLocale,
+  TextDirection,
+  UpdateRestaurantLocaleSettingsPayload,
+} from './locale.types';
 
 const LOCALE_STORAGE_KEY = 'restaurant-ordering.locale';
 
@@ -15,11 +32,13 @@ const LOCALE_STORAGE_KEY = 'restaurant-ordering.locale';
   providedIn: 'root',
 })
 export class LocaleService {
-  private readonly localeSignal = signal<SupportedLocale>(this.readStoredLocale());
+  private readonly directionService = inject(DirectionService);
+
+  private readonly localeSignal = signal<AdminUiLocale>(this.readStoredLocale());
 
   readonly locale = this.localeSignal.asReadonly();
   readonly direction = computed<TextDirection>(() =>
-    this.localeSignal() === 'ar' ? 'rtl' : 'ltr',
+    this.directionService.getDirection(this.localeSignal()),
   );
   readonly ui = computed(() => UI_TEXT[this.localeSignal()]);
 
@@ -27,7 +46,7 @@ export class LocaleService {
     this.applyDocumentAttributes(this.localeSignal());
   }
 
-  setLocale(locale: SupportedLocale): void {
+  setLocale(locale: AdminUiLocale): void {
     this.localeSignal.set(locale);
     this.applyDocumentAttributes(locale);
 
@@ -47,19 +66,31 @@ export class LocaleService {
   }
 
   pickTextForLocale(
-    locale: SupportedLocale,
+    locale: ContentLocale,
     text: LocalizedText | null | undefined,
     fallback = '—',
   ): string {
-    if (!text) {
-      return fallback;
-    }
+    return pickLegacyBilingualText(
+      locale,
+      text,
+      fallback,
+      (code) => this.directionService.getDirection(code),
+    );
+  }
 
-    const primary = locale === 'ar' ? text.ar : text.en;
-    const secondary = locale === 'ar' ? text.en : text.ar;
-
-    const chosen = (primary?.trim() || secondary?.trim() || '').trim();
-    return chosen || fallback;
+  pickResolvedTextForLocale(
+    locale: ContentLocale,
+    resolved: string | null | undefined,
+    legacy: LocalizedText | null | undefined,
+    fallback = '—',
+  ): string {
+    return pickResolvedOrLegacyText(
+      resolved,
+      locale,
+      legacy,
+      fallback,
+      (code) => this.directionService.getDirection(code),
+    );
   }
 
   formatCurrency(
@@ -75,11 +106,11 @@ export class LocaleService {
     return this.ui()[key];
   }
 
-  uiTextForLocale(locale: SupportedLocale, key: UiTextKey): string {
+  uiTextForLocale(locale: AdminUiLocale, key: UiTextKey): string {
     return UI_TEXT[locale][key];
   }
 
-  private readStoredLocale(): SupportedLocale {
+  private readStoredLocale(): AdminUiLocale {
     try {
       const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
       return stored === 'en' ? 'en' : 'ar';
@@ -88,10 +119,8 @@ export class LocaleService {
     }
   }
 
-  private applyDocumentAttributes(locale: SupportedLocale): void {
-    const dir: TextDirection = locale === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = locale;
-    document.documentElement.dir = dir;
+  private applyDocumentAttributes(locale: AdminUiLocale): void {
+    this.directionService.applyDocumentDirection(locale);
   }
 }
 
@@ -687,7 +716,7 @@ export type UiTextKey =
   | 'languageArabic'
   | 'languageEnglish';
 
-const UI_TEXT: Record<SupportedLocale, Record<UiTextKey, string>> = {
+const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
   ar: {
     loading: 'جاري تحميل القائمة…',
     errorTitle: 'تعذر تحميل القائمة',

@@ -14,7 +14,9 @@ import {
   viewChild,
 } from '@angular/core';
 import { attachElementToBody } from '../../../../../shared/utils/overlay-body-portal';
-import { LocaleService, type SupportedLocale } from '../../../../../core/localization/locale';
+import { LocaleService, type AdminUiLocale } from '../../../../../core/localization/locale';
+import { DirectionService } from '../../../../../core/localization/direction.service';
+import type { ContentLocale } from '../../../../../core/localization/locale.types';
 import { RestaurantThemeService } from '../../../../../core/theme/restaurant-theme';
 import { EmptyState } from '../../../../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../../../../shared/ui/error-state/error-state';
@@ -63,6 +65,7 @@ export class RestaurantLivePreview {
   readonly refreshPreview = output<void>();
 
   protected readonly localeService = inject(LocaleService);
+  private readonly directionService = inject(DirectionService);
   private readonly themeService = inject(RestaurantThemeService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
@@ -70,7 +73,7 @@ export class RestaurantLivePreview {
   private detachPreviewPortal: (() => void) | null = null;
 
   protected readonly viewport = signal<PreviewViewport>('desktop');
-  protected readonly previewLocale = signal<SupportedLocale>('ar');
+  protected readonly previewLocale = signal<ContentLocale>('ar');
   protected readonly fullPreviewOpen = signal(false);
   protected readonly activeCategoryId = signal('');
   protected readonly previewQuantities = signal<Record<string, number>>({});
@@ -174,8 +177,12 @@ export class RestaurantLivePreview {
     this.viewport.set(mode);
   }
 
-  protected setPreviewLocale(locale: SupportedLocale): void {
-    this.previewLocale.set(locale);
+  protected setPreviewLocale(locale: ContentLocale): void {
+    this.previewLocale.set(locale.trim().toLowerCase() || 'ar');
+  }
+
+  protected previewDirection(): 'rtl' | 'ltr' {
+    return this.directionService.getDirection(this.previewLocale());
   }
 
   protected pickPreviewText(

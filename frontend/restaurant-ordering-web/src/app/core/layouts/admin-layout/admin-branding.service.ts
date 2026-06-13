@@ -28,15 +28,15 @@ export class AdminBrandingService {
   readonly coverLoadFailed = this.coverLoadFailedSignal.asReadonly();
 
   readonly restaurantName = computed(() => {
-    const locale = this.localeService.locale();
-    const nameAr = this.nameArSignal();
-    const nameEn = this.nameEnSignal();
+    const fallback =
+      this.localeService.direction() === 'rtl'
+        ? ADMIN_SHELL_MOCK.restaurantName.ar
+        : ADMIN_SHELL_MOCK.restaurantName.en;
 
-    if (locale === 'ar') {
-      return nameAr?.trim() || nameEn?.trim() || ADMIN_SHELL_MOCK.restaurantName.ar;
-    }
-
-    return nameEn?.trim() || nameAr?.trim() || ADMIN_SHELL_MOCK.restaurantName.en;
+    return this.localeService.pickText(
+      { ar: this.nameArSignal(), en: this.nameEnSignal() },
+      fallback,
+    );
   });
 
   readonly brandInitial = computed(() => {

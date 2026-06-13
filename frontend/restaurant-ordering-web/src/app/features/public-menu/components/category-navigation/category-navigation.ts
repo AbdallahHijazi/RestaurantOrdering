@@ -1,5 +1,6 @@
 import { Component, computed, inject, input, output } from '@angular/core';
-import { LocaleService, type SupportedLocale } from '../../../../core/localization/locale';
+import { LocaleService } from '../../../../core/localization/locale';
+import type { ContentLocale } from '../../../../core/localization/locale.types';
 import { PUBLIC_MENU_ALL_CATEGORIES_ID } from '../../public-menu.constants';
 import type { PublicMenuCategory } from '../../models/public-menu.models';
 
@@ -12,7 +13,7 @@ export class CategoryNavigation {
   readonly categories = input.required<PublicMenuCategory[]>();
   readonly activeCategoryId = input.required<string>();
   readonly searchQuery = input('');
-  readonly displayLocale = input<SupportedLocale | null>(null);
+  readonly displayLocale = input<ContentLocale | null>(null);
 
   readonly categorySelected = output<string>();
   readonly searchQueryChange = output<string>();
@@ -39,8 +40,9 @@ export class CategoryNavigation {
     return new Map(
       this.visibleCategories().map((category) => [
         category.id,
-        this.localeService.pickTextForLocale(
+        this.localeService.pickResolvedTextForLocale(
           locale,
+          category.name,
           { ar: category.nameAr, en: category.nameEn },
           category.nameAr,
         ),
