@@ -1361,6 +1361,9 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0);
 
+                    b.Property<DateTime?>("ClaimedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
 
@@ -1381,6 +1384,9 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                     b.Property<string>("LastError")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("LeaseExpiresAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("MaxAttempts")
                         .ValueGeneratedOnAdd()
@@ -1413,6 +1419,10 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("WorkerId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IdempotencyKey")
@@ -1423,6 +1433,8 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                     b.HasIndex("SourceLocaleCode");
 
                     b.HasIndex("TargetLocaleCode");
+
+                    b.HasIndex("Status", "LeaseExpiresAt");
 
                     b.HasIndex("Status", "NextAttemptAt");
 

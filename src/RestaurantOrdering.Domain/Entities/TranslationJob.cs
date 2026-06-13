@@ -19,6 +19,9 @@ public class TranslationJob : BaseEntity
     public string? LastError { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? CompletedAt { get; set; }
+    public DateTime? ClaimedAt { get; set; }
+    public DateTime? LeaseExpiresAt { get; set; }
+    public string? WorkerId { get; set; }
 
     public Restaurant Restaurant { get; set; } = null!;
     public LocaleDefinition TargetLocale { get; set; } = null!;

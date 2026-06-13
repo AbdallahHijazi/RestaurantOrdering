@@ -21,17 +21,28 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
     private readonly string _jwtAccessTokenLifetimeMinutes;
     private readonly string _uploadsRootPath;
     private readonly bool _useStrictRateLimits;
+    private readonly bool _workerEnabled;
+    private readonly int _workerBatchSize;
+    private readonly int _workerPollingIntervalSeconds;
 
     public string UploadsRootPath => _uploadsRootPath;
 
     public TestWebApplicationFactory()
-        : this(jwtSigningKey: null, useStrictRateLimits: false)
+        : this(jwtSigningKey: null, useStrictRateLimits: false, workerEnabled: false)
     {
     }
 
-    private TestWebApplicationFactory(string? jwtSigningKey, bool useStrictRateLimits)
+    private TestWebApplicationFactory(
+        string? jwtSigningKey,
+        bool useStrictRateLimits,
+        bool workerEnabled,
+        int workerBatchSize = 10,
+        int workerPollingIntervalSeconds = 10)
     {
         _useStrictRateLimits = useStrictRateLimits;
+        _workerEnabled = workerEnabled;
+        _workerBatchSize = workerBatchSize;
+        _workerPollingIntervalSeconds = workerPollingIntervalSeconds;
         _jwtIssuer = "RestaurantOrdering.Tests";
         _jwtAudience = "RestaurantOrdering.Tests.Client";
         _jwtSigningKey = jwtSigningKey ?? "test-signing-key-at-least-32-characters-long!";
@@ -40,10 +51,20 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
     }
 
     public static TestWebApplicationFactory CreateWithSigningKey(string jwtSigningKey) =>
-        new(jwtSigningKey, useStrictRateLimits: false);
+        new(jwtSigningKey, useStrictRateLimits: false, workerEnabled: false);
 
     public static TestWebApplicationFactory CreateWithStrictRateLimits() =>
-        new(jwtSigningKey: null, useStrictRateLimits: true);
+        new(jwtSigningKey: null, useStrictRateLimits: true, workerEnabled: false);
+
+    public static TestWebApplicationFactory CreateWithWorkerEnabled(
+        int batchSize = 10,
+        int pollingIntervalSeconds = 10) =>
+        new(
+            jwtSigningKey: null,
+            useStrictRateLimits: false,
+            workerEnabled: true,
+            workerBatchSize: batchSize,
+            workerPollingIntervalSeconds: pollingIntervalSeconds);
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -59,7 +80,11 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
                     ["Jwt:SigningKey"] = _jwtSigningKey,
                     ["Jwt:AccessTokenLifetimeMinutes"] = _jwtAccessTokenLifetimeMinutes,
                     ["FileStorage:RootPath"] = _uploadsRootPath,
-                    ["Testing:UseStrictRateLimits"] = _useStrictRateLimits ? "true" : "false"
+                    ["Testing:UseStrictRateLimits"] = _useStrictRateLimits ? "true" : "false",
+                    ["TranslationWorker:Enabled"] = _workerEnabled ? "true" : "false",
+                    ["TranslationWorker:PollingIntervalSeconds"] = _workerPollingIntervalSeconds.ToString(),
+                    ["TranslationWorker:BatchSize"] = _workerBatchSize.ToString(),
+                    ["TranslationWorker:LeaseDurationSeconds"] = "120"
                 });
         });
 

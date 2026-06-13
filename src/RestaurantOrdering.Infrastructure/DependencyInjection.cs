@@ -10,6 +10,7 @@ using RestaurantOrdering.Infrastructure.Identity;
 using RestaurantOrdering.Infrastructure.Persistence;
 using RestaurantOrdering.Infrastructure.Persistence.Seed;
 using RestaurantOrdering.Infrastructure.Services;
+using RestaurantOrdering.Infrastructure.Translation;
 
 namespace RestaurantOrdering.Infrastructure;
 
@@ -120,6 +121,44 @@ public static class DependencyInjection
                 options => options.AccessTokenLifetimeMinutes > 0 && options.AccessTokenLifetimeMinutes <= 1440,
                 "Jwt:AccessTokenLifetimeMinutes must be between 1 and 1440.")
             .ValidateOnStart();
+
+        services.AddOptions<TranslationWorkerOptions>()
+            .Configure(options =>
+            {
+                var section = configuration.GetSection(TranslationWorkerOptions.SectionName);
+                options.Enabled = bool.TryParse(section[nameof(TranslationWorkerOptions.Enabled)], out var enabled)
+                    && enabled;
+                options.PollingIntervalSeconds = int.TryParse(
+                    section[nameof(TranslationWorkerOptions.PollingIntervalSeconds)],
+                    out var pollingIntervalSeconds)
+                    ? pollingIntervalSeconds
+                    : 10;
+                options.BatchSize = int.TryParse(
+                    section[nameof(TranslationWorkerOptions.BatchSize)],
+                    out var batchSize)
+                    ? batchSize
+                    : 10;
+                options.LeaseDurationSeconds = int.TryParse(
+                    section[nameof(TranslationWorkerOptions.LeaseDurationSeconds)],
+                    out var leaseDurationSeconds)
+                    ? leaseDurationSeconds
+                    : 120;
+            })
+            .Validate(
+                options => options.PollingIntervalSeconds >= 1,
+                "TranslationWorker:PollingIntervalSeconds must be at least 1.")
+            .Validate(
+                options => options.BatchSize >= 1,
+                "TranslationWorker:BatchSize must be at least 1.")
+            .Validate(
+                options => options.LeaseDurationSeconds >= 1,
+                "TranslationWorker:LeaseDurationSeconds must be at least 1.")
+            .ValidateOnStart();
+
+        services.AddSingleton<ITranslationJobWorkerIdentity, TranslationJobWorkerIdentity>();
+        services.AddScoped<ITranslationJobClaimService, TranslationJobClaimService>();
+        services.AddScoped<ITranslationJobWorkerExecutor, TranslationJobWorkerExecutor>();
+        services.AddHostedService<TranslationJobWorker>();
 
         return services;
     }

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RestaurantOrdering.Application.Common.Interfaces;
+using RestaurantOrdering.Application.Common.Translation;
 using RestaurantOrdering.Domain.Entities;
 using RestaurantOrdering.Domain.Enums;
 
@@ -57,6 +58,32 @@ public sealed class TranslationJobProcessor : ITranslationJobProcessor
             return new TranslationJobProcessResult(job.Id, "NotQueued");
         }
 
+        return await ProcessCoreAsync(job, workerId: null, cancellationToken);
+    }
+
+    public async Task<TranslationJobProcessResult> ProcessClaimedJobAsync(
+        Guid jobId,
+        string workerId,
+        CancellationToken cancellationToken)
+    {
+        var job = await _context.TranslationJobs
+            .SingleOrDefaultAsync(item => item.Id == jobId, cancellationToken)
+            ?? throw new InvalidOperationException($"Translation job '{jobId}' was not found.");
+
+        var now = _dateTimeService.UtcNow;
+        if (!TranslationJobLease.IsActiveClaim(job, workerId, now))
+        {
+            return new TranslationJobProcessResult(job.Id, "StaleClaim");
+        }
+
+        return await ProcessCoreAsync(job, workerId, cancellationToken);
+    }
+
+    private async Task<TranslationJobProcessResult> ProcessCoreAsync(
+        TranslationJob job,
+        string? workerId,
+        CancellationToken cancellationToken)
+    {
         var now = _dateTimeService.UtcNow;
         var currentContentVersion = await GetCurrentContentVersionAsync(job, cancellationToken);
 
@@ -90,12 +117,19 @@ public sealed class TranslationJobProcessor : ITranslationJobProcessor
                 job.IdempotencyKey),
             cancellationToken);
 
+        if (workerId is not null
+            && !await HasActiveClaimAsync(job.Id, workerId, cancellationToken))
+        {
+            return new TranslationJobProcessResult(job.Id, "StaleClaim");
+        }
+
         if (providerResult.IsSuccess && providerResult.TranslatedFields is not null)
         {
             await ApplyDraftTranslationAsync(job, providerResult.TranslatedFields, now, cancellationToken);
             job.Status = TranslationJobStatus.Succeeded;
             job.CompletedAt = now;
             job.LastError = null;
+            TranslationJobLease.Clear(job);
             await _context.SaveChangesAsync(cancellationToken);
             return new TranslationJobProcessResult(job.Id, "Succeeded");
         }
@@ -117,8 +151,21 @@ public sealed class TranslationJobProcessor : ITranslationJobProcessor
             job.NextAttemptAt = now.Add(RetryDelay);
         }
 
+        TranslationJobLease.Clear(job);
         await _context.SaveChangesAsync(cancellationToken);
         return new TranslationJobProcessResult(job.Id, "Failed", job.LastError);
+    }
+
+    private async Task<bool> HasActiveClaimAsync(
+        Guid jobId,
+        string workerId,
+        CancellationToken cancellationToken)
+    {
+        var job = await _context.TranslationJobs
+            .AsNoTracking()
+            .SingleAsync(item => item.Id == jobId, cancellationToken);
+
+        return TranslationJobLease.IsActiveClaim(job, workerId, _dateTimeService.UtcNow);
     }
 
     private async Task<int?> GetCurrentContentVersionAsync(
@@ -319,6 +366,7 @@ public sealed class TranslationJobProcessor : ITranslationJobProcessor
         job.Status = TranslationJobStatus.Skipped;
         job.CompletedAt = now;
         job.NextAttemptAt = null;
+        TranslationJobLease.Clear(job);
     }
 
     private static string? NormalizeOptional(string? value) =>

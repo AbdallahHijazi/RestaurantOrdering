@@ -46,6 +46,13 @@ public class TranslationJobConfiguration : IEntityTypeConfiguration<TranslationJ
         builder.Property(j => j.LastError)
             .HasMaxLength(1000);
 
+        builder.Property(j => j.ClaimedAt);
+
+        builder.Property(j => j.LeaseExpiresAt);
+
+        builder.Property(j => j.WorkerId)
+            .HasMaxLength(100);
+
         builder.Property(j => j.CreatedAt)
             .IsRequired();
 
@@ -53,6 +60,8 @@ public class TranslationJobConfiguration : IEntityTypeConfiguration<TranslationJ
             .IsUnique();
 
         builder.HasIndex(j => new { j.Status, j.NextAttemptAt });
+
+        builder.HasIndex(j => new { j.Status, j.LeaseExpiresAt });
 
         builder.HasOne(j => j.Restaurant)
             .WithMany()
