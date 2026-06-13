@@ -23,17 +23,20 @@ public sealed class RestaurantOwnerRegistrationService : IRestaurantOwnerRegistr
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ApplicationDbContext _context;
     private readonly IDateTimeService _dateTimeService;
+    private readonly IPublishedTranslationWriter _publishedTranslationWriter;
     private readonly ILogger<RestaurantOwnerRegistrationService> _logger;
 
     public RestaurantOwnerRegistrationService(
         UserManager<ApplicationUser> userManager,
         ApplicationDbContext context,
         IDateTimeService dateTimeService,
+        IPublishedTranslationWriter publishedTranslationWriter,
         ILogger<RestaurantOwnerRegistrationService> logger)
     {
         _userManager = userManager;
         _context = context;
         _dateTimeService = dateTimeService;
+        _publishedTranslationWriter = publishedTranslationWriter;
         _logger = logger;
     }
 
@@ -132,6 +135,7 @@ public sealed class RestaurantOwnerRegistrationService : IRestaurantOwnerRegistr
 
         _context.Restaurants.Add(restaurant);
         _context.RestaurantSettings.Add(restaurantSettings);
+        await _publishedTranslationWriter.InitializeRegistrationCatalogAsync(restaurant, cancellationToken);
 
         try
         {

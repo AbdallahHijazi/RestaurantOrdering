@@ -13,19 +13,26 @@ public sealed class UpdateMenuItemCommandHandler
 {
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTimeService;
+    private readonly IPublishedTranslationWriter _publishedTranslationWriter;
 
     public UpdateMenuItemCommandHandler(
         IApplicationDbContext context,
-        IDateTimeService dateTimeService)
+        IDateTimeService dateTimeService,
+        IPublishedTranslationWriter publishedTranslationWriter)
     {
         _context = context;
         _dateTimeService = dateTimeService;
+        _publishedTranslationWriter = publishedTranslationWriter;
     }
 
     public async Task<MenuItemDto> Handle(
         UpdateMenuItemCommand request,
         CancellationToken cancellationToken)
     {
+        await _publishedTranslationWriter.EnsureLegacyBilingualWriteSupportedAsync(
+            request.RestaurantId,
+            cancellationToken);
+
         var menuItem = await _context.MenuItems
             .FirstOrDefaultAsync(
                 item => item.Id == request.MenuItemId && item.RestaurantId == request.RestaurantId,
@@ -66,6 +73,7 @@ public sealed class UpdateMenuItemCommandHandler
         var nameEn = request.NameEn?.Trim();
         var descriptionAr = request.DescriptionAr?.Trim();
         var descriptionEn = request.DescriptionEn?.Trim();
+        var contentVersionBefore = menuItem.ContentVersion;
 
         TranslatableContentVersion.BumpMenuItemIfTranslatableContentChanged(
             menuItem,
@@ -84,6 +92,14 @@ public sealed class UpdateMenuItemCommandHandler
         menuItem.IsAvailable = request.IsAvailable;
         menuItem.IsActive = request.IsActive;
         menuItem.UpdatedAt = _dateTimeService.UtcNow;
+
+        if (menuItem.ContentVersion > contentVersionBefore)
+        {
+            await _publishedTranslationWriter.UpsertMenuItemPublishedTranslationsAsync(
+                menuItem,
+                isManualEdit: true,
+                cancellationToken);
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 

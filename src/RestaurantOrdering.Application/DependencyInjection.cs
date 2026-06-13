@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using RestaurantOrdering.Application.Common.Behaviors;
 using RestaurantOrdering.Application.Common.Interfaces;
+using RestaurantOrdering.Application.Common.Localization;
 using RestaurantOrdering.Application.Common.Security;
 using System.Reflection;
 
@@ -30,6 +31,7 @@ public static class DependencyInjection
             typeof(RestaurantDashboardAccessBehavior<,>));
         services.AddScoped<IRestaurantAuthorizationService, RestaurantAuthorizationService>();
         services.AddScoped<ICurrentRequestDashboardAccess, CurrentRequestDashboardAccess>();
+        services.AddScoped<IPublishedTranslationWriter, PublishedTranslationWriter>();
 
         return services;
     }

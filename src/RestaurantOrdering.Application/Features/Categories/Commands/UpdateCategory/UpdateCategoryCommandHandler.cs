@@ -13,19 +13,26 @@ public sealed class UpdateCategoryCommandHandler
 {
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTimeService;
+    private readonly IPublishedTranslationWriter _publishedTranslationWriter;
 
     public UpdateCategoryCommandHandler(
         IApplicationDbContext context,
-        IDateTimeService dateTimeService)
+        IDateTimeService dateTimeService,
+        IPublishedTranslationWriter publishedTranslationWriter)
     {
         _context = context;
         _dateTimeService = dateTimeService;
+        _publishedTranslationWriter = publishedTranslationWriter;
     }
 
     public async Task<CategoryDto> Handle(
         UpdateCategoryCommand request,
         CancellationToken cancellationToken)
     {
+        await _publishedTranslationWriter.EnsureLegacyBilingualWriteSupportedAsync(
+            request.RestaurantId,
+            cancellationToken);
+
         var category = await _context.Categories
             .FirstOrDefaultAsync(
                 c => c.Id == request.CategoryId && c.RestaurantId == request.RestaurantId,
@@ -40,6 +47,7 @@ public sealed class UpdateCategoryCommandHandler
         var nameEn = request.NameEn?.Trim();
         var descriptionAr = request.DescriptionAr?.Trim();
         var descriptionEn = request.DescriptionEn?.Trim();
+        var contentVersionBefore = category.ContentVersion;
 
         TranslatableContentVersion.BumpCategoryIfTranslatableContentChanged(
             category,
@@ -55,6 +63,14 @@ public sealed class UpdateCategoryCommandHandler
         category.DisplayOrder = request.DisplayOrder;
         category.IsActive = request.IsActive;
         category.UpdatedAt = _dateTimeService.UtcNow;
+
+        if (category.ContentVersion > contentVersionBefore)
+        {
+            await _publishedTranslationWriter.UpsertCategoryPublishedTranslationsAsync(
+                category,
+                isManualEdit: true,
+                cancellationToken);
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 

@@ -13,19 +13,26 @@ public sealed class UpdateRestaurantCommandHandler
 {
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTimeService;
+    private readonly IPublishedTranslationWriter _publishedTranslationWriter;
 
     public UpdateRestaurantCommandHandler(
         IApplicationDbContext context,
-        IDateTimeService dateTimeService)
+        IDateTimeService dateTimeService,
+        IPublishedTranslationWriter publishedTranslationWriter)
     {
         _context = context;
         _dateTimeService = dateTimeService;
+        _publishedTranslationWriter = publishedTranslationWriter;
     }
 
     public async Task<RestaurantDto> Handle(
         UpdateRestaurantCommand request,
         CancellationToken cancellationToken)
     {
+        await _publishedTranslationWriter.EnsureLegacyBilingualWriteSupportedAsync(
+            request.RestaurantId,
+            cancellationToken);
+
         var normalizedSlug = SlugNormalizer.Normalize(request.Slug);
 
         var restaurant = await _context.Restaurants
@@ -46,28 +53,44 @@ public sealed class UpdateRestaurantCommandHandler
             throw new ConflictException("Restaurant slug is already in use.");
         }
 
+        var nameAr = request.NameAr.Trim();
+        var nameEn = request.NameEn?.Trim();
+        var descriptionAr = request.DescriptionAr?.Trim();
+        var descriptionEn = request.DescriptionEn?.Trim();
+        var addressAr = request.AddressAr?.Trim();
+        var addressEn = request.AddressEn?.Trim();
+        var contentVersionBefore = restaurant.ContentVersion;
+
         TranslatableContentVersion.BumpRestaurantIfTranslatableContentChanged(
             restaurant,
-            request.NameAr,
-            request.NameEn,
-            request.DescriptionAr,
-            request.DescriptionEn,
-            request.AddressAr,
-            request.AddressEn);
+            nameAr,
+            nameEn,
+            descriptionAr,
+            descriptionEn,
+            addressAr,
+            addressEn);
 
         restaurant.Slug = normalizedSlug;
-        restaurant.NameAr = request.NameAr;
-        restaurant.NameEn = request.NameEn;
-        restaurant.DescriptionAr = request.DescriptionAr;
-        restaurant.DescriptionEn = request.DescriptionEn;
+        restaurant.NameAr = nameAr;
+        restaurant.NameEn = nameEn;
+        restaurant.DescriptionAr = descriptionAr;
+        restaurant.DescriptionEn = descriptionEn;
         restaurant.PhoneNumber = request.PhoneNumber;
         restaurant.WhatsAppNumber = request.WhatsAppNumber;
-        restaurant.AddressAr = request.AddressAr;
-        restaurant.AddressEn = request.AddressEn;
+        restaurant.AddressAr = addressAr;
+        restaurant.AddressEn = addressEn;
         restaurant.Latitude = request.Latitude;
         restaurant.Longitude = request.Longitude;
         restaurant.AccentColor = RestaurantAccentColor.Normalize(request.AccentColor);
         restaurant.UpdatedAt = _dateTimeService.UtcNow;
+
+        if (restaurant.ContentVersion > contentVersionBefore)
+        {
+            await _publishedTranslationWriter.UpsertRestaurantPublishedTranslationsAsync(
+                restaurant,
+                isManualEdit: true,
+                cancellationToken);
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 

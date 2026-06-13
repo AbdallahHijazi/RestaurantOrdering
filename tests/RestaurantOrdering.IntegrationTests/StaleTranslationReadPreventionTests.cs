@@ -75,7 +75,7 @@ public sealed class StaleTranslationReadPreventionTests : IAsyncLifetime
         var restaurant = await SeedLegacyRestaurantAsync(includeEnglish: false);
         var originalVersion = restaurant.ContentVersion;
 
-        await new UpdateRestaurantCommandHandler(_context, _dateTimeService)
+        await new UpdateRestaurantCommandHandler(_context, _dateTimeService, CreateWriter())
             .Handle(BuildRestaurantUpdateCommand(restaurant, nameAr: "اسم محدث"), CancellationToken.None);
 
         var updated = await _context.Restaurants.AsNoTracking().SingleAsync(item => item.Id == restaurant.Id);
@@ -89,7 +89,7 @@ public sealed class StaleTranslationReadPreventionTests : IAsyncLifetime
         var restaurant = await SeedLegacyRestaurantAsync(includeEnglish: true);
         var originalVersion = restaurant.ContentVersion;
 
-        await new UpdateRestaurantCommandHandler(_context, _dateTimeService)
+        await new UpdateRestaurantCommandHandler(_context, _dateTimeService, CreateWriter())
             .Handle(
                 BuildRestaurantUpdateCommand(restaurant, descriptionEn: "Updated English description"),
                 CancellationToken.None);
@@ -108,7 +108,7 @@ public sealed class StaleTranslationReadPreventionTests : IAsyncLifetime
         var originalVersion = menuItem.ContentVersion;
         var originalPrice = menuItem.Price;
 
-        await new UpdateMenuItemCommandHandler(_context, _dateTimeService)
+        await new UpdateMenuItemCommandHandler(_context, _dateTimeService, CreateWriter())
             .Handle(
                 BuildMenuItemUpdateCommand(menuItem, price: originalPrice + 5m),
                 CancellationToken.None);
@@ -158,7 +158,7 @@ public sealed class StaleTranslationReadPreventionTests : IAsyncLifetime
             .AsNoTracking()
             .SingleAsync(item => item.RestaurantId == restaurant.Id && item.LocaleCode == "ar")).Name;
 
-        await new UpdateRestaurantCommandHandler(_context, _dateTimeService)
+        await new UpdateRestaurantCommandHandler(_context, _dateTimeService, CreateWriter())
             .Handle(BuildRestaurantUpdateCommand(restaurant, nameAr: "اسم legacy جديد"), CancellationToken.None);
 
         var dto = await new GetRestaurantByIdQueryHandler(_context)
@@ -231,7 +231,7 @@ public sealed class StaleTranslationReadPreventionTests : IAsyncLifetime
         var category = await SeedLegacyCategoryAsync(restaurant.Id, includeEnglish: true);
         await ApplyBackfillMigrationAsync();
 
-        var created = await new CreateMenuItemCommandHandler(_context, _dateTimeService)
+        var created = await new CreateMenuItemCommandHandler(_context, _dateTimeService, CreateWriter())
             .Handle(
                 new CreateMenuItemCommand(
                     restaurant.Id,
@@ -253,8 +253,11 @@ public sealed class StaleTranslationReadPreventionTests : IAsyncLifetime
 
         fetched.NameAr.Should().Be("وجبة جديدة");
         fetched.NameEn.Should().Be("New Item");
-        (await _context.MenuItemTranslations.AnyAsync(item => item.MenuItemId == created.Id)).Should().BeFalse();
+        (await _context.MenuItemTranslations.AnyAsync(item => item.MenuItemId == created.Id)).Should().BeTrue();
     }
+
+    private IPublishedTranslationWriter CreateWriter() =>
+        new PublishedTranslationWriter(_context, _dateTimeService);
 
     [Fact]
     public async Task BackfillRestaurantSettingsSql_InsertsMissingSettingsWithRequiredFields()

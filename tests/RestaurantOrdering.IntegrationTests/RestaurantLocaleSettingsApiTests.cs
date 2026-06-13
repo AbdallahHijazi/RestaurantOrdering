@@ -285,19 +285,18 @@ public sealed class RestaurantLocaleSettingsApiTests : IClassFixture<TestWebAppl
     public async Task PutRestaurantLocales_ChangePrimaryLocaleWithMissingTranslations_Returns400WithCounts()
     {
         await TestDataSeeder.SeedAsync(_factory.Services);
-        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "en", "fr");
+        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "en");
         await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "ar");
 
         using var client = CreateHttpsClient();
         await AuthenticateAsync(client, TestDataSeeder.OwnerAEmail, TestDataSeeder.CorrectPassword);
 
         var payload = CreateUpdatePayload(
-            defaultLocale: "fr",
+            defaultLocale: "en",
             supportedLocales:
             [
                 new SupportedLocalePayload("ar", true, 1),
-                new SupportedLocalePayload("en", true, 2),
-                new SupportedLocalePayload("fr", true, 3)
+                new SupportedLocalePayload("en", true, 2)
             ],
             translationMode: "ManualOnly");
 
@@ -316,20 +315,19 @@ public sealed class RestaurantLocaleSettingsApiTests : IClassFixture<TestWebAppl
     public async Task PutRestaurantLocales_ChangePrimaryLocaleWhenComplete_Succeeds()
     {
         await TestDataSeeder.SeedAsync(_factory.Services);
-        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "en", "fr");
+        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "en");
         await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "ar");
-        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "fr");
+        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "en");
 
         using var client = CreateHttpsClient();
         await AuthenticateAsync(client, TestDataSeeder.OwnerAEmail, TestDataSeeder.CorrectPassword);
 
         var payload = CreateUpdatePayload(
-            defaultLocale: "fr",
+            defaultLocale: "en",
             supportedLocales:
             [
                 new SupportedLocalePayload("ar", true, 1),
-                new SupportedLocalePayload("en", true, 2),
-                new SupportedLocalePayload("fr", true, 3)
+                new SupportedLocalePayload("en", true, 2)
             ],
             translationMode: "ManualOnly");
 
@@ -339,26 +337,26 @@ public sealed class RestaurantLocaleSettingsApiTests : IClassFixture<TestWebAppl
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var settings = await response.Content.ReadFromJsonAsync<RestaurantLocaleSettingsResponse>(JsonOptions);
-        settings!.DefaultLocale.Should().Be("fr");
+        settings!.DefaultLocale.Should().Be("en");
     }
 
     [Fact]
     public async Task PutRestaurantLocales_ChangePrimaryLocale_KeepsPreviousLocaleEnabled()
     {
         await TestDataSeeder.SeedAsync(_factory.Services);
-        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "fr");
+        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "en");
         await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "ar");
-        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "fr");
+        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "en");
 
         using var client = CreateHttpsClient();
         await AuthenticateAsync(client, TestDataSeeder.OwnerAEmail, TestDataSeeder.CorrectPassword);
 
         var payload = CreateUpdatePayload(
-            defaultLocale: "fr",
+            defaultLocale: "en",
             supportedLocales:
             [
                 new SupportedLocalePayload("ar", true, 1),
-                new SupportedLocalePayload("fr", true, 2)
+                new SupportedLocalePayload("en", true, 2)
             ],
             translationMode: "ManualOnly");
 
@@ -432,17 +430,16 @@ public sealed class RestaurantLocaleSettingsApiTests : IClassFixture<TestWebAppl
         await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "en");
         await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "ar");
         await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "en");
-        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "fr");
 
         using var client = CreateHttpsClient();
         await AuthenticateAsync(client, TestDataSeeder.OwnerAEmail, TestDataSeeder.CorrectPassword);
 
         var payload = CreateUpdatePayload(
-            defaultLocale: "fr",
+            defaultLocale: "en",
             supportedLocales:
             [
                 new SupportedLocalePayload("ar", true, 1),
-                new SupportedLocalePayload("en", false, 2),
+                new SupportedLocalePayload("en", true, 2),
                 new SupportedLocalePayload("fr", true, 3)
             ],
             translationMode: "AutoPublish");
@@ -461,9 +458,153 @@ public sealed class RestaurantLocaleSettingsApiTests : IClassFixture<TestWebAppl
             .Select(item => item.EventType)
             .ToListAsync();
 
-        events.Should().Contain(TranslationAuditEventType.LocaleDisabled);
+        events.Should().Contain(TranslationAuditEventType.LocaleEnabled);
         events.Should().Contain(TranslationAuditEventType.PrimaryLocaleChanged);
         events.Should().Contain(TranslationAuditEventType.TranslationModeChanged);
+    }
+
+    [Fact]
+    public async Task PutRestaurantLocales_OwnerCanAddFrenchToSupportedLocalesWhileDefaultStaysArabic()
+    {
+        await TestDataSeeder.SeedAsync(_factory.Services);
+        using var client = CreateHttpsClient();
+        await AuthenticateAsync(client, TestDataSeeder.OwnerAEmail, TestDataSeeder.CorrectPassword);
+
+        var response = await client.PutAsJsonAsync(
+            $"/api/v1/admin/restaurants/{TestDataSeeder.RestaurantAId}/locales",
+            CreateUpdatePayload(
+                defaultLocale: "ar",
+                supportedLocales:
+                [
+                    new SupportedLocalePayload("ar", true, 1),
+                    new SupportedLocalePayload("en", true, 2),
+                    new SupportedLocalePayload("fr", true, 3)
+                ],
+                translationMode: "AutoGenerateDrafts"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var settings = await response.Content.ReadFromJsonAsync<RestaurantLocaleSettingsResponse>(JsonOptions);
+        settings!.DefaultLocale.Should().Be("ar");
+        settings.SupportedLocales.Should().Contain(item => item.Code == "fr" && item.IsEnabled);
+    }
+
+    [Fact]
+    public async Task PutRestaurantLocales_OwnerCanAddGermanToSupportedLocalesWhileDefaultStaysEnglish()
+    {
+        await TestDataSeeder.SeedAsync(_factory.Services);
+        await SetDefaultLocaleAsync(TestDataSeeder.RestaurantAId, "en");
+        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "en");
+
+        using var client = CreateHttpsClient();
+        await AuthenticateAsync(client, TestDataSeeder.OwnerAEmail, TestDataSeeder.CorrectPassword);
+
+        var response = await client.PutAsJsonAsync(
+            $"/api/v1/admin/restaurants/{TestDataSeeder.RestaurantAId}/locales",
+            CreateUpdatePayload(
+                defaultLocale: "en",
+                supportedLocales:
+                [
+                    new SupportedLocalePayload("en", true, 1),
+                    new SupportedLocalePayload("de", true, 2)
+                ],
+                translationMode: "AutoGenerateDrafts"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var settings = await response.Content.ReadFromJsonAsync<RestaurantLocaleSettingsResponse>(JsonOptions);
+        settings!.DefaultLocale.Should().Be("en");
+        settings.SupportedLocales.Should().Contain(item => item.Code == "de" && item.IsEnabled);
+    }
+
+    [Fact]
+    public async Task PutRestaurantLocales_ChangeDefaultToFrenchFailsEvenWhenTranslationsComplete()
+    {
+        await TestDataSeeder.SeedAsync(_factory.Services);
+        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "en", "fr");
+        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "ar");
+        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "fr");
+
+        using var client = CreateHttpsClient();
+        await AuthenticateAsync(client, TestDataSeeder.OwnerAEmail, TestDataSeeder.CorrectPassword);
+
+        var response = await client.PutAsJsonAsync(
+            $"/api/v1/admin/restaurants/{TestDataSeeder.RestaurantAId}/locales",
+            CreateUpdatePayload(
+                defaultLocale: "fr",
+                supportedLocales:
+                [
+                    new SupportedLocalePayload("ar", true, 1),
+                    new SupportedLocalePayload("en", true, 2),
+                    new SupportedLocalePayload("fr", true, 3)
+                ],
+                translationMode: "ManualOnly"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("dynamic catalog authoring is enabled");
+        body.Should().Contain("fr");
+    }
+
+    [Fact]
+    public async Task PutRestaurantLocales_ChangeDefaultToGermanFailsWhenCurrentDefaultIsEnglish()
+    {
+        await TestDataSeeder.SeedAsync(_factory.Services);
+        await SetDefaultLocaleAsync(TestDataSeeder.RestaurantAId, "en");
+        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "en", "de");
+        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "en");
+        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "de");
+
+        using var client = CreateHttpsClient();
+        await AuthenticateAsync(client, TestDataSeeder.OwnerAEmail, TestDataSeeder.CorrectPassword);
+
+        var response = await client.PutAsJsonAsync(
+            $"/api/v1/admin/restaurants/{TestDataSeeder.RestaurantAId}/locales",
+            CreateUpdatePayload(
+                defaultLocale: "de",
+                supportedLocales:
+                [
+                    new SupportedLocalePayload("en", true, 1),
+                    new SupportedLocalePayload("de", true, 2)
+                ],
+                translationMode: "ManualOnly"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("dynamic catalog authoring is enabled");
+        body.Should().Contain("de");
+    }
+
+    [Fact]
+    public async Task PutRestaurantLocales_ChangeDefaultToFrench_DoesNotPartiallyUpdateSettingsOrCreateJobs()
+    {
+        await TestDataSeeder.SeedAsync(_factory.Services);
+        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "fr");
+        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "ar");
+        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "fr");
+
+        var snapshotBefore = await GetLocaleSettingsSnapshotAsync();
+        var jobsBefore = await CountTranslationJobsAsync();
+        var auditCountBefore = await CountAuditLogsAsync();
+
+        using var client = CreateHttpsClient();
+        await AuthenticateAsync(client, TestDataSeeder.OwnerAEmail, TestDataSeeder.CorrectPassword);
+
+        var response = await client.PutAsJsonAsync(
+            $"/api/v1/admin/restaurants/{TestDataSeeder.RestaurantAId}/locales",
+            CreateUpdatePayload(
+                defaultLocale: "fr",
+                supportedLocales:
+                [
+                    new SupportedLocalePayload("ar", true, 1),
+                    new SupportedLocalePayload("fr", true, 2)
+                ],
+                translationMode: "AutoPublish"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var snapshotAfter = await GetLocaleSettingsSnapshotAsync();
+        snapshotAfter.Should().BeEquivalentTo(snapshotBefore);
+        (await CountTranslationJobsAsync()).Should().Be(jobsBefore);
+        (await CountAuditLogsAsync()).Should().Be(auditCountBefore);
     }
 
     [Fact]
@@ -489,17 +630,17 @@ public sealed class RestaurantLocaleSettingsApiTests : IClassFixture<TestWebAppl
     public async Task PutRestaurantLocales_ChangePrimaryLocale_WithWhitespaceRestaurantName_Returns400()
     {
         await TestDataSeeder.SeedAsync(_factory.Services);
-        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "fr");
+        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "en");
         await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "ar");
-        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "fr");
-        await SetRestaurantTranslationNameAsync(TestDataSeeder.RestaurantAId, "fr", "   ");
+        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "en");
+        await SetRestaurantTranslationNameAsync(TestDataSeeder.RestaurantAId, "en", "   ");
 
         using var client = CreateHttpsClient();
         await AuthenticateAsync(client, TestDataSeeder.OwnerAEmail, TestDataSeeder.CorrectPassword);
 
         var response = await client.PutAsJsonAsync(
             $"/api/v1/admin/restaurants/{TestDataSeeder.RestaurantAId}/locales",
-            CreatePrimaryLocaleChangePayload("fr"));
+            CreatePrimaryLocaleChangePayload("en"));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var body = await response.Content.ReadAsStringAsync();
@@ -510,17 +651,17 @@ public sealed class RestaurantLocaleSettingsApiTests : IClassFixture<TestWebAppl
     public async Task PutRestaurantLocales_ChangePrimaryLocale_WithWhitespaceCategoryName_Returns400()
     {
         await TestDataSeeder.SeedAsync(_factory.Services);
-        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "fr");
+        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "en");
         await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "ar");
-        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "fr");
-        await SetCategoryTranslationNameAsync(TestDataSeeder.CategoryAId, "fr", "   ");
+        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "en");
+        await SetCategoryTranslationNameAsync(TestDataSeeder.CategoryAId, "en", "   ");
 
         using var client = CreateHttpsClient();
         await AuthenticateAsync(client, TestDataSeeder.OwnerAEmail, TestDataSeeder.CorrectPassword);
 
         var response = await client.PutAsJsonAsync(
             $"/api/v1/admin/restaurants/{TestDataSeeder.RestaurantAId}/locales",
-            CreatePrimaryLocaleChangePayload("fr"));
+            CreatePrimaryLocaleChangePayload("en"));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var body = await response.Content.ReadAsStringAsync();
@@ -531,17 +672,17 @@ public sealed class RestaurantLocaleSettingsApiTests : IClassFixture<TestWebAppl
     public async Task PutRestaurantLocales_ChangePrimaryLocale_WithWhitespaceMenuItemName_Returns400()
     {
         await TestDataSeeder.SeedAsync(_factory.Services);
-        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "fr");
+        await SeedSupportedLocalesAsync(TestDataSeeder.RestaurantAId, "ar", "en");
         await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "ar");
-        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "fr");
-        await SetMenuItemTranslationNameAsync(TestDataSeeder.MenuItemAId, "fr", "   ");
+        await SeedPublishedTranslationsAsync(TestDataSeeder.RestaurantAId, "en");
+        await SetMenuItemTranslationNameAsync(TestDataSeeder.MenuItemAId, "en", "   ");
 
         using var client = CreateHttpsClient();
         await AuthenticateAsync(client, TestDataSeeder.OwnerAEmail, TestDataSeeder.CorrectPassword);
 
         var response = await client.PutAsJsonAsync(
             $"/api/v1/admin/restaurants/{TestDataSeeder.RestaurantAId}/locales",
-            CreatePrimaryLocaleChangePayload("fr"));
+            CreatePrimaryLocaleChangePayload("en"));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var body = await response.Content.ReadAsStringAsync();
@@ -573,9 +714,47 @@ public sealed class RestaurantLocaleSettingsApiTests : IClassFixture<TestWebAppl
             supportedLocales:
             [
                 new SupportedLocalePayload("ar", true, 1),
-                new SupportedLocalePayload("fr", true, 2)
+                new SupportedLocalePayload("en", true, 2)
             ],
             translationMode: "ManualOnly");
+
+    private async Task SetDefaultLocaleAsync(Guid restaurantId, string localeCode)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var settings = await context.RestaurantSettings.SingleAsync(item => item.RestaurantId == restaurantId);
+        settings.DefaultLocale = localeCode;
+        await context.SaveChangesAsync();
+    }
+
+    private async Task<LocaleSettingsSnapshot> GetLocaleSettingsSnapshotAsync()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var settings = await context.RestaurantSettings
+            .AsNoTracking()
+            .SingleAsync(item => item.RestaurantId == TestDataSeeder.RestaurantAId);
+
+        var supportedLocales = await context.RestaurantSupportedLocales
+            .AsNoTracking()
+            .Where(item => item.RestaurantId == TestDataSeeder.RestaurantAId)
+            .OrderBy(item => item.LocaleCode)
+            .Select(item => new SupportedLocaleSnapshot(item.LocaleCode, item.IsEnabled, item.SortOrder))
+            .ToListAsync();
+
+        return new LocaleSettingsSnapshot(
+            settings.DefaultLocale,
+            settings.TranslationMode,
+            supportedLocales);
+    }
+
+    private async Task<int> CountAuditLogsAsync()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        return await context.TranslationAuditLogs
+            .CountAsync(item => item.RestaurantId == TestDataSeeder.RestaurantAId);
+    }
 
     private async Task SetRestaurantTranslationNameAsync(Guid restaurantId, string localeCode, string name)
     {
@@ -792,6 +971,13 @@ public sealed class RestaurantLocaleSettingsApiTests : IClassFixture<TestWebAppl
     private HttpClient CreateHttpsClient() => CreateHttpsClient(_factory);
 
     private sealed record SupportedLocalePayload(string Code, bool IsEnabled, int SortOrder);
+
+    private sealed record SupportedLocaleSnapshot(string Code, bool IsEnabled, int SortOrder);
+
+    private sealed record LocaleSettingsSnapshot(
+        string DefaultLocale,
+        TranslationMode TranslationMode,
+        IReadOnlyList<SupportedLocaleSnapshot> SupportedLocales);
 
     private sealed class LoginResponseModel
     {

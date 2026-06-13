@@ -77,6 +77,8 @@ public sealed class UpdateRestaurantLocaleSettingsCommandHandler
         var previousTranslationMode = settings.TranslationMode;
         var normalizedDefaultLocale = request.DefaultLocale.Trim();
 
+        TransitionalPrimaryLocaleGuard.EnsureAllowedDefaultLocale(normalizedDefaultLocale);
+
         if (!string.Equals(previousDefaultLocale, normalizedDefaultLocale, StringComparison.Ordinal))
         {
             var missingCounts = await PrimaryLocaleTranslationValidator.GetMissingCountsAsync(
