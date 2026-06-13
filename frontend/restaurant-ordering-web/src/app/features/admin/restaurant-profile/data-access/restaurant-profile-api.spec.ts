@@ -15,6 +15,11 @@ describe('RestaurantProfileApiService', () => {
   const restaurantId = 'aaaaaaaa-1111-1111-1111-111111111111';
 
   const formValue = {
+    profileContent: {
+      name: 'مطعم',
+      description: '',
+      address: '',
+    },
     nameAr: 'مطعم',
     nameEn: 'Restaurant',
     descriptionAr: '',
@@ -114,5 +119,56 @@ describe('RestaurantProfileApiService', () => {
     httpMock.expectNone(
       `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/settings`,
     );
+  });
+
+  it('updateProfileContent sends PUT to catalog profile-content endpoint', async () => {
+    const promise = new Promise<void>((resolve) => {
+      service
+        .updateProfileContent(restaurantId, {
+          name: 'مطعم محدث',
+          description: 'وصف',
+          address: 'الرياض',
+        })
+        .subscribe(() => resolve());
+    });
+
+    const profileContentReq = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/catalog/profile-content`,
+    );
+    expect(profileContentReq.request.method).toBe('PUT');
+    expect(profileContentReq.request.body).toEqual({
+      name: 'مطعم محدث',
+      description: 'وصف',
+      address: 'الرياض',
+    });
+    profileContentReq.flush({
+      id: restaurantId,
+      slug: 'restaurant-a',
+      nameAr: 'مطعم محدث',
+      phoneNumber: '+966500000000',
+      isActive: true,
+      ownerId: 'o',
+    });
+
+    await promise;
+  });
+
+  it('toUpdateRestaurantRequest syncs ar legacy fields from profile content', () => {
+    const request = service.toUpdateRestaurantRequest(
+      {
+        ...formValue,
+        profileContent: {
+          name: 'اسم محدث',
+          description: 'وصف محدث',
+          address: 'عنوان محدث',
+        },
+      },
+      'ar',
+    );
+
+    expect(request.nameAr).toBe('اسم محدث');
+    expect(request.descriptionAr).toBe('وصف محدث');
+    expect(request.addressAr).toBe('عنوان محدث');
+    expect(request.nameEn).toBe('Restaurant');
   });
 });

@@ -114,12 +114,64 @@ export class RestaurantLivePreview {
 
   protected readonly restaurantProfile = computed<RestaurantPublicProfile>(() => {
     const data = this.preview();
+    const primaryLocale = (data.primaryLocale ?? 'ar').trim().toLowerCase();
+    const previewLocale = this.previewLocale().trim().toLowerCase();
+    const usePrimaryContent = previewLocale === primaryLocale;
+
+    let nameAr = data.nameAr;
+    let nameEn = data.nameEn ?? null;
+    let descriptionAr = data.descriptionAr ?? null;
+    let descriptionEn = data.descriptionEn ?? null;
+    let addressAr = data.addressAr ?? null;
+    let addressEn = data.addressEn ?? null;
+
+    if (usePrimaryContent) {
+      const primaryName = data.primaryName?.trim();
+      const primaryDescription = data.primaryDescription?.trim();
+      const primaryAddress = data.primaryAddress?.trim();
+
+      if (primaryLocale === 'ar') {
+        if (primaryName) {
+          nameAr = primaryName;
+        }
+        if (primaryDescription) {
+          descriptionAr = primaryDescription;
+        }
+        if (primaryAddress) {
+          addressAr = primaryAddress;
+        }
+      } else if (primaryLocale === 'en') {
+        if (primaryName) {
+          nameEn = primaryName;
+        }
+        if (primaryDescription) {
+          descriptionEn = primaryDescription;
+        }
+        if (primaryAddress) {
+          addressEn = primaryAddress;
+        }
+      } else {
+        if (primaryName) {
+          nameEn = primaryName;
+          nameAr = primaryName;
+        }
+        if (primaryDescription) {
+          descriptionEn = primaryDescription;
+          descriptionAr = primaryDescription;
+        }
+        if (primaryAddress) {
+          addressEn = primaryAddress;
+          addressAr = primaryAddress;
+        }
+      }
+    }
+
     return {
       slug: data.slug,
-      nameAr: data.nameAr,
-      nameEn: data.nameEn,
-      descriptionAr: data.descriptionAr,
-      descriptionEn: data.descriptionEn,
+      nameAr,
+      nameEn,
+      descriptionAr,
+      descriptionEn,
       logoUrl: data.logoUrl,
       coverImageUrl: data.coverImageUrl,
       primaryAccentColor: data.primaryAccentColor,
@@ -128,8 +180,8 @@ export class RestaurantLivePreview {
       timeZone: data.timeZone,
       phoneNumber: data.phoneNumber,
       whatsAppNumber: data.whatsAppNumber,
-      addressAr: data.addressAr,
-      addressEn: data.addressEn,
+      addressAr,
+      addressEn,
       isOpen: true,
     };
   });

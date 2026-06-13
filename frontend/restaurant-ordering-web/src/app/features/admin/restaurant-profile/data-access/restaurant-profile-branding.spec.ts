@@ -71,6 +71,11 @@ describe('RestaurantProfileApiService branding', () => {
   let httpMock: HttpTestingController;
 
   const formValue = {
+    profileContent: {
+      name: 'مطعم',
+      description: '',
+      address: '',
+    },
     nameAr: 'مطعم',
     nameEn: 'Restaurant',
     descriptionAr: '',

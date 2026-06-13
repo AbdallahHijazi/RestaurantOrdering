@@ -27,6 +27,10 @@ const PREVIEW_LOCALE_SETTINGS = {
 
 const PREVIEW: RestaurantProfilePreviewData = {
   slug: 'restaurant-a',
+  primaryLocale: 'ar',
+  primaryName: 'مطعم حقيقي',
+  primaryDescription: null,
+  primaryAddress: 'الرياض',
   nameAr: 'مطعم حقيقي',
   nameEn: 'Real Restaurant',
   descriptionAr: null,
@@ -128,14 +132,21 @@ describe('Profile preview menu (5F.6.3)', () => {
           workingHoursJson: null,
         });
 
-      httpMock
-        .expectOne(`${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`)
-        .flush(REAL_MENU_DTO);
-
       const localeRequests = httpMock.match(
         `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
       );
       for (const req of localeRequests) {
+        req.flush(PREVIEW_LOCALE_SETTINGS);
+      }
+
+      httpMock
+        .expectOne(`${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`)
+        .flush(REAL_MENU_DTO);
+
+      const previewLocaleRequests = httpMock.match(
+        `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
+      );
+      for (const req of previewLocaleRequests) {
         req.flush(PREVIEW_LOCALE_SETTINGS);
       }
 

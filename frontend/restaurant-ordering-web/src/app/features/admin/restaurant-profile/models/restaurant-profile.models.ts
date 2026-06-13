@@ -1,4 +1,11 @@
+export interface ProfileContentValue {
+  name: string;
+  description: string;
+  address: string;
+}
+
 export interface RestaurantProfileFormValue {
+  profileContent: ProfileContentValue;
   nameAr: string;
   nameEn: string;
   descriptionAr: string;
@@ -33,6 +40,10 @@ export interface RestaurantSettingsSnapshot {
 
 export interface RestaurantProfilePreviewData {
   slug: string;
+  primaryLocale: string;
+  primaryName?: string | null;
+  primaryDescription?: string | null;
+  primaryAddress?: string | null;
   nameAr: string;
   nameEn?: string | null;
   descriptionAr?: string | null;

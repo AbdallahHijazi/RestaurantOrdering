@@ -7,7 +7,8 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, map, of, switchMap, tap, throwError, type Observable } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { catchError, forkJoin, map, of, switchMap, tap, throwError, type Observable } from 'rxjs';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
@@ -21,6 +22,8 @@ import {
   RestaurantThemeService,
 } from '../../../../../core/theme/restaurant-theme';
 import { LocaleService, type SupportedLocale } from '../../../../../core/localization/locale';
+import { LocaleApiService } from '../../../../../core/localization/locale-api.service';
+import type { RestaurantLocaleSettings } from '../../../../../core/localization/locale.types';
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { RestaurantLivePreview } from '../../components/restaurant-live-preview/restaurant-live-preview';
 import { RestaurantLocaleSettingsPanel } from '../../components/restaurant-locale-settings-panel/restaurant-locale-settings-panel';
@@ -31,6 +34,11 @@ import {
   isCurrencyCodeValid,
   mapSettingsDtoToFormPatch,
 } from '../../data-access/restaurant-profile-settings.util';
+import { formatPrimaryLanguageLabel } from '../../../pages/menu-management-page/menu-catalog.util';
+import {
+  resolvePrimaryProfileContent,
+  syncLegacyFromProfileContent,
+} from '../../data-access/profile-content.util';
 import {
   createImagePreviewUrl,
   normalizeSlugInput,
@@ -40,7 +48,10 @@ import {
 } from '../../data-access/image-preview.util';
 import { resolveApiAssetUrl } from '../../../../../core/config/resolve-api-asset-url';
 import type { UploadedMediaFile } from '../../../data-access/admin-menu.models';
-import type { RestaurantApiDto } from '../../../../public-menu/data-access/public-menu.dto';
+import type {
+  RestaurantApiDto,
+  RestaurantSettingsApiDto,
+} from '../../../../public-menu/data-access/public-menu.dto';
 import {
   PublicMenuApiService,
   type PublicMenuLoadError,
@@ -66,10 +77,7 @@ const WORKSPACE_TABS: WorkspaceTab[] = ['identity', 'localization', 'languages',
 const CURRENCY_CODE_PATTERN = /^[A-Za-z]{3}$/;
 
 const PROFILE_CONTROL_NAMES = [
-  'nameAr',
-  'nameEn',
-  'descriptionAr',
-  'descriptionEn',
+  'profileContent',
   'slug',
   'primaryAccentColor',
   'countryCode',
@@ -80,8 +88,6 @@ const PROFILE_CONTROL_NAMES = [
   'whatsAppNumber',
   'email',
   'city',
-  'addressAr',
-  'addressEn',
 ] as const;
 
 const SETTINGS_CONTROL_NAMES = [
@@ -109,6 +115,7 @@ function orderingMethodsValidator(control: AbstractControl): ValidationErrors | 
 export class RestaurantProfileSetupPage {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly profileApi = inject(RestaurantProfileApiService);
+  private readonly localeApi = inject(LocaleApiService);
   private readonly publicMenuApi = inject(PublicMenuApiService);
   private readonly authService = inject(AuthService);
   private readonly branding = inject(AdminBrandingService);
@@ -137,6 +144,22 @@ export class RestaurantProfileSetupPage {
   });
 
   private readonly catalogSlug = signal('');
+
+  protected readonly localeSettings = signal<RestaurantLocaleSettings | null>(null);
+  protected readonly profileContentWarning = signal(false);
+
+  protected readonly primaryLanguageLabel = computed(() => {
+    const settings = this.localeSettings();
+    if (!settings) {
+      return this.localeService.locale() === 'ar' ? 'العربية' : 'English';
+    }
+
+    return formatPrimaryLanguageLabel(settings);
+  });
+
+  protected readonly primaryLocaleCode = computed(
+    () => this.localeSettings()?.defaultLocale?.trim().toLowerCase() ?? 'ar',
+  );
 
   protected readonly previewMenuState = signal<ProfilePreviewMenuState>('idle');
   protected readonly previewMenuCategories = signal<PublicMenuCategory[]>([]);
@@ -246,13 +269,20 @@ export class RestaurantProfileSetupPage {
    */
   readonly form = this.fb.group(
     {
-      nameAr: this.fb.control(MOCK_PUBLIC_MENU.restaurant.nameAr, [
-        Validators.required,
-        Validators.maxLength(120),
-      ]),
-      nameEn: this.fb.control(MOCK_PUBLIC_MENU.restaurant.nameEn ?? '', [
-        Validators.maxLength(120),
-      ]),
+      profileContent: this.fb.group({
+        name: this.fb.control(MOCK_PUBLIC_MENU.restaurant.nameAr, [
+          Validators.required,
+          Validators.maxLength(120),
+        ]),
+        description: this.fb.control(MOCK_PUBLIC_MENU.restaurant.descriptionAr ?? '', [
+          Validators.maxLength(500),
+        ]),
+        address: this.fb.control(MOCK_PUBLIC_MENU.restaurant.addressAr ?? '', [
+          Validators.maxLength(200),
+        ]),
+      }),
+      nameAr: this.fb.control(MOCK_PUBLIC_MENU.restaurant.nameAr, [Validators.maxLength(120)]),
+      nameEn: this.fb.control(MOCK_PUBLIC_MENU.restaurant.nameEn ?? '', [Validators.maxLength(120)]),
       descriptionAr: this.fb.control(MOCK_PUBLIC_MENU.restaurant.descriptionAr ?? '', [
         Validators.maxLength(500),
       ]),
@@ -324,12 +354,27 @@ export class RestaurantProfileSetupPage {
   protected readonly previewData = computed<RestaurantProfilePreviewData>(() => {
     this.formRevision();
     const value = this.form.getRawValue();
+    const profileContent = value.profileContent;
+    const primaryLocale = this.primaryLocaleCode();
+    const legacy = syncLegacyFromProfileContent(primaryLocale, profileContent, {
+      nameAr: value.nameAr,
+      nameEn: value.nameEn,
+      descriptionAr: value.descriptionAr,
+      descriptionEn: value.descriptionEn,
+      addressAr: value.addressAr,
+      addressEn: value.addressEn,
+    });
+
     return {
       slug: normalizeSlugInput(value.slug),
-      nameAr: value.nameAr.trim(),
-      nameEn: value.nameEn.trim() || null,
-      descriptionAr: value.descriptionAr.trim() || null,
-      descriptionEn: value.descriptionEn.trim() || null,
+      primaryLocale,
+      primaryName: profileContent.name.trim() || null,
+      primaryDescription: profileContent.description.trim() || null,
+      primaryAddress: profileContent.address.trim() || null,
+      nameAr: legacy.nameAr?.trim() || '',
+      nameEn: legacy.nameEn?.trim() || null,
+      descriptionAr: legacy.descriptionAr?.trim() || null,
+      descriptionEn: legacy.descriptionEn?.trim() || null,
       logoUrl: this.logoPreviewUrl(),
       coverImageUrl: this.coverPreviewUrl(),
       primaryAccentColor: value.primaryAccentColor.trim(),
@@ -338,8 +383,8 @@ export class RestaurantProfileSetupPage {
       timeZone: value.timeZone.trim(),
       phoneNumber: value.phoneNumber.trim(),
       whatsAppNumber: value.whatsAppNumber.trim() || null,
-      addressAr: value.addressAr.trim() || null,
-      addressEn: value.addressEn.trim() || null,
+      addressAr: legacy.addressAr?.trim() || null,
+      addressEn: legacy.addressEn?.trim() || null,
     };
   });
 
@@ -500,11 +545,25 @@ export class RestaurantProfileSetupPage {
         ),
         switchMap(({ uploadedLogo, uploadedCover }) => {
           this.profileSavePhase.set('saving');
-          return this.profileApi.updateRestaurant(
-            restaurantId,
-            this.profileApi.toUpdateRestaurantRequest(payload),
-          ).pipe(
-            switchMap((restaurant) => {
+          const payload = this.buildFormValue();
+          const defaultLocale = this.primaryLocaleCode();
+
+          return this.profileApi
+            .updateProfileContent(
+              restaurantId,
+              this.profileApi.toProfileContentRequest(payload.profileContent),
+            )
+            .pipe(
+              catchError((error: unknown) =>
+                throwError(() => this.mapProfileContentSaveError(error)),
+              ),
+              switchMap(() =>
+                this.profileApi.updateRestaurant(
+                  restaurantId,
+                  this.profileApi.toUpdateRestaurantRequest(payload, defaultLocale),
+                ),
+              ),
+              switchMap((restaurant) => {
               const logoLink$ = uploadedLogo
                 ? this.profileApi.setRestaurantLogo(restaurantId, uploadedLogo.id)
                 : of(restaurant);
@@ -551,10 +610,10 @@ export class RestaurantProfileSetupPage {
           this.profileSaveNotice.set(this.localeService.uiText('profileRestaurantSaved'));
           this.reloadProfileAfterSave(payload.slug);
         },
-        error: (error: { type?: BrandingSaveError }) => {
+        error: (error: { type?: BrandingSaveError; detail?: string | null }) => {
           this.savingProfile.set(false);
           this.profileSavePhase.set('idle');
-          this.profileSaveNotice.set(this.brandingErrorMessage(error?.type));
+          this.profileSaveNotice.set(this.brandingErrorMessage(error?.type, error?.detail));
         },
       });
   }
@@ -595,15 +654,59 @@ export class RestaurantProfileSetupPage {
     );
   }
 
-  private brandingErrorMessage(type?: BrandingSaveError): string {
+  private brandingErrorMessage(type?: BrandingSaveError, detail?: string | null): string {
     switch (type) {
       case 'logo-upload':
         return this.localeService.uiText('profileLogoUploadFailed');
       case 'cover-upload':
         return this.localeService.uiText('profileCoverUploadFailed');
+      case 'profile-content-save':
+        return this.profileContentSaveErrorMessage(detail);
       default:
         return this.localeService.uiText('adminMenuErrorGeneric');
     }
+  }
+
+  private mapProfileContentSaveError(
+    error: unknown,
+  ): { type: BrandingSaveError; detail?: string | null } {
+    if (error && typeof error === 'object' && 'type' in error) {
+      return error as { type: BrandingSaveError; detail?: string | null };
+    }
+
+    return { type: 'profile-content-save', detail: this.extractProfileContentErrorDetail(error) };
+  }
+
+  private profileContentSaveErrorMessage(detail?: string | null): string {
+    return detail?.trim() || this.localeService.uiText('adminMenuErrorGeneric');
+  }
+
+  private extractProfileContentErrorDetail(error: unknown): string | null {
+    if (!(error instanceof HttpErrorResponse)) {
+      return null;
+    }
+
+    const body = error.error;
+    if (!body || typeof body !== 'object') {
+      return null;
+    }
+
+    const record = body as Record<string, unknown>;
+    if (typeof record['detail'] === 'string' && record['detail'].trim()) {
+      return record['detail'];
+    }
+
+    const errors = record['errors'];
+    if (errors && typeof errors === 'object') {
+      const messages = Object.values(errors as Record<string, unknown>)
+        .flatMap((value) => (Array.isArray(value) ? value : []))
+        .filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
+      if (messages.length > 0) {
+        return messages.join(' · ');
+      }
+    }
+
+    return null;
   }
 
   private applyBrandingAfterSave(
@@ -622,25 +725,19 @@ export class RestaurantProfileSetupPage {
       return;
     }
 
-    this.profileApi
-      .loadProfile(restaurantId)
+    forkJoin({
+      profile: this.profileApi.loadProfile(restaurantId),
+      localeSettings: this.localeApi
+        .getRestaurantLocaleSettings(restaurantId)
+        .pipe(catchError(() => of(null))),
+    })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ restaurant, settings }) => {
-          this.form.patchValue({
-            nameAr: restaurant.nameAr,
-            nameEn: restaurant.nameEn ?? '',
-            descriptionAr: restaurant.descriptionAr ?? '',
-            descriptionEn: restaurant.descriptionEn ?? '',
-            slug: restaurant.slug,
-            phoneNumber: restaurant.phoneNumber,
-            whatsAppNumber: restaurant.whatsAppNumber ?? '',
-            addressAr: restaurant.addressAr ?? '',
-            addressEn: restaurant.addressEn ?? '',
-            ...mapSettingsDtoToFormPatch(settings),
-          });
-          this.settingsSnapshot.set(createSettingsSnapshot(settings));
-          this.applyBrandingFromRestaurant(restaurant);
+        next: ({ profile, localeSettings }) => {
+          this.localeSettings.set(localeSettings);
+          this.applyRestaurantToForm(profile.restaurant, profile.settings, localeSettings);
+          this.settingsSnapshot.set(createSettingsSnapshot(profile.settings));
+          this.applyBrandingFromRestaurant(profile.restaurant);
           this.form.markAsPristine();
           this.loadPreviewMenu(slug);
         },
@@ -691,6 +788,11 @@ export class RestaurantProfileSetupPage {
 
   private markControlsTouched(controlNames: readonly (keyof typeof this.form.controls)[]): void {
     for (const name of controlNames) {
+      if (name === 'profileContent') {
+        this.form.controls.profileContent.markAllAsTouched();
+        continue;
+      }
+
       this.form.controls[name].markAsTouched();
     }
   }
@@ -698,13 +800,60 @@ export class RestaurantProfileSetupPage {
   private isControlGroupValid(
     controlNames: readonly (keyof typeof this.form.controls)[],
   ): boolean {
-    return controlNames.every((name) => this.form.controls[name].valid);
+    if (controlNames.includes('profileContent') && this.form.controls.profileContent.invalid) {
+      return false;
+    }
+
+    return controlNames
+      .filter((name) => name !== 'profileContent')
+      .every((name) => this.form.controls[name].valid);
+  }
+
+  private applyRestaurantToForm(
+    restaurant: RestaurantApiDto,
+    settings: RestaurantSettingsApiDto,
+    localeSettings: RestaurantLocaleSettings | null,
+  ): void {
+    const defaultLocale = localeSettings?.defaultLocale?.trim().toLowerCase() ?? 'ar';
+    const resolved = resolvePrimaryProfileContent(defaultLocale, {
+      nameAr: restaurant.nameAr,
+      nameEn: restaurant.nameEn,
+      descriptionAr: restaurant.descriptionAr,
+      descriptionEn: restaurant.descriptionEn,
+      addressAr: restaurant.addressAr,
+      addressEn: restaurant.addressEn,
+    });
+
+    this.profileContentWarning.set(resolved.missingPrimaryLocale);
+
+    this.form.patchValue({
+      profileContent: resolved.content,
+      nameAr: restaurant.nameAr,
+      nameEn: restaurant.nameEn ?? '',
+      descriptionAr: restaurant.descriptionAr ?? '',
+      descriptionEn: restaurant.descriptionEn ?? '',
+      slug: restaurant.slug,
+      phoneNumber: restaurant.phoneNumber,
+      whatsAppNumber: restaurant.whatsAppNumber ?? '',
+      addressAr: restaurant.addressAr ?? '',
+      addressEn: restaurant.addressEn ?? '',
+      ...mapSettingsDtoToFormPatch(settings),
+    });
   }
 
   private loadProfile(): void {
     const restaurantId = this.authService.restaurantId();
     if (!restaurantId) {
       this.applyMockOrderingDefaults();
+      this.localeSettings.set(null);
+      this.profileContentWarning.set(false);
+      this.form.patchValue({
+        profileContent: {
+          name: MOCK_PUBLIC_MENU.restaurant.nameAr,
+          description: MOCK_PUBLIC_MENU.restaurant.descriptionAr ?? '',
+          address: MOCK_PUBLIC_MENU.restaurant.addressAr ?? '',
+        },
+      });
       this.logoPreviewUrl.set(MOCK_PUBLIC_MENU.restaurant.logoUrl ?? null);
       this.coverPreviewUrl.set(MOCK_PUBLIC_MENU.restaurant.coverImageUrl ?? null);
       this.pageState.set('demo');
@@ -713,29 +862,23 @@ export class RestaurantProfileSetupPage {
     }
 
     this.pageState.set('loading');
-    this.profileApi
-      .loadProfile(restaurantId)
+    forkJoin({
+      profile: this.profileApi.loadProfile(restaurantId),
+      localeSettings: this.localeApi
+        .getRestaurantLocaleSettings(restaurantId)
+        .pipe(catchError(() => of(null))),
+    })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ restaurant, settings }) => {
-          this.form.patchValue({
-            nameAr: restaurant.nameAr,
-            nameEn: restaurant.nameEn ?? '',
-            descriptionAr: restaurant.descriptionAr ?? '',
-            descriptionEn: restaurant.descriptionEn ?? '',
-            slug: restaurant.slug,
-            phoneNumber: restaurant.phoneNumber,
-            whatsAppNumber: restaurant.whatsAppNumber ?? '',
-            addressAr: restaurant.addressAr ?? '',
-            addressEn: restaurant.addressEn ?? '',
-            ...mapSettingsDtoToFormPatch(settings),
-          });
-          this.settingsSnapshot.set(createSettingsSnapshot(settings));
-          this.catalogSlug.set(restaurant.slug);
-          this.applyBrandingFromRestaurant(restaurant);
+        next: ({ profile, localeSettings }) => {
+          this.localeSettings.set(localeSettings);
+          this.applyRestaurantToForm(profile.restaurant, profile.settings, localeSettings);
+          this.settingsSnapshot.set(createSettingsSnapshot(profile.settings));
+          this.catalogSlug.set(profile.restaurant.slug);
+          this.applyBrandingFromRestaurant(profile.restaurant);
           this.pageState.set('ready');
           this.form.markAsPristine();
-          this.loadPreviewMenu(restaurant.slug);
+          this.loadPreviewMenu(profile.restaurant.slug);
         },
         error: () => {
           this.pageState.set('settings-error');
@@ -797,11 +940,26 @@ export class RestaurantProfileSetupPage {
 
   private buildFormValue(): RestaurantProfileFormValue {
     const value = this.form.getRawValue();
+    const primaryLocale = this.primaryLocaleCode();
+    const legacy = syncLegacyFromProfileContent(primaryLocale, value.profileContent, {
+      nameAr: value.nameAr,
+      nameEn: value.nameEn,
+      descriptionAr: value.descriptionAr,
+      descriptionEn: value.descriptionEn,
+      addressAr: value.addressAr,
+      addressEn: value.addressEn,
+    });
+
     return {
-      nameAr: value.nameAr.trim(),
-      nameEn: value.nameEn.trim(),
-      descriptionAr: value.descriptionAr.trim(),
-      descriptionEn: value.descriptionEn.trim(),
+      profileContent: {
+        name: value.profileContent.name.trim(),
+        description: value.profileContent.description.trim(),
+        address: value.profileContent.address.trim(),
+      },
+      nameAr: legacy.nameAr?.trim() || '',
+      nameEn: legacy.nameEn?.trim() || '',
+      descriptionAr: legacy.descriptionAr?.trim() || '',
+      descriptionEn: legacy.descriptionEn?.trim() || '',
       slug: normalizeSlugInput(value.slug),
       logoUrl: this.logoPreviewUrl(),
       coverImageUrl: this.coverPreviewUrl(),
@@ -816,8 +974,8 @@ export class RestaurantProfileSetupPage {
       whatsAppNumber: value.whatsAppNumber.trim(),
       email: value.email.trim(),
       city: value.city.trim(),
-      addressAr: value.addressAr.trim(),
-      addressEn: value.addressEn.trim(),
+      addressAr: legacy.addressAr?.trim() || '',
+      addressEn: legacy.addressEn?.trim() || '',
       isPickupEnabled: value.isPickupEnabled,
       isDeliveryEnabled: value.isDeliveryEnabled,
       deliveryFee: Number(value.deliveryFee),

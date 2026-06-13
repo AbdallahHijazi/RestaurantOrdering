@@ -8,6 +8,10 @@ import type { RestaurantProfilePreviewData } from '../../features/admin/restaura
 
 const PREVIEW: RestaurantProfilePreviewData = {
   slug: 'demo',
+  primaryLocale: 'ar',
+  primaryName: 'عالم النبات',
+  primaryDescription: 'وصف',
+  primaryAddress: 'الرياض',
   nameAr: 'عالم النبات',
   nameEn: 'The Botanist',
   descriptionAr: 'وصف',

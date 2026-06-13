@@ -149,6 +149,12 @@ export type UiTextKey =
   | 'profileNavMenuBuilder'
   | 'profileNavOrderDashboard'
   | 'profileIdentitySectionDesc'
+  | 'profileIdentityPrimaryNotice'
+  | 'profileIdentityPrimaryLanguage'
+  | 'profileIdentityFieldName'
+  | 'profileIdentityFieldDescription'
+  | 'profileIdentityFieldAddress'
+  | 'profileIdentityMissingPrimaryLocale'
   | 'profileLocalizationSectionDesc'
   | 'profileContactSectionDesc'
   | 'profileDeliverySectionDesc'
@@ -836,6 +842,13 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     profileNavMenuBuilder: 'بناء القائمة',
     profileNavOrderDashboard: 'لوحة الطلبات',
     profileIdentitySectionDesc: 'عرّف هوية مطعمك الرقمية ومظهره.',
+    profileIdentityPrimaryNotice:
+      'أدخل محتوى هوية المطعم باللغة الأساسية الحالية. سيتم إنشاء ترجمات لباقي اللغات حسب إعدادات الترجمة.',
+    profileIdentityPrimaryLanguage: 'اللغة الأساسية',
+    profileIdentityFieldName: 'اسم المطعم',
+    profileIdentityFieldDescription: 'وصف المطعم',
+    profileIdentityFieldAddress: 'العنوان',
+    profileIdentityMissingPrimaryLocale: 'لا توجد نسخة منشورة لهذه اللغة بعد.',
     profileLocalizationSectionDesc: 'إدارة الإعدادات الخاصة بالمنطقة واللغة.',
     profileContactSectionDesc: 'كيف يتواصل الزبائن معك وأين يجدونك.',
     profileDeliverySectionDesc: 'اضبط توفر الخدمة وقواعد الطلب.',
@@ -1540,6 +1553,13 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     profileNavMenuBuilder: 'Menu Builder',
     profileNavOrderDashboard: 'Order Dashboard',
     profileIdentitySectionDesc: "Define your brand's digital presence and appearance.",
+    profileIdentityPrimaryNotice:
+      'Enter restaurant identity content in the current primary language. Translations for other languages will follow your translation settings.',
+    profileIdentityPrimaryLanguage: 'Primary language',
+    profileIdentityFieldName: 'Restaurant name',
+    profileIdentityFieldDescription: 'Restaurant description',
+    profileIdentityFieldAddress: 'Address',
+    profileIdentityMissingPrimaryLocale: 'No published content exists for this language yet.',
     profileLocalizationSectionDesc: 'Manage region-specific settings and operational defaults.',
     profileContactSectionDesc: 'How customers can reach you and where to find you.',
     profileDeliverySectionDesc: 'Configure your service availability and ordering rules.',

@@ -31,6 +31,10 @@ const LOCALE_SETTINGS_RESPONSE = {
 
 const PREVIEW: RestaurantProfilePreviewData = {
   slug: 'restaurant-a',
+  primaryLocale: 'ar',
+  primaryName: 'مطعم المعاينة',
+  primaryDescription: 'وصف',
+  primaryAddress: 'الرياض',
   nameAr: 'مطعم المعاينة',
   nameEn: 'Preview Restaurant',
   descriptionAr: 'وصف',

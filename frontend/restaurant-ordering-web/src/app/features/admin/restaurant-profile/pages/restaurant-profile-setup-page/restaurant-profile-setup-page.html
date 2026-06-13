@@ -74,27 +74,57 @@
             <p>{{ localeService.uiText('profileIdentitySectionDesc') }}</p>
           </header>
 
-          <div class="profile-console__field-grid">
+          <p class="profile-console__hint" data-testid="profile-identity-primary-notice">
+            {{ localeService.uiText('profileIdentityPrimaryNotice') }}
+          </p>
+
+          <p class="profile-console__hint" data-testid="profile-identity-primary-language">
+            {{ localeService.uiText('profileIdentityPrimaryLanguage') }}: {{ primaryLanguageLabel() }}
+          </p>
+
+          @if (profileContentWarning()) {
+            <p
+              class="profile-console__alert"
+              role="alert"
+              data-testid="profile-identity-missing-locale"
+            >
+              {{ localeService.uiText('profileIdentityMissingPrimaryLocale') }}
+            </p>
+          }
+
+          <div formGroupName="profileContent" class="profile-console__field-grid profile-console__field-grid--stacked">
             <label class="profile-console__field">
-              <span>{{ localeService.locale() === 'ar' ? 'الاسم بالعربية' : 'Arabic name' }}</span>
-              <input type="text" formControlName="nameAr" autocomplete="organization" />
+              <span>{{ localeService.uiText('profileIdentityFieldName') }}</span>
+              <input
+                type="text"
+                formControlName="name"
+                autocomplete="organization"
+                data-testid="profile-identity-name"
+              />
+              @if (
+                form.controls.profileContent.controls.name.invalid &&
+                form.controls.profileContent.controls.name.touched
+              ) {
+                <small class="profile-console__error">{{
+                  localeService.locale() === 'ar' ? 'هذا الحقل مطلوب.' : 'This field is required.'
+                }}</small>
+              }
             </label>
 
             <label class="profile-console__field">
-              <span>{{ localeService.locale() === 'ar' ? 'الاسم بالإنجليزية' : 'English name' }}</span>
-              <input type="text" formControlName="nameEn" autocomplete="organization" />
+              <span>{{ localeService.uiText('profileIdentityFieldDescription') }}</span>
+              <textarea
+                rows="3"
+                formControlName="description"
+                data-testid="profile-identity-description"
+              ></textarea>
+            </label>
+
+            <label class="profile-console__field">
+              <span>{{ localeService.uiText('profileIdentityFieldAddress') }}</span>
+              <input type="text" formControlName="address" data-testid="profile-identity-address" />
             </label>
           </div>
-
-          <label class="profile-console__field">
-            <span>{{ localeService.locale() === 'ar' ? 'الوصف بالعربية' : 'Arabic description' }}</span>
-            <textarea rows="3" formControlName="descriptionAr"></textarea>
-          </label>
-
-          <label class="profile-console__field">
-            <span>{{ localeService.locale() === 'ar' ? 'الوصف بالإنجليزية' : 'English description' }}</span>
-            <textarea rows="3" formControlName="descriptionEn"></textarea>
-          </label>
 
           <label class="profile-console__field">
             <span>Slug</span>
@@ -332,16 +362,6 @@
               <input type="text" formControlName="city" />
             </label>
           </div>
-
-          <label class="profile-console__field">
-            <span>{{ localeService.locale() === 'ar' ? 'العنوان بالعربية' : 'Arabic address' }}</span>
-            <input type="text" formControlName="addressAr" />
-          </label>
-
-          <label class="profile-console__field">
-            <span>{{ localeService.locale() === 'ar' ? 'العنوان بالإنجليزية' : 'English address' }}</span>
-            <input type="text" formControlName="addressEn" />
-          </label>
 
           <button
             type="button"

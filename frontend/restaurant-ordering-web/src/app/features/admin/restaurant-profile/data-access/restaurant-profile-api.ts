@@ -14,6 +14,11 @@ import type {
   RestaurantProfileFormValue,
   RestaurantSettingsSnapshot,
 } from '../models/restaurant-profile.models';
+import {
+  syncLegacyFromProfileContent,
+  toProfileContentRequest,
+  type ProfileContentFields,
+} from './profile-content.util';
 import { buildUpdateSettingsRequest } from './restaurant-profile-settings.util';
 
 export { buildUpdateSettingsRequest } from './restaurant-profile-settings.util';
@@ -51,8 +56,15 @@ export interface BrandingSaveResult {
 export type BrandingSaveError =
   | 'logo-upload'
   | 'cover-upload'
+  | 'profile-content-save'
   | 'profile-save'
   | 'profile-reload';
+
+export interface UpdateProfileContentApiRequest {
+  name: string;
+  description?: string | null;
+  address?: string | null;
+}
 
 /**
  * Backend validation and ownership enforcement are required for production saves.
@@ -77,7 +89,10 @@ export class RestaurantProfileApiService {
       });
     }
 
-    const updateRequest = this.toUpdateRestaurantRequest(formValue);
+    const updateRequest = this.toUpdateRestaurantRequest(
+      formValue,
+      formValue.defaultLocale ?? 'ar',
+    );
     return this.updateRestaurant(restaurantId, updateRequest).pipe(
       map(() => ({ mode: 'api' as const, scope: 'restaurant' as const, message: 'restaurant-saved' })),
     );
@@ -103,7 +118,10 @@ export class RestaurantProfileApiService {
         this.uploadPendingMedia(restaurantId, branding.pendingCoverFile, branding.uploadedCover).pipe(
           catchError(() => throwError(() => ({ type: 'cover-upload' satisfies BrandingSaveError }))),
           switchMap((uploadedCover) => {
-            const updateRequest = this.toUpdateRestaurantRequest(formValue);
+            const updateRequest = this.toUpdateRestaurantRequest(
+              formValue,
+              formValue.defaultLocale ?? 'ar',
+            );
             return this.updateRestaurant(restaurantId, updateRequest).pipe(
               catchError(() => throwError(() => ({ type: 'profile-save' satisfies BrandingSaveError }))),
               switchMap((restaurant) => {
@@ -199,6 +217,17 @@ export class RestaurantProfileApiService {
     );
   }
 
+  /** Real contract: PUT /api/v1/admin/restaurants/{restaurantId}/catalog/profile-content */
+  updateProfileContent(
+    restaurantId: string,
+    request: UpdateProfileContentApiRequest,
+  ): Observable<RestaurantApiDto> {
+    return this.http.put<RestaurantApiDto>(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/catalog/profile-content`,
+      request,
+    );
+  }
+
   /** Real contract: GET /api/v1/admin/restaurants/{restaurantId}/settings */
   getSettings(restaurantId: string): Observable<RestaurantSettingsApiDto> {
     return this.http.get<RestaurantSettingsApiDto>(
@@ -265,21 +294,37 @@ export class RestaurantProfileApiService {
     return this.uploadMedia(restaurantId, pendingFile);
   }
 
-  toUpdateRestaurantRequest(form: RestaurantProfileFormValue): UpdateRestaurantApiRequest {
+  toUpdateRestaurantRequest(
+    form: RestaurantProfileFormValue,
+    defaultLocale: string,
+  ): UpdateRestaurantApiRequest {
+    const legacy = syncLegacyFromProfileContent(defaultLocale, form.profileContent, {
+      nameAr: form.nameAr,
+      nameEn: form.nameEn,
+      descriptionAr: form.descriptionAr,
+      descriptionEn: form.descriptionEn,
+      addressAr: form.addressAr,
+      addressEn: form.addressEn,
+    });
+
     return {
       slug: form.slug.trim().toLowerCase(),
-      nameAr: form.nameAr.trim(),
-      nameEn: form.nameEn.trim() || null,
-      descriptionAr: form.descriptionAr.trim() || null,
-      descriptionEn: form.descriptionEn.trim() || null,
+      nameAr: legacy.nameAr.trim(),
+      nameEn: legacy.nameEn?.trim() || null,
+      descriptionAr: legacy.descriptionAr?.trim() || null,
+      descriptionEn: legacy.descriptionEn?.trim() || null,
       phoneNumber: form.phoneNumber.trim(),
       whatsAppNumber: form.whatsAppNumber.trim() || null,
-      addressAr: form.addressAr.trim() || null,
-      addressEn: form.addressEn.trim() || null,
+      addressAr: legacy.addressAr?.trim() || null,
+      addressEn: legacy.addressEn?.trim() || null,
       latitude: null,
       longitude: null,
       accentColor: form.primaryAccentColor.trim(),
     };
+  }
+
+  toProfileContentRequest(content: ProfileContentFields): UpdateProfileContentApiRequest {
+    return toProfileContentRequest(content);
   }
 }
 

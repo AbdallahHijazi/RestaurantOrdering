@@ -24,6 +24,7 @@ const PREVIEW_LOCALE_SETTINGS = {
 };
 
 const PROFILE_CONTROL_NAMES = [
+  'profileContent',
   'nameAr',
   'nameEn',
   'descriptionAr',
@@ -81,6 +82,10 @@ describe('RestaurantProfileSetupPage', () => {
       slug: 'restaurant-a',
       nameAr: 'مطعم',
       nameEn: 'Restaurant',
+      descriptionAr: 'وصف عربي',
+      descriptionEn: 'English description',
+      addressAr: 'الرياض',
+      addressEn: 'Riyadh',
       phoneNumber: '+966500000000',
       isActive: true,
     });
@@ -100,6 +105,8 @@ describe('RestaurantProfileSetupPage', () => {
       isPickupEnabled: false,
       workingHoursJson: '{"sat":"10-22"}',
     });
+
+    flushPendingPreviewLocaleSettings();
 
     const menuReq = httpMock.expectOne(
       `${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`,
@@ -125,7 +132,9 @@ describe('RestaurantProfileSetupPage', () => {
       `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
     );
     for (const req of localeRequests) {
-      req.flush(PREVIEW_LOCALE_SETTINGS);
+      if (!req.cancelled) {
+        req.flush(PREVIEW_LOCALE_SETTINGS);
+      }
     }
   }
 
@@ -257,7 +266,7 @@ describe('RestaurantProfileSetupPage', () => {
 
   it('marks unsaved changes when profile form is dirty', () => {
     flushLoadedSettings();
-    fixture.componentInstance.form.controls.nameAr.setValue('Updated name');
+    fixture.componentInstance.form.controls.profileContent.controls.name.setValue('Updated name');
     fixture.componentInstance.form.markAsDirty();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Unsaved changes');
@@ -352,13 +361,34 @@ describe('RestaurantProfileSetupPage', () => {
 
   it('saves restaurant profile independently from ordering settings', () => {
     flushLoadedSettings();
-    fixture.componentInstance.form.controls.nameAr.setValue('مطعم محدث');
+    fixture.componentInstance.form.controls.profileContent.controls.name.setValue('مطعم محدث');
     fixture.componentInstance.form.markAsDirty();
     (
       fixture.nativeElement.querySelector(
         '[data-testid="profile-save-identity"]',
       ) as HTMLButtonElement
     ).click();
+    fixture.detectChanges();
+
+    const profileContentReq = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/catalog/profile-content`,
+    );
+    expect(profileContentReq.request.method).toBe('PUT');
+    expect(profileContentReq.request.body).toEqual({
+      name: 'مطعم محدث',
+      description: 'وصف عربي',
+      address: 'الرياض',
+    });
+    expect(profileContentReq.request.body).not.toHaveProperty('nameAr');
+    expect(profileContentReq.request.body).not.toHaveProperty('nameEn');
+    profileContentReq.flush({
+      id: RESTAURANT_ID,
+      ownerId: 'o',
+      slug: 'restaurant-a',
+      nameAr: 'مطعم محدث',
+      phoneNumber: '+966500000000',
+      isActive: true,
+    });
     fixture.detectChanges();
 
     const restaurantReq = httpMock.expectOne(
@@ -403,6 +433,8 @@ describe('RestaurantProfileSetupPage', () => {
       workingHoursJson: '{"sat":"10-22"}',
     });
 
+    flushPendingPreviewLocaleSettings();
+
     const menuReloadReq = httpMock.expectOne(
       `${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`,
     );
@@ -414,6 +446,7 @@ describe('RestaurantProfileSetupPage', () => {
       phoneNumber: '+966500000000',
       categories: [],
     });
+    flushPendingPreviewLocaleSettings();
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Restaurant profile saved successfully');
@@ -589,5 +622,183 @@ describe('RestaurantProfileSetupPage', () => {
     ) as HTMLElement;
     expect(slugInput.closest('bdi')?.getAttribute('dir')).toBe('ltr');
     expect(accentInput.closest('bdi')?.getAttribute('dir')).toBe('ltr');
+  });
+});
+
+describe('RestaurantProfileSetupPage primary-locale identity (7A.19.1)', () => {
+  let fixture: ComponentFixture<RestaurantProfileSetupPage>;
+  let httpMock: HttpTestingController;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [RestaurantProfileSetupPage],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: AuthService,
+          useValue: { restaurantId: () => RESTAURANT_ID },
+        },
+      ],
+    }).compileComponents();
+
+    TestBed.inject(LocaleService).setLocale('en');
+    httpMock = TestBed.inject(HttpTestingController);
+    fixture = TestBed.createComponent(RestaurantProfileSetupPage);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    flushPendingPreviewLocaleSettings(httpMock);
+    httpMock.verify();
+    TestBed.resetTestingModule();
+  });
+
+  function flushPendingPreviewLocaleSettings(controller = httpMock): void {
+    const localeRequests = controller.match(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
+    );
+    for (const req of localeRequests) {
+      if (!req.cancelled) {
+        req.flush(PREVIEW_LOCALE_SETTINGS);
+      }
+    }
+  }
+
+  function flushWithLocaleSettings(
+    localeSettings: typeof PREVIEW_LOCALE_SETTINGS,
+    restaurantOverrides: Record<string, unknown> = {},
+  ): void {
+    const restaurantReq = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}`,
+    );
+    restaurantReq.flush({
+      id: RESTAURANT_ID,
+      ownerId: 'o',
+      slug: 'restaurant-a',
+      nameAr: 'مطعم',
+      nameEn: 'Restaurant',
+      descriptionAr: 'وصف عربي',
+      descriptionEn: 'English description',
+      addressAr: 'الرياض',
+      addressEn: 'Riyadh',
+      phoneNumber: '+966500000000',
+      isActive: true,
+      ...restaurantOverrides,
+    });
+
+    const settingsReq = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/settings`,
+    );
+    settingsReq.flush({
+      id: 's',
+      restaurantId: RESTAURANT_ID,
+      currencyCode: 'SAR',
+      timeZone: 'Asia/Riyadh',
+      taxRate: 15,
+      deliveryFee: 12,
+      minimumOrderAmount: 25,
+      isDeliveryEnabled: true,
+      isPickupEnabled: false,
+      workingHoursJson: '{"sat":"10-22"}',
+    });
+
+    const localeRequests = httpMock.match(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
+    );
+    for (const req of localeRequests) {
+      req.flush(localeSettings);
+    }
+
+    const menuReq = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`,
+    );
+    menuReq.flush({
+      id: RESTAURANT_ID,
+      slug: 'restaurant-a',
+      nameAr: 'مطعم',
+      nameEn: 'Restaurant',
+      phoneNumber: '+966500000000',
+      categories: [],
+    });
+
+    flushPendingPreviewLocaleSettings();
+    fixture.detectChanges();
+  }
+
+  it('does not render bilingual identity field labels', () => {
+    flushWithLocaleSettings(PREVIEW_LOCALE_SETTINGS);
+    expect(fixture.nativeElement.textContent).not.toContain('Arabic name');
+    expect(fixture.nativeElement.textContent).not.toContain('English name');
+    expect(fixture.nativeElement.textContent).not.toContain('الاسم بالعربية');
+    expect(fixture.nativeElement.textContent).not.toContain('الاسم بالإنجليزية');
+  });
+
+  it('renders single restaurant name field in identity tab', () => {
+    flushWithLocaleSettings(PREVIEW_LOCALE_SETTINGS);
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-identity-name"]')).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('Restaurant name');
+  });
+
+  it('shows primary language label from locale settings', () => {
+    flushWithLocaleSettings(PREVIEW_LOCALE_SETTINGS);
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-identity-primary-language"]'))
+      .toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('Primary language: العربية');
+  });
+
+  it('fills profile content name from nameAr when defaultLocale is ar', () => {
+    flushWithLocaleSettings(PREVIEW_LOCALE_SETTINGS);
+    expect(fixture.componentInstance.form.controls.profileContent.controls.name.value).toBe('مطعم');
+  });
+
+  it('fills profile content name from nameEn when defaultLocale is en', () => {
+    flushWithLocaleSettings({
+      ...PREVIEW_LOCALE_SETTINGS,
+      defaultLocale: 'en',
+    });
+    expect(fixture.componentInstance.form.controls.profileContent.controls.name.value).toBe(
+      'Restaurant',
+    );
+  });
+
+  it('does not fill fr primary content from nameAr and shows warning', () => {
+    flushWithLocaleSettings({
+      ...PREVIEW_LOCALE_SETTINGS,
+      defaultLocale: 'fr',
+      supportedLocales: [
+        { code: 'ar', isEnabled: true, sortOrder: 1 },
+        { code: 'fr', isEnabled: true, sortOrder: 2 },
+      ],
+      availableLocales: [
+        { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+        { code: 'fr', displayName: 'French', nativeName: 'Français', direction: 'ltr' },
+      ],
+    });
+
+    expect(fixture.componentInstance.form.controls.profileContent.controls.name.value).toBe('');
+    expect(fixture.componentInstance['profileContentWarning']()).toBe(true);
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-identity-missing-locale"]'))
+      .toBeTruthy();
+  });
+
+  it('updates live preview from profile content fields', () => {
+    flushWithLocaleSettings(PREVIEW_LOCALE_SETTINGS);
+    fixture.componentInstance.form.controls.profileContent.patchValue({
+      name: 'Preview Name',
+      description: 'Preview Description',
+      address: 'Preview Address',
+    });
+    fixture.detectChanges();
+    expect(fixture.componentInstance['previewData']().primaryName).toBe('Preview Name');
+    expect(fixture.componentInstance['previewData']().nameAr).toBe('Preview Name');
+  });
+
+  it('keeps legacy bilingual controls for read compatibility', () => {
+    flushWithLocaleSettings(PREVIEW_LOCALE_SETTINGS);
+    expect(fixture.componentInstance.form.controls.nameAr).toBeTruthy();
+    expect(fixture.componentInstance.form.controls.nameEn).toBeTruthy();
+    expect(fixture.componentInstance.form.controls.addressAr).toBeTruthy();
+    expect(fixture.componentInstance.form.controls.addressEn).toBeTruthy();
   });
 });
