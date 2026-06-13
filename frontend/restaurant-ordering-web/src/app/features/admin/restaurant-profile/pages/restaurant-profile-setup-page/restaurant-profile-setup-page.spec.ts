@@ -9,6 +9,20 @@ import { RestaurantProfileSetupPage } from './restaurant-profile-setup-page';
 
 const RESTAURANT_ID = 'aaaaaaaa-1111-1111-1111-111111111111';
 
+const PREVIEW_LOCALE_SETTINGS = {
+  defaultLocale: 'ar',
+  translationMode: 'ManualOnly',
+  supportedLocales: [
+    { code: 'ar', isEnabled: true, sortOrder: 1 },
+    { code: 'en', isEnabled: true, sortOrder: 2 },
+  ],
+  availableLocales: [
+    { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+    { code: 'en', displayName: 'English', nativeName: 'English', direction: 'ltr' },
+  ],
+  canManageLocales: true,
+};
+
 const PROFILE_CONTROL_NAMES = [
   'nameAr',
   'nameEn',
@@ -52,6 +66,7 @@ describe('RestaurantProfileSetupPage', () => {
   });
 
   afterEach(() => {
+    flushPendingPreviewLocaleSettings();
     httpMock.verify();
     TestBed.resetTestingModule();
   });
@@ -100,7 +115,18 @@ describe('RestaurantProfileSetupPage', () => {
       },
     );
 
+    flushPendingPreviewLocaleSettings();
+
     fixture.detectChanges();
+  }
+
+  function flushPendingPreviewLocaleSettings(): void {
+    const localeRequests = httpMock.match(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
+    );
+    for (const req of localeRequests) {
+      req.flush(PREVIEW_LOCALE_SETTINGS);
+    }
   }
 
   function selectTab(tab: string): void {

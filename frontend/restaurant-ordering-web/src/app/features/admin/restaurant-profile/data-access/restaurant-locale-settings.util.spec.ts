@@ -4,9 +4,11 @@ import {
   buildLocaleSettingsPayload,
   createEditorStateFromSettings,
   ensureDefaultLocaleEnabled,
+  ensurePreviewLocaleInList,
   formatLocaleOptionLabel,
   hasMissingTranslationErrors,
   parseMissingTranslationCounts,
+  resolveEnabledPreviewLocales,
 } from './restaurant-locale-settings.util';
 import type { LocaleMetadata, RestaurantLocaleSettings } from '../../../../core/localization/locale.types';
 
@@ -91,5 +93,33 @@ describe('restaurant-locale-settings.util', () => {
       categories: 2,
       menuItems: 3,
     });
+  });
+
+  it('resolves enabled preview locales from settings', () => {
+    const locales = resolveEnabledPreviewLocales({
+      ...BASE_SETTINGS,
+      supportedLocales: [
+        { code: 'ar', isEnabled: true, sortOrder: 1 },
+        { code: 'en', isEnabled: true, sortOrder: 2 },
+        { code: 'fr', isEnabled: true, sortOrder: 3 },
+        { code: 'de', isEnabled: false, sortOrder: 4 },
+      ],
+      availableLocales: [
+        ...AVAILABLE,
+        { code: 'de', displayName: 'German', nativeName: 'Deutsch', direction: 'ltr' },
+      ],
+    });
+
+    expect(locales.map((locale) => locale.code)).toEqual(['ar', 'en', 'fr']);
+  });
+
+  it('falls back to ar/en preview locales when settings are unavailable', () => {
+    expect(resolveEnabledPreviewLocales(null).map((locale) => locale.code)).toEqual(['ar', 'en']);
+  });
+
+  it('keeps preview locale in enabled list or falls back to first locale', () => {
+    const locales = resolveEnabledPreviewLocales(BASE_SETTINGS);
+    expect(ensurePreviewLocaleInList('fr', locales)).toBe('ar');
+    expect(ensurePreviewLocaleInList('en', locales)).toBe('en');
   });
 });

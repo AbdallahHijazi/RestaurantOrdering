@@ -90,6 +90,40 @@ export function formatLocaleOptionLabel(locale: LocaleMetadata): string {
   return `${locale.nativeName} — ${locale.displayName}`;
 }
 
+export const FALLBACK_PREVIEW_LOCALES: readonly LocaleMetadata[] = [
+  { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+  { code: 'en', displayName: 'English', nativeName: 'English', direction: 'ltr' },
+];
+
+export const PREVIEW_LOCALE_SEGMENTED_MAX = 4;
+
+export function resolveEnabledPreviewLocales(
+  settings: RestaurantLocaleSettings | null,
+): LocaleMetadata[] {
+  if (!settings) {
+    return [...FALLBACK_PREVIEW_LOCALES];
+  }
+
+  const enabledCodes = new Set(
+    settings.supportedLocales.filter((entry) => entry.isEnabled).map((entry) => entry.code),
+  );
+
+  const locales = settings.availableLocales.filter((locale) => enabledCodes.has(locale.code));
+  return locales.length > 0 ? locales : [...FALLBACK_PREVIEW_LOCALES];
+}
+
+export function ensurePreviewLocaleInList(
+  currentLocale: string,
+  locales: readonly LocaleMetadata[],
+): string {
+  const normalized = currentLocale.trim().toLowerCase();
+  if (locales.some((locale) => locale.code === normalized)) {
+    return normalized;
+  }
+
+  return locales[0]?.code ?? 'ar';
+}
+
 export function parseMissingTranslationCounts(
   error: HttpErrorResponse,
 ): MissingTranslationErrorCounts | null {

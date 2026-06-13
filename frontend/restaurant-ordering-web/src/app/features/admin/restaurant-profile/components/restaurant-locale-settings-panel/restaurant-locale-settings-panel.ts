@@ -229,6 +229,14 @@ export class RestaurantLocaleSettingsPanel {
       : this.localeService.uiText('profileLocaleDirectionLtr');
   }
 
+  protected primaryLocaleBadge(): string {
+    return this.localeService.uiText('profileLocalePrimaryBadge');
+  }
+
+  protected isTranslationModeSelected(mode: TranslationModeOption): boolean {
+    return this.editor()?.translationMode === mode;
+  }
+
   protected translationModeLabel(mode: TranslationModeOption): string {
     switch (mode) {
       case 'ManualOnly':

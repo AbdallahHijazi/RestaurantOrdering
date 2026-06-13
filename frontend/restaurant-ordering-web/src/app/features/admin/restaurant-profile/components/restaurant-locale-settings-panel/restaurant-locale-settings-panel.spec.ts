@@ -72,8 +72,9 @@ describe('RestaurantLocaleSettingsPanel', () => {
 
     expect(select).toBeTruthy();
     expect(select?.value).toBe('ar');
-    expect(fixture.nativeElement.textContent).toContain('Français');
-    expect(fixture.nativeElement.textContent).toContain('French');
+    expect(select?.classList.contains('locale-settings__select')).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('العربية — Arabic');
+    expect(fixture.nativeElement.textContent).toContain('Français — French');
   });
 
   it('shows RTL/LTR badges from metadata', () => {
@@ -93,6 +94,24 @@ describe('RestaurantLocaleSettingsPanel', () => {
         ) as HTMLElement
       ).textContent,
     ).toContain('LTR');
+  });
+
+  it('shows primary badge on default locale card', () => {
+    flushLocaleSettingsLoad();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="locale-settings-primary-badge-ar"]'),
+    ).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('Primary');
+  });
+
+  it('marks selected translation mode card', () => {
+    flushLocaleSettingsLoad();
+
+    const manualCard = fixture.nativeElement.querySelector(
+      '.locale-settings__mode-card',
+    ) as HTMLElement;
+    expect(manualCard.classList.contains('is-selected')).toBe(true);
   });
 
   it('auto-enables default locale when changed and keeps default toggle disabled', () => {

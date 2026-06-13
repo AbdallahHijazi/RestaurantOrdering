@@ -46,17 +46,7 @@
       </div>
 
       <div class="live-preview__toolbar-end">
-        <div class="live-preview__toolbar-group" role="group" aria-label="Preview language">
-          <span class="live-preview__group-label">{{ localeService.uiText('profilePreviewLang') }}</span>
-          <div class="live-preview__lang-toggle">
-            <button type="button" [class.is-active]="previewLocale() === 'ar'" (click)="setPreviewLocale('ar')">
-              العربية
-            </button>
-            <button type="button" [class.is-active]="previewLocale() === 'en'" (click)="setPreviewLocale('en')">
-              English
-            </button>
-          </div>
-        </div>
+        <ng-container *ngTemplateOutlet="previewLangControls" />
 
         <p
           class="live-preview__sync-capsule"
@@ -100,14 +90,7 @@
         </button>
       </div>
 
-      <div class="live-preview__controls live-preview__controls--language" role="group" aria-label="Preview language">
-        <button type="button" [class.is-active]="previewLocale() === 'ar'" (click)="setPreviewLocale('ar')">
-          العربية
-        </button>
-        <button type="button" [class.is-active]="previewLocale() === 'en'" (click)="setPreviewLocale('en')">
-          English
-        </button>
-      </div>
+      <ng-container *ngTemplateOutlet="previewLangControls" />
 
       <div class="live-preview__toolbar-actions">
         <button type="button" class="live-preview__full" (click)="openFullPreview()">
@@ -265,4 +248,67 @@
       </footer>
     }
   }
+</ng-template>
+
+<ng-template #previewLangControls>
+  <div
+    class="live-preview__toolbar-group live-preview__toolbar-group--lang"
+    role="group"
+    [attr.aria-label]="localeService.uiText('profilePreviewLang')"
+    data-testid="live-preview-lang-switcher"
+  >
+    <span class="live-preview__group-label">{{ localeService.uiText('profilePreviewLang') }}</span>
+
+    @if (!usePreviewLocaleDropdown()) {
+      <div class="live-preview__lang-toggle">
+        @for (locale of enabledPreviewLocales(); track locale.code) {
+          <button
+            type="button"
+            [class.is-active]="previewLocale() === locale.code"
+            [attr.data-testid]="'live-preview-lang-' + locale.code"
+            (click)="setPreviewLocale(locale.code)"
+          >
+            {{ previewLocaleButtonLabel(locale) }}
+          </button>
+        }
+      </div>
+    } @else {
+      <div #previewLocaleMenu class="live-preview__lang-dropdown" data-testid="live-preview-lang-dropdown">
+        <button
+          type="button"
+          class="live-preview__lang-dropdown-trigger"
+          data-testid="live-preview-lang-dropdown-trigger"
+          [attr.aria-expanded]="previewLocaleMenuOpen()"
+          aria-haspopup="listbox"
+          (click)="togglePreviewLocaleMenu()"
+        >
+          <span>{{ previewLocaleButtonLabel(activePreviewLocaleMeta() ?? enabledPreviewLocales()[0]) }}</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
+          </svg>
+        </button>
+
+        @if (previewLocaleMenuOpen()) {
+          <ul class="live-preview__lang-dropdown-menu" role="listbox" data-testid="live-preview-lang-dropdown-menu">
+            @for (locale of enabledPreviewLocales(); track locale.code) {
+              <li role="presentation">
+                <button
+                  type="button"
+                  role="option"
+                  class="live-preview__lang-dropdown-option"
+                  [class.is-active]="previewLocale() === locale.code"
+                  [attr.data-testid]="'live-preview-lang-' + locale.code"
+                  [attr.aria-selected]="previewLocale() === locale.code"
+                  (click)="setPreviewLocale(locale.code)"
+                >
+                  <span>{{ previewLocaleButtonLabel(locale) }}</span>
+                  <code>{{ previewLocaleShortLabel(locale) }}</code>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    }
+  </div>
 </ng-template>

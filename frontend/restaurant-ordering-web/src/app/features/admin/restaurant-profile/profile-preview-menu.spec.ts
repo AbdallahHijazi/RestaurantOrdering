@@ -11,6 +11,20 @@ import type { RestaurantProfilePreviewData } from './models/restaurant-profile.m
 
 const RESTAURANT_ID = 'aaaaaaaa-1111-1111-1111-111111111111';
 
+const PREVIEW_LOCALE_SETTINGS = {
+  defaultLocale: 'ar',
+  translationMode: 'ManualOnly',
+  supportedLocales: [
+    { code: 'ar', isEnabled: true, sortOrder: 1 },
+    { code: 'en', isEnabled: true, sortOrder: 2 },
+  ],
+  availableLocales: [
+    { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+    { code: 'en', displayName: 'English', nativeName: 'English', direction: 'ltr' },
+  ],
+  canManageLocales: true,
+};
+
 const PREVIEW: RestaurantProfilePreviewData = {
   slug: 'restaurant-a',
   nameAr: 'مطعم حقيقي',
@@ -76,6 +90,12 @@ describe('Profile preview menu (5F.6.3)', () => {
     });
 
     afterEach(() => {
+      const localeRequests = httpMock.match(
+        `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
+      );
+      for (const req of localeRequests) {
+        req.flush(PREVIEW_LOCALE_SETTINGS);
+      }
       httpMock.verify();
     });
 
@@ -111,6 +131,13 @@ describe('Profile preview menu (5F.6.3)', () => {
       httpMock
         .expectOne(`${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`)
         .flush(REAL_MENU_DTO);
+
+      const localeRequests = httpMock.match(
+        `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
+      );
+      for (const req of localeRequests) {
+        req.flush(PREVIEW_LOCALE_SETTINGS);
+      }
 
       fixture.detectChanges();
     }
@@ -168,6 +195,14 @@ describe('Profile preview menu (5F.6.3)', () => {
     beforeEach(async () => {
       await TestBed.configureTestingModule({
         imports: [RestaurantLivePreview],
+        providers: [
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          {
+            provide: AuthService,
+            useValue: { restaurantId: () => null },
+          },
+        ],
       }).compileComponents();
 
       fixture = TestBed.createComponent(RestaurantLivePreview);
