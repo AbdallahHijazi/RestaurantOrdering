@@ -39,7 +39,8 @@ public class RestaurantSupportedLocaleConfiguration : IEntityTypeConfiguration<R
 
         builder.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_RestaurantSupportedLocales_LocaleCode", "[LocaleCode] <> ''");
+            t.HasCheckConstraint("CK_RestaurantSupportedLocales_LocaleCode", "\"LocaleCode\" <> ''");
         });
     }
 }
+

@@ -82,11 +82,12 @@ public class TranslationJobConfiguration : IEntityTypeConfiguration<TranslationJ
 
         builder.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_TranslationJobs_TargetLocaleCode", "[TargetLocaleCode] <> ''");
-            t.HasCheckConstraint("CK_TranslationJobs_SourceLocaleCode", "[SourceLocaleCode] <> ''");
-            t.HasCheckConstraint("CK_TranslationJobs_SourceVersion", "[SourceVersion] >= 1");
-            t.HasCheckConstraint("CK_TranslationJobs_AttemptCount", "[AttemptCount] >= 0");
-            t.HasCheckConstraint("CK_TranslationJobs_MaxAttempts", "[MaxAttempts] >= 1");
+            t.HasCheckConstraint("CK_TranslationJobs_TargetLocaleCode", "\"TargetLocaleCode\" <> ''");
+            t.HasCheckConstraint("CK_TranslationJobs_SourceLocaleCode", "\"SourceLocaleCode\" <> ''");
+            t.HasCheckConstraint("CK_TranslationJobs_SourceVersion", "\"SourceVersion\" >= 1");
+            t.HasCheckConstraint("CK_TranslationJobs_AttemptCount", "\"AttemptCount\" >= 0");
+            t.HasCheckConstraint("CK_TranslationJobs_MaxAttempts", "\"MaxAttempts\" >= 1");
         });
     }
 }
+

@@ -69,3 +69,4 @@ public class CategoryTranslationConfiguration : IEntityTypeConfiguration<Categor
         });
     }
 }
+

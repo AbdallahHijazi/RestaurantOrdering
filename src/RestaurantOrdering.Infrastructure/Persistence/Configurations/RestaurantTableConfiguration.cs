@@ -30,3 +30,4 @@ public class RestaurantTableConfiguration : IEntityTypeConfiguration<RestaurantT
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
+

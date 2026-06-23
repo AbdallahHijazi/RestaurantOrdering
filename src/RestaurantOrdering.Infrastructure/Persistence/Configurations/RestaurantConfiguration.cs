@@ -78,9 +78,10 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
 
         builder.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_Restaurants_ContentVersion", "[ContentVersion] >= 1");
+            t.HasCheckConstraint("CK_Restaurants_ContentVersion", "\"ContentVersion\" >= 1");
         });
 
         builder.HasQueryFilter(r => !r.IsDeleted);
     }
 }
+

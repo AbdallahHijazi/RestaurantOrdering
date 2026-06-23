@@ -57,10 +57,11 @@ public class RestaurantSettingsConfiguration : IEntityTypeConfiguration<Restaura
 
         builder.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_RestaurantSettings_DefaultLocale", "[DefaultLocale] <> ''");
-            t.HasCheckConstraint("CK_RestaurantSettings_TaxRate", "[TaxRate] >= 0 AND [TaxRate] <= 100");
-            t.HasCheckConstraint("CK_RestaurantSettings_DeliveryFee", "[DeliveryFee] >= 0");
-            t.HasCheckConstraint("CK_RestaurantSettings_MinimumOrderAmount", "[MinimumOrderAmount] >= 0");
+            t.HasCheckConstraint("CK_RestaurantSettings_DefaultLocale", "\"DefaultLocale\" <> ''");
+            t.HasCheckConstraint("CK_RestaurantSettings_TaxRate", "\"TaxRate\" >= 0 AND \"TaxRate\" <= 100");
+            t.HasCheckConstraint("CK_RestaurantSettings_DeliveryFee", "\"DeliveryFee\" >= 0");
+            t.HasCheckConstraint("CK_RestaurantSettings_MinimumOrderAmount", "\"MinimumOrderAmount\" >= 0");
         });
     }
 }
+

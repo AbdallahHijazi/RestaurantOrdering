@@ -42,7 +42,8 @@ public class RestaurantUserPermissionGrantConfiguration : IEntityTypeConfigurati
         {
             t.HasCheckConstraint(
                 "CK_RestaurantUserPermissionGrants_Permission",
-                "[Permission] >= 1 AND [Permission] <= 9");
+                "\"Permission\" >= 1 AND \"Permission\" <= 9");
         });
     }
 }
+

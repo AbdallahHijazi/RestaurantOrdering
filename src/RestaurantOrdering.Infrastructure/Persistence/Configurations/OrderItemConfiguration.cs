@@ -51,9 +51,10 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
 
         builder.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_OrderItems_UnitPrice", "[UnitPrice] >= 0");
-            t.HasCheckConstraint("CK_OrderItems_TotalPrice", "[TotalPrice] >= 0");
-            t.HasCheckConstraint("CK_OrderItems_Quantity", "[Quantity] > 0");
+            t.HasCheckConstraint("CK_OrderItems_UnitPrice", "\"UnitPrice\" >= 0");
+            t.HasCheckConstraint("CK_OrderItems_TotalPrice", "\"TotalPrice\" >= 0");
+            t.HasCheckConstraint("CK_OrderItems_Quantity", "\"Quantity\" > 0");
         });
     }
 }
+

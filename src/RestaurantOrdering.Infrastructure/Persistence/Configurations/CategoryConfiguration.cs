@@ -36,7 +36,8 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         builder.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_Categories_ContentVersion", "[ContentVersion] >= 1");
+            t.HasCheckConstraint("CK_Categories_ContentVersion", "\"ContentVersion\" >= 1");
         });
     }
 }
+

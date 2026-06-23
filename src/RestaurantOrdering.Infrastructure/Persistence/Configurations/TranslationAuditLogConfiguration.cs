@@ -40,3 +40,4 @@ public class TranslationAuditLogConfiguration : IEntityTypeConfiguration<Transla
         builder.HasQueryFilter(a => !a.Restaurant.IsDeleted);
     }
 }
+

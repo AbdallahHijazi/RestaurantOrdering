@@ -28,3 +28,4 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
         builder.HasQueryFilter(u => !u.IsDeleted);
     }
 }
+

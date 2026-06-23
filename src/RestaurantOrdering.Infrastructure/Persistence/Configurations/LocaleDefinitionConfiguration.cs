@@ -36,9 +36,10 @@ public class LocaleDefinitionConfiguration : IEntityTypeConfiguration<LocaleDefi
 
         builder.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_LocaleDefinitions_Code", "[Code] <> ''");
+            t.HasCheckConstraint("CK_LocaleDefinitions_Code", "\"Code\" <> ''");
         });
 
         builder.HasData(LocaleDefinitionSeed.All);
     }
 }
+
