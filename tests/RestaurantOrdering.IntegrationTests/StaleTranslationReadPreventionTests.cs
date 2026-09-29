@@ -37,7 +37,7 @@ public sealed class StaleTranslationReadPreventionTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlServer(ConnectionString)
+            .UseNpgsql(ConnectionString)
             .Options;
 
         _context = new ApplicationDbContext(options);

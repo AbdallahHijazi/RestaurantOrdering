@@ -8,7 +8,8 @@
       "launchUrl": "swagger",
       "applicationUrl": "http://localhost:5159",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=RestaurantOrderingDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
       }
     },
     "https": {
@@ -18,7 +19,8 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7167;http://localhost:5159",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=RestaurantOrderingDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
       }
     }
   }

@@ -23,8 +23,8 @@ public sealed class AuthController : ControllerBase
 
     [HttpPost("login")]
     [EnableRateLimiting("auth-login")]
-    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    //[ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    //[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<LoginResponse>> Login(
         [FromBody] LoginRequest request,
         CancellationToken cancellationToken)
@@ -38,10 +38,10 @@ public sealed class AuthController : ControllerBase
 
     [HttpPost("register-owner")]
     [EnableRateLimiting("register-owner")]
-    [ProducesResponseType(typeof(RegisterRestaurantOwnerResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status429TooManyRequests)]
+    //[ProducesResponseType(typeof(RegisterRestaurantOwnerResponse), StatusCodes.Status201Created)]
+    //[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    //[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    //[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status429TooManyRequests)]
     public async Task<ActionResult<RegisterRestaurantOwnerResponse>> RegisterOwner(
         [FromBody] RegisterRestaurantOwnerRequest request,
         CancellationToken cancellationToken)

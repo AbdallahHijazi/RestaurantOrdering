@@ -19,7 +19,7 @@ public sealed class MultilingualFoundationTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlServer(ConnectionString)
+            .UseNpgsql(ConnectionString)
             .Options;
 
         _context = new ApplicationDbContext(options);

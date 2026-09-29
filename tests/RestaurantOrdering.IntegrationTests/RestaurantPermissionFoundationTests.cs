@@ -30,7 +30,7 @@ public sealed class RestaurantPermissionFoundationTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         var services = new ServiceCollection();
-        services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(ConnectionString));
+        services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(ConnectionString));
         services
             .AddIdentityCore<ApplicationUser>()
             .AddRoles<IdentityRole<Guid>>()

@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Dockerfile" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/RestaurantOrdering.Api/RestaurantOrdering.Api.csproj" Id="27feb0ff-b596-4338-adf1-a11c891a63ab" />
     <Project Path="src/RestaurantOrdering.Application/RestaurantOrdering.Application.csproj" Id="2700c898-7644-4801-83a1-60a8304e1ee0" />
