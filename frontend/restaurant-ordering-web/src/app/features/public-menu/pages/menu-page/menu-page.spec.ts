@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { of } from 'rxjs';
 import { API_BASE_URL } from '../../../../core/config/api-config';
 import { LocaleService } from '../../../../core/localization/locale';
 import { PublicCartService } from '../../data-access/public-cart.service';
@@ -38,6 +39,7 @@ function createActivatedRoute(slug: string | null): ActivatedRoute {
 
   return {
     snapshot: childSnapshot,
+    queryParamMap: of(emptyQuery),
     pathFromRoot: [
       { snapshot: { paramMap: convertToParamMap({}), queryParamMap: emptyQuery } },
       { snapshot: parentSnapshot },
@@ -55,6 +57,30 @@ describe('MenuPage', () => {
   });
 
   afterEach(() => {
+    httpMock?.match(() => true).forEach((req) => {
+      if (req.cancelled) {
+        return;
+      }
+
+      if (req.request.url.includes('/locales')) {
+        req.flush({
+          defaultLocale: 'ar',
+          translationMode: 'ManualOnly',
+          supportedLocales: [
+            { code: 'ar', isEnabled: true, sortOrder: 1 },
+            { code: 'en', isEnabled: true, sortOrder: 2 },
+          ],
+          availableLocales: [
+            { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+            { code: 'en', displayName: 'English', nativeName: 'English', direction: 'ltr' },
+          ],
+          canManageLocales: true,
+        });
+        return;
+      }
+
+      req.flush({});
+    });
     httpMock?.verify();
     TestBed.inject(LocaleService).setLocale('ar');
     sessionStorage.clear();
@@ -188,12 +214,14 @@ describe('MenuPage', () => {
     expect(root.textContent).toContain('سلطة الأعشاب الموسمية');
     expect(document.documentElement.dir).toBe('rtl');
 
-    const enButton = root.querySelector(
-      'app-language-switcher button.language-switcher__btn:nth-of-type(2)',
-    ) as HTMLButtonElement | null;
-    expect(enButton).toBeTruthy();
+    const select = root.querySelector(
+      '[data-testid="language-switcher-select"]',
+    ) as HTMLSelectElement | null;
+    expect(select).toBeTruthy();
 
-    enButton!.click();
+    select!.value = 'en';
+    select!.selectedIndex = Array.from(select!.options).findIndex((option) => option.value === 'en');
+    select!.dispatchEvent(new Event('change', { bubbles: true }));
     await settle(fixture);
 
     expect(document.documentElement.lang).toBe('en');
@@ -204,12 +232,9 @@ describe('MenuPage', () => {
     expect(root.textContent).toContain('Starters');
     expect(root.textContent).toContain('Seasonal Herb Salad');
 
-    const arButton = root.querySelector(
-      'app-language-switcher button.language-switcher__btn:nth-of-type(1)',
-    ) as HTMLButtonElement | null;
-    expect(arButton).toBeTruthy();
-
-    arButton!.click();
+    select!.value = 'ar';
+    select!.selectedIndex = Array.from(select!.options).findIndex((option) => option.value === 'ar');
+    select!.dispatchEvent(new Event('change', { bubbles: true }));
     await settle(fixture);
 
     expect(document.documentElement.lang).toBe('ar');

@@ -11,6 +11,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { LocaleService } from '../../../../core/localization/locale';
+import { LanguageSwitcher } from '../../../../shared/ui/language-switcher/language-switcher';
 import { OrderModalShell } from '../../../../shared/components/order-modal-shell/order-modal-shell';
 import { shouldShowFinancialAmount, orderItemDisplayName } from '../../../../shared/orders/order-display.util';
 import { formatOrderDateTime } from '../../../../shared/orders/order-date-time.util';
@@ -47,7 +48,7 @@ const EMPTY_COLUMN: ColumnState = {
 
 @Component({
   selector: 'app-kitchen-dashboard-page',
-  imports: [OrderModalShell],
+  imports: [OrderModalShell, LanguageSwitcher],
   templateUrl: './kitchen-dashboard-page.html',
   styleUrl: './kitchen-dashboard-page.scss',
 })
@@ -57,6 +58,7 @@ export class KitchenDashboardPage {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly locale = inject(LocaleService);
+  protected readonly restaurantId = computed(() => this.authService.restaurantId());
   protected readonly boardColumns = KITCHEN_BOARD_STATUSES;
   protected readonly OrderStatus = OrderStatus;
   protected readonly OrderType = OrderType;

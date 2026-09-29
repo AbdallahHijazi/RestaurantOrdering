@@ -5,11 +5,12 @@ import { filter } from 'rxjs';
 import { ApplicationRoles } from '../../auth/application-roles';
 import { AuthService } from '../../auth/auth.service';
 import { LocaleService } from '../../localization/locale';
+import { LanguageSwitcher } from '../../../shared/ui/language-switcher/language-switcher';
 import { AdminBrandingService } from '../admin-layout/admin-branding.service';
 
 @Component({
   selector: 'app-profile-console-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, LanguageSwitcher],
   templateUrl: './profile-console-layout.html',
   styleUrl: './profile-console-layout.scss',
 })
@@ -32,6 +33,7 @@ export class ProfileConsoleLayout {
 
   protected readonly brandAvatarUrl = this.branding.brandAvatarUrl;
   protected readonly brandInitial = this.branding.brandInitial;
+  protected readonly restaurantId = computed(() => this.authService.restaurantId());
 
   constructor() {
     this.router.events
@@ -44,18 +46,8 @@ export class ProfileConsoleLayout {
       });
   }
 
-  protected adminTargetLanguageLabel(): string {
-    return this.localeService.locale() === 'ar' ? 'EN' : 'العربية';
-  }
-
   protected adminLanguageAriaLabel(): string {
-    return this.localeService.locale() === 'ar'
-      ? this.localeService.uiText('adminSwitchToEnglish')
-      : this.localeService.uiText('adminSwitchToArabic');
-  }
-
-  protected toggleInterfaceLocale(): void {
-    this.localeService.setLocale(this.localeService.locale() === 'ar' ? 'en' : 'ar');
+    return this.localeService.uiText('adminLanguageGroup');
   }
 
   protected logout(): void {

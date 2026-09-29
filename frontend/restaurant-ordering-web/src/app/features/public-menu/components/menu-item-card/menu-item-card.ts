@@ -33,7 +33,7 @@ export class MenuItemCard {
   protected readonly ui = this.localeService.ui;
 
   protected readonly activeLocale = computed(
-    () => this.displayLocale() ?? this.localeService.locale(),
+    () => this.displayLocale() ?? this.localeService.contentLocale(),
   );
 
   protected readonly displayName = computed(() => {

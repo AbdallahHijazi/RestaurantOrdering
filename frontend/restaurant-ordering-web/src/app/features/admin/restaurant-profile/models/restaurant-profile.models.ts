@@ -58,6 +58,9 @@ export interface RestaurantProfilePreviewData {
   whatsAppNumber?: string | null;
   addressAr?: string | null;
   addressEn?: string | null;
+  resolvedName?: string | null;
+  resolvedDescription?: string | null;
+  resolvedAddress?: string | null;
 }
 
 /** Demo restaurant ID used until auth provides the real tenant context. */

@@ -21,6 +21,7 @@ function createActivatedRoute(slug: string, tableToken: string | null): Activate
 
   return {
     snapshot: childSnapshot,
+    queryParamMap: of(queryParamMap),
     pathFromRoot: [
       { snapshot: { paramMap: convertToParamMap({}), queryParamMap } },
       { snapshot: parentSnapshot },

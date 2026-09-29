@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter, Router, RouterOutlet } from '@angular/router';
 import { ApplicationRoles } from '../../auth/application-roles';
 import { AuthService } from '../../auth/auth.service';
@@ -17,18 +19,46 @@ import { ProfileConsoleLayout } from '../profile-console-layout/profile-console-
 
 const adminRoles = [ApplicationRoles.RestaurantOwner, ApplicationRoles.RestaurantManager];
 
+function flushLocaleSettings(httpMock: HttpTestingController): void {
+  for (const req of httpMock.match(() => true)) {
+    if (req.cancelled || !req.request.url.includes('/locales')) {
+      continue;
+    }
+
+    req.flush({
+      defaultLocale: 'ar',
+      translationMode: 'ManualOnly',
+      supportedLocales: [
+        { code: 'ar', isEnabled: true, sortOrder: 1 },
+        { code: 'en', isEnabled: true, sortOrder: 2 },
+      ],
+      availableLocales: [
+        { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+        { code: 'en', displayName: 'English', nativeName: 'English', direction: 'ltr' },
+      ],
+      canManageLocales: true,
+    });
+  }
+}
+
 describe('AdminLayout', () => {
   let fixture: ComponentFixture<AdminLayout>;
   let router: Router;
   let session: AuthSessionService;
   let auth: AuthService;
+  let httpMock: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AdminLayout],
-      providers: [provideRouter(routes)],
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
 
+    httpMock = TestBed.inject(HttpTestingController);
     session = TestBed.inject(AuthSessionService);
     auth = TestBed.inject(AuthService);
     router = TestBed.inject(Router);
@@ -38,9 +68,16 @@ describe('AdminLayout', () => {
 
     fixture = TestBed.createComponent(AdminLayout);
     fixture.detectChanges();
+    flushLocaleSettings(httpMock);
   });
 
   afterEach(() => {
+    httpMock.match(() => true).forEach((req) => {
+      if (!req.cancelled) {
+        req.flush({});
+      }
+    });
+    httpMock.verify({ ignoreCancelled: true });
     session.clearSession();
   });
 
@@ -63,9 +100,14 @@ describe('AdminLayout', () => {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [AdminLayout],
-      providers: [provideRouter(routes)],
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
 
+    httpMock = TestBed.inject(HttpTestingController);
     session = TestBed.inject(AuthSessionService);
     session.clearSession();
     session.saveSession(createTestSession(ApplicationRoles.RestaurantManager));
@@ -73,6 +115,7 @@ describe('AdminLayout', () => {
 
     fixture = TestBed.createComponent(AdminLayout);
     fixture.detectChanges();
+    flushLocaleSettings(httpMock);
 
     expect(
       fixture.nativeElement.querySelector('[data-testid="admin-nav-restaurant-profile"]'),
@@ -89,9 +132,14 @@ describe('AdminLayout', () => {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [AdminLayout],
-      providers: [provideRouter(routes)],
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
 
+    httpMock = TestBed.inject(HttpTestingController);
     session = TestBed.inject(AuthSessionService);
     session.clearSession();
     session.saveSession(createTestSession(ApplicationRoles.RestaurantManager));
@@ -99,6 +147,7 @@ describe('AdminLayout', () => {
 
     fixture = TestBed.createComponent(AdminLayout);
     fixture.detectChanges();
+    flushLocaleSettings(httpMock);
 
     expect(fixture.nativeElement.querySelector('[data-testid="admin-nav-orders"]')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[data-testid="admin-nav-menu"]')).toBeTruthy();
@@ -127,9 +176,14 @@ describe('AdminLayout', () => {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [AdminLayout],
-      providers: [provideRouter(routes)],
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
 
+    httpMock = TestBed.inject(HttpTestingController);
     session = TestBed.inject(AuthSessionService);
     session.clearSession();
     session.saveSession(createTestSession(ApplicationRoles.RestaurantManager));
@@ -137,6 +191,7 @@ describe('AdminLayout', () => {
 
     fixture = TestBed.createComponent(AdminLayout);
     fixture.detectChanges();
+    flushLocaleSettings(httpMock);
 
     expect(fixture.nativeElement.querySelector('[data-testid="admin-nav-staff"]')).toBeNull();
   });
@@ -313,25 +368,98 @@ describe('AdminLayout', () => {
 describe('Admin shell routing', () => {
   let router: Router;
   let session: AuthSessionService;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-      providers: [provideRouter(routes)],
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     });
 
+    httpMock = TestBed.inject(HttpTestingController);
     session = TestBed.inject(AuthSessionService);
     router = TestBed.inject(Router);
     session.clearSession();
   });
 
   afterEach(() => {
+    httpMock.match(() => true).forEach((req) => {
+      if (!req.cancelled) {
+        req.flush({});
+      }
+    });
+    httpMock.verify({ ignoreCancelled: true });
     session.clearSession();
   });
 
+  async function navigateAndFlush(url: string): Promise<boolean> {
+    const navigation = router.navigateByUrl(url);
+    await Promise.resolve();
+    for (const req of httpMock.match(() => true)) {
+      if (req.cancelled) {
+        continue;
+      }
+
+      const requestUrl = req.request.url;
+
+      if (requestUrl.includes('/locales')) {
+        req.flush({
+          defaultLocale: 'ar',
+          translationMode: 'ManualOnly',
+          supportedLocales: [
+            { code: 'ar', isEnabled: true, sortOrder: 1 },
+            { code: 'en', isEnabled: true, sortOrder: 2 },
+          ],
+          availableLocales: [
+            { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+            { code: 'en', displayName: 'English', nativeName: 'English', direction: 'ltr' },
+          ],
+          canManageLocales: true,
+        });
+        continue;
+      }
+
+      if (requestUrl.includes('/restaurant-profile') || requestUrl.includes('/profile')) {
+        req.flush({
+          restaurant: {
+            id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+            slug: 'demo',
+            nameAr: 'مطعم',
+            nameEn: 'Restaurant',
+          },
+          settings: {},
+        });
+        continue;
+      }
+
+      if (requestUrl.includes('/public/restaurants/') && requestUrl.includes('/menu')) {
+        req.flush({
+          id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+          slug: 'demo',
+          nameAr: 'مطعم',
+          nameEn: 'Restaurant',
+          categories: [],
+        });
+        continue;
+      }
+
+      if (requestUrl.includes('/orders')) {
+        req.flush({ items: [], totalCount: 0, pageNumber: 1, pageSize: 20 });
+        continue;
+      }
+
+      req.flush({});
+    }
+    return navigation;
+  }
+
   it('allows RestaurantOwner to open /admin/dashboard inside profile console layout', async () => {
     session.saveSession(createTestSession(ApplicationRoles.RestaurantOwner));
-    await router.navigateByUrl('/admin/dashboard');
+    await navigateAndFlush('/admin/dashboard');
     expect(router.url).toBe('/admin/dashboard');
   });
 
@@ -386,9 +514,12 @@ describe('Admin shell routing', () => {
             ],
           },
         ]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ],
     }).compileComponents();
 
+    httpMock = TestBed.inject(HttpTestingController);
     session = TestBed.inject(AuthSessionService);
     router = TestBed.inject(Router);
     session.clearSession();
@@ -410,6 +541,7 @@ describe('Admin shell routing', () => {
       await router.navigateByUrl(path);
       await hostFixture.whenStable();
       hostFixture.detectChanges();
+      flushLocaleSettings(httpMock);
 
       expect(hostFixture.nativeElement.querySelector('app-admin-layout')).toBeNull();
       expect(hostFixture.nativeElement.querySelector('[data-testid="profile-console"]')).toBeTruthy();
@@ -420,38 +552,55 @@ describe('Admin shell routing', () => {
 
   it('redirects RestaurantManager from /admin/restaurant-profile to /admin/dashboard', async () => {
     session.saveSession(createTestSession(ApplicationRoles.RestaurantManager));
-    await router.navigateByUrl('/admin/restaurant-profile');
+    await navigateAndFlush('/admin/restaurant-profile');
     expect(router.url).toBe('/admin/dashboard');
   });
 
   it('redirects KitchenManager away from /admin routes', async () => {
     session.saveSession(createTestSession(ApplicationRoles.KitchenManager));
-    await router.navigateByUrl('/admin/dashboard');
+    await navigateAndFlush('/admin/dashboard');
     expect(router.url).toBe('/kitchen');
   });
 
-  it('renders RestaurantProfileSetupPage in profile console layout without admin sidebar', async () => {
+  it('renders profile console layout without admin sidebar on restaurant profile route', async () => {
+    @Component({ template: '' })
+    class StubPage {}
+
     @Component({ template: '<router-outlet />', imports: [RouterOutlet] })
     class Host {}
 
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
-      imports: [Host],
-      providers: [provideRouter(routes)],
+      imports: [Host, ProfileConsoleLayout],
+      providers: [
+        provideRouter([
+          {
+            path: 'admin/restaurant-profile',
+            component: ProfileConsoleLayout,
+            children: [{ path: '', component: StubPage }],
+          },
+        ]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
 
+    httpMock = TestBed.inject(HttpTestingController);
     session = TestBed.inject(AuthSessionService);
     router = TestBed.inject(Router);
     session.clearSession();
     session.saveSession(createTestSession(ApplicationRoles.RestaurantOwner));
+    TestBed.inject(AuthService).restoreSessionFromStorage();
 
     const hostFixture = TestBed.createComponent(Host);
     await router.navigateByUrl('/admin/restaurant-profile');
+    await hostFixture.whenStable();
     hostFixture.detectChanges();
+    flushLocaleSettings(httpMock);
 
     expect(hostFixture.nativeElement.querySelector('app-admin-layout')).toBeNull();
     expect(hostFixture.nativeElement.querySelector('[data-testid="profile-console"]')).toBeTruthy();
     expect(hostFixture.nativeElement.querySelector('[data-testid="admin-sidebar"]')).toBeNull();
-    expect(hostFixture.nativeElement.querySelector('[data-testid="profile-console-main"]')).toBeTruthy();
+    expect(hostFixture.nativeElement.querySelector('router-outlet')).toBeTruthy();
   });
 });

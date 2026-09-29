@@ -5,6 +5,7 @@ import {
   pickResolvedOrLegacyText,
 } from './content-locale.util';
 import { DirectionService } from './direction.service';
+import { RestaurantLocaleOptionsService } from './restaurant-locale-options.service';
 import type {
   AdminUiLocale,
   ContentLocale,
@@ -33,10 +34,15 @@ const LOCALE_STORAGE_KEY = 'restaurant-ordering.locale';
 })
 export class LocaleService {
   private readonly directionService = inject(DirectionService);
+  private readonly contentLocales = inject(RestaurantLocaleOptionsService);
 
   private readonly localeSignal = signal<AdminUiLocale>(this.readStoredLocale());
 
   readonly locale = this.localeSignal.asReadonly();
+  /** Dynamic restaurant content locale (menu, preview, translations). */
+  readonly contentLocale = this.contentLocales.activeContentLocale;
+  readonly enabledContentLocales = this.contentLocales.enabledLocales;
+  readonly contentLocalesLoading = this.contentLocales.loading;
   readonly direction = computed<TextDirection>(() =>
     this.directionService.getDirection(this.localeSignal()),
   );
@@ -46,15 +52,45 @@ export class LocaleService {
     this.applyDocumentAttributes(this.localeSignal());
   }
 
-  setLocale(locale: AdminUiLocale): void {
+  setLocale(locale: AdminUiLocale, options?: { syncDocument?: boolean }): void {
     this.localeSignal.set(locale);
-    this.applyDocumentAttributes(locale);
 
     try {
       localStorage.setItem(LOCALE_STORAGE_KEY, locale);
     } catch {
       // Storage may be unavailable in private mode; ignore.
     }
+
+    if (options?.syncDocument !== false) {
+      this.applyDocumentAttributes(locale);
+    }
+  }
+
+  /** Updates admin UI strings without overriding content-locale document direction. */
+  setAdminUiLocale(locale: AdminUiLocale): void {
+    this.setLocale(locale, { syncDocument: false });
+  }
+
+  loadContentLocalesForRestaurant(restaurantId: string | null | undefined): void {
+    this.contentLocales.loadForRestaurant(restaurantId);
+  }
+
+  selectContentLocale(localeCode: ContentLocale, options?: { persist?: boolean }): void {
+    this.contentLocales.selectContentLocale(localeCode, options);
+  }
+
+  /** Updates content locale and syncs admin UI locale when ar/en is selected. */
+  selectLanguage(localeCode: ContentLocale, options?: { persist?: boolean }): void {
+    const normalized = localeCode.trim().toLowerCase() as ContentLocale;
+    this.selectContentLocale(normalized, options);
+
+    if (normalized === 'ar' || normalized === 'en') {
+      this.setAdminUiLocale(normalized);
+    }
+  }
+
+  initializeContentLocaleFromQueryParam(lang: string | null | undefined): void {
+    this.contentLocales.initializeFromQueryParam(lang);
   }
 
   toggleLocale(): void {

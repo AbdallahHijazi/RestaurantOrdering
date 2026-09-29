@@ -1,13 +1,49 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { API_BASE_URL } from '../config/api-config';
 import { LocaleService } from './locale';
+import { RestaurantLocaleOptionsService } from './restaurant-locale-options.service';
+
+const RESTAURANT_ID = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 
 describe('LocaleService', () => {
   let service: LocaleService;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
     service = TestBed.inject(LocaleService);
+    httpMock = TestBed.inject(HttpTestingController);
   });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  function loadLocalesWithGerman(): void {
+    TestBed.inject(RestaurantLocaleOptionsService).loadForRestaurant(RESTAURANT_ID);
+    const req = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
+    );
+    req.flush({
+      defaultLocale: 'ar',
+      translationMode: 'ManualOnly',
+      supportedLocales: [
+        { code: 'ar', isEnabled: true, sortOrder: 1 },
+        { code: 'en', isEnabled: true, sortOrder: 2 },
+        { code: 'de', isEnabled: true, sortOrder: 3 },
+      ],
+      availableLocales: [
+        { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+        { code: 'en', displayName: 'English', nativeName: 'English', direction: 'ltr' },
+        { code: 'de', displayName: 'German', nativeName: 'Deutsch', direction: 'ltr' },
+      ],
+      canManageLocales: true,
+    });
+  }
 
   it('defaults to Arabic locale', () => {
     service.setLocale('ar');
@@ -61,5 +97,25 @@ describe('LocaleService', () => {
     service.setLocale('en');
     const formatted = service.formatCurrency(120, 'SAR', 'SA');
     expect(formatted).toContain('120');
+  });
+
+  it('selectLanguage updates content locale for dynamic locales', () => {
+    loadLocalesWithGerman();
+    service.setLocale('en');
+    service.selectLanguage('de');
+    expect(service.contentLocale()).toBe('de');
+    expect(service.locale()).toBe('en');
+  });
+
+  it('selectLanguage syncs admin UI locale only for ar/en', () => {
+    loadLocalesWithGerman();
+    service.setLocale('en');
+    service.selectLanguage('ar');
+    expect(service.contentLocale()).toBe('ar');
+    expect(service.locale()).toBe('ar');
+
+    service.selectLanguage('de');
+    expect(service.contentLocale()).toBe('de');
+    expect(service.locale()).toBe('ar');
   });
 });

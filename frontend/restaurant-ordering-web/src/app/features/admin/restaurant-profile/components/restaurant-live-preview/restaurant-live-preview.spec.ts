@@ -11,6 +11,20 @@ import type { RestaurantProfilePreviewData } from '../../models/restaurant-profi
 
 const RESTAURANT_ID = 'aaaaaaaa-1111-1111-1111-111111111111';
 
+const PREVIEW_LOCALE_SETTINGS = {
+  defaultLocale: 'ar',
+  translationMode: 'ManualOnly',
+  supportedLocales: [
+    { code: 'ar', isEnabled: true, sortOrder: 1 },
+    { code: 'en', isEnabled: true, sortOrder: 2 },
+  ],
+  availableLocales: [
+    { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+    { code: 'en', displayName: 'English', nativeName: 'English', direction: 'ltr' },
+  ],
+  canManageLocales: true,
+};
+
 const LOCALE_SETTINGS_RESPONSE = {
   defaultLocale: 'ar',
   translationMode: 'ManualOnly',
@@ -72,11 +86,21 @@ type PreviewHarness = RestaurantLivePreview & {
   selectCategory: (categoryId: string) => void;
   activeCategoryId: () => string;
   filteredPreviewItems: () => Array<{ id: string; nameEn?: string | null }>;
-  previewLocale: () => string;
-  setPreviewLocale: (locale: string) => void;
+  contentLocale: () => string;
   previewDirection: () => 'rtl' | 'ltr';
-  enabledPreviewLocales: () => Array<{ code: string }>;
 };
+
+function selectLanguage(root: ParentNode, code: string): void {
+  const select = root.querySelector('[data-testid="language-switcher-select"]') as HTMLSelectElement;
+  const option = Array.from(select.options).find((entry) => entry.value === code);
+  if (!option) {
+    throw new Error(`Language option not found: ${code}`);
+  }
+
+  select.value = code;
+  select.selectedIndex = option.index;
+  select.dispatchEvent(new Event('change', { bubbles: true }));
+}
 
 function getPreviewModal(fixture: ComponentFixture<RestaurantLivePreview>): HTMLElement | null {
   return (
@@ -117,7 +141,7 @@ describe('RestaurantLivePreview', () => {
         provideHttpClientTesting(),
         {
           provide: AuthService,
-          useValue: { restaurantId: () => null },
+          useValue: { restaurantId: () => RESTAURANT_ID },
         },
       ],
     }).compileComponents();
@@ -131,6 +155,14 @@ describe('RestaurantLivePreview', () => {
     fixture.componentRef.setInput('categories', REAL_CATEGORIES);
     fixture.componentRef.setInput('items', REAL_ITEMS);
     fixture.detectChanges();
+
+    const httpMock = TestBed.inject(HttpTestingController);
+    for (const req of httpMock.match(() => true)) {
+      if (!req.cancelled && req.request.url.includes('/locales')) {
+        req.flush(PREVIEW_LOCALE_SETTINGS);
+      }
+    }
+    fixture.detectChanges();
   });
 
   afterEach(() => {
@@ -139,17 +171,17 @@ describe('RestaurantLivePreview', () => {
     TestBed.inject(LocaleService).setLocale('ar');
   });
 
-  it('renders fallback ar/en preview languages when locale settings are unavailable', () => {
+  it('renders enabled preview languages from locale settings API', () => {
     const switcher = fixture.nativeElement.querySelector(
       '[data-testid="live-preview-lang-switcher"]',
     ) as HTMLElement;
 
     expect(switcher).toBeTruthy();
 
-    const buttons = switcher.querySelectorAll('.live-preview__lang-toggle button');
-    expect(buttons.length).toBe(2);
-    expect(buttons[0].textContent?.trim()).toBe('العربية');
-    expect(buttons[1].textContent?.trim()).toBe('English');
+    const select = switcher.querySelector('[data-testid="language-switcher-select"]') as HTMLSelectElement;
+    expect(select.options.length).toBe(2);
+    expect(select.options[0].textContent).toContain('العربية');
+    expect(select.options[1].textContent).toContain('English');
   });
 
   it('shows real catalog items instead of mock hummus', () => {
@@ -197,6 +229,8 @@ describe('RestaurantLivePreview', () => {
   });
 
   it('keeps category filtering after switching preview language', () => {
+    const locale = TestBed.inject(LocaleService);
+
     component.openFullPreview();
     fixture.detectChanges();
 
@@ -204,16 +238,10 @@ describe('RestaurantLivePreview', () => {
     clickCategory(modal, 'تصنيف فعلي');
     fixture.detectChanges();
 
-    const buttons = Array.from(
-      fixture.nativeElement.querySelectorAll('.live-preview__lang-toggle button'),
-    ) as HTMLButtonElement[];
-    if (buttons.length === 0) {
-      component.setPreviewLocale('en');
-    } else {
-      buttons.find((button) => button.textContent?.includes('English'))?.click();
-    }
+    selectLanguage(fixture.nativeElement, 'en');
     fixture.detectChanges();
 
+    expect(locale.contentLocale()).toBe('en');
     expect(cardTexts(getModalCards(modal))).toContain('Real Dish');
   });
 
@@ -300,7 +328,7 @@ describe('RestaurantLivePreview', () => {
 
     expect(start.querySelector('[data-testid="live-preview-device-desktop"]')).toBeTruthy();
     expect(start.querySelector('[data-testid="live-preview-full"]')).toBeTruthy();
-    expect(end.querySelector('.live-preview__lang-toggle')).toBeTruthy();
+    expect(end.querySelector('[data-testid="live-preview-lang-switcher"]')).toBeTruthy();
     expect(end.querySelector('[data-testid="live-preview-sync-status"]')).toBeTruthy();
   });
 
@@ -343,25 +371,21 @@ describe('RestaurantLivePreview', () => {
     expect(frame.classList.contains('live-preview__frame--mobile')).toBe(true);
   });
 
-  it('changes preview locale without changing admin interface locale', () => {
+  it('syncs admin UI locale when ar/en preview language is selected', () => {
     const locale = TestBed.inject(LocaleService);
     locale.setLocale('en');
     fixture.componentRef.setInput('variant', 'studio');
     fixture.detectChanges();
 
-    const buttons = Array.from(
-      fixture.nativeElement.querySelectorAll('.live-preview__lang-toggle button'),
-    ) as HTMLButtonElement[];
-
-    buttons.find((button) => button.textContent?.includes('English'))?.click();
+    selectLanguage(fixture.nativeElement, 'en');
     fixture.detectChanges();
-    expect(component.previewLocale()).toBe('en');
+    expect(locale.contentLocale()).toBe('en');
     expect(locale.locale()).toBe('en');
 
-    buttons.find((button) => button.textContent?.includes('العربية'))?.click();
+    selectLanguage(fixture.nativeElement, 'ar');
     fixture.detectChanges();
-    expect(component.previewLocale()).toBe('ar');
-    expect(locale.locale()).toBe('en');
+    expect(locale.contentLocale()).toBe('ar');
+    expect(locale.locale()).toBe('ar');
   });
 
   it('applies studio device frame classes from toolbar buttons', () => {
@@ -377,7 +401,9 @@ describe('RestaurantLivePreview', () => {
   });
 
   it('applies preview locale direction to full preview modal body', () => {
-    component.setPreviewLocale('en');
+    const locale = TestBed.inject(LocaleService);
+
+    locale.selectContentLocale('en');
     component.openFullPreview();
     fixture.detectChanges();
 
@@ -387,7 +413,7 @@ describe('RestaurantLivePreview', () => {
     expect(modalBody.getAttribute('dir')).toBe('ltr');
 
     component.closeFullPreview();
-    component.setPreviewLocale('ar');
+    locale.selectContentLocale('ar');
     component.openFullPreview();
     fixture.detectChanges();
 
@@ -395,16 +421,6 @@ describe('RestaurantLivePreview', () => {
       '.live-preview__modal-body',
     ) as HTMLElement;
     expect(rtlModalBody.getAttribute('dir')).toBe('rtl');
-  });
-
-  it('accepts fr/de preview locale strings and resolves direction centrally', () => {
-    component.setPreviewLocale('fr');
-    expect(component.previewLocale()).toBe('fr');
-    expect(component.previewDirection()).toBe('ltr');
-
-    component.setPreviewLocale('de');
-    expect(component.previewLocale()).toBe('de');
-    expect(component.previewDirection()).toBe('ltr');
   });
 });
 
@@ -446,17 +462,21 @@ describe('RestaurantLivePreview dynamic locales', () => {
   });
 
   function flushLocales(response = LOCALE_SETTINGS_RESPONSE): void {
-    const req = httpMock.expectOne(
-      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
-    );
-    req.flush(response);
+    for (const req of httpMock.match(() => true)) {
+      if (req.cancelled || !req.request.url.includes('/locales')) {
+        continue;
+      }
+
+      req.flush(response);
+    }
     fixture.detectChanges();
   }
 
   it('renders enabled preview locales from locale settings API', () => {
     flushLocales();
+    const locale = TestBed.inject(LocaleService);
 
-    expect(component.enabledPreviewLocales().map((locale) => locale.code)).toEqual([
+    expect(locale.enabledContentLocales().map((entry) => entry.code)).toEqual([
       'ar',
       'en',
       'fr',
@@ -466,34 +486,37 @@ describe('RestaurantLivePreview dynamic locales', () => {
     const switcher = fixture.nativeElement.querySelector(
       '[data-testid="live-preview-lang-switcher"]',
     ) as HTMLElement;
-    const buttons = switcher.querySelectorAll('.live-preview__lang-toggle button');
-    expect(buttons.length).toBe(4);
-    expect(buttons[2].textContent?.trim()).toBe('Français');
-    expect(buttons[3].textContent?.trim()).toBe('Deutsch');
+    const select = switcher.querySelector('[data-testid="language-switcher-select"]') as HTMLSelectElement;
+    expect(select.options.length).toBe(4);
+    expect(select.options[2].textContent).toContain('Français');
+    expect(select.options[3].textContent).toContain('Deutsch');
   });
 
-  it('selecting fr updates previewLocale without changing admin interface locale', () => {
+  it('selecting fr updates content locale without changing admin interface locale', () => {
     flushLocales();
     fixture.componentRef.setInput('variant', 'studio');
     fixture.detectChanges();
 
     const locale = TestBed.inject(LocaleService);
-    (
-      fixture.nativeElement.querySelector('[data-testid="live-preview-lang-fr"]') as HTMLButtonElement
-    ).click();
+    selectLanguage(fixture.nativeElement, 'fr');
     fixture.detectChanges();
 
-    expect(component.previewLocale()).toBe('fr');
+    expect(locale.contentLocale()).toBe('fr');
     expect(locale.locale()).toBe('en');
   });
 
   it('falls back to ar/en when locale settings request fails', () => {
-    const req = httpMock.expectOne(
-      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
-    );
-    req.flush('Server error', { status: 500, statusText: 'Server Error' });
+    for (const req of httpMock.match(() => true)) {
+      if (req.cancelled || !req.request.url.includes('/locales')) {
+        continue;
+      }
+
+      req.flush('Server error', { status: 500, statusText: 'Server Error' });
+    }
     fixture.detectChanges();
 
-    expect(component.enabledPreviewLocales().map((locale) => locale.code)).toEqual(['ar', 'en']);
+    expect(
+      TestBed.inject(LocaleService).enabledContentLocales().map((locale) => locale.code),
+    ).toEqual(['ar', 'en']);
   });
 });

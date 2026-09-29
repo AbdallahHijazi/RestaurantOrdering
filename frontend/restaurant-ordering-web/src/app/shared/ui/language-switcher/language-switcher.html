@@ -1,20 +1,33 @@
-<div class="language-switcher" role="group" aria-label="Language switcher">
-  <button
-    type="button"
-    class="language-switcher__btn"
-    [class.is-active]="localeService.locale() === 'ar'"
-    [attr.aria-pressed]="localeService.locale() === 'ar'"
-    (click)="setLocale('ar')"
-  >
-    ع
-  </button>
-  <button
-    type="button"
-    class="language-switcher__btn"
-    [class.is-active]="localeService.locale() === 'en'"
-    [attr.aria-pressed]="localeService.locale() === 'en'"
-    (click)="setLocale('en')"
-  >
-    EN
-  </button>
+<div class="language-switcher">
+  <label class="language-switcher__label">
+    <span class="language-switcher__sr-only">{{ ariaLabel() }}</span>
+    <select
+      class="language-switcher__select"
+      [attr.aria-label]="ariaLabel()"
+      [ngModel]="selectedLocale()"
+      (ngModelChange)="onLocaleSelected($event)"
+      [disabled]="localeOptions.loading()"
+      data-testid="language-switcher-select"
+    >
+      @for (locale of localeOptions.enabledLocales(); track locale.code) {
+        <option
+          [value]="locale.code"
+          [attr.data-testid]="'language-switcher-' + locale.code"
+        >
+          {{ optionLabel(locale) }}
+        </option>
+      }
+    </select>
+  </label>
+
+  @if (selectedLocaleMetadata(); as selected) {
+    <span
+      class="language-switcher__direction-badge"
+      [class.language-switcher__direction-badge--rtl]="selected.direction === 'rtl'"
+      [attr.data-testid]="'language-switcher-direction-' + selected.code"
+      aria-hidden="true"
+    >
+      {{ directionBadge(selected) }}
+    </span>
+  }
 </div>

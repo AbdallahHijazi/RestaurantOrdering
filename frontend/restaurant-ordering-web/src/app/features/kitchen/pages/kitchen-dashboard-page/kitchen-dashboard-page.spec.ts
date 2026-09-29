@@ -42,6 +42,35 @@ describe('KitchenDashboardPage', () => {
     document.body.classList.remove('order-modal-scroll-lock');
     document.querySelectorAll('app-modal-shell, app-order-modal-shell').forEach((node) => node.remove());
     TestBed.inject(LocaleService).setLocale('ar');
+    httpMock.match(() => true).forEach((req) => {
+      if (req.cancelled) {
+        return;
+      }
+
+      if (req.request.url.includes('/locales')) {
+        req.flush({
+          defaultLocale: 'ar',
+          translationMode: 'ManualOnly',
+          supportedLocales: [
+            { code: 'ar', isEnabled: true, sortOrder: 1 },
+            { code: 'en', isEnabled: true, sortOrder: 2 },
+          ],
+          availableLocales: [
+            { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+            { code: 'en', displayName: 'English', nativeName: 'English', direction: 'ltr' },
+          ],
+          canManageLocales: true,
+        });
+        return;
+      }
+
+      if (req.request.url.includes('/orders')) {
+        req.flush(resultFor([]));
+        return;
+      }
+
+      req.flush({});
+    });
     httpMock.verify({ ignoreCancelled: true });
     session.clearSession();
   });

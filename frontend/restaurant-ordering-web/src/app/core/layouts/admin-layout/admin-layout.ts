@@ -6,13 +6,14 @@ import { ApplicationRoles } from '../../auth/application-roles';
 import { AuthService } from '../../auth/auth.service';
 import { AdminBrandingService } from './admin-branding.service';
 import { LocaleService } from '../../localization/locale';
+import { LanguageSwitcher } from '../../../shared/ui/language-switcher/language-switcher';
 import { ADMIN_SHELL_MOCK } from './admin-shell.config';
 
 type AdminPageKey = 'dashboard' | 'restaurantProfile' | 'staff' | 'orders' | 'menu';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, LanguageSwitcher],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.scss',
 })
@@ -52,6 +53,7 @@ export class AdminLayout {
   protected readonly isOwner = computed(() =>
     this.authService.hasAnyRole(ApplicationRoles.RestaurantOwner),
   );
+  protected readonly restaurantId = computed(() => this.authService.restaurantId());
   protected readonly roleLabel = computed(() => {
     const role = this.authService.currentRole();
     if (role === ApplicationRoles.RestaurantOwner) {
@@ -81,10 +83,6 @@ export class AdminLayout {
 
   protected closeDrawer(): void {
     this.drawerOpen.set(false);
-  }
-
-  protected setLocale(locale: 'ar' | 'en'): void {
-    this.localeService.setLocale(locale);
   }
 
   protected logout(): void {

@@ -3,7 +3,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router, RouterOutlet } from '@angular/router';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { API_BASE_URL } from '../../config/api-config';
+import { RestaurantLocaleOptionsService } from '../../localization/restaurant-locale-options.service';
 import { ApplicationRoles } from '../../auth/application-roles';
 import { AuthService } from '../../auth/auth.service';
 import { LocaleService } from '../../localization/locale';
@@ -39,26 +43,57 @@ function getLayoutStylesheetText(): string {
 
 describe('ProfileConsoleLayout', () => {
   let fixture: ComponentFixture<ProfileConsoleLayout>;
-  let auth: { logout: ReturnType<typeof vi.fn>; hasAnyRole: ReturnType<typeof vi.fn> };
+  let httpMock: HttpTestingController;
+  let auth: {
+    logout: ReturnType<typeof vi.fn>;
+    hasAnyRole: ReturnType<typeof vi.fn>;
+    restaurantId?: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     setViewportWidth(1280);
     auth = {
       logout: vi.fn(),
       hasAnyRole: vi.fn((role: string) => role === ApplicationRoles.RestaurantOwner),
+      restaurantId: vi.fn(() => 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'),
     };
 
     await TestBed.configureTestingModule({
       imports: [ProfileConsoleLayout],
       providers: [
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: AuthService, useValue: auth },
       ],
     }).compileComponents();
 
+    httpMock = TestBed.inject(HttpTestingController);
     TestBed.inject(LocaleService).setLocale('en');
     fixture = TestBed.createComponent(ProfileConsoleLayout);
     fixture.detectChanges();
+    flushLocaleSettings(httpMock);
+  });
+
+  afterEach(() => {
+    httpMock.match(() => true).forEach((req) => {
+      if (!req.cancelled) {
+        req.flush({
+          defaultLocale: 'ar',
+          translationMode: 'ManualOnly',
+          supportedLocales: [
+            { code: 'ar', isEnabled: true, sortOrder: 1 },
+            { code: 'en', isEnabled: true, sortOrder: 2 },
+          ],
+          availableLocales: [
+            { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+            { code: 'en', displayName: 'English', nativeName: 'English', direction: 'ltr' },
+          ],
+          canManageLocales: true,
+        });
+      }
+    });
+    httpMock.verify();
   });
 
   it('renders compact header with six primary navigation links for owners', () => {
@@ -267,46 +302,33 @@ describe('ProfileConsoleLayout', () => {
     expect(avatar.src).toContain('logo.png');
   });
 
-  it('renders globe language toggle with target language label and icon-only logout', () => {
-    const languageButton = fixture.nativeElement.querySelector(
-      '[data-testid="profile-console-language-toggle"]',
-    ) as HTMLButtonElement;
-    const languageLabel = fixture.nativeElement.querySelector(
-      '[data-testid="profile-console-language-label"]',
-    ) as HTMLSpanElement;
+  it('renders dynamic language switcher and icon-only logout', () => {
+    const switcher = fixture.nativeElement.querySelector(
+      '[data-testid="profile-console-language-switcher"] app-language-switcher',
+    );
     const logoutButton = fixture.nativeElement.querySelector(
       '[data-testid="profile-console-logout"]',
     ) as HTMLButtonElement;
 
-    expect(languageButton.querySelector('svg')).toBeTruthy();
-    expect(languageLabel.textContent?.trim()).toBe('العربية');
+    expect(switcher).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="language-switcher-select"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="language-switcher-ar"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="language-switcher-en"]')).toBeTruthy();
     expect(logoutButton.querySelector('svg')).toBeTruthy();
     expect(logoutButton.textContent?.trim()).toBe('');
     expect(logoutButton.getAttribute('aria-label')).toBeTruthy();
     expect(logoutButton.getAttribute('title')).toBeTruthy();
   });
 
-  it('shows EN as target language label when admin locale is Arabic', () => {
-    TestBed.inject(LocaleService).setLocale('ar');
+  it('switches content locale from language switcher', () => {
+    const localeOptions = TestBed.inject(RestaurantLocaleOptionsService);
+    const select = fixture.nativeElement.querySelector(
+      '[data-testid="language-switcher-select"]',
+    ) as HTMLSelectElement;
+    select.value = 'ar';
+    select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
-
-    const languageLabel = fixture.nativeElement.querySelector(
-      '[data-testid="profile-console-language-label"]',
-    ) as HTMLSpanElement;
-    expect(languageLabel.textContent?.trim()).toBe('EN');
-  });
-
-  it('toggles admin interface locale from globe button', () => {
-    const locale = TestBed.inject(LocaleService);
-    locale.setLocale('en');
-    fixture.detectChanges();
-
-    (
-      fixture.nativeElement.querySelector('[data-testid="profile-console-language-toggle"]') as HTMLButtonElement
-    ).click();
-    fixture.detectChanges();
-    expect(locale.locale()).toBe('ar');
-    expect(document.documentElement.dir).toBe('rtl');
+    expect(localeOptions.activeContentLocale()).toBe('ar');
   });
 
   it('does not render publish in the primary top bar', () => {
@@ -326,18 +348,23 @@ describe('ProfileConsoleLayout', () => {
     auth = {
       logout: vi.fn(),
       hasAnyRole: vi.fn((role: string) => role === ApplicationRoles.RestaurantManager),
+      restaurantId: vi.fn(() => 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'),
     };
 
     await TestBed.configureTestingModule({
       imports: [ProfileConsoleLayout],
       providers: [
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: AuthService, useValue: auth },
       ],
     }).compileComponents();
 
+    const http = TestBed.inject(HttpTestingController);
     const managerFixture = TestBed.createComponent(ProfileConsoleLayout);
     managerFixture.detectChanges();
+    flushLocaleSettings(http);
 
     expect(managerFixture.nativeElement.querySelector('[data-testid="profile-console-nav-dashboard"]')).toBeTruthy();
     expect(managerFixture.nativeElement.querySelector('[data-testid="profile-console-nav-orders"]')).toBeTruthy();
@@ -358,6 +385,7 @@ describe('ProfileConsoleLayout', () => {
     auth = {
       logout: vi.fn(),
       hasAnyRole: vi.fn((role: string) => role === ApplicationRoles.RestaurantOwner),
+      restaurantId: vi.fn(() => 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'),
     };
 
     await TestBed.configureTestingModule({
@@ -370,16 +398,20 @@ describe('ProfileConsoleLayout', () => {
             children: [{ path: '', component: StubPage }],
           },
         ]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: AuthService, useValue: auth },
       ],
     }).compileComponents();
 
+    const http = TestBed.inject(HttpTestingController);
     const router = TestBed.inject(Router);
     TestBed.inject(LocaleService).setLocale('en');
     const hostFixture = TestBed.createComponent(Host);
     await router.navigateByUrl('/admin/restaurant-profile');
     await hostFixture.whenStable();
     hostFixture.detectChanges();
+    flushLocaleSettings(http);
 
     const profileLink = hostFixture.nativeElement.querySelector(
       '[data-testid="profile-console-nav-profile"]',
@@ -398,6 +430,7 @@ describe('ProfileConsoleLayout', () => {
     auth = {
       logout: vi.fn(),
       hasAnyRole: vi.fn((role: string) => role === ApplicationRoles.RestaurantOwner),
+      restaurantId: vi.fn(() => 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'),
     };
 
     await TestBed.configureTestingModule({
@@ -410,15 +443,19 @@ describe('ProfileConsoleLayout', () => {
             children: [{ path: '', component: StubPage }],
           },
         ]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: AuthService, useValue: auth },
       ],
     }).compileComponents();
 
+    const http = TestBed.inject(HttpTestingController);
     const router = TestBed.inject(Router);
     const hostFixture = TestBed.createComponent(Host);
     await router.navigateByUrl('/admin/dashboard');
     await hostFixture.whenStable();
     hostFixture.detectChanges();
+    flushLocaleSettings(http);
 
     const dashboardLink = hostFixture.nativeElement.querySelector(
       '[data-testid="profile-console-nav-dashboard"]',
@@ -438,6 +475,7 @@ describe('ProfileConsoleLayout', () => {
     auth = {
       logout: vi.fn(),
       hasAnyRole: vi.fn((role: string) => role === ApplicationRoles.RestaurantOwner),
+      restaurantId: vi.fn(() => 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'),
     };
 
     await TestBed.configureTestingModule({
@@ -450,18 +488,47 @@ describe('ProfileConsoleLayout', () => {
             children: [{ path: '', component: StubPage }],
           },
         ]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: AuthService, useValue: auth },
       ],
     }).compileComponents();
 
+    const http = TestBed.inject(HttpTestingController);
     const router = TestBed.inject(Router);
     const hostFixture = TestBed.createComponent(Host);
     await router.navigateByUrl('/admin/orders');
     await hostFixture.whenStable();
     hostFixture.detectChanges();
+    flushLocaleSettings(http);
 
     expect(
       hostFixture.nativeElement.querySelector('.profile-console__shell--scrollable'),
     ).toBeTruthy();
   });
 });
+
+function flushLocaleSettings(httpMock: HttpTestingController): void {
+  const requests = httpMock.match(() => true);
+  for (const req of requests) {
+    if (req.cancelled) {
+      continue;
+    }
+
+    if (req.request.url.includes('/locales')) {
+      req.flush({
+        defaultLocale: 'ar',
+        translationMode: 'ManualOnly',
+        supportedLocales: [
+          { code: 'ar', isEnabled: true, sortOrder: 1 },
+          { code: 'en', isEnabled: true, sortOrder: 2 },
+        ],
+        availableLocales: [
+          { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+          { code: 'en', displayName: 'English', nativeName: 'English', direction: 'ltr' },
+        ],
+        canManageLocales: true,
+      });
+    }
+  }
+}

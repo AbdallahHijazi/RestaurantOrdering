@@ -61,6 +61,12 @@ describe('RestaurantProfileSetupPage', () => {
     }).compileComponents();
 
     TestBed.inject(LocaleService).setLocale('en');
+    try {
+      localStorage.removeItem('restaurant-ordering.content-locale');
+    } catch {
+      // ignore
+    }
+    TestBed.inject(LocaleService).selectContentLocale('ar', { persist: false });
     httpMock = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(RestaurantProfileSetupPage);
     fixture.detectChanges();
@@ -108,9 +114,7 @@ describe('RestaurantProfileSetupPage', () => {
 
     flushPendingPreviewLocaleSettings();
 
-    const menuReq = httpMock.expectOne(
-      `${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`,
-    );
+    const menuReq = expectPreviewMenuRequest();
     menuReq.flush(
       menuDto ?? {
         id: RESTAURANT_ID,
@@ -136,6 +140,16 @@ describe('RestaurantProfileSetupPage', () => {
         req.flush(PREVIEW_LOCALE_SETTINGS);
       }
     }
+  }
+
+  function expectPreviewMenuRequest(expectedLang = TestBed.inject(LocaleService).contentLocale()) {
+    fixture.detectChanges();
+
+    return httpMock.expectOne(
+      (req) =>
+        req.url === `${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu` &&
+        req.params.get('lang') === expectedLang,
+    );
   }
 
   function selectTab(tab: string): void {
@@ -434,19 +448,6 @@ describe('RestaurantProfileSetupPage', () => {
     });
 
     flushPendingPreviewLocaleSettings();
-
-    const menuReloadReq = httpMock.expectOne(
-      `${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`,
-    );
-    menuReloadReq.flush({
-      id: RESTAURANT_ID,
-      slug: 'restaurant-a',
-      nameAr: 'مطعم محدث',
-      nameEn: 'Restaurant',
-      phoneNumber: '+966500000000',
-      categories: [],
-    });
-    flushPendingPreviewLocaleSettings();
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Restaurant profile saved successfully');
@@ -643,6 +644,12 @@ describe('RestaurantProfileSetupPage primary-locale identity (7A.19.1)', () => {
     }).compileComponents();
 
     TestBed.inject(LocaleService).setLocale('en');
+    try {
+      localStorage.removeItem('restaurant-ordering.content-locale');
+    } catch {
+      // ignore
+    }
+    TestBed.inject(LocaleService).selectContentLocale('ar', { persist: false });
     httpMock = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(RestaurantProfileSetupPage);
     fixture.detectChanges();
@@ -663,6 +670,16 @@ describe('RestaurantProfileSetupPage primary-locale identity (7A.19.1)', () => {
         req.flush(PREVIEW_LOCALE_SETTINGS);
       }
     }
+  }
+
+  function expectPreviewMenuRequest(expectedLang = TestBed.inject(LocaleService).contentLocale()) {
+    fixture.detectChanges();
+
+    return httpMock.expectOne(
+      (req) =>
+        req.url === `${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu` &&
+        req.params.get('lang') === expectedLang,
+    );
   }
 
   function flushWithLocaleSettings(
@@ -710,9 +727,7 @@ describe('RestaurantProfileSetupPage primary-locale identity (7A.19.1)', () => {
       req.flush(localeSettings);
     }
 
-    const menuReq = httpMock.expectOne(
-      `${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`,
-    );
+    const menuReq = expectPreviewMenuRequest();
     menuReq.flush({
       id: RESTAURANT_ID,
       slug: 'restaurant-a',

@@ -69,6 +69,7 @@ export function mapPublicMenuApiDto(dto: PublicMenuApiDto): PublicMenuPageData {
 
   return {
     restaurant: {
+      id: dto.id,
       slug: dto.slug,
       nameAr: dto.nameAr,
       nameEn: dto.nameEn,

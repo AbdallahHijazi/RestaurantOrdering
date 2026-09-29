@@ -22,7 +22,7 @@ export class RestaurantCoverHero {
   protected readonly coverFailed = signal(false);
 
   protected readonly activeLocale = computed(
-    () => this.displayLocale() ?? this.localeService.locale(),
+    () => this.displayLocale() ?? this.localeService.contentLocale(),
   );
 
   protected readonly displayName = computed(() => {

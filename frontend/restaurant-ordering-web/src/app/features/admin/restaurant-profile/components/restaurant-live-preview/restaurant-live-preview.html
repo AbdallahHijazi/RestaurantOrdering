@@ -114,7 +114,13 @@
             <img [src]="logo" [alt]="restaurantProfile().nameAr" />
           }
           <strong>
-            {{ pickPreviewText({ ar: restaurantProfile().nameAr, en: restaurantProfile().nameEn }, restaurantProfile().nameAr) }}
+            {{
+              pickPreviewText(
+                restaurantProfile().name,
+                { ar: restaurantProfile().nameAr, en: restaurantProfile().nameEn },
+                restaurantProfile().nameAr
+              )
+            }}
           </strong>
         </div>
 
@@ -201,14 +207,14 @@
     <app-restaurant-cover-hero
       [restaurant]="restaurantProfile()"
       [imageFallback]="imageFallback"
-      [displayLocale]="previewLocale()"
+      [displayLocale]="contentLocale()"
     />
 
     @if (previewCategories().length > 0) {
       <app-category-navigation
         [categories]="previewCategories()"
         [activeCategoryId]="activeCategoryId()"
-        [displayLocale]="previewLocale()"
+        [displayLocale]="contentLocale()"
         (categorySelected)="selectCategory($event)"
       />
     }
@@ -228,7 +234,7 @@
             [countryCode]="restaurantProfile().countryCode"
             [quantity]="quantityFor(item.id)"
             [imageFallback]="imageFallback"
-            [displayLocale]="previewLocale()"
+            [displayLocale]="contentLocale()"
             (quantityChange)="updatePreviewQuantity(item.id, $event)"
           />
         }
@@ -240,6 +246,7 @@
         <p>
           {{
             pickPreviewText(
+              restaurantProfile().address,
               { ar: restaurantProfile().addressAr, en: restaurantProfile().addressEn },
               '—'
             )
@@ -253,62 +260,12 @@
 <ng-template #previewLangControls>
   <div
     class="live-preview__toolbar-group live-preview__toolbar-group--lang"
-    role="group"
-    [attr.aria-label]="localeService.uiText('profilePreviewLang')"
     data-testid="live-preview-lang-switcher"
   >
     <span class="live-preview__group-label">{{ localeService.uiText('profilePreviewLang') }}</span>
-
-    @if (!usePreviewLocaleDropdown()) {
-      <div class="live-preview__lang-toggle">
-        @for (locale of enabledPreviewLocales(); track locale.code) {
-          <button
-            type="button"
-            [class.is-active]="previewLocale() === locale.code"
-            [attr.data-testid]="'live-preview-lang-' + locale.code"
-            (click)="setPreviewLocale(locale.code)"
-          >
-            {{ previewLocaleButtonLabel(locale) }}
-          </button>
-        }
-      </div>
-    } @else {
-      <div #previewLocaleMenu class="live-preview__lang-dropdown" data-testid="live-preview-lang-dropdown">
-        <button
-          type="button"
-          class="live-preview__lang-dropdown-trigger"
-          data-testid="live-preview-lang-dropdown-trigger"
-          [attr.aria-expanded]="previewLocaleMenuOpen()"
-          aria-haspopup="listbox"
-          (click)="togglePreviewLocaleMenu()"
-        >
-          <span>{{ previewLocaleButtonLabel(activePreviewLocaleMeta() ?? enabledPreviewLocales()[0]) }}</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
-          </svg>
-        </button>
-
-        @if (previewLocaleMenuOpen()) {
-          <ul class="live-preview__lang-dropdown-menu" role="listbox" data-testid="live-preview-lang-dropdown-menu">
-            @for (locale of enabledPreviewLocales(); track locale.code) {
-              <li role="presentation">
-                <button
-                  type="button"
-                  role="option"
-                  class="live-preview__lang-dropdown-option"
-                  [class.is-active]="previewLocale() === locale.code"
-                  [attr.data-testid]="'live-preview-lang-' + locale.code"
-                  [attr.aria-selected]="previewLocale() === locale.code"
-                  (click)="setPreviewLocale(locale.code)"
-                >
-                  <span>{{ previewLocaleButtonLabel(locale) }}</span>
-                  <code>{{ previewLocaleShortLabel(locale) }}</code>
-                </button>
-              </li>
-            }
-          </ul>
-        }
-      </div>
-    }
+    <app-language-switcher
+      [restaurantId]="restaurantId()"
+      [ariaLabel]="localeService.uiText('profilePreviewLang')"
+    />
   </div>
 </ng-template>

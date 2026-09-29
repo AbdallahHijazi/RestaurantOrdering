@@ -164,6 +164,13 @@ export class RestaurantProfileSetupPage {
   protected readonly previewMenuState = signal<ProfilePreviewMenuState>('idle');
   protected readonly previewMenuCategories = signal<PublicMenuCategory[]>([]);
   protected readonly previewMenuItems = signal<PublicMenuItem[]>([]);
+  protected readonly previewMenuResolved = signal<{
+    name?: string | null;
+    description?: string | null;
+    address?: string | null;
+  } | null>(null);
+
+  private lastPreviewMenuRequestKey: string | null = null;
 
   protected readonly activeWorkspaceTab = signal<WorkspaceTab>('identity');
   /** No backend publish endpoint exists in the current API surface. */
@@ -353,6 +360,7 @@ export class RestaurantProfileSetupPage {
 
   protected readonly previewData = computed<RestaurantProfilePreviewData>(() => {
     this.formRevision();
+    this.previewMenuResolved();
     const value = this.form.getRawValue();
     const profileContent = value.profileContent;
     const primaryLocale = this.primaryLocaleCode();
@@ -364,6 +372,8 @@ export class RestaurantProfileSetupPage {
       addressAr: value.addressAr,
       addressEn: value.addressEn,
     });
+
+    const resolved = this.previewMenuResolved();
 
     return {
       slug: normalizeSlugInput(value.slug),
@@ -385,6 +395,9 @@ export class RestaurantProfileSetupPage {
       whatsAppNumber: value.whatsAppNumber.trim() || null,
       addressAr: legacy.addressAr?.trim() || null,
       addressEn: legacy.addressEn?.trim() || null,
+      resolvedName: resolved?.name ?? null,
+      resolvedDescription: resolved?.description ?? null,
+      resolvedAddress: resolved?.address ?? null,
     };
   });
 
@@ -395,6 +408,17 @@ export class RestaurantProfileSetupPage {
 
     effect(() => {
       this.themeService.applyAccent(this.previewData().primaryAccentColor);
+    });
+
+    effect(() => {
+      const slug = this.catalogSlug().trim();
+      const lang = this.localeService.contentLocale();
+      const state = this.pageState();
+      if (!slug || state === 'demo' || state === 'loading' || state === 'settings-error') {
+        return;
+      }
+
+      this.loadPreviewMenu(slug, lang);
     });
 
     effect(() => {
@@ -428,7 +452,7 @@ export class RestaurantProfileSetupPage {
 
     const slug = this.catalogSlug().trim();
     if (slug) {
-      this.loadPreviewMenu(slug);
+      this.loadPreviewMenu(slug, this.localeService.contentLocale(), true);
     }
   }
 
@@ -739,11 +763,9 @@ export class RestaurantProfileSetupPage {
           this.settingsSnapshot.set(createSettingsSnapshot(profile.settings));
           this.applyBrandingFromRestaurant(profile.restaurant);
           this.form.markAsPristine();
-          this.loadPreviewMenu(slug);
         },
         error: () => {
           this.profileSaveNotice.set(this.localeService.uiText('profileReloadFailed'));
-          this.loadPreviewMenu(slug);
         },
       });
   }
@@ -878,7 +900,6 @@ export class RestaurantProfileSetupPage {
           this.applyBrandingFromRestaurant(profile.restaurant);
           this.pageState.set('ready');
           this.form.markAsPristine();
-          this.loadPreviewMenu(profile.restaurant.slug);
         },
         error: () => {
           this.pageState.set('settings-error');
@@ -886,24 +907,46 @@ export class RestaurantProfileSetupPage {
       });
   }
 
-  private loadPreviewMenu(slug: string): void {
+  private loadPreviewMenu(slug: string, lang?: string | null, force = false): void {
     const normalized = slug.trim().toLowerCase();
     if (!normalized) {
       this.previewMenuState.set('idle');
       this.previewMenuCategories.set([]);
       this.previewMenuItems.set([]);
+      this.previewMenuResolved.set(null);
       return;
     }
 
+    const langKey = (lang ?? this.localeService.contentLocale()).trim().toLowerCase();
+    const requestKey = `${normalized}|${langKey}`;
+    const state = this.previewMenuState();
+
+    if (
+      !force &&
+      this.lastPreviewMenuRequestKey === requestKey &&
+      (state === 'loading' ||
+        state === 'loaded' ||
+        state === 'empty' ||
+        state === 'error')
+    ) {
+      return;
+    }
+
+    this.lastPreviewMenuRequestKey = requestKey;
     this.previewMenuState.set('loading');
 
     this.publicMenuApi
-      .getMenuBySlug(normalized)
+      .getMenuBySlug(normalized, langKey)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
           this.previewMenuCategories.set(data.categories);
           this.previewMenuItems.set(data.items);
+          this.previewMenuResolved.set({
+            name: data.restaurant.name ?? null,
+            description: data.restaurant.description ?? null,
+            address: data.restaurant.address ?? null,
+          });
           this.previewMenuState.set(
             data.categories.length === 0 || data.items.length === 0 ? 'empty' : 'loaded',
           );
@@ -911,6 +954,7 @@ export class RestaurantProfileSetupPage {
         error: (error: { type?: PublicMenuLoadError }) => {
           this.previewMenuCategories.set([]);
           this.previewMenuItems.set([]);
+          this.previewMenuResolved.set(null);
           this.previewMenuState.set('error');
 
           if (typeof ngDevMode !== 'undefined' && ngDevMode) {

@@ -89,19 +89,41 @@ describe('Profile preview menu (5F.6.3)', () => {
       }).compileComponents();
 
       TestBed.inject(LocaleService).setLocale('en');
+      try {
+        localStorage.removeItem('restaurant-ordering.content-locale');
+      } catch {
+        // ignore
+      }
+      TestBed.inject(LocaleService).selectContentLocale('ar', { persist: false });
       httpMock = TestBed.inject(HttpTestingController);
       fixture = TestBed.createComponent(RestaurantProfileSetupPage);
     });
 
     afterEach(() => {
-      const localeRequests = httpMock.match(
-        `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
-      );
-      for (const req of localeRequests) {
-        req.flush(PREVIEW_LOCALE_SETTINGS);
+      for (const req of httpMock.match(() => true)) {
+        if (req.cancelled) {
+          continue;
+        }
+
+        if (req.request.url.includes('/locales')) {
+          req.flush(PREVIEW_LOCALE_SETTINGS);
+        } else if (req.request.url.includes('/menu')) {
+          req.flush(REAL_MENU_DTO);
+        }
       }
       httpMock.verify();
+      TestBed.resetTestingModule();
     });
+
+    function expectPreviewMenuRequest(expectedLang = TestBed.inject(LocaleService).contentLocale()) {
+      fixture.detectChanges();
+
+      return httpMock.expectOne(
+        (req) =>
+          req.url === `${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu` &&
+          req.params.get('lang') === expectedLang,
+      );
+    }
 
     function flushProfileAndMenu(): void {
       fixture.detectChanges();
@@ -139,9 +161,7 @@ describe('Profile preview menu (5F.6.3)', () => {
         req.flush(PREVIEW_LOCALE_SETTINGS);
       }
 
-      httpMock
-        .expectOne(`${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`)
-        .flush(REAL_MENU_DTO);
+      expectPreviewMenuRequest().flush(REAL_MENU_DTO);
 
       const previewLocaleRequests = httpMock.match(
         `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
@@ -172,9 +192,7 @@ describe('Profile preview menu (5F.6.3)', () => {
       fixture.componentInstance['refreshPreviewMenu']();
       fixture.detectChanges();
 
-      httpMock
-        .expectOne(`${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`)
-        .flush({
+      expectPreviewMenuRequest().flush({
           ...REAL_MENU_DTO,
           categories: [],
         });
@@ -190,9 +208,7 @@ describe('Profile preview menu (5F.6.3)', () => {
       fixture.componentInstance['refreshPreviewMenu']();
       fixture.detectChanges();
 
-      httpMock
-        .expectOne(`${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/menu`)
-        .flush('fail', { status: 500, statusText: 'Server Error' });
+      expectPreviewMenuRequest().flush('fail', { status: 500, statusText: 'Server Error' });
       fixture.detectChanges();
 
       expect(fixture.nativeElement.querySelector('[data-testid="live-preview-menu-error"]')).toBeTruthy();

@@ -23,7 +23,9 @@ export class MenuManagementMealCard {
   readonly imageError = output<string>();
 
   protected displayItemName(item: AdminMenuItem): string {
-    return this.locale.pickText(
+    return this.locale.pickResolvedTextForLocale(
+      this.locale.contentLocale(),
+      item.primaryName,
       { ar: item.nameAr, en: item.nameEn ?? item.nameAr },
       item.nameAr,
     );

@@ -6,14 +6,15 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LocaleService, type SupportedLocale } from '../../../../core/localization/locale';
+import { LocaleService } from '../../../../core/localization/locale';
+import { LanguageSwitcher } from '../../../../shared/ui/language-switcher/language-switcher';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { LoginError } from '../../../../core/auth/auth.models';
 import { resolvePostLoginRoute } from '../../../../core/auth/safe-return-url.util';
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, LanguageSwitcher],
   templateUrl: './login-page.html',
   styleUrl: './login-page.scss',
 })
@@ -76,10 +77,6 @@ export class LoginPage {
 
   protected togglePasswordVisibility(): void {
     this.passwordVisible.update((visible) => !visible);
-  }
-
-  protected setLocale(locale: SupportedLocale): void {
-    this.localeService.setLocale(locale);
   }
 
   protected emailError(): string | null {

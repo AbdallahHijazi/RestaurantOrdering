@@ -7,6 +7,7 @@ import type {
 import { getFallbackDirection } from '../../../core/localization/direction.service';
 
 export interface RestaurantPublicProfile {
+  id?: string;
   slug: string;
   nameAr: string;
   nameEn?: string | null;

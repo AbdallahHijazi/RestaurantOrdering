@@ -6,26 +6,7 @@
 
   <main class="login-page__main">
     <div class="login-page__toolbar">
-      <div class="login-page__lang" role="group" [attr.aria-label]="localeService.uiText('languageEnglish')">
-        <button
-          type="button"
-          class="login-page__lang-btn"
-          [class.is-active]="localeService.locale() === 'ar'"
-          [attr.aria-pressed]="localeService.locale() === 'ar'"
-          (click)="setLocale('ar')"
-        >
-          {{ localeService.uiText('languageArabic') }}
-        </button>
-        <button
-          type="button"
-          class="login-page__lang-btn"
-          [class.is-active]="localeService.locale() === 'en'"
-          [attr.aria-pressed]="localeService.locale() === 'en'"
-          (click)="setLocale('en')"
-        >
-          {{ localeService.uiText('languageEnglish') }}
-        </button>
-      </div>
+      <app-language-switcher class="login-page__lang" />
     </div>
 
     <section class="login-page__card" aria-labelledby="login-title">

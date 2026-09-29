@@ -11,24 +11,11 @@
     </div>
 
     <div class="kitchen-page__actions">
-      <div class="kitchen-page__language" role="group" [attr.aria-label]="locale.uiText('adminLanguageGroup')">
-        <button
-          type="button"
-          class="kitchen-page__lang-btn"
-          [class.kitchen-page__lang-btn--active]="locale.locale() === 'ar'"
-          (click)="locale.setLocale('ar')"
-        >
-          {{ locale.uiText('languageArabic') }}
-        </button>
-        <button
-          type="button"
-          class="kitchen-page__lang-btn"
-          [class.kitchen-page__lang-btn--active]="locale.locale() === 'en'"
-          (click)="locale.setLocale('en')"
-        >
-          {{ locale.uiText('languageEnglish') }}
-        </button>
-      </div>
+      <app-language-switcher
+        class="kitchen-page__language"
+        [restaurantId]="restaurantId()"
+        [ariaLabel]="locale.uiText('adminLanguageGroup')"
+      />
 
       <button
         type="button"

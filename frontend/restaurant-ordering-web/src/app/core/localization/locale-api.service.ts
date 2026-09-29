@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
 import { API_BASE_URL } from '../config/api-config';
+import { resolveEnabledPreviewLocales } from '../../features/admin/restaurant-profile/data-access/restaurant-locale-settings.util';
 import { DirectionService } from './direction.service';
 import type { LocaleMetadata, RestaurantLocaleSettings, UpdateRestaurantLocaleSettingsPayload } from './locale.types';
 import {
@@ -23,6 +24,12 @@ export class LocaleApiService {
     return this.http.get<SystemLocaleApiDto[]>(`${API_BASE_URL}/api/v1/system/locales`).pipe(
       map((items) => items.map(mapSystemLocaleDto)),
       tap((locales) => this.directionService.registerLocales(locales)),
+    );
+  }
+
+  loadEnabledLocales(restaurantId: string) {
+    return this.getRestaurantLocaleSettings(restaurantId).pipe(
+      map((settings) => resolveEnabledPreviewLocales(settings)),
     );
   }
 

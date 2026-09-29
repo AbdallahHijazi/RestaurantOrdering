@@ -118,28 +118,11 @@
       <div class="admin-layout__header-actions">
         <span class="admin-layout__role-badge">{{ roleLabel() }}</span>
 
-        <div
+        <app-language-switcher
           class="admin-layout__lang"
-          role="group"
-          [attr.aria-label]="localeService.uiText('adminLanguageGroup')"
-        >
-          <button
-            type="button"
-            [class.is-active]="localeService.locale() === 'ar'"
-            [attr.aria-pressed]="localeService.locale() === 'ar'"
-            (click)="setLocale('ar')"
-          >
-            {{ localeService.uiText('languageArabic') }}
-          </button>
-          <button
-            type="button"
-            [class.is-active]="localeService.locale() === 'en'"
-            [attr.aria-pressed]="localeService.locale() === 'en'"
-            (click)="setLocale('en')"
-          >
-            {{ localeService.uiText('languageEnglish') }}
-          </button>
-        </div>
+          [restaurantId]="restaurantId()"
+          [ariaLabel]="localeService.uiText('adminLanguageGroup')"
+        />
       </div>
     </header>
 

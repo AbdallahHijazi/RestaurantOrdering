@@ -4,24 +4,12 @@
       class="profile-console__header-start"
       data-testid="profile-console-header-start"
     >
-      <button
-        type="button"
-        class="profile-console__header-action profile-console__language-toggle"
-        data-testid="profile-console-language-toggle"
-        [attr.aria-label]="adminLanguageAriaLabel()"
-        [attr.title]="adminLanguageAriaLabel()"
-        (click)="toggleInterfaceLocale()"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path
-            fill="currentColor"
-            d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm7.93 9h-3.18a15.7 15.7 0 0 0-1.07-4.02A8.02 8.02 0 0 1 19.93 11ZM12 4c.95 1.6 1.6 3.4 1.93 5.36H10.07C10.4 7.4 11.05 5.6 12 4ZM8.32 6.98A15.7 15.7 0 0 0 7.25 11H4.07a8.02 8.02 0 0 1 4.25-4.02ZM4.07 13h3.18c.23 1.4.66 2.74 1.25 4.02A8.02 8.02 0 0 1 4.07 13Zm7.93 7c-.95-1.6-1.6-3.4-1.93-5.36h3.86C13.6 16.6 12.95 18.4 12 21Zm3.68-2.02c.59-1.28 1.02-2.62 1.25-4.02h3.18a8.02 8.02 0 0 1-4.43 4.02ZM16.75 13h3.18a8.02 8.02 0 0 1-4.25 4.02c.59-1.28 1.02-2.62 1.25-4.02Z"
-          />
-        </svg>
-        <span class="profile-console__language-label" data-testid="profile-console-language-label">{{
-          adminTargetLanguageLabel()
-        }}</span>
-      </button>
+      <div class="profile-console__language-switcher" data-testid="profile-console-language-switcher">
+        <app-language-switcher
+          [restaurantId]="restaurantId()"
+          [ariaLabel]="adminLanguageAriaLabel()"
+        />
+      </div>
 
       <button
         type="button"
@@ -113,4 +101,4 @@
     <router-outlet />
   </div>
 </div>
-
+

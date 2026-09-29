@@ -624,14 +624,18 @@ export class MenuManagementPage {
   }
 
   protected displayCategoryName(category: AdminCategory): string {
-    return this.locale.pickText(
+    return this.locale.pickResolvedTextForLocale(
+      this.locale.contentLocale(),
+      category.primaryName,
       { ar: category.nameAr, en: category.nameEn ?? category.nameAr },
       category.nameAr,
     );
   }
 
   protected displayItemName(item: AdminMenuItem): string {
-    return this.locale.pickText(
+    return this.locale.pickResolvedTextForLocale(
+      this.locale.contentLocale(),
+      item.primaryName,
       { ar: item.nameAr, en: item.nameEn ?? item.nameAr },
       item.nameAr,
     );

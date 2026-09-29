@@ -13,15 +13,12 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, of } from 'rxjs';
 import { attachElementToBody } from '../../../../../shared/utils/overlay-body-portal';
 import { AuthService } from '../../../../../core/auth/auth.service';
-import { LocaleService, type AdminUiLocale } from '../../../../../core/localization/locale';
-import { LocaleApiService } from '../../../../../core/localization/locale-api.service';
+import { LocaleService } from '../../../../../core/localization/locale';
 import { DirectionService } from '../../../../../core/localization/direction.service';
-import type { ContentLocale, LocaleMetadata } from '../../../../../core/localization/locale.types';
 import { RestaurantThemeService } from '../../../../../core/theme/restaurant-theme';
+import { LanguageSwitcher } from '../../../../../shared/ui/language-switcher/language-switcher';
 import { EmptyState } from '../../../../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../../../../shared/ui/error-state/error-state';
 import { LoadingState } from '../../../../../shared/ui/loading-state/loading-state';
@@ -34,11 +31,6 @@ import type {
   PublicMenuItem,
   RestaurantPublicProfile,
 } from '../../../../public-menu/models/public-menu.models';
-import {
-  PREVIEW_LOCALE_SEGMENTED_MAX,
-  ensurePreviewLocaleInList,
-  resolveEnabledPreviewLocales,
-} from '../../data-access/restaurant-locale-settings.util';
 import type {
   ProfilePreviewMenuState,
   RestaurantProfilePreviewData,
@@ -50,6 +42,7 @@ type PreviewViewport = 'desktop' | 'tablet' | 'mobile';
   selector: 'app-restaurant-live-preview',
   imports: [
     NgTemplateOutlet,
+    LanguageSwitcher,
     RestaurantCoverHero,
     CategoryNavigation,
     MenuItemCard,
@@ -74,25 +67,22 @@ export class RestaurantLivePreview {
   readonly refreshPreview = output<void>();
 
   protected readonly localeService = inject(LocaleService);
-  private readonly localeApi = inject(LocaleApiService);
   private readonly authService = inject(AuthService);
   private readonly directionService = inject(DirectionService);
   private readonly themeService = inject(RestaurantThemeService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly previewOverlay = viewChild<ElementRef<HTMLElement>>('previewOverlay');
-  private readonly previewLocaleMenu = viewChild<ElementRef<HTMLElement>>('previewLocaleMenu');
   private detachPreviewPortal: (() => void) | null = null;
 
   protected readonly viewport = signal<PreviewViewport>('desktop');
-  protected readonly previewLocale = signal<ContentLocale>('ar');
-  protected readonly previewLocaleMenuOpen = signal(false);
-  protected readonly enabledPreviewLocales = signal<LocaleMetadata[]>(resolveEnabledPreviewLocales(null));
   protected readonly fullPreviewOpen = signal(false);
   protected readonly activeCategoryId = signal('');
   protected readonly previewQuantities = signal<Record<string, number>>({});
 
   protected readonly imageFallback = MOCK_IMAGE_FALLBACK;
+  protected readonly contentLocale = this.localeService.contentLocale;
+  protected readonly restaurantId = computed(() => this.authService.restaurantId());
 
   protected readonly previewCategories = computed(() => this.categories());
 
@@ -104,19 +94,11 @@ export class RestaurantLivePreview {
     () => this.menuState() === 'loaded' || this.menuState() === 'demo',
   );
 
-  protected readonly usePreviewLocaleDropdown = computed(
-    () => this.enabledPreviewLocales().length > PREVIEW_LOCALE_SEGMENTED_MAX,
-  );
-
-  protected readonly activePreviewLocaleMeta = computed(() =>
-    this.enabledPreviewLocales().find((locale) => locale.code === this.previewLocale()),
-  );
-
   protected readonly restaurantProfile = computed<RestaurantPublicProfile>(() => {
     const data = this.preview();
     const primaryLocale = (data.primaryLocale ?? 'ar').trim().toLowerCase();
-    const previewLocale = this.previewLocale().trim().toLowerCase();
-    const usePrimaryContent = previewLocale === primaryLocale;
+    const contentLocale = this.contentLocale().trim().toLowerCase();
+    const usePrimaryContent = contentLocale === primaryLocale;
 
     let nameAr = data.nameAr;
     let nameEn = data.nameEn ?? null;
@@ -170,8 +152,10 @@ export class RestaurantLivePreview {
       slug: data.slug,
       nameAr,
       nameEn,
+      name: data.resolvedName ?? null,
       descriptionAr,
       descriptionEn,
+      description: data.resolvedDescription ?? null,
       logoUrl: data.logoUrl,
       coverImageUrl: data.coverImageUrl,
       primaryAccentColor: data.primaryAccentColor,
@@ -182,19 +166,14 @@ export class RestaurantLivePreview {
       whatsAppNumber: data.whatsAppNumber,
       addressAr,
       addressEn,
+      address: data.resolvedAddress ?? null,
       isOpen: true,
     };
   });
 
   constructor() {
-    this.loadEnabledPreviewLocales();
-
     effect(() => {
-      const locales = this.enabledPreviewLocales();
-      const nextLocale = ensurePreviewLocaleInList(this.previewLocale(), locales);
-      if (nextLocale !== this.previewLocale()) {
-        this.previewLocale.set(nextLocale);
-      }
+      this.localeService.loadContentLocalesForRestaurant(this.authService.restaurantId());
     });
 
     effect(() => {
@@ -252,25 +231,8 @@ export class RestaurantLivePreview {
 
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
-    if (this.previewLocaleMenuOpen()) {
-      this.previewLocaleMenuOpen.set(false);
-      return;
-    }
-
     if (this.fullPreviewOpen()) {
       this.closeFullPreview();
-    }
-  }
-
-  @HostListener('document:click', ['$event'])
-  protected onDocumentClick(event: MouseEvent): void {
-    if (!this.previewLocaleMenuOpen()) {
-      return;
-    }
-
-    const menu = this.previewLocaleMenu()?.nativeElement;
-    if (menu && !menu.contains(event.target as Node)) {
-      this.previewLocaleMenuOpen.set(false);
     }
   }
 
@@ -278,32 +240,21 @@ export class RestaurantLivePreview {
     this.viewport.set(mode);
   }
 
-  protected setPreviewLocale(locale: ContentLocale): void {
-    this.previewLocale.set(locale.trim().toLowerCase() || 'ar');
-    this.previewLocaleMenuOpen.set(false);
-  }
-
-  protected togglePreviewLocaleMenu(): void {
-    this.previewLocaleMenuOpen.update((open) => !open);
-  }
-
-  protected previewLocaleButtonLabel(locale: LocaleMetadata): string {
-    return locale.nativeName?.trim() || locale.displayName?.trim() || locale.code.toUpperCase();
-  }
-
-  protected previewLocaleShortLabel(locale: LocaleMetadata): string {
-    return locale.code.toUpperCase();
-  }
-
   protected previewDirection(): 'rtl' | 'ltr' {
-    return this.directionService.getDirection(this.previewLocale());
+    return this.directionService.getDirection(this.contentLocale());
   }
 
   protected pickPreviewText(
-    text: { ar?: string | null; en?: string | null } | null | undefined,
+    resolved: string | null | undefined,
+    legacy: { ar?: string | null; en?: string | null } | null | undefined,
     fallback = '—',
   ): string {
-    return this.localeService.pickTextForLocale(this.previewLocale(), text, fallback);
+    return this.localeService.pickResolvedTextForLocale(
+      this.contentLocale(),
+      resolved,
+      legacy,
+      fallback,
+    );
   }
 
   protected openFullPreview(): void {
@@ -329,34 +280,14 @@ export class RestaurantLivePreview {
 
   protected labelForCategory(category: PublicMenuCategory): string {
     return this.pickPreviewText(
+      category.name,
       { ar: category.nameAr, en: category.nameEn },
       category.nameAr,
     );
   }
 
   protected requestRefresh(): void {
-    this.loadEnabledPreviewLocales();
+    this.localeService.loadContentLocalesForRestaurant(this.authService.restaurantId());
     this.refreshPreview.emit();
-  }
-
-  private loadEnabledPreviewLocales(): void {
-    const restaurantId = this.authService.restaurantId();
-    if (!restaurantId) {
-      this.enabledPreviewLocales.set(resolveEnabledPreviewLocales(null));
-      return;
-    }
-
-    this.localeApi
-      .getRestaurantLocaleSettings(restaurantId)
-      .pipe(
-        catchError(() => of(null)),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((settings) => {
-        this.enabledPreviewLocales.set(resolveEnabledPreviewLocales(settings));
-        if (settings) {
-          this.directionService.registerLocales(settings.availableLocales);
-        }
-      });
   }
 }
