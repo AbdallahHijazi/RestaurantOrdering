@@ -1,8 +1,15 @@
 <article class="table-card" [attr.data-testid]="'table-card-' + table().id">
   <div class="table-card__head">
     <div class="table-card__title">
-      <h2>{{ table().name }}</h2>
-      <p>{{ zoneLabel(table()) }}</p>
+      <div class="table-card__title-row">
+        <h2>{{ table().name }}</h2>
+        <span class="table-card__zone">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z" />
+          </svg>
+          {{ zoneLabel(table()) }}
+        </span>
+      </div>
     </div>
     <span
       class="table-card__badge"
@@ -17,7 +24,11 @@
     </span>
   </div>
 
-  <div class="table-card__preview" [attr.data-testid]="'table-qr-' + table().id">
+  <div
+    class="table-card__preview"
+    [class.table-card__preview--inactive]="!table().isActive"
+    [attr.data-testid]="'table-qr-' + table().id"
+  >
     <app-table-print-card
       variant="preview"
       [table]="table()"
@@ -27,6 +38,24 @@
       [qrSvg]="qrSvg() ?? ''"
       [qrLoading]="qrLoading()"
     />
+    @if (!table().isActive) {
+      <div class="table-card__inactive-overlay" [attr.data-testid]="'table-inactive-overlay-' + table().id">
+        <span class="table-card__inactive-label">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M7 10V7a5 5 0 0 1 10 0v3h1a2 2 0 0 1 2 2v8H4v-8a2 2 0 0 1 2-2h1Zm2 0h6V7a3 3 0 0 0-6 0v3Zm2 4v3h2v-3h-2Z" />
+          </svg>
+          {{ locale.uiText('tablesOrderTemporarilyDisabled') }}
+        </span>
+        <button
+          type="button"
+          class="table-card__reactivate"
+          [attr.data-testid]="'table-reactivate-' + table().id"
+          (click)="toggleStatus.emit(table())"
+        >
+          {{ locale.uiText('tablesReactivateNow') }}
+        </button>
+      </div>
+    }
   </div>
 
   <div class="table-card__actions">
@@ -36,6 +65,9 @@
       [attr.data-testid]="'table-edit-' + table().id"
       (click)="edit.emit(table())"
     >
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="m14.7 5.3 4 4L8 20H4v-4L14.7 5.3Zm1.4-1.4 1.2-1.2a1 1 0 0 1 1.4 0l2.6 2.6a1 1 0 0 1 0 1.4l-1.2 1.2-4-4Z" />
+      </svg>
       {{ locale.uiText('tablesActionEdit') }}
     </button>
     <button
@@ -44,6 +76,9 @@
       [attr.data-testid]="'table-print-' + table().id"
       (click)="print.emit(table())"
     >
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M6 2h12v5H6V2Zm13 6a3 3 0 0 1 3 3v6h-4v5H6v-5H2v-6a3 3 0 0 1 3-3h14Zm-3 12v-5H8v5h8Zm4-5v-4a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v4h1v-2h12v2h2Z" />
+      </svg>
       {{ locale.uiText('tablesActionPrint') }}
     </button>
     <button
@@ -52,6 +87,9 @@
       [attr.data-testid]="'table-download-qr-' + table().id"
       (click)="downloadQr.emit(table())"
     >
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M11 3h2v10.2l3.6-3.6 1.4 1.4-6 6-6-6 1.4-1.4 3.6 3.6V3ZM4 19h16v2H4v-2Z" />
+      </svg>
       {{ locale.uiText('tablesActionDownloadQr') }}
     </button>
     <button
@@ -60,6 +98,9 @@
       [attr.data-testid]="'table-toggle-status-' + table().id"
       (click)="toggleStatus.emit(table())"
     >
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M13 3v9h-2V3h2Zm4.8 2.2A9 9 0 1 1 6.2 5.2l1.3 1.5a7 7 0 1 0 9 0l1.3-1.5Z" />
+      </svg>
       {{
         table().isActive
           ? locale.uiText('tablesActionDeactivate')
@@ -72,6 +113,9 @@
       [attr.data-testid]="'table-regenerate-' + table().id"
       (click)="regenerateToken.emit(table())"
     >
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M12 4a8 8 0 0 1 7.7 6H22l-3.5 4L15 10h2.6A6 6 0 1 0 18 15l1.7 1A8 8 0 1 1 12 4Z" />
+      </svg>
       {{ locale.uiText('tablesActionRegenerateToken') }}
     </button>
   </div>

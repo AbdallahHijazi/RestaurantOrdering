@@ -1,9 +1,12 @@
 <section class="tables-management-page" data-testid="tables-management-page">
   <div class="tables-management-shell">
     @if (successMessage()) {
-      <p class="tables-management-success" role="status" data-testid="tables-success-message">
-        {{ successMessage() }}
-      </p>
+      <app-floating-notification-pill
+        data-testid="tables-success-message"
+        [message]="successMessage()!"
+        [closeLabel]="locale.uiText('notificationClose')"
+        (dismissed)="dismissSuccessMessage()"
+      />
     }
 
     <header class="tables-management-head">
@@ -19,6 +22,9 @@
           [disabled]="pageState() !== 'ready' || filteredTables().length === 0"
           (click)="printAllTables()"
         >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M6 2h12v5H6V2Zm10 2H8v3h8V4Zm3 4a3 3 0 0 1 3 3v6h-4v5H6v-5H2v-6a3 3 0 0 1 3-3h14Zm-3 12v-5H8v5h8Zm3-5h1v-4a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v4h2v-2h12v2h1Z" />
+          </svg>
           {{ locale.uiText('tablesPrintAll') }}
         </button>
         <button
@@ -28,6 +34,9 @@
           [disabled]="pageState() === 'loading' || pageState() === 'missing-context'"
           (click)="openCreateModal()"
         >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z" />
+          </svg>
           {{ locale.uiText('tablesAddTable') }}
         </button>
       </div>
@@ -66,18 +75,33 @@
       @case ('ready') {
         <section class="tables-management-stats" data-testid="tables-stats">
           <article class="tables-management-stats__card">
+            <span class="tables-management-stats__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path fill="currentColor" d="M4 4h16v5H4V4Zm0 7h7v9H4v-9Zm9 0h7v9h-7v-9ZM6 6v1h12V6H6Zm0 7v5h3v-5H6Zm9 0v5h3v-5h-3Z" />
+              </svg>
+            </span>
             <div class="tables-management-stats__content">
               <span>{{ locale.uiText('tablesStatTotal') }}</span>
               <strong data-testid="tables-stat-total">{{ totalTables() }}</strong>
             </div>
           </article>
-          <article class="tables-management-stats__card">
+          <article class="tables-management-stats__card tables-management-stats__card--active">
+            <span class="tables-management-stats__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1.2 14.2-4-4 1.4-1.4 2.6 2.6 5-5 1.4 1.4-6.4 6.4Z" />
+              </svg>
+            </span>
             <div class="tables-management-stats__content">
               <span>{{ locale.uiText('tablesStatActive') }}</span>
               <strong data-testid="tables-stat-active">{{ activeTables() }}</strong>
             </div>
           </article>
-          <article class="tables-management-stats__card">
+          <article class="tables-management-stats__card tables-management-stats__card--zones">
+            <span class="tables-management-stats__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z" />
+              </svg>
+            </span>
             <div class="tables-management-stats__content">
               <span>{{ locale.uiText('tablesStatZones') }}</span>
               <strong data-testid="tables-stat-zones">{{ distinctZoneCount() }}</strong>
@@ -89,6 +113,9 @@
           <div class="tables-management-workspace-top">
             <label class="tables-management-search">
               <span class="tables-management-search__label">{{ locale.uiText('tablesSearchPlaceholder') }}</span>
+              <svg class="tables-management-search__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="m20.7 19.3-4.2-4.2a7.5 7.5 0 1 0-1.4 1.4l4.2 4.2 1.4-1.4ZM5 10.5a5.5 5.5 0 1 1 11 0 5.5 5.5 0 0 1-11 0Z" />
+              </svg>
               <input
                 type="search"
                 data-testid="tables-search-input"
@@ -115,6 +142,11 @@
                 (valueChange)="setStatusFilter($event)"
               />
             </div>
+            <!-- @if (tables().length > 0) {
+              <span class="tables-management-summary" data-testid="tables-summary">
+                {{ showingTablesLabel() }}
+              </span>
+            } -->
           </div>
 
           @if (tables().length === 0) {
@@ -149,11 +181,6 @@
             </div>
           }
 
-          @if (tables().length > 0) {
-            <footer class="tables-management-summary" data-testid="tables-summary">
-              <span>{{ showingTablesLabel() }}</span>
-            </footer>
-          }
         </section>
       }
     }

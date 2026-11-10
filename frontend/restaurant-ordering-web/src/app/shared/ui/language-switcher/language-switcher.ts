@@ -1,5 +1,13 @@
-import { Component, computed, effect, inject, input } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  HostListener,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { LocaleService } from '../../../core/localization/locale';
@@ -8,7 +16,6 @@ import { RestaurantLocaleOptionsService } from '../../../core/localization/resta
 
 @Component({
   selector: 'app-language-switcher',
-  imports: [FormsModule],
   templateUrl: './language-switcher.html',
   styleUrl: './language-switcher.scss',
 })
@@ -22,6 +29,9 @@ export class LanguageSwitcher {
 
   private readonly router = inject(Router, { optional: true });
   private readonly route = inject(ActivatedRoute, { optional: true });
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
+  protected readonly isOpen = signal(false);
 
   protected readonly selectedLocale = this.localeService.contentLocale;
 
@@ -39,12 +49,44 @@ export class LanguageSwitcher {
     return locale.nativeName?.trim() || locale.displayName?.trim() || locale.code;
   }
 
-  protected directionBadge(locale: LocaleMetadata): string {
-    return locale.direction === 'rtl' ? 'RTL' : 'LTR';
+  protected localeBadge(locale: LocaleMetadata): string {
+    return locale.code.trim().toUpperCase();
+  }
+
+  protected toggleDropdown(): void {
+    if (this.localeOptions.loading()) {
+      return;
+    }
+
+    this.isOpen.update((value) => !value);
+  }
+
+  protected selectLocale(localeCode: string): void {
+    this.onLocaleSelected(localeCode);
+    this.isOpen.set(false);
+  }
+
+  protected isSelected(locale: LocaleMetadata): boolean {
+    return locale.code.trim().toLowerCase() === this.selectedLocale().trim().toLowerCase();
+  }
+
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(event: MouseEvent): void {
+    const target = event.target;
+
+    if (target instanceof Node && !this.elementRef.nativeElement.contains(target)) {
+      this.isOpen.set(false);
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    this.isOpen.set(false);
   }
 
   protected onLocaleSelected(localeCode: string): void {
     const normalized = localeCode.trim().toLowerCase() as ContentLocale;
+
     if (!normalized) {
       return;
     }
@@ -64,8 +106,11 @@ export class LanguageSwitcher {
 
   private findLocaleMetadata(code: string): LocaleMetadata | null {
     const normalized = code.trim().toLowerCase();
+
     return (
-      this.localeOptions.enabledLocales().find((locale) => locale.code === normalized) ?? null
+      this.localeOptions.enabledLocales().find(
+        (locale) => locale.code.trim().toLowerCase() === normalized,
+      ) ?? null
     );
   }
 }

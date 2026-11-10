@@ -1,0 +1,77 @@
+.menu-management-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.menu-management-form-notice {
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.75rem;
+  color: var(--menu-text, var(--restaurant-text));
+  background: var(--restaurant-accent-soft);
+  line-height: 1.5;
+}
+
+.menu-management-form-notice p,
+.menu-management-help {
+  margin: 0;
+}
+
+.menu-management-form-notice p + p {
+  margin-top: 0.35rem;
+  font-weight: 600;
+}
+
+.menu-management-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: var(--menu-text, var(--restaurant-text));
+  font-weight: 600;
+}
+
+.menu-management-form input,
+.menu-management-form textarea,
+.menu-management-form select {
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--menu-line, var(--restaurant-border));
+  border-radius: 0.75rem;
+  color: var(--menu-text, var(--restaurant-text));
+  background: var(--restaurant-surface-soft);
+  font: inherit;
+}
+
+.menu-management-checkbox {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.5rem !important;
+  font-weight: 500 !important;
+}
+
+.menu-management-field-error,
+.menu-management-modal-error,
+.menu-management-warning {
+  color: var(--menu-red, var(--restaurant-danger));
+}
+
+.menu-management-help {
+  color: var(--menu-muted, var(--restaurant-muted-text));
+  font-size: 0.85rem;
+}
+
+.menu-management-image-preview {
+  max-width: 100%;
+}
+
+.menu-management-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.menu-management-delete-confirm {
+  border-color: var(--menu-red, var(--restaurant-danger));
+  color: var(--restaurant-text);
+  background: var(--menu-red, var(--restaurant-danger));
+}

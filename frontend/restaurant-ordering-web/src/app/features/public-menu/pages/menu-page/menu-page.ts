@@ -48,6 +48,13 @@ import { readRouteParam } from './route-param.util';
 
 type PageState = 'loading' | 'success' | 'not-found' | 'error';
 
+interface PublicMenuSection {
+  id: string;
+  title: string;
+  description: string | null;
+  items: PublicMenuItem[];
+}
+
 @Component({
   selector: 'app-menu-page',
   imports: [
@@ -88,7 +95,6 @@ export class MenuPage implements OnDestroy {
   protected readonly menuData = signal<PublicMenuPageData | null>(null);
   protected readonly activeCategoryId = signal<string>(PUBLIC_MENU_ALL_CATEGORIES_ID);
   protected readonly searchQuery = signal('');
-  protected readonly logoFailed = signal(false);
   protected readonly restaurantSlug = signal('');
 
   protected readonly cartOpen = signal(false);
@@ -146,7 +152,7 @@ export class MenuPage implements OnDestroy {
       this.contentLocale(),
       restaurant.address,
       { ar: restaurant.addressAr, en: restaurant.addressEn },
-      '—',
+      '',
     );
   });
 
@@ -194,6 +200,55 @@ export class MenuPage implements OnDestroy {
     this.ui()
       .publicMenuResultCount.replace('{count}', String(this.filteredItems().length)),
   );
+
+  protected readonly categorySections = computed<PublicMenuSection[]>(() => {
+    const data = this.menuData();
+    const items = this.filteredItems();
+    if (!data || items.length === 0) {
+      return [];
+    }
+
+    const locale = this.contentLocale();
+    const activeCategoryId = this.activeCategoryId();
+    const categories = [...data.categories].sort(
+      (first, second) => first.displayOrder - second.displayOrder,
+    );
+
+    const selectedCategories =
+      activeCategoryId === PUBLIC_MENU_ALL_CATEGORIES_ID
+        ? categories
+        : categories.filter((category) => category.id === activeCategoryId);
+
+    const sections = selectedCategories
+      .map((category): PublicMenuSection => ({
+        id: category.id,
+        title: this.localeService.pickResolvedTextForLocale(
+          locale,
+          category.name,
+          { ar: category.nameAr, en: category.nameEn },
+          category.nameAr,
+        ),
+        description: category.description?.trim() || null,
+        items: items.filter((item) => item.categoryId === category.id),
+      }))
+      .filter((section) => section.items.length > 0);
+
+    const groupedItemIds = new Set(
+      sections.flatMap((section) => section.items.map((item) => item.id)),
+    );
+    const ungroupedItems = items.filter((item) => !groupedItemIds.has(item.id));
+
+    if (ungroupedItems.length > 0) {
+      sections.push({
+        id: 'other',
+        title: this.ui().menuTitle,
+        description: null,
+        items: ungroupedItems,
+      });
+    }
+
+    return sections;
+  });
 
   constructor() {
     effect(() => {
@@ -295,6 +350,16 @@ export class MenuPage implements OnDestroy {
     this.showFloatingCartTemporarily();
   }
 
+  protected itemQuantity(itemId: string): number {
+    return this.cart.quantityFor(itemId);
+  }
+
+  protected onItemQuantityChange(item: PublicMenuItem, quantity: number): void {
+    if (this.cart.setQuantity(item, quantity) && quantity > 0) {
+      this.showFloatingCartTemporarily();
+    }
+  }
+
   protected openCart(): void {
     this.hideFloatingCart();
     this.lastFocusedElement = document.activeElement as HTMLElement | null;
@@ -341,10 +406,6 @@ export class MenuPage implements OnDestroy {
   protected returnToMenuFromConfirmation(): void {
     this.closeConfirmation();
     this.scrollToMenu();
-  }
-
-  protected onLogoError(): void {
-    this.logoFailed.set(true);
   }
 
   protected tableBadgeLabel(): string {

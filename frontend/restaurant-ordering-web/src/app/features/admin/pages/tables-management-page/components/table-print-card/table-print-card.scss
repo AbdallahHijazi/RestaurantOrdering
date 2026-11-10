@@ -142,16 +142,16 @@
 }
 
 .table-qr-card--preview {
-  --table-card-gap: 0.3125rem;
-  --table-card-logo-size: 3.625rem;
-  --table-card-qr-size: 7.875rem;
-  --table-card-restaurant-size: 1rem;
-  --table-card-table-size: 1.25rem;
-  --table-card-inner-padding-block: 0.8125rem;
-  --table-card-inner-padding-inline: 0.6875rem;
+  --table-card-gap: 0.25rem;
+  --table-card-logo-size: 3.125rem;
+  --table-card-qr-size: 6.75rem;
+  --table-card-restaurant-size: 0.9rem;
+  --table-card-table-size: 1.125rem;
+  --table-card-inner-padding-block: 0.75rem;
+  --table-card-inner-padding-inline: 0.625rem;
 
   width: 14.75rem;
-  height: 22.125rem;
+  height: 19.25rem;
   max-width: 100%;
   flex-shrink: 0;
 }

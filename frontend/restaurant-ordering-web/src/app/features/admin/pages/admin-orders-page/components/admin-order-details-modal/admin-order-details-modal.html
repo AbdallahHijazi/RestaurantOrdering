@@ -351,126 +351,189 @@
   </footer>
 
   @if (details(); as order) {
-    <section
-      class="order-invoice-print-area"
-      data-testid="admin-order-invoice-print-area"
-      aria-hidden="true"
-      [attr.dir]="locale.locale() === 'ar' ? 'rtl' : 'ltr'"
-    >
-      <header class="order-invoice-print-area__header">
-        <h1 class="order-invoice-print-area__title">
-          {{ locale.uiText('adminOrderDetailsInvoiceTitle') }}
-        </h1>
-      </header>
+  <section
+    class="order-invoice-print-area"
+    data-testid="admin-order-invoice-print-area"
+    aria-hidden="true"
+    [attr.dir]="locale.locale() === 'ar' ? 'rtl' : 'ltr'"
+  >
+    <!-- Receipt header -->
+    <header class="order-invoice-print-area__header">
+      <h1 class="order-invoice-print-area__title">
+        {{ locale.uiText('adminOrderDetailsInvoiceTitle') }}
+      </h1>
 
-      <dl class="order-invoice-print-area__meta">
-        <div>
-          <dt>{{ locale.uiText('adminOrdersColNumber') }}</dt>
-          <dd class="order-invoice-print-area__ltr" dir="ltr" data-testid="admin-order-invoice-number">
-            {{ order.orderNumber }}
-          </dd>
-        </div>
-        <div>
-          <dt>{{ locale.uiText('adminOrdersColStatus') }}</dt>
-          <dd data-testid="admin-order-invoice-status">{{ statusLabel(order.orderStatus) }}</dd>
-        </div>
-        <div>
-          <dt>{{ locale.uiText('adminOrdersColType') }}</dt>
-          <dd data-testid="admin-order-invoice-type">{{ orderTypeLabel(order.orderType) }}</dd>
-        </div>
-        <div>
-          <dt>{{ locale.uiText('adminOrdersColGuest') }}</dt>
-          <dd data-testid="admin-order-invoice-guest">{{ order.guestName?.trim() || '—' }}</dd>
-        </div>
-        @if (order.guestPhone?.trim()) {
-          <div>
-            <dt>{{ locale.uiText('adminOrdersColPhone') }}</dt>
-            <dd class="order-invoice-print-area__ltr" dir="ltr" data-testid="admin-order-invoice-phone">
-              {{ order.guestPhone }}
-            </dd>
-          </div>
-        }
-        @if (showDeliveryAddress(order)) {
-          <div class="order-invoice-print-area__span">
-            <dt>{{ locale.uiText('adminOrdersFieldDeliveryAddress') }}</dt>
-            <dd data-testid="admin-order-invoice-address">{{ order.deliveryAddress }}</dd>
-          </div>
-        }
-        <div>
-          <dt>{{ locale.uiText('adminOrdersColCreatedAt') }}</dt>
-          <dd class="order-invoice-print-area__ltr" dir="ltr" data-testid="admin-order-invoice-created">
-            {{ formatCreatedAt(order.createdAt) }}
-          </dd>
-        </div>
-      </dl>
+      <div
+        class="order-invoice-print-area__order-number"
+        dir="ltr"
+        data-testid="admin-order-invoice-number"
+      >
+        {{ order.orderNumber }}
+      </div>
+    </header>
 
-      <table class="order-invoice-print-area__table" data-testid="admin-order-invoice-items">
-        <thead>
-          <tr>
-            <th scope="col">{{ locale.uiText('adminOrderDetailsColProduct') }}</th>
-            <th scope="col">{{ locale.uiText('adminOrderDetailsColQuantity') }}</th>
-            <th scope="col">{{ locale.uiText('adminOrderDetailsColPrice') }}</th>
-            <th scope="col">{{ locale.uiText('adminOrderDetailsColLineTotal') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of order.items; track item.id) {
-            <tr [attr.data-testid]="'admin-order-invoice-item-' + item.id">
-              <td>{{ itemName(item) }}</td>
-              <td>{{ item.quantity }}</td>
-              <td class="order-invoice-print-area__ltr" dir="ltr">
-                {{ formatMoney(item.unitPrice, order.currencyCode) }}
-              </td>
-              <td class="order-invoice-print-area__ltr" dir="ltr">
-                {{ formatMoney(item.totalPrice, order.currencyCode) }}
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-
-      <div class="order-invoice-print-area__summary" data-testid="admin-order-invoice-summary">
-        <div class="order-invoice-print-area__summary-line">
-          <span>{{ locale.uiText('adminOrdersFieldSubtotal') }}</span>
-          <strong class="order-invoice-print-area__ltr" dir="ltr">
-            {{ formatMoney(order.subtotal, order.currencyCode) }}
-          </strong>
-        </div>
-        @if (showDeliveryFee(order)) {
-          <div class="order-invoice-print-area__summary-line">
-            <span>{{ locale.uiText('adminOrdersFieldDeliveryFee') }}</span>
-            <strong class="order-invoice-print-area__ltr" dir="ltr">
-              {{ formatMoney(order.deliveryFee, order.currencyCode) }}
-            </strong>
-          </div>
-        }
-        @if (shouldShowFinancialAmount(order.discountAmount)) {
-          <div class="order-invoice-print-area__summary-line">
-            <span>{{ locale.uiText('adminOrdersFieldDiscount') }}</span>
-            <strong class="order-invoice-print-area__ltr" dir="ltr">
-              {{ formatMoney(order.discountAmount, order.currencyCode) }}
-            </strong>
-          </div>
-        }
-        @if (shouldShowFinancialAmount(order.taxAmount)) {
-          <div class="order-invoice-print-area__summary-line">
-            <span>{{ locale.uiText('adminOrdersFieldTax') }}</span>
-            <strong class="order-invoice-print-area__ltr" dir="ltr">
-              {{ formatMoney(order.taxAmount, order.currencyCode) }}
-            </strong>
-          </div>
-        }
-        <div class="order-invoice-print-area__summary-line order-invoice-print-area__summary-line--total">
-          <span>{{ locale.uiText('adminOrdersFieldTotal') }}</span>
-          <strong class="order-invoice-print-area__ltr" dir="ltr" data-testid="admin-order-invoice-total">
-            {{ formatMoney(order.totalAmount, order.currencyCode) }}
-          </strong>
-        </div>
+    <!-- Order information -->
+    <dl class="order-invoice-print-area__meta">
+      <div>
+        <dt>{{ locale.uiText('adminOrdersColType') }}</dt>
+        <dd>{{ orderTypeLabel(order.orderType) }}</dd>
       </div>
 
-      <p class="order-invoice-print-area__thanks" data-testid="admin-order-invoice-thanks">
-        {{ locale.uiText('adminOrderDetailsInvoiceThanks') }}
-      </p>
-    </section>
-  }
+      <div>
+        <dt>{{ locale.uiText('adminOrdersColGuest') }}</dt>
+        <dd>{{ order.guestName?.trim() || '—' }}</dd>
+      </div>
+
+      @if (order.guestPhone?.trim()) {
+        <div>
+          <dt>{{ locale.uiText('adminOrdersColPhone') }}</dt>
+          <dd class="order-invoice-print-area__ltr" dir="ltr">
+            {{ order.guestPhone }}
+          </dd>
+        </div>
+      }
+
+      @if (showDeliveryAddress(order)) {
+        <div>
+          <dt>{{ locale.uiText('adminOrdersFieldDeliveryAddress') }}</dt>
+          <dd>{{ order.deliveryAddress }}</dd>
+        </div>
+      }
+
+      <div>
+        <dt>{{ locale.uiText('adminOrdersColCreatedAt') }}</dt>
+        <dd class="order-invoice-print-area__ltr" dir="ltr">
+          {{ formatCreatedAt(order.createdAt) }}
+        </dd>
+      </div>
+
+      @if (order.notes?.trim()) {
+        <div>
+          <dt>{{ locale.uiText('adminOrdersFieldNotes') }}</dt>
+          <dd>{{ order.notes }}</dd>
+        </div>
+      }
+    </dl>
+
+    <!-- Items -->
+    <table
+      class="order-invoice-print-area__table"
+      data-testid="admin-order-invoice-items"
+    >
+      <thead>
+        <tr>
+          <th scope="col">
+            {{ locale.uiText('adminOrderDetailsColProduct') }}
+          </th>
+          <th scope="col">
+            {{ locale.uiText('adminOrderDetailsColQuantity') }}
+          </th>
+          <th scope="col">
+            {{ locale.uiText('adminOrderDetailsColPrice') }}
+          </th>
+          <th scope="col">
+            {{ locale.uiText('adminOrderDetailsColLineTotal') }}
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (item of order.items; track item.id) {
+          <tr [attr.data-testid]="'admin-order-invoice-item-' + item.id">
+            <td>
+              <span class="order-invoice-print-area__item-name">
+                {{ itemName(item) }}
+              </span>
+
+              @if (item.notes?.trim()) {
+                <span class="order-invoice-print-area__item-notes">
+                  {{ item.notes }}
+                </span>
+              }
+            </td>
+
+            <td>
+              {{ item.quantity }}
+            </td>
+
+            <td class="order-invoice-print-area__ltr" dir="ltr">
+              {{ formatMoney(item.unitPrice, order.currencyCode) }}
+            </td>
+
+            <td class="order-invoice-print-area__ltr" dir="ltr">
+              {{ formatMoney(item.totalPrice, order.currencyCode) }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div
+      class="order-invoice-print-area__summary"
+      data-testid="admin-order-invoice-summary"
+    >
+      <div class="order-invoice-print-area__summary-line">
+        <span>{{ locale.uiText('adminOrdersFieldSubtotal') }}</span>
+
+        <strong class="order-invoice-print-area__ltr" dir="ltr">
+          {{ formatMoney(order.subtotal, order.currencyCode) }}
+        </strong>
+      </div>
+
+      @if (showDeliveryFee(order)) {
+        <div class="order-invoice-print-area__summary-line">
+          <span>{{ locale.uiText('adminOrdersFieldDeliveryFee') }}</span>
+
+          <strong class="order-invoice-print-area__ltr" dir="ltr">
+            {{ formatMoney(order.deliveryFee, order.currencyCode) }}
+          </strong>
+        </div>
+      }
+
+      @if (shouldShowFinancialAmount(order.discountAmount)) {
+        <div class="order-invoice-print-area__summary-line">
+          <span>{{ locale.uiText('adminOrdersFieldDiscount') }}</span>
+
+          <strong class="order-invoice-print-area__ltr" dir="ltr">
+            {{ formatMoney(order.discountAmount, order.currencyCode) }}
+          </strong>
+        </div>
+      }
+
+      @if (shouldShowFinancialAmount(order.taxAmount)) {
+        <div class="order-invoice-print-area__summary-line">
+          <span>{{ locale.uiText('adminOrdersFieldTax') }}</span>
+
+          <strong class="order-invoice-print-area__ltr" dir="ltr">
+            {{ formatMoney(order.taxAmount, order.currencyCode) }}
+          </strong>
+        </div>
+      }
+
+      <div
+        class="order-invoice-print-area__summary-line
+               order-invoice-print-area__summary-line--total"
+      >
+        <span>{{ locale.uiText('adminOrdersFieldTotal') }}</span>
+
+        <strong
+          class="order-invoice-print-area__ltr"
+          dir="ltr"
+          data-testid="admin-order-invoice-total"
+        >
+          {{ formatMoney(order.totalAmount, order.currencyCode) }}
+        </strong>
+      </div>
+    </div>
+
+    <!-- Receipt footer -->
+    <p
+      class="order-invoice-print-area__thanks"
+      data-testid="admin-order-invoice-thanks"
+    >
+      {{ locale.uiText('adminOrderDetailsInvoiceThanks') }}
+    </p>
+  </section>
+}
 </div>

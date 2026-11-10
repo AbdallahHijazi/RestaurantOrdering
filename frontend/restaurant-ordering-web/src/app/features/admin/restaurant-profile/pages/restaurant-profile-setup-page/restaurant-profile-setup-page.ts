@@ -79,7 +79,6 @@ const CURRENCY_CODE_PATTERN = /^[A-Za-z]{3}$/;
 const PROFILE_CONTROL_NAMES = [
   'profileContent',
   'slug',
-  'primaryAccentColor',
   'countryCode',
   'defaultLocale',
   'supportedLocales',
@@ -110,7 +109,12 @@ function orderingMethodsValidator(control: AbstractControl): ValidationErrors | 
   selector: 'app-restaurant-profile-setup-page',
   imports: [ReactiveFormsModule, RestaurantLivePreview, RestaurantLocaleSettingsPanel],
   templateUrl: './restaurant-profile-setup-page.html',
-  styleUrl: './restaurant-profile-setup-page.scss',
+  styleUrls: [
+    './restaurant-profile-setup-page.scss',
+    './restaurant-profile-setup-page.identity.scss',
+    './restaurant-profile-setup-page.media.scss',
+    './restaurant-profile-setup-page.settings.scss',
+  ],
 })
 export class RestaurantProfileSetupPage {
   private readonly fb = inject(NonNullableFormBuilder);
@@ -131,6 +135,7 @@ export class RestaurantProfileSetupPage {
   protected readonly profileSavePhase = signal<ProfileSavePhase>('idle');
   protected readonly logoFileName = signal<string | null>(null);
   protected readonly coverFileName = signal<string | null>(null);
+  protected readonly linkCopyNotice = signal<string | null>(null);
   protected readonly logoPreviewUrl = signal<string | null>(null);
   protected readonly coverPreviewUrl = signal<string | null>(null);
   private readonly pendingLogoFile = signal<File | null>(null);
@@ -138,6 +143,7 @@ export class RestaurantProfileSetupPage {
   private readonly uploadedLogoMedia = signal<UploadedMediaFile | null>(null);
   private readonly uploadedCoverMedia = signal<UploadedMediaFile | null>(null);
   private readonly persistedLogoFileId = signal<string | null>(null);
+  private profileSnapshot: RestaurantProfileFormValue | null = null;
 
   private readonly settingsSnapshot = signal<RestaurantSettingsSnapshot>({
     workingHoursJson: null,
@@ -190,6 +196,20 @@ export class RestaurantProfileSetupPage {
   protected readonly previewSyncStatus = computed<'synced' | 'unsaved'>(() =>
     this.hasUnsavedProfileChanges() ? 'unsaved' : 'synced',
   );
+
+  protected readonly publicMenuBaseUrl = computed(() => {
+    if (typeof window === 'undefined') {
+      return '/r/';
+    }
+
+    return `${window.location.origin}/r/`;
+  });
+
+  protected readonly publicMenuUrl = computed(() => {
+    this.formRevision();
+    const slug = normalizeSlugInput(this.form.controls.slug.value);
+    return `${this.publicMenuBaseUrl()}${slug}/menu`;
+  });
 
   protected readonly canSaveSettings = computed(
     () => this.pageState() === 'ready' || this.pageState() === 'demo',
@@ -253,16 +273,6 @@ export class RestaurantProfileSetupPage {
     this.selectWorkspaceTab(tabs[nextIndex]);
     const nextTabId = `profile-tab-${tabs[nextIndex]}`;
     document.getElementById(nextTabId)?.focus();
-  }
-
-  protected onAccentColorPicked(event: Event): void {
-    const value = (event.target as HTMLInputElement).value.toUpperCase();
-    this.form.controls.primaryAccentColor.setValue(value);
-    this.form.controls.primaryAccentColor.markAsDirty();
-  }
-
-  protected accentColorPickerValue(): string {
-    return this.themeService.sanitizeAccentColor(this.form.controls.primaryAccentColor.value);
   }
 
   protected isUploadingBranding(): boolean {
@@ -461,6 +471,33 @@ export class RestaurantProfileSetupPage {
     control.setValue(normalizeSlugInput(control.value));
   }
 
+  protected async copyPublicMenuUrl(): Promise<void> {
+    const url = this.publicMenuUrl();
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = url;
+        textArea.setAttribute('readonly', '');
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.select();
+        const copied = document.execCommand('copy');
+        textArea.remove();
+        if (!copied) {
+          throw new Error('Copy command failed');
+        }
+      }
+
+      this.linkCopyNotice.set(this.localeService.uiText('profileLinkCopied'));
+    } catch {
+      this.linkCopyNotice.set(this.localeService.uiText('profileLinkCopyFailed'));
+    }
+  }
+
   protected onLogoSelected(event: Event): void {
     this.handleImageSelection(event, 'logo', (url, fileName) => {
       revokeImagePreviewUrl(this.logoPreviewUrl());
@@ -477,6 +514,44 @@ export class RestaurantProfileSetupPage {
     });
   }
 
+  protected removePendingLogo(): void {
+    if (!this.pendingLogoFile()) {
+      return;
+    }
+
+    revokeImagePreviewUrl(this.logoPreviewUrl());
+    this.pendingLogoFile.set(null);
+    this.uploadedLogoMedia.set(null);
+    this.logoFileName.set(null);
+    this.logoPreviewUrl.set(this.profileSnapshot?.logoUrl ?? null);
+    this.profileSaveNotice.set(null);
+  }
+
+  protected resetProfileChanges(): void {
+    const snapshot = this.profileSnapshot;
+    if (!snapshot || this.savingProfile()) {
+      return;
+    }
+
+    revokeImagePreviewUrl(this.logoPreviewUrl());
+    revokeImagePreviewUrl(this.coverPreviewUrl());
+
+    const { logoUrl, coverImageUrl, ...formValue } = structuredClone(snapshot);
+    this.form.reset(formValue);
+    this.logoPreviewUrl.set(logoUrl);
+    this.coverPreviewUrl.set(coverImageUrl);
+    this.logoFileName.set(null);
+    this.coverFileName.set(null);
+    this.pendingLogoFile.set(null);
+    this.pendingCoverFile.set(null);
+    this.uploadedLogoMedia.set(null);
+    this.uploadedCoverMedia.set(null);
+    this.profileSaveNotice.set(this.localeService.uiText('profileChangesCancelled'));
+    this.linkCopyNotice.set(null);
+    this.form.markAsPristine();
+    this.form.markAsUntouched();
+  }
+
   protected profileSaveLabel(): string {
     switch (this.profileSavePhase()) {
       case 'uploading-logo':
@@ -490,14 +565,6 @@ export class RestaurantProfileSetupPage {
           ? this.localeService.uiText('profileSavingRestaurant')
           : this.localeService.uiText('profileSaveRestaurant');
     }
-  }
-
-  protected chooseImageLabel(): string {
-    return this.localeService.locale() === 'ar' ? 'اختر صورة' : 'Choose image';
-  }
-
-  protected noFileChosenLabel(): string {
-    return this.localeService.locale() === 'ar' ? 'لم يتم اختيار ملف' : 'No file chosen';
   }
 
   protected fieldError(controlName: keyof typeof this.form.controls): string | null {
@@ -631,6 +698,7 @@ export class RestaurantProfileSetupPage {
           this.form.markAsPristine();
           this.uploadedLogoMedia.set(null);
           this.uploadedCoverMedia.set(null);
+          this.captureProfileSnapshot();
           this.profileSaveNotice.set(this.localeService.uiText('profileRestaurantSaved'));
           this.reloadProfileAfterSave(payload.slug);
         },
@@ -763,6 +831,7 @@ export class RestaurantProfileSetupPage {
           this.settingsSnapshot.set(createSettingsSnapshot(profile.settings));
           this.applyBrandingFromRestaurant(profile.restaurant);
           this.form.markAsPristine();
+          this.captureProfileSnapshot();
         },
         error: () => {
           this.profileSaveNotice.set(this.localeService.uiText('profileReloadFailed'));
@@ -880,6 +949,7 @@ export class RestaurantProfileSetupPage {
       this.coverPreviewUrl.set(MOCK_PUBLIC_MENU.restaurant.coverImageUrl ?? null);
       this.pageState.set('demo');
       this.applyDemoPreviewCatalog();
+      this.captureProfileSnapshot();
       return;
     }
 
@@ -900,6 +970,7 @@ export class RestaurantProfileSetupPage {
           this.applyBrandingFromRestaurant(profile.restaurant);
           this.pageState.set('ready');
           this.form.markAsPristine();
+          this.captureProfileSnapshot();
         },
         error: () => {
           this.pageState.set('settings-error');
@@ -1026,6 +1097,10 @@ export class RestaurantProfileSetupPage {
       minimumOrderAmount: Number(value.minimumOrderAmount),
       taxRate: Number(value.taxRate),
     };
+  }
+
+  private captureProfileSnapshot(): void {
+    this.profileSnapshot = structuredClone(this.buildFormValue());
   }
 
   private applyBrandingFromRestaurant(restaurant: RestaurantApiDto): void {

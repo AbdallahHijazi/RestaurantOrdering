@@ -1,4 +1,9 @@
-<article class="meal-card" [attr.data-testid]="'menu-item-' + item().id">
+<article
+  class="meal-card"
+  [class.meal-card--reordering]="reorderMode()"
+  [class.meal-card--dragging]="dragging()"
+  [attr.data-testid]="'menu-item-' + item().id"
+>
   <div class="meal-card__media">
     @if (imageSrc(); as src) {
       <img
@@ -11,7 +16,26 @@
         {{ locale.uiText('adminMenuImageFallbackAlt') }}
       </div>
     }
-    <span class="meal-card__code">#{{ item().displayOrder }}</span>
+    <div class="meal-card__order">
+      <span class="meal-card__code">#{{ item().displayOrder }}</span>
+      @if (reorderMode()) {
+        <button
+          type="button"
+          class="meal-card__drag-handle"
+          [attr.aria-label]="locale.uiText('adminMenuReorderItems') + ': ' + displayItemName(item())"
+          (pointerdown)="beginPointerReorder($event)"
+          (click)="$event.preventDefault(); $event.stopPropagation()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M9 4h2v2H9V4Zm4 0h2v2h-2V4ZM9 8h2v2H9V8Zm4 0h2v2h-2V8Zm-4 4h2v2H9v-2Zm4 0h2v2h-2v-2Zm-4 4h2v2H9v-2Zm4 0h2v2h-2v-2Z" />
+          </svg>
+        </button>
+      }
+    </div>
+    <span class="meal-card__availability-badge" [class.is-unavailable]="!item().isAvailable">
+      <span class="meal-card__status-dot"></span>
+      {{ availabilityLabel(item()) }}
+    </span>
     <span class="meal-card__badge">{{ categoryName() }}</span>
   </div>
 
@@ -19,10 +43,6 @@
     <div class="meal-card__info">
       <div>
         <h3 class="meal-card__name">{{ displayItemName(item()) }}</h3>
-        <p class="meal-card__availability">
-          <span class="meal-card__status-dot" [class.is-unavailable]="!item().isAvailable"></span>
-          {{ availabilityLabel(item()) }}
-        </p>
       </div>
       <div class="meal-card__price">
         @if (hasMeaningfulDiscount(item())) {
@@ -34,24 +54,16 @@
       </div>
     </div>
 
+    @if (displayItemDescription(item()); as description) {
+      <p class="meal-card__description">{{ description }}</p>
+    }
+
     <div class="meal-card__actions">
-      <button
-        type="button"
-        class="meal-card__action meal-card__action--neutral"
-        [attr.data-testid]="'menu-toggle-availability-' + item().id"
-        [disabled]="availabilityBusy()"
-        (click)="toggleAvailability.emit(item())"
-      >
-        {{
-          availabilityBusy()
-            ? locale.uiText('adminMenuToggleAvailableBusy')
-            : locale.uiText('adminMenuToggleAvailable')
-        }}
-      </button>
       <button
         type="button"
         class="meal-card__action meal-card__action--edit"
         [attr.data-testid]="'menu-edit-item-' + item().id"
+        [disabled]="reorderMode()"
         (click)="editItem.emit(item())"
       >
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -64,8 +76,22 @@
       </button>
       <button
         type="button"
+        class="meal-card__action meal-card__action--neutral"
+        [attr.data-testid]="'menu-toggle-availability-' + item().id"
+        [disabled]="reorderMode() || availabilityBusy()"
+        (click)="toggleAvailability.emit(item())"
+      >
+        {{
+          availabilityBusy()
+            ? locale.uiText('adminMenuToggleAvailableBusy')
+            : locale.uiText('adminMenuToggleAvailable')
+        }}
+      </button>
+      <button
+        type="button"
         class="meal-card__action meal-card__action--delete"
         [attr.data-testid]="'menu-delete-item-' + item().id"
+        [disabled]="reorderMode()"
         (click)="deleteItem.emit(item())"
       >
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">

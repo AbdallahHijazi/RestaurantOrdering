@@ -15,7 +15,7 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { switchMap, of, finalize, type Observable } from 'rxjs';
+import { finalize, forkJoin, of, switchMap, type Observable } from 'rxjs';
 import { resolveApiAssetUrl } from '../../../../core/config/resolve-api-asset-url';
 import { DirectionService } from '../../../../core/localization/direction.service';
 import { LocaleApiService } from '../../../../core/localization/locale-api.service';
@@ -27,6 +27,7 @@ import {
 } from '../../restaurant-profile/data-access/image-preview.util';
 import { AdminMenuService } from '../../data-access/admin-menu.service';
 import { MenuManagementMealCard } from './components/menu-management-meal-card/menu-management-meal-card';
+import { FloatingNotificationPill } from '../../../../shared/ui/floating-notification-pill/floating-notification-pill';
 import {
   formatPrimaryLanguageLabel,
   primarySortName,
@@ -45,12 +46,18 @@ import {
 
 type PageState = 'loading' | 'ready' | 'error' | 'missing-context';
 type ModalKind = 'category' | 'item' | 'deleteCategory' | 'deleteItem' | null;
+type AvailabilityFilter = 'all' | 'available' | 'unavailable';
+type DropPosition = 'before' | 'after';
 
 @Component({
   selector: 'app-menu-management-page',
-  imports: [ReactiveFormsModule, ModalShell, MenuManagementMealCard],
+  imports: [ReactiveFormsModule, ModalShell, MenuManagementMealCard, FloatingNotificationPill],
   templateUrl: './menu-management-page.html',
-  styleUrl: './menu-management-page.scss',
+  styleUrls: [
+    './menu-management-page.scss',
+    './menu-management-page.reorder.scss',
+    './menu-management-page.modal.scss',
+  ],
 })
 export class MenuManagementPage {
   private readonly fb = inject(NonNullableFormBuilder);
@@ -78,6 +85,17 @@ export class MenuManagementPage {
   protected readonly deletingCategory = signal<AdminCategory | null>(null);
   protected readonly deletingItem = signal<AdminMenuItem | null>(null);
   protected readonly availabilityBusyId = signal<string | null>(null);
+  protected readonly categoryReorderMode = signal(false);
+  protected readonly itemReorderMode = signal(false);
+  protected readonly categoryOrderBusy = signal(false);
+  protected readonly itemOrderBusy = signal(false);
+  protected readonly draggingCategoryId = signal<string | null>(null);
+  protected readonly draggingItemId = signal<string | null>(null);
+  protected readonly categoryDropTargetId = signal<string | null>(null);
+  protected readonly categoryDropPosition = signal<DropPosition | null>(null);
+  protected readonly itemDropTargetId = signal<string | null>(null);
+  protected readonly itemDropPosition = signal<DropPosition | null>(null);
+  protected readonly reorderErrorMessage = signal<string | null>(null);
   protected readonly imagePreviewUrl = signal<string | null>(null);
   protected readonly imageValidationError = signal<string | null>(null);
   protected readonly pendingImageFile = signal<File | null>(null);
@@ -109,15 +127,25 @@ export class MenuManagementPage {
   );
 
   protected readonly searchQuery = signal('');
-
+  protected readonly availabilityFilter = signal<AvailabilityFilter>('all');
+  private categoryOrderSnapshot: AdminCategory[] | null = null;
+  private itemOrderSnapshot: AdminMenuItem[] | null = null;
+  private reorderAnimationFrame: number | null = null;
   protected readonly filteredMenuItems = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
+    const availability = this.availabilityFilter();
     const items = this.menuItems();
-    if (!query) {
-      return items;
-    }
 
     return items.filter((item) => {
+      if (availability === 'available' && !item.isAvailable) {
+        return false;
+      }
+      if (availability === 'unavailable' && item.isAvailable) {
+        return false;
+      }
+      if (!query) {
+        return true;
+      }
       const name = this.displayItemName(item).toLowerCase();
       const category = this.categoryNameById(item.categoryId).toLowerCase();
       return name.includes(query) || category.includes(query);
@@ -133,6 +161,15 @@ export class MenuManagementPage {
       this.itemsState() === 'ready' &&
       this.menuItems().length > 0 &&
       this.filteredMenuItems().length === 0,
+  );
+
+  protected readonly canReorderItems = computed(
+    () =>
+      this.itemsState() === 'ready' &&
+      this.selectedCategoryId() !== ALL_MENU_ITEMS_FILTER &&
+      this.menuItems().length > 1 &&
+      !this.searchQuery().trim() &&
+      this.availabilityFilter() === 'all',
   );
 
   protected readonly selectedCategoryLabel = computed(() => {
@@ -243,6 +280,9 @@ export class MenuManagementPage {
   }
 
   protected selectCategory(categoryId: string): void {
+    if (this.categoryReorderMode() || this.itemReorderMode()) {
+      return;
+    }
     this.selectedCategoryId.set(categoryId);
     this.searchQuery.set('');
     this.loadMenuItems();
@@ -251,6 +291,346 @@ export class MenuManagementPage {
   protected onSearchInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.searchQuery.set(value);
+  }
+
+  protected onAvailabilityFilterChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    if (value === 'all' || value === 'available' || value === 'unavailable') {
+      this.availabilityFilter.set(value);
+    }
+  }
+
+  protected toggleCategoryReorder(): void {
+    if (this.categoryOrderBusy()) {
+      return;
+    }
+
+    this.cancelItemDrag();
+    this.itemReorderMode.set(false);
+    this.reorderErrorMessage.set(null);
+    this.categoryReorderMode.update((active) => !active);
+    if (!this.categoryReorderMode()) {
+      this.cancelCategoryDrag();
+    }
+  }
+
+  protected toggleItemReorder(): void {
+    if (this.itemOrderBusy() || (!this.itemReorderMode() && !this.canReorderItems())) {
+      return;
+    }
+
+    this.cancelCategoryDrag();
+    this.categoryReorderMode.set(false);
+    this.reorderErrorMessage.set(null);
+    this.itemReorderMode.update((active) => !active);
+    if (!this.itemReorderMode()) {
+      this.cancelItemDrag();
+    }
+  }
+
+  protected onCategoryPointerDown(event: PointerEvent, categoryId: string): void {
+    if ((event.pointerType === 'mouse' && event.button !== 0) || !this.beginCategoryDrag(categoryId)) {
+      return;
+    }
+    if (event.pointerType === 'mouse') {
+      event.preventDefault();
+    }
+    (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
+  }
+
+  protected onCategoryPointerMove(event: PointerEvent): void {
+    if (!this.draggingCategoryId()) {
+      return;
+    }
+    this.autoScrollCategoryStrip(event);
+    const target = document
+      .elementFromPoint(event.clientX, event.clientY)
+      ?.closest<HTMLElement>('[data-category-reorder-id]');
+    const categoryId = target?.dataset['categoryReorderId'];
+    if (categoryId) {
+      this.previewCategoryMove(categoryId);
+    }
+  }
+
+  protected onCategoryPointerUp(): void {
+    if (this.draggingCategoryId()) {
+      this.finishCategoryDrag();
+    }
+  }
+
+  protected onCategoryPointerCancel(): void {
+    this.cancelCategoryDrag();
+  }
+
+  protected onItemPointerDown(event: PointerEvent, itemId: string): void {
+    if ((event.pointerType === 'mouse' && event.button !== 0) || !this.beginItemDrag(itemId)) {
+      return;
+    }
+    event.preventDefault();
+  }
+
+  protected onItemPointerMove(event: PointerEvent): void {
+    if (!this.draggingItemId()) {
+      return;
+    }
+    const target = document
+      .elementFromPoint(event.clientX, event.clientY)
+      ?.closest<HTMLElement>('[data-item-reorder-id]');
+    const itemId = target?.dataset['itemReorderId'];
+    if (itemId) {
+      this.previewItemMove(itemId);
+    }
+  }
+
+  protected onItemPointerUp(): void {
+    if (this.draggingItemId()) {
+      this.finishItemDrag();
+    }
+  }
+
+  protected onItemPointerCancel(): void {
+    this.cancelItemDrag();
+  }
+
+
+  private captureReorderPositions(
+  selector: string,
+  dataKey: 'categoryReorderId' | 'itemReorderId',
+  ): Map<string, DOMRect> {
+    if (this.reorderAnimationFrame !== null) {
+      cancelAnimationFrame(this.reorderAnimationFrame);
+      this.reorderAnimationFrame = null;
+    }
+
+    const positions = new Map<string, DOMRect>();
+
+    document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
+      element
+        .getAnimations()
+        .filter((animation) => animation.id === 'menu-reorder-flip')
+        .forEach((animation) => animation.cancel());
+
+      const id = element.dataset[dataKey];
+
+      if (id) {
+        positions.set(id, element.getBoundingClientRect());
+      }
+    });
+
+    return positions;
+  }
+
+private animateReorder(
+    selector: string,
+    dataKey: 'categoryReorderId' | 'itemReorderId',
+    previousPositions: Map<string, DOMRect>,
+  ): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    this.reorderAnimationFrame = requestAnimationFrame(() => {
+      this.reorderAnimationFrame = null;
+
+      document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
+        const id = element.dataset[dataKey];
+
+        if (!id) {
+          return;
+        }
+
+        const previous = previousPositions.get(id);
+
+        if (!previous) {
+          return;
+        }
+
+        const current = element.getBoundingClientRect();
+
+        const deltaX = previous.left - current.left;
+        const deltaY = previous.top - current.top;
+
+        if (Math.abs(deltaX) < 0.5 && Math.abs(deltaY) < 0.5) {
+          return;
+        }
+
+        element.animate(
+          [
+            {
+              transform: `translate3d(${deltaX}px, ${deltaY}px, 0)`,
+            },
+            {
+              transform: 'translate3d(0, 0, 0)',
+            },
+          ],
+          {
+            id: 'menu-reorder-flip',
+            duration: 320,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+            fill: 'both',
+          },
+        );
+      });
+    });
+  }
+
+  private beginCategoryDrag(categoryId: string): boolean {
+    if (!this.categoryReorderMode() || this.categoryOrderBusy()) {
+      return false;
+    }
+    if (!this.categoryOrderSnapshot) {
+      this.categoryOrderSnapshot = [...this.categories()];
+    }
+    this.draggingCategoryId.set(categoryId);
+    return true;
+  }
+
+  private previewCategoryMove(targetId: string): void {
+    const sourceId = this.draggingCategoryId();
+
+    if (!sourceId || sourceId === targetId) {
+      return;
+    }
+
+    const entries = this.categories();
+
+    const sourceIndex = entries.findIndex((entry) => entry.id === sourceId);
+    const targetIndex = entries.findIndex((entry) => entry.id === targetId);
+
+    if (sourceIndex < 0 || targetIndex < 0) {
+      return;
+    }
+
+    const previousPositions = this.captureReorderPositions(
+      '[data-category-reorder-id]',
+      'categoryReorderId',
+    );
+
+    this.categoryDropTargetId.set(targetId);
+
+    this.categoryDropPosition.set(
+      sourceIndex < targetIndex ? 'after' : 'before',
+    );
+
+    this.categories.set(
+      this.moveEntry(entries, sourceId, targetId),
+    );
+
+    this.animateReorder(
+      '[data-category-reorder-id]',
+      'categoryReorderId',
+      previousPositions,
+    );
+  }
+
+  protected finishCategoryDrag(): void {
+    const previous = this.categoryOrderSnapshot;
+    this.categoryOrderSnapshot = null;
+    this.draggingCategoryId.set(null);
+    this.categoryDropTargetId.set(null);
+    this.categoryDropPosition.set(null);
+    if (!previous || this.sameOrder(previous, this.categories())) {
+      return;
+    }
+
+    const reordered = this.categories().map((category, index) => ({
+      ...category,
+      displayOrder: index + 1,
+    }));
+    this.categories.set(reordered);
+    this.persistCategoryOrder(previous, reordered);
+  }
+
+  private cancelCategoryDrag(): void {
+    if (this.categoryOrderSnapshot) {
+      this.categories.set(this.categoryOrderSnapshot);
+    }
+    this.categoryOrderSnapshot = null;
+    this.draggingCategoryId.set(null);
+    this.categoryDropTargetId.set(null);
+    this.categoryDropPosition.set(null);
+  }
+
+  private beginItemDrag(itemId: string): boolean {
+    if (!this.itemReorderMode() || this.itemOrderBusy()) {
+      return false;
+    }
+    if (!this.itemOrderSnapshot) {
+      this.itemOrderSnapshot = [...this.menuItems()];
+    }
+    this.draggingItemId.set(itemId);
+    return true;
+  }
+
+  private previewItemMove(targetId: string): void {
+    const sourceId = this.draggingItemId();
+
+    if (!sourceId || sourceId === targetId) {
+      return;
+    }
+
+    const entries = this.menuItems();
+
+    const sourceIndex = entries.findIndex((entry) => entry.id === sourceId);
+    const targetIndex = entries.findIndex((entry) => entry.id === targetId);
+
+    if (sourceIndex < 0 || targetIndex < 0) {
+      return;
+    }
+
+    const previousPositions = this.captureReorderPositions(
+      '[data-item-reorder-id]',
+      'itemReorderId',
+    );
+
+    this.itemDropTargetId.set(targetId);
+
+    this.itemDropPosition.set(
+      sourceIndex < targetIndex ? 'after' : 'before',
+    );
+
+    this.menuItems.set(
+      this.moveEntry(entries, sourceId, targetId),
+    );
+
+    this.animateReorder(
+      '[data-item-reorder-id]',
+      'itemReorderId',
+      previousPositions,
+    );
+  }
+
+  protected finishItemDrag(): void {
+    const previous = this.itemOrderSnapshot;
+    this.itemOrderSnapshot = null;
+    this.draggingItemId.set(null);
+    this.itemDropTargetId.set(null);
+    this.itemDropPosition.set(null);
+    if (!previous || this.sameOrder(previous, this.menuItems())) {
+      return;
+    }
+
+    const reordered = this.menuItems().map((item, index) => ({
+      ...item,
+      displayOrder: index + 1,
+    }));
+    this.menuItems.set(reordered);
+    this.persistItemOrder(previous, reordered);
+  }
+
+  private cancelItemDrag(): void {
+    if (this.itemOrderSnapshot) {
+      this.menuItems.set(this.itemOrderSnapshot);
+    }
+    this.itemOrderSnapshot = null;
+    this.draggingItemId.set(null);
+    this.itemDropTargetId.set(null);
+    this.itemDropPosition.set(null);
+  }
+
+  protected dismissPageNotification(): void {
+    this.successMessage.set(null);
+    this.reorderErrorMessage.set(null);
   }
 
   protected showingMealsCountLabel(): string {
@@ -428,7 +808,7 @@ export class MenuManagementPage {
             ),
           );
           this.closeModal();
-          this.successMessage.set(
+          this.showSuccessFeedback(
             this.locale.uiText(
               editing ? 'adminMenuCategoryUpdateSuccess' : 'adminMenuCategoryCreateSuccess',
             ),
@@ -463,7 +843,7 @@ export class MenuManagementPage {
             this.selectedCategoryId.set(ALL_MENU_ITEMS_FILTER);
           }
           this.closeModal();
-          this.successMessage.set(this.locale.uiText('adminMenuCategoryDeleteSuccess'));
+          this.showSuccessFeedback(this.locale.uiText('adminMenuCategoryDeleteSuccess'));
           this.loadMenuItems();
         },
         error: (error) => {
@@ -514,7 +894,7 @@ export class MenuManagementPage {
           );
           this.refreshCategoryCounts();
           this.closeModal();
-          this.successMessage.set(
+          this.showSuccessFeedback(
             this.locale.uiText(
               editing ? 'adminMenuItemUpdateSuccess' : 'adminMenuItemCreateSuccess',
             ),
@@ -546,7 +926,7 @@ export class MenuManagementPage {
           this.menuItems.update((entries) => entries.filter((entry) => entry.id !== item.id));
           this.refreshCategoryCounts();
           this.closeModal();
-          this.successMessage.set(this.locale.uiText('adminMenuItemDeleteSuccess'));
+          this.showSuccessFeedback(this.locale.uiText('adminMenuItemDeleteSuccess'));
         },
         error: (error) => {
           this.modalErrorMessage.set(this.mapMutationError(error));
@@ -602,10 +982,10 @@ export class MenuManagementPage {
           this.menuItems.update((entries) =>
             entries.map((entry) => (entry.id === updated.id ? updated : entry)),
           );
-          this.successMessage.set(this.locale.uiText('adminMenuItemUpdateSuccess'));
+          this.showSuccessFeedback(this.locale.uiText('adminMenuItemUpdateSuccess'));
         },
         error: (error) => {
-          this.successMessage.set(null);
+          this.dismissPageNotification();
           this.itemsErrorMessage.set(this.mapMutationError(error));
         },
       });
@@ -700,6 +1080,88 @@ export class MenuManagementPage {
     this.imageValidationError.set(null);
   }
 
+  private persistCategoryOrder(
+    previous: AdminCategory[],
+    reordered: AdminCategory[],
+  ): void {
+    const changed = reordered.filter(
+      (category) =>
+        previous.find((entry) => entry.id === category.id)?.displayOrder !== category.displayOrder,
+    );
+    if (changed.length === 0) {
+      return;
+    }
+
+    this.categoryOrderBusy.set(true);
+    this.successMessage.set(null);
+    this.reorderErrorMessage.set(null);
+    forkJoin(
+      changed.map((category) =>
+        this.menuService.updateCatalogCategory(
+          category.id,
+          this.toCatalogCategoryRequestFromExisting(category),
+        ),
+      ),
+    )
+      .pipe(
+        finalize(() => this.categoryOrderBusy.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (saved) => {
+          const savedById = new Map(saved.map((category) => [category.id, category]));
+          this.categories.update((entries) =>
+            entries.map((entry) => savedById.get(entry.id) ?? entry),
+          );
+          this.showSuccessFeedback(this.locale.uiText('adminMenuCategoryUpdateSuccess'));
+        },
+        error: (error) => {
+          this.categories.set(previous);
+          this.successMessage.set(null);
+          this.reorderErrorMessage.set(this.mapMutationError(error));
+        },
+      });
+  }
+
+  private persistItemOrder(previous: AdminMenuItem[], reordered: AdminMenuItem[]): void {
+    const changed = reordered.filter(
+      (item) => previous.find((entry) => entry.id === item.id)?.displayOrder !== item.displayOrder,
+    );
+    if (changed.length === 0) {
+      return;
+    }
+
+    this.itemOrderBusy.set(true);
+    this.successMessage.set(null);
+    this.reorderErrorMessage.set(null);
+    forkJoin(
+      changed.map((item) =>
+        this.menuService.updateCatalogMenuItem(
+          item.id,
+          this.toCatalogItemRequestFromExisting(item, { displayOrder: item.displayOrder }),
+        ),
+      ),
+    )
+      .pipe(
+        finalize(() => this.itemOrderBusy.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (saved) => {
+          const savedById = new Map(saved.map((item) => [item.id, item]));
+          this.menuItems.update((entries) =>
+            entries.map((entry) => savedById.get(entry.id) ?? entry),
+          );
+          this.showSuccessFeedback(this.locale.uiText('adminMenuItemUpdateSuccess'));
+        },
+        error: (error) => {
+          this.menuItems.set(previous);
+          this.successMessage.set(null);
+          this.reorderErrorMessage.set(this.mapMutationError(error));
+        },
+      });
+  }
+
   private refreshCategoryCounts(): void {
     this.menuService
       .listCategories()
@@ -750,6 +1212,18 @@ export class MenuManagementPage {
     };
   }
 
+  private toCatalogCategoryRequestFromExisting(
+    category: AdminCategory,
+  ): SaveCatalogCategoryRequest {
+    const primary = resolveCatalogSaveContent(this.defaultLocale(), category);
+    return {
+      name: primary.name,
+      description: primary.description || null,
+      displayOrder: category.displayOrder,
+      isActive: category.isActive,
+    };
+  }
+
   private toItemRequest(
     raw: ReturnType<typeof this.itemForm.getRawValue>,
     imageFileId: string | null,
@@ -784,6 +1258,48 @@ export class MenuManagementPage {
       isActive: item.isActive,
       ...overrides,
     };
+  }
+
+  private moveEntry<T extends { id: string }>(entries: T[], sourceId: string, targetId: string): T[] {
+    const sourceIndex = entries.findIndex((entry) => entry.id === sourceId);
+    const targetIndex = entries.findIndex((entry) => entry.id === targetId);
+    if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) {
+      return entries;
+    }
+
+    const moved = [...entries];
+    const [entry] = moved.splice(sourceIndex, 1);
+    moved.splice(targetIndex, 0, entry);
+    return moved;
+  }
+
+  private sameOrder<T extends { id: string }>(left: T[], right: T[]): boolean {
+    return left.length === right.length && left.every((entry, index) => entry.id === right[index]?.id);
+  }
+
+  private autoScrollCategoryStrip(event: PointerEvent): void {
+    const currentTarget = event.currentTarget;
+    if (!(currentTarget instanceof HTMLElement)) {
+      return;
+    }
+
+    const strip = currentTarget.closest<HTMLElement>('.menu-management-categories');
+    if (!strip || strip.scrollWidth <= strip.clientWidth) {
+      return;
+    }
+
+    const bounds = strip.getBoundingClientRect();
+    const edge = Math.min(48, bounds.width * 0.15);
+    if (event.clientX < bounds.left + edge) {
+      strip.scrollBy({ left: -18 });
+    } else if (event.clientX > bounds.right - edge) {
+      strip.scrollBy({ left: 18 });
+    }
+  }
+
+  private showSuccessFeedback(message: string): void {
+    this.reorderErrorMessage.set(null);
+    this.successMessage.set(message);
   }
 
   private mapImageValidationError(reason: 'type' | 'size' | 'empty'): string {

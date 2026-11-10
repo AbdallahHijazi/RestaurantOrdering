@@ -14,6 +14,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, switchMap } from 'rxjs';
 import { ModalShell } from '../../../../shared/components/order-modal-shell/order-modal-shell';
+import { FloatingNotificationPill } from '../../../../shared/ui/floating-notification-pill/floating-notification-pill';
 import { LocaleService } from '../../../../core/localization/locale';
 import { resolveApiAssetUrl } from '../../../../core/config/resolve-api-asset-url';
 import { AdminBrandingService } from '../../../../core/layouts/admin-layout/admin-branding.service';
@@ -56,6 +57,7 @@ interface PrintEntry {
     TablePrintCard,
     TableFormModal,
     TableConfirmModal,
+    FloatingNotificationPill,
   ],
   templateUrl: './tables-management-page.html',
   styleUrls: ['./tables-management-page.scss', './tables-management-page.print.scss'],
@@ -68,6 +70,7 @@ export class TablesManagementPage {
   private readonly branding = inject(AdminBrandingService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly appRef = inject(ApplicationRef);
+  private successMessageTimeoutId: number | null = null;
 
   @ViewChild('printArea', { read: ElementRef })
   private printAreaRef?: ElementRef<HTMLElement>;
@@ -175,6 +178,11 @@ export class TablesManagementPage {
   });
 
   constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.successMessageTimeoutId !== null) {
+        window.clearTimeout(this.successMessageTimeoutId);
+      }
+    });
     this.loadTables();
   }
 
@@ -200,7 +208,7 @@ export class TablesManagementPage {
   }
 
   protected loadTables(): void {
-    this.successMessage.set(null);
+    this.clearSuccessMessage();
 
     const restaurantId = this.tablesService.getRestaurantId();
     if (!restaurantId) {
@@ -265,6 +273,7 @@ export class TablesManagementPage {
   }
 
   protected openCreateModal(): void {
+    this.clearSuccessMessage();
     this.createForm.reset({ name: '', zone: '', isActive: true });
     this.createErrorMessage.set(null);
     this.createSubmitting.set(false);
@@ -305,7 +314,7 @@ export class TablesManagementPage {
         next: (created) => {
           this.tables.update((entries) => [...entries, created].sort(this.compareTables));
           this.closeCreateModal();
-          this.successMessage.set(this.locale.uiText('tablesCreateSuccess'));
+          this.showSuccessMessage(this.locale.uiText('tablesCreateSuccess'));
           void this.ensureQrPreview(created);
         },
         error: (error) => {
@@ -315,6 +324,7 @@ export class TablesManagementPage {
   }
 
   protected openEditModal(table: RestaurantTable): void {
+    this.clearSuccessMessage();
     this.selectedTable.set(table);
     this.editForm.reset({
       name: table.name,
@@ -362,7 +372,7 @@ export class TablesManagementPage {
             entries.map((entry) => (entry.id === updated.id ? updated : entry)).sort(this.compareTables),
           );
           this.closeEditModal();
-          this.successMessage.set(this.locale.uiText('tablesUpdateSuccess'));
+          this.showSuccessMessage(this.locale.uiText('tablesUpdateSuccess'));
         },
         error: (error) => {
           this.editErrorMessage.set(this.mapMutationError(error));
@@ -371,6 +381,7 @@ export class TablesManagementPage {
   }
 
   protected openStatusConfirm(table: RestaurantTable): void {
+    this.clearSuccessMessage();
     this.selectedTable.set(table);
     this.confirmKind.set(table.isActive ? 'deactivate' : 'activate');
     this.confirmErrorMessage.set(null);
@@ -379,6 +390,7 @@ export class TablesManagementPage {
   }
 
   protected openRegenerateConfirm(table: RestaurantTable): void {
+    this.clearSuccessMessage();
     this.selectedTable.set(table);
     this.confirmKind.set('regenerateToken');
     this.confirmErrorMessage.set(null);
@@ -420,7 +432,7 @@ export class TablesManagementPage {
             entries.map((entry) => (entry.id === updated.id ? updated : entry)).sort(this.compareTables),
           );
           this.closeConfirmModal();
-          this.successMessage.set(
+          this.showSuccessMessage(
             this.confirmKind() === 'regenerateToken'
               ? this.locale.uiText('tablesRegenerateSuccess')
               : updated.isActive
@@ -433,6 +445,27 @@ export class TablesManagementPage {
           this.confirmErrorMessage.set(this.mapMutationError(error));
         },
       });
+  }
+
+  private showSuccessMessage(message: string): void {
+    this.clearSuccessMessage();
+    this.successMessage.set(message);
+    this.successMessageTimeoutId = window.setTimeout(() => {
+      this.successMessage.set(null);
+      this.successMessageTimeoutId = null;
+    }, 4000);
+  }
+
+  private clearSuccessMessage(): void {
+    if (this.successMessageTimeoutId !== null) {
+      window.clearTimeout(this.successMessageTimeoutId);
+      this.successMessageTimeoutId = null;
+    }
+    this.successMessage.set(null);
+  }
+
+  protected dismissSuccessMessage(): void {
+    this.clearSuccessMessage();
   }
 
   protected dismissModal(): void {

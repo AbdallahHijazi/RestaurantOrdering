@@ -1,0 +1,215 @@
+.menu-management-category-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-block-end: 1.5rem;
+  padding: 0.625rem;
+  border: 1px solid var(--menu-line);
+  border-radius: 1rem;
+  background: var(--restaurant-surface);
+  box-shadow: var(--restaurant-shadow-xs);
+}
+
+.menu-management-categories {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.menu-management-category-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.menu-management-reorder-button {
+  display: inline-flex;
+  min-height: 2.8rem;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.menu-management-reorder-button.is-active {
+  border-color: var(--restaurant-accent-border);
+  color: var(--restaurant-text-on-accent);
+  background: var(--restaurant-accent);
+}
+
+.menu-management-reorder-hint {
+  margin: -0.75rem 0 1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.menu-management-reorder-hint {
+  color: var(--restaurant-accent-strong);
+  background: var(--restaurant-accent-soft);
+}
+
+// .menu-management-category-wrap {
+//   position: relative;
+//   border-radius: 0.75rem;
+//   will-change: transform;
+// }
+
+// .menu-management-category-wrap.is-dragging {
+//   z-index: 10;
+// }
+
+// .menu-management-category-pill.is-reorderable {
+//   touch-action: pan-y pinch-zoom;
+//   border-color: color-mix(in srgb, var(--restaurant-accent-border) 74%, transparent);
+//   background: color-mix(in srgb, var(--restaurant-accent-soft) 48%, var(--restaurant-surface));
+//   box-shadow: 0 0.15rem 0.45rem color-mix(in srgb, var(--restaurant-text) 8%, transparent);
+//   cursor: grab;
+//   user-select: none;
+//   transition:
+//     transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+//     border-color 0.18s ease,
+//     box-shadow 0.18s ease,
+//     background-color 0.18s ease;
+// }
+
+// .menu-management-category-wrap.is-dragging .menu-management-category-pill {
+//   position: relative;
+//   z-index: 2;
+//   border-color: var(--restaurant-accent-border);
+//   box-shadow: 0 0.65rem 1.35rem color-mix(in srgb, var(--restaurant-text) 18%, transparent);
+//   cursor: grabbing;
+//   transform: translateY(-2px) scale(1.035);
+// }
+
+// app-menu-management-meal-card {
+//   position: relative;
+//   min-width: 0;
+//   will-change: transform;
+// }
+
+.menu-management-category-wrap.is-drop-before::before,
+.menu-management-category-wrap.is-drop-after::after {
+  position: absolute;
+  z-index: 4;
+  top: 0.2rem;
+  bottom: 0.2rem;
+  width: 0.2rem;
+  border-radius: 999px;
+  background: var(--restaurant-accent);
+  box-shadow: 0 0 0 0.2rem var(--restaurant-accent-soft);
+  content: '';
+}
+
+.menu-management-category-wrap.is-drop-before::before {
+  inset-inline-start: -0.35rem;
+}
+
+.menu-management-category-wrap.is-drop-after::after {
+  inset-inline-end: -0.35rem;
+}
+
+
+app-menu-management-meal-card.menu-management-item-slot--drop-before::before,
+app-menu-management-meal-card.menu-management-item-slot--drop-after::after {
+  position: absolute;
+  z-index: 6;
+  top: 0.6rem;
+  bottom: 0.6rem;
+  width: 0.25rem;
+  border-radius: 999px;
+  background: var(--restaurant-accent);
+  box-shadow: 0 0 0 0.25rem var(--restaurant-accent-soft);
+  content: '';
+  pointer-events: none;
+}
+
+app-menu-management-meal-card.menu-management-item-slot--drop-before::before {
+  inset-inline-start: -0.6rem;
+}
+
+app-menu-management-meal-card.menu-management-item-slot--drop-after::after {
+  inset-inline-end: -0.6rem;
+}
+
+@media (max-width: 64rem) {
+  .menu-management-category-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .menu-management-category-actions {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 30rem) {
+  .menu-management-category-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .menu-management-category-actions .menu-management-secondary {
+    min-width: 0;
+    white-space: normal;
+  }
+
+  app-menu-management-meal-card.menu-management-item-slot--drop-before::before,
+  app-menu-management-meal-card.menu-management-item-slot--drop-after::after {
+    right: 0.6rem;
+    left: 0.6rem;
+    width: auto;
+    height: 0.25rem;
+  }
+
+  app-menu-management-meal-card.menu-management-item-slot--drop-before::before {
+    top: -0.6rem;
+    bottom: auto;
+  }
+
+  app-menu-management-meal-card.menu-management-item-slot--drop-after::after {
+    top: auto;
+    bottom: -0.6rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-management-category-wrap,
+  app-menu-management-meal-card {
+    will-change: auto;
+  }
+
+  .menu-management-category-wrap {
+    transition: none;
+  }
+
+  .menu-management-category-wrap.is-drop-before::before,
+  .menu-management-category-wrap.is-drop-after::after,
+  app-menu-management-meal-card.menu-management-item-slot--drop-before::before,
+  app-menu-management-meal-card.menu-management-item-slot--drop-after::after {
+    animation: none;
+  }
+}
+
+.menu-management-category-wrap.is-drop-before::before,
+.menu-management-category-wrap.is-drop-after::after,
+app-menu-management-meal-card.menu-management-item-slot--drop-before::before,
+app-menu-management-meal-card.menu-management-item-slot--drop-after::after {
+  animation: menu-reorder-indicator-in 140ms ease-out;
+}
+
+@keyframes menu-reorder-indicator-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

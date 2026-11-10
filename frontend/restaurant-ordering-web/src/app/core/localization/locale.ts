@@ -185,12 +185,34 @@ export type UiTextKey =
   | 'profileNavMenuBuilder'
   | 'profileNavOrderDashboard'
   | 'profileIdentitySectionDesc'
+  | 'profileIdentityLead'
+  | 'profileBasicInfoTitle'
+  | 'profileBasicInfoDescription'
   | 'profileIdentityPrimaryNotice'
   | 'profileIdentityPrimaryLanguage'
   | 'profileIdentityFieldName'
   | 'profileIdentityFieldDescription'
   | 'profileIdentityFieldAddress'
   | 'profileIdentityMissingPrimaryLocale'
+  | 'profileSlugLabel'
+  | 'profileCopyLink'
+  | 'profileLinkCopied'
+  | 'profileLinkCopyFailed'
+  | 'profileLogoTitle'
+  | 'profileLogoBadge'
+  | 'profileChangeLogo'
+  | 'profileRemoveLogo'
+  | 'profileRemoveLogoUnavailable'
+  | 'profileCoverTitle'
+  | 'profileCoverRatio'
+  | 'profileChangeCover'
+  | 'profileActionContext'
+  | 'profileCancelChanges'
+  | 'profileChangesCancelled'
+  | 'profileRequiredField'
+  | 'profileSlugValidation'
+  | 'profileLoading'
+  | 'profileMediaEmpty'
   | 'profileLocalizationSectionDesc'
   | 'profileContactSectionDesc'
   | 'profileDeliverySectionDesc'
@@ -517,6 +539,8 @@ export type UiTextKey =
   | 'tablesCardSubtitle'
   | 'tablesCardOrderFromPhone'
   | 'tablesCardScanEnglish'
+  | 'tablesOrderTemporarilyDisabled'
+  | 'tablesReactivateNow'
   | 'kitchenEyebrow'
   | 'kitchenTitle'
   | 'kitchenLead'
@@ -601,6 +625,9 @@ export type UiTextKey =
   | 'adminOrdersColTotal'
   | 'adminOrdersColActions'
   | 'adminOrdersViewDetails'
+  | 'adminOrdersViewLabel'
+  | 'adminOrdersViewTable'
+  | 'adminOrdersViewCards'
   | 'adminOrdersActionStartPreparing'
   | 'adminOrdersActionMarkReady'
   | 'adminOrdersActionComplete'
@@ -750,6 +777,15 @@ export type UiTextKey =
   | 'adminMenuAddNewMealDescription'
   | 'adminMenuAvailableNow'
   | 'adminMenuAddCategoryAria'
+  | 'adminMenuAvailabilityFilterLabel'
+  | 'adminMenuFilterAllStatuses'
+  | 'adminMenuReorderCategories'
+  | 'adminMenuFinishCategoryReorder'
+  | 'adminMenuCategoryReorderHint'
+  | 'adminMenuReorderItems'
+  | 'adminMenuFinishItemReorder'
+  | 'adminMenuItemReorderHint'
+  | 'notificationClose'
   | 'publicCartTitle'
   | 'publicCartEmpty'
   | 'publicCartRemove'
@@ -879,6 +915,11 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     profileNavMenuBuilder: 'بناء القائمة',
     profileNavOrderDashboard: 'لوحة الطلبات',
     profileIdentitySectionDesc: 'عرّف هوية مطعمك الرقمية ومظهره.',
+    profileIdentityLead:
+      'عرّف هوية مطعمك الرقمية ومظهره العام. تُستخدم هذه البيانات في واجهة القائمة العامة وروابط المشاركة.',
+    profileBasicInfoTitle: 'المعلومات الأساسية للمطعم',
+    profileBasicInfoDescription:
+      'البيانات التعريفية التي تظهر في رأس الصفحة ونتائج البحث وقنوات الطلب.',
     profileIdentityPrimaryNotice:
       'أدخل محتوى هوية المطعم باللغة الأساسية الحالية. سيتم إنشاء ترجمات لباقي اللغات حسب إعدادات الترجمة.',
     profileIdentityPrimaryLanguage: 'اللغة الأساسية',
@@ -886,6 +927,25 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     profileIdentityFieldDescription: 'وصف المطعم',
     profileIdentityFieldAddress: 'العنوان',
     profileIdentityMissingPrimaryLocale: 'لا توجد نسخة منشورة لهذه اللغة بعد.',
+    profileSlugLabel: 'معرّف الرابط الرقمي (Slug)',
+    profileCopyLink: 'نسخ',
+    profileLinkCopied: 'تم نسخ رابط المطعم.',
+    profileLinkCopyFailed: 'تعذر نسخ الرابط. حاول مرة أخرى.',
+    profileLogoTitle: 'شعار المطعم (Logo)',
+    profileLogoBadge: 'الرمز الرسمي',
+    profileChangeLogo: 'تغيير الشعار',
+    profileRemoveLogo: 'إزالة',
+    profileRemoveLogoUnavailable: 'يمكن إزالة اختيار شعار جديد قبل حفظه فقط.',
+    profileCoverTitle: 'صورة الغلاف والترويسة',
+    profileCoverRatio: 'نسبة العرض 3:1',
+    profileChangeCover: 'استبدال صورة الغلاف',
+    profileActionContext: 'إعدادات الهوية والعلامة التجارية',
+    profileCancelChanges: 'إلغاء التغييرات',
+    profileChangesCancelled: 'تم التراجع عن التغييرات غير المحفوظة.',
+    profileRequiredField: 'هذا الحقل مطلوب.',
+    profileSlugValidation: 'استخدم أحرفًا صغيرة وأرقامًا وشرطات مفردة فقط.',
+    profileLoading: 'جاري تحميل ملف المطعم…',
+    profileMediaEmpty: 'لا توجد صورة مضافة حاليًا.',
     profileLocalizationSectionDesc: 'إدارة الإعدادات الخاصة بالمنطقة واللغة.',
     profileContactSectionDesc: 'كيف يتواصل الزبائن معك وأين يجدونك.',
     profileDeliverySectionDesc: 'اضبط توفر الخدمة وقواعد الطلب.',
@@ -1222,6 +1282,8 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     tablesCardSubtitle: 'امسح الرمز لعرض المنيو وبدء الطلب',
     tablesCardOrderFromPhone: 'اطلب مباشرة من هاتفك',
     tablesCardScanEnglish: 'Scan to view the menu',
+    tablesOrderTemporarilyDisabled: 'الطلب معطل مؤقتًا',
+    tablesReactivateNow: 'إعادة التفعيل الآن',
     kitchenEyebrow: 'المطبخ',
     kitchenTitle: 'لوحة المطبخ',
     kitchenLead: 'تابع الطلبات النشطة وحدّث حالة التحضير.',
@@ -1307,6 +1369,9 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminOrdersColTotal: 'الإجمالي',
     adminOrdersColActions: 'إجراءات',
     adminOrdersViewDetails: 'التفاصيل',
+    adminOrdersViewLabel: 'طريقة عرض الطلبات',
+    adminOrdersViewTable: 'جدول',
+    adminOrdersViewCards: 'بطاقات',
     adminOrdersActionStartPreparing: 'بدء التحضير',
     adminOrdersActionMarkReady: 'تعليم كجاهز',
     adminOrdersActionComplete: 'تعليم كمكتمل',
@@ -1460,6 +1525,15 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminMenuAddNewMealDescription: 'أنشئ طبقًا جديدًا وأضف صورته وتفاصيله.',
     adminMenuAvailableNow: 'متاح الآن',
     adminMenuAddCategoryAria: 'إضافة تصنيف',
+    adminMenuAvailabilityFilterLabel: 'تصفية الأطباق حسب التوفر',
+    adminMenuFilterAllStatuses: 'كل الحالات',
+    adminMenuReorderCategories: 'ترتيب التصنيفات',
+    adminMenuFinishCategoryReorder: 'إنهاء ترتيب التصنيفات',
+    adminMenuCategoryReorderHint: 'اسحب التصنيفات من المقبض لتغيير ترتيب ظهورها. يُحفظ الترتيب تلقائيًا.',
+    adminMenuReorderItems: 'ترتيب الأطباق',
+    adminMenuFinishItemReorder: 'إنهاء ترتيب الأطباق',
+    adminMenuItemReorderHint: 'اسحب بطاقة الطبق من المقبض إلى موضعها الجديد. يُحفظ الترتيب تلقائيًا.',
+    notificationClose: 'إغلاق الإشعار',
     publicCartTitle: 'سلتك',
     publicCartEmpty: 'سلتك فارغة. أضف وجبات من القائمة.',
     publicCartEmptyTitle: 'سلتك فارغة',
@@ -1592,6 +1666,11 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     profileNavMenuBuilder: 'Menu Builder',
     profileNavOrderDashboard: 'Order Dashboard',
     profileIdentitySectionDesc: "Define your brand's digital presence and appearance.",
+    profileIdentityLead:
+      'Define your restaurant identity and public appearance. This information is used on the public menu and shared links.',
+    profileBasicInfoTitle: 'Basic restaurant information',
+    profileBasicInfoDescription:
+      'Identity details shown in the page header, search results, and ordering channels.',
     profileIdentityPrimaryNotice:
       'Enter restaurant identity content in the current primary language. Translations for other languages will follow your translation settings.',
     profileIdentityPrimaryLanguage: 'Primary language',
@@ -1599,6 +1678,25 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     profileIdentityFieldDescription: 'Restaurant description',
     profileIdentityFieldAddress: 'Address',
     profileIdentityMissingPrimaryLocale: 'No published content exists for this language yet.',
+    profileSlugLabel: 'Public URL identifier (Slug)',
+    profileCopyLink: 'Copy',
+    profileLinkCopied: 'Restaurant link copied.',
+    profileLinkCopyFailed: 'Could not copy the link. Please try again.',
+    profileLogoTitle: 'Restaurant logo',
+    profileLogoBadge: 'Official mark',
+    profileChangeLogo: 'Change logo',
+    profileRemoveLogo: 'Remove',
+    profileRemoveLogoUnavailable: 'Only a newly selected logo can be removed before saving.',
+    profileCoverTitle: 'Cover and header image',
+    profileCoverRatio: '3:1 aspect ratio',
+    profileChangeCover: 'Replace cover image',
+    profileActionContext: 'Identity and brand settings',
+    profileCancelChanges: 'Cancel changes',
+    profileChangesCancelled: 'Unsaved changes were reverted.',
+    profileRequiredField: 'This field is required.',
+    profileSlugValidation: 'Use lowercase letters, numbers, and single hyphens only.',
+    profileLoading: 'Loading restaurant profile…',
+    profileMediaEmpty: 'No image has been added yet.',
     profileLocalizationSectionDesc: 'Manage region-specific settings and operational defaults.',
     profileContactSectionDesc: 'How customers can reach you and where to find you.',
     profileDeliverySectionDesc: 'Configure your service availability and ordering rules.',
@@ -1939,6 +2037,8 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     tablesCardSubtitle: 'Scan the code to view the menu and start your order',
     tablesCardOrderFromPhone: 'Order directly from your phone',
     tablesCardScanEnglish: 'Scan to view the menu',
+    tablesOrderTemporarilyDisabled: 'Ordering is temporarily disabled',
+    tablesReactivateNow: 'Reactivate now',
     kitchenEyebrow: 'Kitchen',
     kitchenTitle: 'Kitchen Dashboard',
     kitchenLead: 'Track active orders and update preparation status.',
@@ -2024,6 +2124,9 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminOrdersColTotal: 'Total',
     adminOrdersColActions: 'Actions',
     adminOrdersViewDetails: 'Details',
+    adminOrdersViewLabel: 'Order view',
+    adminOrdersViewTable: 'Table',
+    adminOrdersViewCards: 'Cards',
     adminOrdersActionStartPreparing: 'Start preparing',
     adminOrdersActionMarkReady: 'Mark as ready',
     adminOrdersActionComplete: 'Mark as completed',
@@ -2180,6 +2283,15 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminMenuAddNewMealDescription: 'Create a new dish and add its image and details.',
     adminMenuAvailableNow: 'Available now',
     adminMenuAddCategoryAria: 'Add category',
+    adminMenuAvailabilityFilterLabel: 'Filter dishes by availability',
+    adminMenuFilterAllStatuses: 'All statuses',
+    adminMenuReorderCategories: 'Reorder categories',
+    adminMenuFinishCategoryReorder: 'Finish category reorder',
+    adminMenuCategoryReorderHint: 'Drag categories by the handle to change their display order. The order saves automatically.',
+    adminMenuReorderItems: 'Reorder dishes',
+    adminMenuFinishItemReorder: 'Finish dish reorder',
+    adminMenuItemReorderHint: 'Drag a dish card by its handle to a new position. The order saves automatically.',
+    notificationClose: 'Close notification',
     publicCartTitle: 'Your cart',
     publicCartEmpty: 'Your cart is empty. Add dishes from the menu.',
     publicCartEmptyTitle: 'Your cart is empty',

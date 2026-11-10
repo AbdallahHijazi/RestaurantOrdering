@@ -25,14 +25,11 @@ export class PublicMenuFloatingCart {
     estimateOrderTotals(this.cart.cartItems(), this.orderSettings(), ORDER_TYPE_PICKUP),
   );
 
-  protected summaryLabel(): string {
-    const count = this.cart.itemCount();
-    const total = this.localeService.formatCurrency(
+  protected totalLabel(): string {
+    return this.localeService.formatCurrency(
       this.estimate().subtotal,
       this.orderSettings().currencyCode,
       this.countryCode(),
     );
-
-    return `${count} · ${total}`;
   }
 }

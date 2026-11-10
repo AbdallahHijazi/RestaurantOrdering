@@ -72,11 +72,15 @@ describe('TablesManagementPage', () => {
     updatedAt: null,
   };
 
-  it('shows internal header title and add table button', () => {
+  it('shows the page actions together in the header without a duplicate print action', () => {
     flushList([]);
     const locale = TestBed.inject(LocaleService);
     expect(root().textContent).toContain(locale.uiText('tablesPageTitle'));
     expect(root().querySelector('[data-testid="tables-add-button"]')).toBeTruthy();
+    const printButtons = root().querySelectorAll('[data-testid="tables-print-all-button"]');
+    expect(printButtons.length).toBe(1);
+    expect(printButtons[0].closest('.tables-management-head')).toBeTruthy();
+    expect(root().querySelector('.tables-management-print-help')).toBeNull();
   });
 
   it('loads tables on init and renders cards', async () => {
@@ -128,6 +132,38 @@ describe('TablesManagementPage', () => {
     expect(preview?.querySelector('[data-testid="table-qr-card-restaurant-name"]')?.textContent).toBeTruthy();
     expect(preview?.querySelector('[data-testid="table-qr-card-table-name"]')?.textContent?.trim()).toBe('Table 1');
     expect(preview?.querySelector('[data-testid="table-qr-card-zone"]')?.textContent?.trim()).toBe('Main Hall');
+  });
+
+  it('keeps the table name and zone in the same card header row', async () => {
+    flushList([sampleTable]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const titleRow = root().querySelector('.table-card__title-row');
+    expect(titleRow?.textContent).toContain('Table 1');
+    expect(titleRow?.textContent).toContain('Main Hall');
+    expect(root().querySelector('.table-card__title > p')).toBeNull();
+  });
+
+  it('shows the disabled ordering overlay from the real inactive table state', async () => {
+    flushList([{ ...sampleTable, isActive: false }]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const locale = TestBed.inject(LocaleService);
+    const overlay = root().querySelector(
+      '[data-testid="table-inactive-overlay-11111111-1111-1111-1111-111111111101"]',
+    );
+    expect(overlay?.textContent).toContain(locale.uiText('tablesOrderTemporarilyDisabled'));
+    expect(overlay?.textContent).toContain(locale.uiText('tablesReactivateNow'));
+
+    root()
+      .querySelector<HTMLButtonElement>(
+        '[data-testid="table-reactivate-11111111-1111-1111-1111-111111111101"]',
+      )
+      ?.click();
+    fixture.detectChanges();
+    expect(document.body.querySelector('[data-testid="table-confirm-submit"]')).toBeTruthy();
   });
 
   it('preview card uses fixed preview dimensions without clipping table meta', async () => {
@@ -196,6 +232,11 @@ describe('TablesManagementPage', () => {
     expect(root().querySelector('[data-testid="tables-summary"]')?.textContent).toContain(
       locale.uiText('tablesShowingCount').replace('{shown}', '2').replace('{total}', '2'),
     );
+    expect(
+      root()
+        .querySelector('[data-testid="tables-summary"]')
+        ?.closest('.tables-management-workspace-top'),
+    ).toBeTruthy();
 
     const searchInput = root().querySelector<HTMLInputElement>('[data-testid="tables-search-input"]');
     searchInput!.value = 'VIP';
@@ -205,5 +246,41 @@ describe('TablesManagementPage', () => {
     expect(root().querySelector('[data-testid="tables-summary"]')?.textContent).toContain(
       locale.uiText('tablesShowingCount').replace('{shown}', '1').replace('{total}', '2'),
     );
+  });
+
+  it('dismisses action success feedback automatically', () => {
+    flushList([sampleTable]);
+    vi.useFakeTimers();
+
+    try {
+      root()
+        .querySelector<HTMLButtonElement>(
+          '[data-testid="table-toggle-status-11111111-1111-1111-1111-111111111101"]',
+        )
+        ?.click();
+      fixture.detectChanges();
+      document.body.querySelector<HTMLButtonElement>('[data-testid="table-confirm-submit"]')?.click();
+
+      const request = httpMock.expectOne(
+        tablesUrl('/11111111-1111-1111-1111-111111111101/status'),
+      );
+      expect(request.request.body).toEqual({ isActive: false });
+      request.flush({ ...sampleTable, isActive: false });
+      fixture.detectChanges();
+
+      expect(root().querySelector('[data-testid="tables-success-message"]')).toBeTruthy();
+      expect(
+        root().querySelector('[data-testid="tables-success-message"] .floating-notification-pill'),
+      ).toBeTruthy();
+      vi.advanceTimersByTime(3999);
+      fixture.detectChanges();
+      expect(root().querySelector('[data-testid="tables-success-message"]')).toBeTruthy();
+
+      vi.advanceTimersByTime(1);
+      fixture.detectChanges();
+      expect(root().querySelector('[data-testid="tables-success-message"]')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

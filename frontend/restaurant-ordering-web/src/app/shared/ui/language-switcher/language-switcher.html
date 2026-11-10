@@ -1,33 +1,82 @@
 <div class="language-switcher">
-  <label class="language-switcher__label">
-    <span class="language-switcher__sr-only">{{ ariaLabel() }}</span>
-    <select
-      class="language-switcher__select"
-      [attr.aria-label]="ariaLabel()"
-      [ngModel]="selectedLocale()"
-      (ngModelChange)="onLocaleSelected($event)"
-      [disabled]="localeOptions.loading()"
-      data-testid="language-switcher-select"
-    >
-      @for (locale of localeOptions.enabledLocales(); track locale.code) {
-        <option
-          [value]="locale.code"
-          [attr.data-testid]="'language-switcher-' + locale.code"
-        >
-          {{ optionLabel(locale) }}
-        </option>
-      }
-    </select>
-  </label>
-
-  @if (selectedLocaleMetadata(); as selected) {
-    <span
-      class="language-switcher__direction-badge"
-      [class.language-switcher__direction-badge--rtl]="selected.direction === 'rtl'"
-      [attr.data-testid]="'language-switcher-direction-' + selected.code"
-      aria-hidden="true"
-    >
-      {{ directionBadge(selected) }}
+  <button
+    type="button"
+    class="language-switcher__trigger"
+    [class.is-open]="isOpen()"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-expanded]="isOpen()"
+    aria-haspopup="listbox"
+    [disabled]="localeOptions.loading()"
+    data-testid="language-switcher-select"
+    (click)="toggleDropdown()"
+  >
+    <span class="language-switcher__globe" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M3 12h18"></path>
+        <path d="M12 3a15 15 0 0 1 0 18"></path>
+        <path d="M12 3a15 15 0 0 0 0 18"></path>
+      </svg>
     </span>
+
+    <span class="language-switcher__current">
+      @if (selectedLocaleMetadata(); as locale) {
+        {{ optionLabel(locale) }}
+      } @else {
+        {{ selectedLocale() }}
+      }
+    </span>
+
+    <span class="language-switcher__chevron" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="m7 9 5 5 5-5"></path>
+      </svg>
+    </span>
+  </button>
+
+  @if (isOpen()) {
+    <div class="language-switcher__menu" role="listbox">
+      <p class="language-switcher__menu-title">
+        {{ selectedLocaleMetadata()?.direction === 'rtl' ? 'اختر لغة الواجهة' : 'Choose interface language' }}
+      </p>
+
+      <div class="language-switcher__options">
+        @for (locale of localeOptions.enabledLocales(); track locale.code) {
+          <button
+            type="button"
+            class="language-switcher__option"
+            [class.is-selected]="isSelected(locale)"
+            [attr.aria-selected]="isSelected(locale)"
+            [attr.data-testid]="'language-switcher-' + locale.code"
+            role="option"
+            (click)="selectLocale(locale.code)"
+          >
+            <span class="language-switcher__check" aria-hidden="true">
+              @if (isSelected(locale)) {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="m5 12 4 4L19 6"></path>
+                </svg>
+              }
+            </span>
+
+            <span class="language-switcher__option-name">
+              {{ optionLabel(locale) }}
+            </span>
+
+            <span class="language-switcher__badge">
+              {{ localeBadge(locale) }}
+            </span>
+          </button>
+        }
+      </div>
+
+      <div class="language-switcher__footer">
+        {{
+          selectedLocaleMetadata()?.direction === 'rtl'
+            ? 'تتغير اتجاهات الشاشات تلقائياً بناءً على اللغة المختارة'
+            : 'Screen direction changes automatically based on the selected language'
+        }}
+      </div>
+    </div>
   }
 </div>

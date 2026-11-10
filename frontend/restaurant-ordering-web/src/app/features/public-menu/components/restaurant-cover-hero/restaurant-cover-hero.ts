@@ -20,6 +20,7 @@ export class RestaurantCoverHero {
   protected readonly localeService = inject(LocaleService);
   private readonly directionService = inject(DirectionService);
   protected readonly coverFailed = signal(false);
+  protected readonly logoFailed = signal(false);
 
   protected readonly activeLocale = computed(
     () => this.displayLocale() ?? this.localeService.contentLocale(),
@@ -45,8 +46,8 @@ export class RestaurantCoverHero {
     );
   });
 
-  protected readonly kickerLabel = computed(() =>
-    this.localeService.uiTextForLocale(this.uiLocale(), 'publicMenuHeroKicker'),
+  protected readonly brandInitial = computed(
+    () => Array.from(this.displayName().trim())[0] ?? '',
   );
 
   protected readonly displayDescription = computed(() => {
@@ -85,6 +86,10 @@ export class RestaurantCoverHero {
 
   protected onCoverError(): void {
     this.coverFailed.set(true);
+  }
+
+  protected onLogoError(): void {
+    this.logoFailed.set(true);
   }
 
   private uiLocale(): AdminUiLocale {

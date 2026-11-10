@@ -9,39 +9,59 @@
   </div>
 
   <div class="public-menu-hero__content">
-    <div class="public-menu-hero__inner">
-      <span class="public-menu-hero__kicker">{{ kickerLabel() }}</span>
+    <div class="public-menu-hero__inner menu-page__brand">
+      <div class="public-menu-hero__logo-wrap">
+        @if (restaurant().logoUrl && !logoFailed()) {
+          <img
+            class="public-menu-hero__logo"
+            [src]="restaurant().logoUrl"
+            [alt]="displayName()"
+            (error)="onLogoError()"
+          />
+        } @else {
+          <span class="public-menu-hero__monogram" aria-hidden="true">
+            {{ brandInitial() }}
+          </span>
+        }
+        @if (restaurant().isOpen != null) {
+          <span
+            class="public-menu-hero__status-dot"
+            [class.public-menu-hero__status-dot--closed]="restaurant().isOpen === false"
+            aria-hidden="true"
+          ></span>
+        }
+      </div>
 
-      @if (secondaryName()) {
-        <span class="public-menu-hero__secondary-name">{{ secondaryName() }}</span>
-      }
-
-      <h1 id="public-menu-hero-title" class="public-menu-hero__title">{{ displayName() }}</h1>
+      <div class="public-menu-hero__identity">
+        <h1 id="public-menu-hero-title" class="public-menu-hero__title">
+          {{ displayName() }}
+        </h1>
+        @if (secondaryName()) {
+          <span class="public-menu-hero__secondary-name">{{ secondaryName() }}</span>
+        }
+      </div>
 
       @if (displayDescription()) {
         <p class="public-menu-hero__lead">{{ displayDescription() }}</p>
       }
 
       <div class="public-menu-hero__actions">
-        <button type="button" class="public-menu-hero__cta" (click)="exploreMenu.emit()">
-          <span>{{ ctaLabel() }}</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="m7 10 5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-
         @if (statusLabel(); as status) {
           <span
             class="public-menu-hero__hours"
             [class.public-menu-hero__hours--closed]="restaurant().isOpen === false"
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.9" />
-              <path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" />
-            </svg>
+            <span class="public-menu-hero__hours-dot" aria-hidden="true"></span>
             <span>{{ status }}</span>
           </span>
         }
+
+        <button type="button" class="public-menu-hero__cta" (click)="exploreMenu.emit()">
+          <span>{{ ctaLabel() }}</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m7 10 5 5 5-5" />
+          </svg>
+        </button>
       </div>
     </div>
   </div>

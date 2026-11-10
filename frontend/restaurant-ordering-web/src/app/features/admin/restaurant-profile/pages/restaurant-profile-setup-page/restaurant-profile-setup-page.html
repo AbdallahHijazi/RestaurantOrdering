@@ -23,34 +23,10 @@
         </button>
       }
     </nav>
-
-    <div class="profile-console__subheader-actions">
-      <button
-        type="button"
-        class="profile-console__publish premium-btn"
-        data-testid="profile-publish-live"
-        [disabled]="!publishAvailable"
-        [attr.aria-disabled]="!publishAvailable"
-        [attr.title]="!publishAvailable ? localeService.uiText('profilePublishUnavailable') : null"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path
-            fill="currentColor"
-            d="M5 20h14v-2H5v2Zm7-18-7 4.5v11L12 22l7-4.5v-11L12 2Zm0 2.2 5.6 3.15L12 11 6.4 7.85 12 4.2ZM6 9.3l5 2.81v8.39l-5-2.81V9.3Zm12 0v8.39l-5 2.81v-8.39l5-2.81Z"
-          />
-        </svg>
-        <span>{{ localeService.uiText('profilePublishLive') }}</span>
-      </button>
-      @if (!publishAvailable) {
-        <p class="profile-console__publish-hint" data-testid="profile-publish-hint">
-          {{ localeService.uiText('profilePublishUnavailable') }}
-        </p>
-      }
-    </div>
   </div>
 
   @if (settingsLoadFailed()) {
-    <div class="profile-console__alert" role="alert">
+    <div class="profile-console__load-alert" role="alert">
       <p>{{ localeService.uiText('profileSettingsLoadError') }}</p>
       <button type="button" class="profile-console__btn profile-console__btn--secondary" (click)="retryLoadSettings()">
         {{ localeService.uiText('profileSettingsRetry') }}
@@ -60,191 +36,310 @@
 
   <div class="profile-console__workspace">
     <div class="profile-console__editor">
-      <form class="profile-console__form" [formGroup]="form">
+      <form class="profile-console__form" [formGroup]="form" [attr.aria-busy]="pageState() === 'loading'">
         @if (activeWorkspaceTab() === 'identity') {
-        <section
-          class="profile-console__panel"
-          role="tabpanel"
-          [id]="workspaceTabPanelId('identity')"
-          [attr.aria-labelledby]="'profile-tab-identity'"
-          data-testid="profile-tabpanel-identity"
-        >
-          <header class="profile-console__panel-heading">
-            <h2>{{ localeService.uiText('profileTabIdentity') }}</h2>
-            <p>{{ localeService.uiText('profileIdentitySectionDesc') }}</p>
-          </header>
-
-          <p class="profile-console__hint" data-testid="profile-identity-primary-notice">
-            {{ localeService.uiText('profileIdentityPrimaryNotice') }}
-          </p>
-
-          <p class="profile-console__hint" data-testid="profile-identity-primary-language">
-            {{ localeService.uiText('profileIdentityPrimaryLanguage') }}: {{ primaryLanguageLabel() }}
-          </p>
-
-          @if (profileContentWarning()) {
-            <p
-              class="profile-console__alert"
-              role="alert"
-              data-testid="profile-identity-missing-locale"
-            >
-              {{ localeService.uiText('profileIdentityMissingPrimaryLocale') }}
-            </p>
-          }
-
-          <div formGroupName="profileContent" class="profile-console__field-grid profile-console__field-grid--stacked">
-            <label class="profile-console__field">
-              <span>{{ localeService.uiText('profileIdentityFieldName') }}</span>
-              <input
-                type="text"
-                formControlName="name"
-                autocomplete="organization"
-                data-testid="profile-identity-name"
-              />
-              @if (
-                form.controls.profileContent.controls.name.invalid &&
-                form.controls.profileContent.controls.name.touched
-              ) {
-                <small class="profile-console__error">{{
-                  localeService.locale() === 'ar' ? 'هذا الحقل مطلوب.' : 'This field is required.'
-                }}</small>
-              }
-            </label>
-
-            <label class="profile-console__field">
-              <span>{{ localeService.uiText('profileIdentityFieldDescription') }}</span>
-              <textarea
-                rows="3"
-                formControlName="description"
-                data-testid="profile-identity-description"
-              ></textarea>
-            </label>
-
-            <label class="profile-console__field">
-              <span>{{ localeService.uiText('profileIdentityFieldAddress') }}</span>
-              <input type="text" formControlName="address" data-testid="profile-identity-address" />
-            </label>
-          </div>
-
-          <label class="profile-console__field">
-            <span>Slug</span>
-            <bdi dir="ltr">
-              <input
-                type="text"
-                class="profile-console__technical"
-                formControlName="slug"
-                (blur)="onSlugBlur()"
-                spellcheck="false"
-              />
-            </bdi>
-            @if (form.controls.slug.invalid && form.controls.slug.touched) {
-              <small class="profile-console__error">{{
-                localeService.locale() === 'ar'
-                  ? 'استخدم أحرفًا صغيرة وأرقامًا وشرطات فقط.'
-                  : 'Use lowercase letters, numbers, and single hyphens only.'
-              }}</small>
-            }
-          </label>
-
-          <div class="profile-console__field">
-            <span>{{ localeService.locale() === 'ar' ? 'Accent Color' : 'Accent color' }}</span>
-            <div class="profile-console__accent">
-              <input
-                type="color"
-                class="profile-console__color-input"
-                [value]="accentColorPickerValue()"
-                [attr.aria-label]="localeService.locale() === 'ar' ? 'Accent Color' : 'Accent color'"
-                (input)="onAccentColorPicked($event)"
-              />
-              <bdi dir="ltr">
-                <input
-                  type="text"
-                  class="profile-console__technical"
-                  formControlName="primaryAccentColor"
-                  spellcheck="false"
-                />
-              </bdi>
-            </div>
-            @if (form.controls.primaryAccentColor.invalid && form.controls.primaryAccentColor.touched) {
-              <small class="profile-console__error">{{ localeService.uiText('profileInvalidAccentColor') }}</small>
-            }
-          </div>
-
-          <div class="profile-console__upload-grid">
-            <div class="profile-console__upload-card">
-              <span>{{ localeService.locale() === 'ar' ? 'الشعار' : 'Logo' }}</span>
-              @if (logoPreviewUrl(); as logoUrl) {
-                <img class="profile-console__upload-thumb" [src]="logoUrl" alt="" />
-              } @else {
-                <div class="profile-console__upload-placeholder" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path fill="currentColor" d="M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm0 2v10h14V7H5Zm3 2h8l-2.5 3-2-2.5L9 13l-1-1Z"/></svg>
-                </div>
-              }
-              <input
-                #logoInput
-                id="logo-input"
-                type="file"
-                class="profile-console__file-input"
-                accept="image/jpeg,image/png,image/webp"
-                (change)="onLogoSelected($event)"
-              />
-              <button type="button" class="profile-console__btn profile-console__btn--secondary" (click)="logoInput.click()">
-                {{ chooseImageLabel() }}
-              </button>
-              <span class="profile-console__file-name">{{ logoFileName() ?? noFileChosenLabel() }}</span>
-              @if (isUploadingBranding() && profileSavePhase() === 'uploading-logo') {
-                <span class="profile-console__upload-status">{{ localeService.uiText('profileUploadingLogo') }}</span>
-              }
-            </div>
-
-            <div class="profile-console__upload-card">
-              <span>{{ localeService.locale() === 'ar' ? 'صورة الغلاف' : 'Cover image' }}</span>
-              @if (coverPreviewUrl(); as coverUrl) {
-                <img class="profile-console__upload-thumb profile-console__upload-thumb--cover" [src]="coverUrl" alt="" />
-              } @else {
-                <div class="profile-console__upload-placeholder profile-console__upload-placeholder--cover" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm1 2v10h14V7H5Zm2.5 2 2.5 3 2-2 1.5 2H7.5Z"/></svg>
-                </div>
-              }
-              <input
-                #coverInput
-                id="cover-input"
-                type="file"
-                class="profile-console__file-input"
-                accept="image/jpeg,image/png,image/webp"
-                (change)="onCoverSelected($event)"
-              />
-              <button type="button" class="profile-console__btn profile-console__btn--secondary" (click)="coverInput.click()">
-                {{ chooseImageLabel() }}
-              </button>
-              <span class="profile-console__file-name">{{ coverFileName() ?? noFileChosenLabel() }}</span>
-              @if (isUploadingBranding() && profileSavePhase() === 'uploading-cover') {
-                <span class="profile-console__upload-status">{{ localeService.uiText('profileUploadingCoverImage') }}</span>
-              }
-            </div>
-          </div>
-
-          @if (profileSaveNotice()) {
-            <p class="profile-console__notice" role="status">{{ profileSaveNotice() }}</p>
-          }
-
-          <button
-            type="button"
-            class="profile-console__btn profile-console__btn--primary profile-console__btn--panel-save premium-btn"
-            data-testid="profile-save-identity"
-            [disabled]="!canSaveSettings() || savingProfile()"
-            (click)="saveRestaurantProfile()"
+          <section
+            class="profile-console__identity-page"
+            role="tabpanel"
+            [id]="workspaceTabPanelId('identity')"
+            [attr.aria-labelledby]="'profile-tab-identity'"
+            data-testid="profile-tabpanel-identity"
           >
-            @if (savingProfile()) {
-              <span class="profile-console__spinner" aria-hidden="true"></span>
+            <header class="profile-console__page-intro">
+              <h1>{{ localeService.uiText('profileTabIdentity') }}</h1>
+              <p>{{ localeService.uiText('profileIdentityLead') }}</p>
+            </header>
+
+            @if (pageState() === 'loading') {
+              <p class="profile-console__loading" role="status">
+                <span class="profile-console__spinner profile-console__spinner--olive" aria-hidden="true"></span>
+                {{ localeService.uiText('profileLoading') }}
+              </p>
             }
-            {{
-              savingProfile()
-                ? localeService.uiText('profileSavingRestaurant')
-                : localeService.uiText('profileSaveIdentityChanges')
-            }}
-          </button>
-        </section>
+
+            @if (profileContentWarning()) {
+              <p class="profile-console__alert" role="alert" data-testid="profile-identity-missing-locale">
+                {{ localeService.uiText('profileIdentityMissingPrimaryLocale') }}
+              </p>
+            }
+
+            <div class="profile-console__identity-grid">
+              <section class="profile-console__card profile-console__card--details">
+                <header class="profile-console__card-heading">
+                  <div>
+                    <h2>
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5m-4 0h4" />
+                      </svg>
+                      {{ localeService.uiText('profileBasicInfoTitle') }}
+                    </h2>
+                    <p>{{ localeService.uiText('profileBasicInfoDescription') }}</p>
+                  </div>
+                  <span class="profile-console__language-badge" data-testid="profile-identity-primary-language">
+                    {{ localeService.uiText('profileIdentityPrimaryLanguage') }}: {{ primaryLanguageLabel() }}
+                  </span>
+                </header>
+
+                <p class="profile-console__context-note" data-testid="profile-identity-primary-notice">
+                  {{ localeService.uiText('profileIdentityPrimaryNotice') }}
+                </p>
+
+                <div formGroupName="profileContent" class="profile-console__field-grid profile-console__field-grid--stacked">
+                  <label class="profile-console__field">
+                    <span>
+                      {{ localeService.uiText('profileIdentityFieldName') }}
+                      <em aria-hidden="true">*</em>
+                    </span>
+                    <input
+                      type="text"
+                      formControlName="name"
+                      autocomplete="organization"
+                      data-testid="profile-identity-name"
+                    />
+                    @if (
+                      form.controls.profileContent.controls.name.invalid &&
+                      form.controls.profileContent.controls.name.touched
+                    ) {
+                      <small class="profile-console__error">{{ localeService.uiText('profileRequiredField') }}</small>
+                    }
+                  </label>
+
+                  <label class="profile-console__field">
+                    <span>{{ localeService.uiText('profileIdentityFieldDescription') }}</span>
+                    <textarea
+                      rows="4"
+                      formControlName="description"
+                      data-testid="profile-identity-description"
+                    ></textarea>
+                  </label>
+
+                  <label class="profile-console__field">
+                    <span>{{ localeService.uiText('profileIdentityFieldAddress') }}</span>
+                    <div class="profile-console__input-with-icon">
+                      <input type="text" formControlName="address" data-testid="profile-identity-address" />
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+                        <circle cx="12" cy="10" r="2.5" />
+                      </svg>
+                    </div>
+                  </label>
+                </div>
+
+                <div class="profile-console__field profile-console__slug-field">
+                  <span>{{ localeService.uiText('profileSlugLabel') }}</span>
+                  <div class="profile-console__slug-control" dir="ltr">
+                    <bdi class="profile-console__slug-prefix" dir="ltr">{{ publicMenuBaseUrl() }}</bdi>
+                    <input
+                      type="text"
+                      class="profile-console__technical"
+                      formControlName="slug"
+                      data-testid="profile-public-url"
+                      (blur)="onSlugBlur()"
+                      spellcheck="false"
+                    />
+                    <span class="profile-console__slug-suffix">/menu</span>
+                    <button
+                      type="button"
+                      class="profile-console__copy-button"
+                      [attr.aria-label]="localeService.uiText('profileCopyLink')"
+                      (click)="copyPublicMenuUrl()"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2Z" />
+                      </svg>
+                      {{ localeService.uiText('profileCopyLink') }}
+                    </button>
+                  </div>
+                  @if (form.controls.slug.invalid && form.controls.slug.touched) {
+                    <small class="profile-console__error">{{ localeService.uiText('profileSlugValidation') }}</small>
+                  }
+                  @if (linkCopyNotice()) {
+                    <small class="profile-console__copy-notice" role="status">{{ linkCopyNotice() }}</small>
+                  }
+                </div>
+              </section>
+
+              <div class="profile-console__media-column">
+                <section class="profile-console__card profile-console__media-card">
+                  <header class="profile-console__card-heading profile-console__card-heading--compact">
+                    <h2>
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="m4 16 4.6-4.6a2 2 0 0 1 2.8 0L16 16m-2-2 1.6-1.6a2 2 0 0 1 2.8 0L20 14m-6-6h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
+                      </svg>
+                      {{ localeService.uiText('profileLogoTitle') }}
+                    </h2>
+                    <span class="profile-console__media-badge">{{ localeService.uiText('profileLogoBadge') }}</span>
+                  </header>
+
+                  <div class="profile-console__logo-row">
+                    <div class="profile-console__logo-preview">
+                      @if (logoPreviewUrl(); as logoUrl) {
+                        <img [src]="logoUrl" [alt]="localeService.uiText('profileLogoTitle')" />
+                      } @else {
+                        <span class="profile-console__media-placeholder" aria-hidden="true">
+                          <svg viewBox="0 0 24 24"><path d="M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm3 4h8l-2.5 3-2-2.5L9 13l-1-1Z" /></svg>
+                        </span>
+                      }
+                    </div>
+
+                    <div class="profile-console__media-actions">
+                      <input
+                        #logoInput
+                        id="logo-input"
+                        type="file"
+                        class="profile-console__file-input"
+                        accept="image/jpeg,image/png,image/webp"
+                        (change)="onLogoSelected($event)"
+                      />
+                      <button type="button" class="profile-console__btn profile-console__btn--primary" (click)="logoInput.click()">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-8-4-4m0 0L8 8m4-4v12" /></svg>
+                        {{ localeService.uiText('profileChangeLogo') }}
+                      </button>
+                      <button
+                        type="button"
+                        class="profile-console__btn profile-console__btn--danger-ghost"
+                        [disabled]="!logoFileName()"
+                        [attr.title]="!logoFileName() ? localeService.uiText('profileRemoveLogoUnavailable') : null"
+                        (click)="removePendingLogo()"
+                      >
+                        {{ localeService.uiText('profileRemoveLogo') }}
+                      </button>
+                    </div>
+                  </div>
+
+                  @if (logoFileName()) {
+                    <span class="profile-console__file-name">{{ logoFileName() }}</span>
+                  }
+                  @if (isUploadingBranding() && profileSavePhase() === 'uploading-logo') {
+                    <span class="profile-console__upload-status">{{ localeService.uiText('profileUploadingLogo') }}</span>
+                  }
+                </section>
+
+                <section class="profile-console__card profile-console__media-card">
+                  <header class="profile-console__card-heading profile-console__card-heading--compact">
+                    <h2>
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M3 9a2 2 0 0 1 2-2h.9a2 2 0 0 0 1.7-.9l.8-1.2A2 2 0 0 1 10.1 4h3.8a2 2 0 0 1 1.7.9l.8 1.2a2 2 0 0 0 1.7.9h.9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
+                        <circle cx="12" cy="13" r="3" />
+                      </svg>
+                      {{ localeService.uiText('profileCoverTitle') }}
+                    </h2>
+                    <span class="profile-console__ratio-label">{{ localeService.uiText('profileCoverRatio') }}</span>
+                  </header>
+
+                  <input
+                    #coverInput
+                    id="cover-input"
+                    type="file"
+                    class="profile-console__file-input"
+                    accept="image/jpeg,image/png,image/webp"
+                    (change)="onCoverSelected($event)"
+                  />
+                  <div class="profile-console__cover-preview">
+                    @if (coverPreviewUrl(); as coverUrl) {
+                      <img [src]="coverUrl" [alt]="localeService.uiText('profileCoverTitle')" />
+                    } @else {
+                      <span class="profile-console__cover-placeholder">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm3.5 4 2.5 3 2-2 1.5 2H7.5Z" /></svg>
+                        {{ localeService.uiText('profileMediaEmpty') }}
+                      </span>
+                    }
+                    <button type="button" class="profile-console__cover-action" (click)="coverInput.click()">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16 4.6-4.6a2 2 0 0 1 2.8 0L16 16m-2-2 1.6-1.6a2 2 0 0 1 2.8 0L20 14M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" /></svg>
+                      {{ localeService.uiText('profileChangeCover') }}
+                    </button>
+                  </div>
+                  @if (coverFileName()) {
+                    <span class="profile-console__file-name">{{ coverFileName() }}</span>
+                  }
+                  @if (isUploadingBranding() && profileSavePhase() === 'uploading-cover') {
+                    <span class="profile-console__upload-status">{{ localeService.uiText('profileUploadingCoverImage') }}</span>
+                  }
+                </section>
+              </div>
+            </div>
+
+            <details class="profile-console__preview-disclosure">
+              <summary>{{ localeService.uiText('previewTitle') }}</summary>
+              <aside class="profile-console__preview-studio" data-testid="profile-preview-studio">
+                <app-restaurant-live-preview
+                  variant="studio"
+                  [previewSyncStatus]="previewSyncStatus()"
+                  [preview]="previewData()"
+                  [menuState]="previewMenuState()"
+                  [categories]="previewMenuCategories()"
+                  [items]="previewMenuItems()"
+                  (refreshPreview)="refreshPreviewMenu()"
+                />
+              </aside>
+            </details>
+
+            @if (profileSaveNotice()) {
+              <p class="profile-console__notice" role="status">{{ profileSaveNotice() }}</p>
+            }
+          </section>
+
+          <aside
+            class="profile-console__action-bar"
+            [attr.aria-label]="localeService.uiText('profileActionContext')"
+          >
+            <div class="profile-console__action-bar-inner">
+              <div class="profile-console__action-status">
+                <span [class.is-unsaved]="hasUnsavedProfileChanges()" aria-hidden="true"></span>
+                <span>
+                  {{
+                    hasUnsavedProfileChanges()
+                      ? localeService.uiText('profileUnsavedChanges')
+                      : localeService.uiText('profileActionContext')
+                  }}
+                </span>
+              </div>
+
+              <div class="profile-console__action-buttons">
+                <button
+                  type="button"
+                  class="profile-console__btn profile-console__btn--primary profile-console__save-action premium-btn"
+                  data-testid="profile-save-identity"
+                  [disabled]="!canSaveSettings() || savingProfile()"
+                  (click)="saveRestaurantProfile()"
+                >
+                  @if (savingProfile()) {
+                    <span class="profile-console__spinner" aria-hidden="true"></span>
+                  } @else {
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3m-1 4-3 3m0 0-3-3m3 3V4" /></svg>
+                  }
+                  {{ savingProfile() ? profileSaveLabel() : localeService.uiText('profileSaveIdentityChanges') }}
+                </button>
+
+                <button
+                  type="button"
+                  class="profile-console__btn profile-console__btn--publish"
+                  data-testid="profile-publish-live"
+                  [disabled]="!publishAvailable"
+                  [attr.aria-disabled]="!publishAvailable"
+                  [attr.title]="!publishAvailable ? localeService.uiText('profilePublishUnavailable') : null"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 16a4 4 0 0 1-.9-7.9A5 5 0 0 1 15.9 6H16a5 5 0 0 1 1 9.9M15 13l-3-3m0 0-3 3m3-3v12" /></svg>
+                  {{ localeService.uiText('profilePublishLive') }}
+                </button>
+
+                <button
+                  type="button"
+                  class="profile-console__btn profile-console__btn--secondary"
+                  data-testid="profile-cancel-identity"
+                  [disabled]="!hasUnsavedProfileChanges() || savingProfile()"
+                  (click)="resetProfileChanges()"
+                >
+                  {{ localeService.uiText('profileCancelChanges') }}
+                </button>
+              </div>
+            </div>
+            @if (!publishAvailable) {
+              <span class="profile-console__sr-only" data-testid="profile-publish-hint">
+                {{ localeService.uiText('profilePublishUnavailable') }}
+              </span>
+            }
+          </aside>
         }
 
         @if (activeWorkspaceTab() === 'localization') {
@@ -506,17 +601,5 @@
         }
       </form>
     </div>
-
-    <aside class="profile-console__preview-studio" data-testid="profile-preview-studio">
-      <app-restaurant-live-preview
-        variant="studio"
-        [previewSyncStatus]="previewSyncStatus()"
-        [preview]="previewData()"
-        [menuState]="previewMenuState()"
-        [categories]="previewMenuCategories()"
-        [items]="previewMenuItems()"
-        (refreshPreview)="refreshPreviewMenu()"
-      />
-    </aside>
   </div>
 </main>

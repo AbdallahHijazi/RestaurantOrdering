@@ -29,7 +29,6 @@ import {
   buildGuestFilterOptions,
   filterOrders,
   formatRelativeOrderTime,
-  getAvatarInitials,
   hasActiveFilters,
   shortenOrderNumber,
   type OrderGuestFilter,
@@ -38,6 +37,7 @@ import {
 } from './admin-orders-page.util';
 
 type PageState = 'loading' | 'ready' | 'error' | 'missing-context';
+type OrderViewMode = 'table' | 'cards';
 type StatusFilter = 'all' | OrderStatus;
 type OrderAction = AdminOrderDetailsAction;
 
@@ -65,7 +65,6 @@ export class AdminOrdersPage {
   protected readonly OrderStatus = OrderStatus;
   protected readonly OrderType = OrderType;
   protected readonly shortenOrderNumber = shortenOrderNumber;
-  protected readonly getAvatarInitials = getAvatarInitials;
 
   protected readonly pageState = signal<PageState>('loading');
   protected readonly listError = signal<string | null>(null);
@@ -79,6 +78,7 @@ export class AdminOrdersPage {
   protected readonly pageNumber = signal(1);
   protected readonly totalCount = signal(0);
   protected readonly updatingOrderIds = signal<ReadonlySet<string>>(new Set());
+  protected readonly viewMode = signal<OrderViewMode>('table');
 
   protected readonly detailsOpen = signal(false);
   protected readonly detailsLoading = signal(false);
@@ -207,6 +207,14 @@ export class AdminOrdersPage {
 
   protected setGuestFilter(value: string): void {
     this.guestFilter.set(value as OrderGuestFilter);
+  }
+
+  protected setViewMode(mode: OrderViewMode): void {
+    if (this.viewMode() === mode) {
+      return;
+    }
+
+    this.viewMode.set(mode);
   }
 
   protected clearFilters(): void {

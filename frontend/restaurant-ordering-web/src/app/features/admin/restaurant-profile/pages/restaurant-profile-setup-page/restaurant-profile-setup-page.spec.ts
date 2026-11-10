@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { API_BASE_URL } from '../../../../../core/config/api-config';
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { LocaleService } from '../../../../../core/localization/locale';
@@ -286,7 +286,7 @@ describe('RestaurantProfileSetupPage', () => {
     expect(fixture.nativeElement.textContent).toContain('Unsaved changes');
   });
 
-  it('renders publish in secondary subheader and keeps it disabled', () => {
+  it('renders publish in the sticky action bar and keeps it disabled', () => {
     flushLoadedSettings();
     expect(fixture.nativeElement.querySelector('[data-testid="profile-console-subheader"]')).toBeTruthy();
     const publishButton = fixture.nativeElement.querySelector(
@@ -613,16 +613,61 @@ describe('RestaurantProfileSetupPage', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="profile-console-main"]')).toBeTruthy();
   });
 
-  it('keeps slug and accent inputs LTR', () => {
+  it('keeps the public slug LTR and does not render accent-color editing', () => {
     flushLoadedSettings();
     TestBed.inject(LocaleService).setLocale('ar');
     fixture.detectChanges();
     const slugInput = fixture.nativeElement.querySelector('[formcontrolname="slug"]') as HTMLElement;
-    const accentInput = fixture.nativeElement.querySelector(
-      '[formcontrolname="primaryAccentColor"]',
-    ) as HTMLElement;
-    expect(slugInput.closest('bdi')?.getAttribute('dir')).toBe('ltr');
-    expect(accentInput.closest('bdi')?.getAttribute('dir')).toBe('ltr');
+    expect(slugInput.closest('[dir="ltr"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[formcontrolname="primaryAccentColor"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('input[type="color"]')).toBeNull();
+  });
+
+  it('builds the public menu URL from the current origin and loaded slug', () => {
+    flushLoadedSettings();
+    const slugInput = fixture.nativeElement.querySelector(
+      '[data-testid="profile-public-url"]',
+    ) as HTMLInputElement;
+    const prefix = fixture.nativeElement.querySelector('.profile-console__slug-prefix') as HTMLElement;
+    expect(prefix.textContent?.trim()).toBe(`${window.location.origin}/r/`);
+    expect(slugInput.value).toBe('restaurant-a');
+  });
+
+  it('copies the database-driven public menu URL', async () => {
+    flushLoadedSettings();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+
+    const copyButton = fixture.nativeElement.querySelector(
+      '.profile-console__copy-button',
+    ) as HTMLButtonElement;
+    copyButton.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/r/restaurant-a/menu`);
+    expect(fixture.nativeElement.textContent).toContain('Restaurant link copied');
+  });
+
+  it('cancels unsaved identity changes using the loaded profile snapshot', () => {
+    flushLoadedSettings();
+    fixture.componentInstance.form.controls.profileContent.controls.name.setValue('Updated name');
+    fixture.componentInstance.form.markAsDirty();
+    fixture.detectChanges();
+
+    const cancelButton = fixture.nativeElement.querySelector(
+      '[data-testid="profile-cancel-identity"]',
+    ) as HTMLButtonElement;
+    expect(cancelButton.disabled).toBe(false);
+    cancelButton.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.form.controls.profileContent.controls.name.value).toBe('مطعم');
+    expect(fixture.componentInstance.form.pristine).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Unsaved changes were reverted');
   });
 });
 

@@ -14,5 +14,5 @@
 .tables-select__check{width:1rem;height:1rem;flex-shrink:0;color:var(--tables-terracotta,var(--restaurant-accent))}
 :host(.tables-management-filter){min-width:8.75rem}
 :host(.tables-management-filter) .tables-select__trigger{border-radius:var(--restaurant-radius-pill);min-height:2.75rem}
-@media (max-width:65.625rem){:host(.tables-management-filter){min-width:0;width:100%}}
+@media (max-width:36rem){:host(.tables-management-filter){min-width:0;width:100%}}
 @media (prefers-reduced-motion:reduce){.tables-select__chevron{transition-duration:.01ms!important}}

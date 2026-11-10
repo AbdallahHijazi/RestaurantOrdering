@@ -101,6 +101,18 @@ describe('MenuManagementPage', () => {
     expect(fixture.nativeElement.querySelector(`[data-testid="menu-item-${ITEM_ID}"]`)).toBeNull();
   });
 
+  it('filters meals locally by availability', () => {
+    const filter = fixture.nativeElement.querySelector(
+      '[data-testid="menu-availability-filter"]',
+    ) as HTMLSelectElement;
+    filter.value = 'unavailable';
+    filter.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="menu-items-filtered-empty"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector(`[data-testid="menu-item-${ITEM_ID}"]`)).toBeNull();
+  });
+
   it('shows meals count label based on filtered results', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="menu-meals-count"]')?.textContent).toContain('1');
   });
@@ -256,9 +268,23 @@ describe('MenuManagementPage', () => {
     );
   });
 
-  it('keeps search and add meal on one toolbar row on desktop', () => {
+  it('keeps the add action in the page toolbar and search in the filters toolbar', () => {
     const toolbar = fixture.nativeElement.querySelector('.menu-management-toolbar') as HTMLElement;
     expect(getComputedStyle(toolbar).flexWrap).toBe('nowrap');
+    expect(toolbar.querySelector('[data-testid="menu-add-item-button"]')).toBeTruthy();
+    expect(
+      fixture.nativeElement
+        .querySelector('[data-testid="menu-search-input"]')
+        .closest('.menu-management-controls'),
+    ).toBeTruthy();
+  });
+
+  it('renders the real item description in the redesigned card', () => {
+    reloadItems([{ ...sampleItem(), descriptionAr: 'وصف الطبق', primaryDescription: 'وصف الطبق' }]);
+    expect(
+      fixture.nativeElement.querySelector(`[data-testid="menu-item-${ITEM_ID}"] .meal-card__description`)
+        ?.textContent,
+    ).toContain('وصف الطبق');
   });
 
   it('shows discounted price prominently with original price struck through', () => {
@@ -393,6 +419,290 @@ describe('MenuManagementPage', () => {
     );
   });
 
+  it('reorders categories, preserves the selection, and persists every changed display order', () => {
+    const secondCategory: AdminCategory = {
+      ...sampleCategory(),
+      id: 'aaaaaaaa-6666-6666-6666-666666666667',
+      nameAr: 'Category 2',
+      nameEn: 'Category 2',
+      displayOrder: 2,
+      itemCount: 0,
+    };
+    const page = fixture.componentInstance as any;
+    page.categories.set([sampleCategory(), secondCategory]);
+    page.selectedCategoryId.set(CATEGORY_ID);
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector(
+      '[data-testid="menu-reorder-categories-button"]',
+    ) as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.menu-management-drag-handle')).toBeNull();
+    const firstChip = fixture.nativeElement.querySelector(
+      `[data-testid="menu-category-${CATEGORY_ID}"] .menu-management-category-pill`,
+    ) as HTMLElement;
+    const target = fixture.nativeElement.querySelector(
+      `[data-category-reorder-id="${secondCategory.id}"]`,
+    ) as HTMLElement;
+    Object.defineProperty(document, 'elementFromPoint', {
+      configurable: true,
+      value: vi.fn().mockReturnValue(target),
+    });
+    const setPointerCapture = vi.fn();
+    Object.defineProperty(firstChip, 'setPointerCapture', {
+      configurable: true,
+      value: setPointerCapture,
+    });
+    const firstCategoryHost = firstChip.closest('[data-category-reorder-id]') as HTMLElement;
+    firstChip.dispatchEvent(domPointerEvent('pointerdown', { pointerId: 7 }));
+    firstCategoryHost.dispatchEvent(domPointerEvent('pointermove'));
+    fixture.detectChanges();
+    expect(target.classList.contains('is-drop-after')).toBe(true);
+    firstCategoryHost.dispatchEvent(domPointerEvent('pointerup'));
+    fixture.detectChanges();
+
+    expect(firstChip.classList.contains('is-reorderable')).toBe(true);
+    expect(setPointerCapture).toHaveBeenCalledWith(7);
+    const reorderedIds = Array.from(
+      fixture.nativeElement.querySelectorAll('[data-category-reorder-id]'),
+    ).map((element: unknown) => (element as HTMLElement).dataset['categoryReorderId']);
+    expect(reorderedIds).toEqual([secondCategory.id, CATEGORY_ID]);
+    expect(page.selectedCategoryId()).toBe(CATEGORY_ID);
+
+    const requests = httpMock.match(
+      (request) => request.method === 'PUT' && request.url.includes('/catalog/categories/'),
+    );
+    expect(requests).toHaveLength(2);
+    expect(requests.map((request) => request.request.body.displayOrder).sort()).toEqual([1, 2]);
+    requests.forEach((request) =>
+      request.flush({
+        ...(request.request.url.endsWith(CATEGORY_ID) ? sampleCategory() : secondCategory),
+        displayOrder: request.request.body.displayOrder,
+      }),
+    );
+    fixture.detectChanges();
+
+    const notification = fixture.nativeElement.querySelector(
+      '[data-testid="menu-success-message"]',
+    ) as HTMLElement;
+    expect(notification.querySelector('.floating-notification-pill')).toBeTruthy();
+    expect(fixture.nativeElement.querySelectorAll('app-floating-notification-pill')).toHaveLength(1);
+    notification.querySelector<HTMLButtonElement>('.floating-notification-pill__close')?.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-testid="menu-success-message"]')).toBeNull();
+    delete (document as unknown as Record<string, unknown>)['elementFromPoint'];
+  });
+
+  it('reorders dish cards and persists the updated display order through catalog PUTs', () => {
+    const secondItem: AdminMenuItem = {
+      ...sampleItem(),
+      id: 'aaaaaaaa-7777-7777-7777-777777777778',
+      nameAr: 'Dish 2',
+      nameEn: 'Dish 2',
+      displayOrder: 2,
+    };
+    reloadItems([sampleItem(), secondItem]);
+
+    const reorderButton = fixture.nativeElement.querySelector(
+      '[data-testid="menu-reorder-items-button"]',
+    ) as HTMLButtonElement;
+    expect(reorderButton.disabled).toBe(false);
+    reorderButton.click();
+    fixture.detectChanges();
+
+    const target = fixture.nativeElement.querySelector(
+      `[data-item-reorder-id="${secondItem.id}"]`,
+    ) as HTMLElement;
+    Object.defineProperty(document, 'elementFromPoint', {
+      configurable: true,
+      value: vi.fn().mockReturnValue(target),
+    });
+    const sourceHost = fixture.nativeElement.querySelector(
+      `[data-item-reorder-id="${ITEM_ID}"]`,
+    ) as HTMLElement;
+    const handle = sourceHost.querySelector('.meal-card__drag-handle') as HTMLElement;
+    const setPointerCapture = vi.fn();
+    Object.defineProperty(handle, 'setPointerCapture', {
+      configurable: true,
+      value: setPointerCapture,
+    });
+    handle.dispatchEvent(domPointerEvent('pointerdown', { pointerType: 'mouse', pointerId: 8 }));
+    sourceHost.dispatchEvent(domPointerEvent('pointermove', { pointerType: 'mouse' }));
+    fixture.detectChanges();
+    expect(target.classList.contains('menu-management-item-slot--drop-after')).toBe(true);
+    sourceHost.dispatchEvent(domPointerEvent('pointerup', { pointerType: 'mouse' }));
+    fixture.detectChanges();
+    expect(setPointerCapture).toHaveBeenCalledWith(8);
+
+    const reorderedIds = Array.from(
+      fixture.nativeElement.querySelectorAll('[data-item-reorder-id]'),
+    ).map((element: unknown) => (element as HTMLElement).dataset['itemReorderId']);
+    expect(reorderedIds).toEqual([secondItem.id, ITEM_ID]);
+    expect(
+      (fixture.nativeElement.querySelector(
+        `[data-testid="menu-edit-item-${ITEM_ID}"]`,
+      ) as HTMLButtonElement).disabled,
+    ).toBe(true);
+
+    const requests = httpMock.match(
+      (request) => request.method === 'PUT' && request.url.includes('/catalog/menu-items/'),
+    );
+    expect(requests).toHaveLength(2);
+    expect(requests.map((request) => request.request.body.displayOrder).sort()).toEqual([1, 2]);
+    requests.forEach((request) =>
+      request.flush({
+        ...(request.request.url.endsWith(ITEM_ID) ? sampleItem() : secondItem),
+        displayOrder: request.request.body.displayOrder,
+      }),
+    );
+    fixture.detectChanges();
+
+    reorderButton.click();
+    fixture.detectChanges();
+    const searchInput = fixture.nativeElement.querySelector(
+      '[data-testid="menu-search-input"]',
+    ) as HTMLInputElement;
+    searchInput.value = 'Dish 2';
+    searchInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector(`[data-testid="menu-item-${secondItem.id}"]`)).toBeTruthy();
+    expect(fixture.nativeElement.querySelector(`[data-testid="menu-item-${ITEM_ID}"]`)).toBeNull();
+    delete (document as unknown as Record<string, unknown>)['elementFromPoint'];
+  });
+
+  it('supports touch pointer movement while dish reorder mode is active', () => {
+    const secondItem: AdminMenuItem = {
+      ...sampleItem(),
+      id: 'aaaaaaaa-7777-7777-7777-777777777778',
+      displayOrder: 2,
+    };
+    reloadItems([sampleItem(), secondItem]);
+    (fixture.nativeElement.querySelector(
+      '[data-testid="menu-reorder-items-button"]',
+    ) as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const target = fixture.nativeElement.querySelector(
+      `[data-item-reorder-id="${secondItem.id}"]`,
+    ) as HTMLElement;
+    const pointLookup = vi.fn().mockReturnValue(target);
+    Object.defineProperty(document, 'elementFromPoint', {
+      configurable: true,
+      value: pointLookup,
+    });
+    const setPointerCapture = vi.fn();
+    const sourceHost = fixture.nativeElement.querySelector(
+      `[data-item-reorder-id="${ITEM_ID}"]`,
+    ) as HTMLElement;
+    const handle = sourceHost.querySelector('.meal-card__drag-handle') as HTMLElement;
+    Object.defineProperty(handle, 'setPointerCapture', {
+      configurable: true,
+      value: setPointerCapture,
+    });
+    handle.dispatchEvent(domPointerEvent('pointerdown', { pointerId: 7 }));
+    sourceHost.dispatchEvent(domPointerEvent('pointermove'));
+    sourceHost.dispatchEvent(domPointerEvent('pointerup'));
+    fixture.detectChanges();
+
+    expect(setPointerCapture).toHaveBeenCalledWith(7);
+    const requests = httpMock.match(
+      (request) => request.method === 'PUT' && request.url.includes('/catalog/menu-items/'),
+    );
+    expect(requests).toHaveLength(2);
+    requests.forEach((request) =>
+      request.flush({
+        ...(request.request.url.endsWith(ITEM_ID) ? sampleItem() : secondItem),
+        displayOrder: request.request.body.displayOrder,
+      }),
+    );
+    expect(pointLookup).toHaveBeenCalled();
+    delete (document as unknown as Record<string, unknown>)['elementFromPoint'];
+  });
+
+  it('supports repeated first, middle, last, and no-op dish moves', () => {
+    const secondItem: AdminMenuItem = {
+      ...sampleItem(),
+      id: 'aaaaaaaa-7777-7777-7777-777777777778',
+      nameEn: 'Dish 2',
+      displayOrder: 2,
+    };
+    const thirdItem: AdminMenuItem = {
+      ...sampleItem(),
+      id: 'aaaaaaaa-7777-7777-7777-777777777779',
+      nameEn: 'Dish 3',
+      displayOrder: 3,
+    };
+    const itemsById = new Map(
+      [sampleItem(), secondItem, thirdItem].map((item) => [item.id, item]),
+    );
+    reloadItems([...itemsById.values()]);
+    (fixture.nativeElement.querySelector(
+      '[data-testid="menu-reorder-items-button"]',
+    ) as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const move = (sourceId: string, targetId: string): void => {
+      const source = fixture.nativeElement.querySelector(
+        `[data-item-reorder-id="${sourceId}"]`,
+      ) as HTMLElement;
+      const target = fixture.nativeElement.querySelector(
+        `[data-item-reorder-id="${targetId}"]`,
+      ) as HTMLElement;
+      const handle = source.querySelector('.meal-card__drag-handle') as HTMLElement;
+      Object.defineProperty(handle, 'setPointerCapture', {
+        configurable: true,
+        value: vi.fn(),
+      });
+      Object.defineProperty(document, 'elementFromPoint', {
+        configurable: true,
+        value: vi.fn().mockReturnValue(target),
+      });
+      handle.dispatchEvent(domPointerEvent('pointerdown', { pointerType: 'mouse' }));
+      source.dispatchEvent(domPointerEvent('pointermove', { pointerType: 'mouse' }));
+      source.dispatchEvent(domPointerEvent('pointerup', { pointerType: 'mouse' }));
+      fixture.detectChanges();
+    };
+    const flushOrderUpdates = (): void => {
+      const requests = httpMock.match(
+        (request) => request.method === 'PUT' && request.url.includes('/catalog/menu-items/'),
+      );
+      expect(requests.length).toBeGreaterThan(0);
+      requests.forEach((request) => {
+        const id = request.request.url.split('/').at(-1)!;
+        request.flush({
+          ...itemsById.get(id)!,
+          displayOrder: request.request.body.displayOrder,
+        });
+      });
+      fixture.detectChanges();
+    };
+    const renderedOrder = (): string[] =>
+      Array.from(fixture.nativeElement.querySelectorAll('[data-item-reorder-id]')).map(
+        (element: unknown) => (element as HTMLElement).dataset['itemReorderId']!,
+      );
+
+    move(ITEM_ID, secondItem.id);
+    expect(renderedOrder()).toEqual([secondItem.id, ITEM_ID, thirdItem.id]);
+    flushOrderUpdates();
+
+    move(ITEM_ID, secondItem.id);
+    expect(renderedOrder()).toEqual([ITEM_ID, secondItem.id, thirdItem.id]);
+    flushOrderUpdates();
+
+    move(thirdItem.id, ITEM_ID);
+    expect(renderedOrder()).toEqual([thirdItem.id, ITEM_ID, secondItem.id]);
+    flushOrderUpdates();
+
+    move(thirdItem.id, thirdItem.id);
+    expect(renderedOrder()).toEqual([thirdItem.id, ITEM_ID, secondItem.id]);
+    httpMock.expectNone(
+      (request) => request.method === 'PUT' && request.url.includes('/catalog/menu-items/'),
+    );
+    delete (document as unknown as Record<string, unknown>)['elementFromPoint'];
+  });
+
   it('uses responsive meal grid structure', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="menu-meals-section"]')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[data-testid="menu-items-grid"]')).toBeTruthy();
@@ -484,6 +794,24 @@ function sampleItem(): AdminMenuItem {
     isActive: true,
     createdAt: '2026-01-01T00:00:00Z',
   };
+}
+
+function domPointerEvent(
+  type: string,
+  overrides: Partial<PointerEvent> = {},
+): Event {
+  const event = new Event(type, { bubbles: true, cancelable: true });
+  Object.defineProperties(event, {
+    pointerType: { value: 'touch' },
+    pointerId: { value: 1 },
+    button: { value: 0 },
+    clientX: { value: 10 },
+    clientY: { value: 10 },
+    ...Object.fromEntries(
+      Object.entries(overrides).map(([key, value]) => [key, { value }]),
+    ),
+  });
+  return event;
 }
 
 describe('MenuManagementPage primary-locale edit (7A.19.2)', () => {

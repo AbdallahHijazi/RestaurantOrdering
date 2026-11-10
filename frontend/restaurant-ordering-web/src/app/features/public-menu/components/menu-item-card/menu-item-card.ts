@@ -4,6 +4,7 @@ import { DirectionService } from '../../../../core/localization/direction.servic
 import { LocaleService } from '../../../../core/localization/locale';
 import type { ContentLocale } from '../../../../core/localization/locale.types';
 import {
+  getMenuItemLabels,
   PUBLIC_CART_MAX_QUANTITY,
   type PublicMenuItem,
 } from '../../models/public-menu.models';
@@ -34,6 +35,10 @@ export class MenuItemCard {
 
   protected readonly activeLocale = computed(
     () => this.displayLocale() ?? this.localeService.contentLocale(),
+  );
+
+  protected readonly labels = computed(() =>
+    getMenuItemLabels(this.activeLocale() === 'en' ? 'en' : 'ar'),
   );
 
   protected readonly displayName = computed(() => {
@@ -104,8 +109,6 @@ export class MenuItemCard {
       return;
     }
 
-    const next = this.quantity() + 1;
-    this.quantityChange.emit(next);
     this.added.emit(this.item());
     this.justAdded.set(true);
     window.setTimeout(() => this.justAdded.set(false), 1200);
