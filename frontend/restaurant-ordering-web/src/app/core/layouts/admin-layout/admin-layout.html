@@ -1,0 +1,133 @@
+<div
+  class="admin-layout"
+  [class.admin-layout--drawer-open]="drawerOpen()"
+  [attr.dir]="localeService.direction()"
+>
+  <button
+    type="button"
+    class="admin-layout__backdrop"
+    [attr.aria-hidden]="!drawerOpen()"
+    [attr.tabindex]="drawerOpen() ? 0 : -1"
+    [attr.aria-label]="localeService.uiText('adminCloseSidebar')"
+    (click)="closeDrawer()"
+  ></button>
+
+  <aside
+    id="admin-sidebar"
+    class="admin-layout__sidebar"
+    data-testid="admin-sidebar"
+    [attr.aria-label]="localeService.uiText('adminSidebarLabel')"
+  >
+    <div class="admin-layout__brand">
+      @if (brandLogoUrl(); as logoUrl) {
+        <img
+          class="admin-layout__brand-logo"
+          [src]="logoUrl"
+          [alt]="localeService.uiText('adminRestaurantLogoAlt')"
+          data-testid="admin-sidebar-logo"
+          (error)="onBrandLogoError()"
+        />
+      } @else {
+        <span class="admin-layout__brand-mark" data-testid="admin-sidebar-logo-fallback" aria-hidden="true">
+          {{ brandInitial() }}
+        </span>
+      }
+      <div class="admin-layout__brand-text">
+        <p class="admin-layout__system-name">{{ systemName() }}</p>
+        <p class="admin-layout__restaurant-name">{{ restaurantName() }}</p>
+      </div>
+    </div>
+
+    <nav class="admin-layout__nav" [attr.aria-label]="localeService.uiText('adminNavLabel')">
+      <a
+        routerLink="/admin/dashboard"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeDrawer()"
+      >
+        {{ localeService.uiText('adminNavDashboard') }}
+      </a>
+      @if (isOwner()) {
+        <a
+          routerLink="/admin/restaurant-profile"
+          routerLinkActive="is-active"
+          data-testid="admin-nav-restaurant-profile"
+          (click)="closeDrawer()"
+        >
+          {{ localeService.uiText('adminNavRestaurantProfile') }}
+        </a>
+      }
+      <a
+        routerLink="/admin/orders"
+        routerLinkActive="is-active"
+        data-testid="admin-nav-orders"
+        (click)="closeDrawer()"
+      >
+        {{ localeService.uiText('adminNavOrders') }}
+      </a>
+      <a
+        routerLink="/admin/menu"
+        routerLinkActive="is-active"
+        data-testid="admin-nav-menu"
+        (click)="closeDrawer()"
+      >
+        {{ localeService.uiText('adminNavMenu') }}
+      </a>
+      @if (isOwner()) {
+        <a
+          routerLink="/admin/staff"
+          routerLinkActive="is-active"
+          data-testid="admin-nav-staff"
+          (click)="closeDrawer()"
+        >
+          {{ localeService.uiText('adminNavStaff') }}
+        </a>
+      }
+    </nav>
+
+    <footer class="admin-layout__sidebar-footer" data-testid="admin-sidebar-footer">
+      <span class="admin-layout__sidebar-role">{{ roleLabel() }}</span>
+      <button
+        type="button"
+        class="admin-layout__sidebar-logout"
+        data-testid="admin-sidebar-logout"
+        (click)="logout()"
+      >
+        {{ localeService.uiText('adminLogout') }}
+      </button>
+    </footer>
+  </aside>
+
+  <div class="admin-layout__main">
+    <header class="admin-layout__header">
+      <div class="admin-layout__header-start">
+        <button
+          type="button"
+          class="admin-layout__menu-btn"
+          data-testid="admin-menu-toggle"
+          [attr.aria-expanded]="drawerOpen()"
+          [attr.aria-controls]="'admin-sidebar'"
+          [attr.aria-label]="localeService.uiText('adminOpenSidebar')"
+          (click)="toggleDrawer()"
+        >
+          <span class="admin-layout__menu-icon" aria-hidden="true"></span>
+        </button>
+        <h1 class="admin-layout__page-title">{{ pageTitle() }}</h1>
+      </div>
+
+      <div class="admin-layout__header-actions">
+        <span class="admin-layout__role-badge">{{ roleLabel() }}</span>
+
+        <app-language-switcher
+          class="admin-layout__lang"
+          [restaurantId]="restaurantId()"
+          [ariaLabel]="localeService.uiText('adminLanguageGroup')"
+        />
+      </div>
+    </header>
+
+    <div class="admin-layout__content">
+      <router-outlet />
+    </div>
+  </div>
+</div>

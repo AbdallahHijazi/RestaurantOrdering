@@ -1,0 +1,112 @@
+<article
+  class="public-menu-card"
+  [class.public-menu-card--unavailable]="!item().isAvailable"
+  data-testid="public-menu-item-card"
+>
+  <div class="public-menu-card__media">
+    @if (imageSrc(); as src) {
+      <img [src]="src" [alt]="displayName()" loading="lazy" (error)="onImageError()" />
+    } @else {
+      <div class="public-menu-card__placeholder" aria-hidden="true"></div>
+    }
+
+    @if (item().isPopular || item().isVegetarian || !item().isAvailable) {
+      <div class="public-menu-card__badges">
+        @if (item().isPopular) {
+          <span class="public-menu-card__badge">{{ ui().publicMenuChefChoice }}</span>
+        }
+        @if (item().isVegetarian) {
+          <span class="public-menu-card__badge public-menu-card__badge--vegetarian">
+            {{ labels().vegetarian }}
+          </span>
+        }
+        @if (!item().isAvailable) {
+          <span class="public-menu-card__badge public-menu-card__badge--unavailable">
+            {{ ui().publicMenuItemUnavailable }}
+          </span>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="public-menu-card__body">
+    <div class="public-menu-card__title-group">
+      <h3>{{ displayName() }}</h3>
+      @if (secondaryName()) {
+        <span class="public-menu-card__subtitle">{{ secondaryName() }}</span>
+      }
+    </div>
+
+    @if (displayDescription()) {
+      <p class="public-menu-card__description">{{ displayDescription() }}</p>
+    } @else {
+      <span class="public-menu-card__description-spacer" aria-hidden="true"></span>
+    }
+
+    <div class="public-menu-card__foot">
+      <div class="public-menu-card__price-wrap">
+        <div class="public-menu-card__price-stack">
+          @if (displaySalePrice(); as salePrice) {
+            <strong class="public-menu-card__price"><bdi dir="ltr">{{ salePrice }}</bdi></strong>
+            <span class="public-menu-card__price public-menu-card__price--original">
+              <bdi dir="ltr">{{ displayPrice() }}</bdi>
+            </span>
+          } @else {
+            <strong class="public-menu-card__price"><bdi dir="ltr">{{ displayPrice() }}</bdi></strong>
+          }
+        </div>
+        <span class="public-menu-card__tag" [class.public-menu-card__tag--off]="!item().isAvailable">
+          {{ item().isAvailable ? ui().publicMenuAvailable : ui().publicMenuItemUnavailable }}
+        </span>
+      </div>
+
+      @if (quantity() > 0) {
+        <div class="public-menu-card__quantity" role="group" [attr.aria-label]="displayName()">
+          <button
+            type="button"
+            class="public-menu-card__qty-btn"
+            [attr.aria-label]="ui().publicCartDecrease"
+            (click)="decrement()"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M6 12h12" />
+            </svg>
+          </button>
+          <span aria-live="polite">{{ quantity() }}</span>
+          <button
+            type="button"
+            class="public-menu-card__qty-btn public-menu-card__qty-btn--add"
+            [attr.aria-label]="ui().publicCartIncrease"
+            (click)="increment()"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 6v12M6 12h12" />
+            </svg>
+          </button>
+        </div>
+      } @else {
+        <button
+          type="button"
+          class="public-menu-card__add"
+          [class.public-menu-card__add--added]="justAdded()"
+          [disabled]="!item().isAvailable"
+          data-testid="public-menu-add-to-cart"
+          [attr.aria-live]="justAdded() ? 'polite' : null"
+          (click)="addItem()"
+        >
+          @if (justAdded()) {
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="m6 12 4 4 8-9" />
+            </svg>
+            <span class="visually-hidden">{{ ui().publicMenuAddedCheck }}</span>
+          } @else {
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span class="visually-hidden">{{ ui().publicMenuAddToCart }}</span>
+          }
+        </button>
+      }
+    </div>
+  </div>
+</article>

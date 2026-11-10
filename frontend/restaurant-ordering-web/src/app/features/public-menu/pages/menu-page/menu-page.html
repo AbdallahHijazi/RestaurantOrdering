@@ -1,0 +1,237 @@
+@if (pageState() === 'loading') {
+  <div class="menu-page">
+    <div class="menu-page__loading">
+      <div class="menu-page__skeleton-hero" aria-hidden="true"></div>
+      <div class="menu-page__skeleton-pills" aria-hidden="true">
+        @for (slot of [1, 2, 3, 4]; track slot) {
+          <div class="menu-page__skeleton-pill"></div>
+        }
+      </div>
+      <div class="menu-page__skeleton-grid" aria-hidden="true">
+        @for (slot of [1, 2, 3, 4, 5, 6, 7, 8]; track slot) {
+          <div class="menu-page__skeleton-card"></div>
+        }
+      </div>
+    </div>
+  </div>
+} @else if (pageState() === 'not-found') {
+  <app-error-state
+    [locale]="localeService"
+    [title]="ui().notFoundTitle"
+    [message]="ui().publicMenuNotFound"
+    [showRetry]="false"
+  />
+} @else if (pageState() === 'error') {
+  <app-error-state
+    [locale]="localeService"
+    [title]="ui().errorTitle"
+    [message]="ui().publicMenuUnavailable"
+    (retry)="reload()"
+  />
+} @else if (menuData(); as data) {
+  <div
+    class="menu-page"
+    [attr.dir]="menuDirection()"
+    [style.--restaurant-accent]="menuAccentColor()"
+    [style.--restaurant-accent-strong]="menuAccentStrongColor()"
+    [style.--restaurant-accent-soft]="menuAccentSoftColor()"
+  >
+    <header class="menu-page__header">
+      <div class="menu-page__toolbar">
+        <div class="menu-page__header-inner">
+          <div class="menu-page__context">
+            @if (resolvedTable(); as table) {
+              <p class="menu-page__table-badge" data-testid="public-menu-table-badge">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M5 20V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14M3 20h18M9 8h1M14 8h1M9 12h1M14 12h1M10 20v-4h4v4" />
+                </svg>
+                <span>{{ ui().publicMenuTableBadge }}: {{ tableBadgeLabel() }}</span>
+              </p>
+            } @else if (tableResolveState() === 'error') {
+              <p
+                class="menu-page__table-badge menu-page__table-badge--error"
+                data-testid="public-menu-table-error"
+              >
+                {{ tableResolveError() }}
+              </p>
+            }
+          </div>
+
+          <div class="menu-page__actions">
+            <a
+              routerLink="/login"
+              class="menu-page__staff-login"
+              data-testid="public-staff-login"
+            >
+              {{ ui().publicStaffLogin }}
+            </a>
+            <app-language-switcher
+              [restaurantId]="menuRestaurantId()"
+              [syncQueryParam]="true"
+            />
+            <button
+              type="button"
+              class="menu-page__cart"
+              data-testid="public-menu-cart-button"
+              [attr.aria-label]="ui().publicCartOpenAria"
+              [attr.aria-expanded]="cartOpen()"
+              (click)="openCart()"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M6 8h12l-1 12H7L6 8Z" />
+                <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+              </svg>
+              @if (cartCount() > 0) {
+                <span class="menu-page__cart-count">{{ cartCount() }}</span>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <app-restaurant-cover-hero
+        [restaurant]="data.restaurant"
+        [displayLocale]="contentLocale()"
+        [imageFallback]="imageFallback"
+        (exploreMenu)="scrollToMenu()"
+      />
+    </header>
+
+    <main class="menu-page__main">
+      <div class="menu-page__container">
+        @if (data.categories.length === 0 || data.items.length === 0) {
+          <app-empty-state
+            [title]="ui().publicMenuEmpty"
+            [locale]="localeService"
+            data-testid="public-menu-empty"
+          />
+        } @else {
+          <section #menuSection class="menu-page__menu" aria-labelledby="menu-section-title">
+            <app-category-navigation
+              [categories]="data.categories"
+              [activeCategoryId]="activeCategoryId()"
+              [searchQuery]="searchQuery()"
+              [displayLocale]="contentLocale()"
+              (categorySelected)="selectCategory($event)"
+              (searchQueryChange)="setSearchQuery($event)"
+            />
+
+            <div class="menu-page__section-head">
+              <div>
+                <span class="menu-page__eyebrow">{{ ui().publicMenuEyebrow }}</span>
+                <h2 id="menu-section-title" class="menu-page__section-title">
+                  {{ ui().menuTitle }}
+                </h2>
+                <p class="menu-page__section-lead">{{ ui().publicMenuLead }}</p>
+              </div>
+              <div class="menu-page__result-meta" aria-live="polite">
+                {{ resultCountLabel() }}
+              </div>
+            </div>
+
+            @if (filteredItems().length === 0) {
+              <div class="menu-page__empty-filtered" data-testid="public-menu-filtered-empty">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <circle cx="11" cy="11" r="6" />
+                  <path d="m16 16 4 4" />
+                </svg>
+                <p>{{ ui().publicMenuFilteredEmpty }}</p>
+              </div>
+            } @else {
+              <div class="menu-page__sections" data-testid="public-menu-grid">
+                @for (section of categorySections(); track section.id) {
+                  <section
+                    class="menu-page__category-section"
+                    [attr.aria-labelledby]="'menu-category-title-' + section.id"
+                  >
+                    <div class="menu-page__category-head">
+                      <div class="menu-page__category-copy">
+                        <span class="menu-page__category-marker" aria-hidden="true"></span>
+                        <div>
+                          <h3 [id]="'menu-category-title-' + section.id">{{ section.title }}</h3>
+                          @if (section.description) {
+                            <p>{{ section.description }}</p>
+                          }
+                        </div>
+                      </div>
+                      <span class="menu-page__category-count">{{ section.items.length }}</span>
+                    </div>
+
+                    <div class="menu-page__grid">
+                      @for (item of section.items; track item.id) {
+                        <app-menu-item-card
+                          [item]="item"
+                          [displayLocale]="contentLocale()"
+                          [currencyCode]="data.restaurant.currencyCode"
+                          [countryCode]="data.restaurant.countryCode"
+                          [imageFallback]="imageFallback"
+                          [quantity]="itemQuantity(item.id)"
+                          (added)="onItemAdded($event)"
+                          (quantityChange)="onItemQuantityChange(item, $event)"
+                        />
+                      }
+                    </div>
+                  </section>
+                }
+              </div>
+            }
+          </section>
+        }
+      </div>
+    </main>
+
+    <footer class="menu-page__footer">
+      <div class="menu-page__container menu-page__footer-inner">
+        <div class="menu-page__footer-brand">
+          <strong>{{ restaurantName() }}</strong>
+          @if (restaurantAddress(); as address) {
+            <span>{{ address }}</span>
+          }
+          <span>{{ ui().publicMenuFooterCopy }}</span>
+        </div>
+
+        <a routerLink="/login" class="menu-page__admin-entry">
+          {{ ui().publicStaffLogin }}
+        </a>
+      </div>
+    </footer>
+
+    <app-public-menu-floating-cart
+      [visible]="floatingCartVisible()"
+      [orderSettings]="data.orderSettings"
+      [countryCode]="data.restaurant.countryCode"
+      (viewCart)="openCart()"
+    />
+
+    <app-public-menu-toast [message]="toastMessage()" [visible]="toastVisible()" />
+
+    <app-public-cart-drawer
+      [open]="cartOpen()"
+      [orderSettings]="data.orderSettings"
+      [countryCode]="data.restaurant.countryCode"
+      [contentLocale]="contentLocale()"
+      [imageFallback]="imageFallback"
+      (closed)="closeCart()"
+      (continueCheckout)="openCheckout()"
+    />
+
+    <app-public-checkout-panel
+      [open]="checkoutOpen()"
+      [slug]="restaurantSlug()"
+      [orderSettings]="data.orderSettings"
+      [countryCode]="data.restaurant.countryCode"
+      [contentLocale]="contentLocale()"
+      (closed)="closeCheckout()"
+      (orderPlaced)="onOrderPlaced($event)"
+      (menuRefreshRequested)="reload()"
+    />
+
+    <app-public-order-confirmation
+      [open]="confirmationOpen()"
+      [confirmation]="orderConfirmation()"
+      [countryCode]="data.restaurant.countryCode"
+      (closed)="closeConfirmation()"
+      (returnToMenu)="returnToMenuFromConfirmation()"
+    />
+  </div>
+}

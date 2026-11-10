@@ -1,0 +1,261 @@
+.table-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 0.875rem;
+  height: 100%;
+  padding: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--tables-line);
+  border-radius: 1.125rem;
+  background: var(--restaurant-surface);
+  box-shadow: var(--restaurant-shadow-xs);
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.22s, box-shadow 0.22s;
+}
+
+.table-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--restaurant-accent) 26%, var(--tables-line));
+  box-shadow: var(--tables-shadow);
+}
+
+.table-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.table-card__title {
+  min-width: 0;
+}
+
+.table-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.table-card__title h2 {
+  margin: 0;
+  overflow: hidden;
+  color: var(--tables-text);
+  font-size: 1.075rem;
+  font-weight: 850;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-card__zone {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 10rem;
+  padding: 0.2rem 0.5rem;
+  overflow: hidden;
+  border-radius: 0.45rem;
+  color: var(--tables-muted);
+  background: var(--restaurant-surface-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-card__zone svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex: 0 0 auto;
+  color: var(--restaurant-accent);
+}
+
+.table-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 1.625rem;
+  padding-inline: 0.625rem;
+  border-radius: 999px;
+  color: var(--tables-green);
+  background: var(--tables-green-soft);
+  font-size: 0.7rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.table-card__badge::before {
+  content: '';
+  width: 0.375rem;
+  height: 0.375rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.table-card__badge--inactive {
+  color: var(--tables-red);
+  background: var(--tables-red-soft);
+}
+
+.table-card__preview {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  padding: 0.75rem 0.5rem;
+  overflow: hidden;
+  border: 1px dashed color-mix(in srgb, var(--restaurant-border) 82%, transparent);
+  border-radius: 0.925rem;
+  background: color-mix(in srgb, var(--restaurant-print-surface) 86%, var(--restaurant-surface-soft));
+}
+
+.table-card__preview--inactive app-table-print-card {
+  opacity: 0.42;
+  filter: grayscale(0.55);
+}
+
+.table-card__inactive-overlay {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.625rem;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--restaurant-surface) 64%, transparent);
+  backdrop-filter: blur(1px);
+  text-align: center;
+}
+
+.table-card__inactive-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.625rem;
+  color: var(--restaurant-surface);
+  background: color-mix(in srgb, var(--tables-text) 92%, transparent);
+  box-shadow: var(--tables-shadow);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.table-card__inactive-label svg {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+.table-card__reactivate {
+  padding: 0.25rem 0.375rem;
+  border: 0;
+  border-radius: 0.4rem;
+  color: var(--restaurant-accent-strong);
+  background: transparent;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+  cursor: pointer;
+}
+
+.table-card__reactivate:focus-visible {
+  outline: 2px solid var(--restaurant-accent-border);
+  outline-offset: 2px;
+}
+
+.table-card__actions {
+  align-self: end;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.table-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-width: 0;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.625rem;
+  border: 1px solid var(--tables-line);
+  border-radius: 0.6875rem;
+  color: var(--restaurant-muted-text);
+  background: var(--restaurant-surface-soft);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.25;
+  cursor: pointer;
+  transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s, background 0.18s;
+}
+
+.table-card__action svg {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+.table-card__action:hover {
+  transform: translateY(-1px);
+  border-color: var(--restaurant-accent-border);
+  color: var(--tables-text);
+  background: var(--restaurant-surface-elevated);
+  box-shadow: var(--restaurant-shadow-xs);
+}
+
+.table-card__action:focus-visible {
+  outline: 2px solid var(--restaurant-accent-border);
+  outline-offset: 2px;
+}
+
+.table-card__action--primary {
+  grid-column: 1 / -1;
+  min-height: 2.75rem;
+  border-color: transparent;
+  color: var(--restaurant-text-on-accent);
+  background: var(--restaurant-accent);
+}
+
+.table-card__action--primary:hover {
+  border-color: transparent;
+  color: var(--restaurant-text-on-accent);
+  background: var(--restaurant-accent-strong);
+}
+
+.table-card__action--danger {
+  color: var(--tables-red);
+  border-color: color-mix(in srgb, var(--restaurant-danger) 28%, var(--tables-line));
+  background: color-mix(in srgb, var(--tables-red-soft) 72%, var(--restaurant-surface));
+}
+
+.table-card__action--danger:hover {
+  color: var(--tables-red);
+  border-color: color-mix(in srgb, var(--restaurant-danger) 42%, var(--tables-line));
+  background: var(--tables-red-soft);
+}
+
+@media (max-width: 24rem) {
+  .table-card__actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .table-card__action--primary {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .table-card,
+  .table-card__action {
+    transition-duration: 0.01ms !important;
+  }
+}

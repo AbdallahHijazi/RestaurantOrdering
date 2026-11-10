@@ -51,6 +51,11 @@ public sealed class UpdateRestaurantCommandValidator : AbstractValidator<UpdateR
         RuleFor(x => x.Longitude)
             .InclusiveBetween(-180m, 180m)
             .When(x => x.Longitude.HasValue);
+
+        RuleFor(x => x.AccentColor)
+            .NotEmpty()
+            .Must(RestaurantAccentColor.IsValid)
+            .WithMessage("Accent color must be a valid hex color such as #B8663F.");
     }
 
     private static readonly System.Text.RegularExpressions.Regex SlugPatternRegex =

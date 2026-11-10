@@ -24,6 +24,15 @@ public class ApplicationDbContext
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<MediaFile> MediaFiles => Set<MediaFile>();
     public DbSet<QrCode> QrCodes => Set<QrCode>();
+    public DbSet<RestaurantTable> RestaurantTables => Set<RestaurantTable>();
+    public DbSet<LocaleDefinition> LocaleDefinitions => Set<LocaleDefinition>();
+    public DbSet<RestaurantSupportedLocale> RestaurantSupportedLocales => Set<RestaurantSupportedLocale>();
+    public DbSet<RestaurantTranslation> RestaurantTranslations => Set<RestaurantTranslation>();
+    public DbSet<CategoryTranslation> CategoryTranslations => Set<CategoryTranslation>();
+    public DbSet<MenuItemTranslation> MenuItemTranslations => Set<MenuItemTranslation>();
+    public DbSet<TranslationJob> TranslationJobs => Set<TranslationJob>();
+    public DbSet<TranslationAuditLog> TranslationAuditLogs => Set<TranslationAuditLog>();
+    public DbSet<RestaurantUserPermissionGrant> RestaurantUserPermissionGrants => Set<RestaurantUserPermissionGrant>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

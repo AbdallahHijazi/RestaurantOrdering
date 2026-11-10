@@ -1,6 +1,8 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestaurantOrdering.Api.Contracts.Admin.Restaurants;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Application.Features.Restaurants.Commands.UpdateRestaurant;
 using RestaurantOrdering.Application.Features.Restaurants.DTOs;
 using RestaurantOrdering.Application.Features.Restaurants.Queries.GetRestaurantById;
@@ -8,6 +10,8 @@ using RestaurantOrdering.Application.Features.Restaurants.Queries.GetRestaurantB
 namespace RestaurantOrdering.Api.Controllers.Admin;
 
 [ApiController]
+//[Authorize(Policy = ApplicationPolicies.RestaurantOwnerOnly)]
+[AllowAnonymous]
 [Route("api/v1/admin/restaurants/{restaurantId:guid}")]
 public sealed class RestaurantsController : ControllerBase
 {
@@ -49,7 +53,8 @@ public sealed class RestaurantsController : ControllerBase
             request.AddressAr,
             request.AddressEn,
             request.Latitude,
-            request.Longitude);
+            request.Longitude,
+            request.AccentColor);
 
         var result = await _sender.Send(command, cancellationToken);
         return Ok(result);

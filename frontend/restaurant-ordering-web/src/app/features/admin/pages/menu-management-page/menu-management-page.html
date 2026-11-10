@@ -1,0 +1,574 @@
+<section class="menu-management-page" data-testid="menu-management-page">
+  <div class="menu-management-shell">
+    <header class="menu-management-hero">
+      <div class="menu-management-title">
+        <h1>{{ locale.uiText('adminMenuPageTitle') }}</h1>
+        <p>{{ locale.uiText('adminMenuPageLead') }}</p>
+      </div>
+
+      <div class="menu-management-toolbar">
+        <button
+          type="button"
+          class="menu-management-primary"
+          data-testid="menu-add-item-button"
+          [disabled]="pageState() !== 'ready'"
+          (click)="openCreateItem()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2Z" />
+          </svg>
+          {{ locale.uiText('adminMenuAddItem') }}
+        </button>
+      </div>
+    </header>
+
+    @if (reorderErrorMessage()) {
+      <app-floating-notification-pill
+        data-testid="menu-reorder-error"
+        tone="error"
+        [message]="reorderErrorMessage()!"
+        [closeLabel]="locale.uiText('notificationClose')"
+        (dismissed)="dismissPageNotification()"
+      />
+    } @else if (successMessage()) {
+      <app-floating-notification-pill
+        data-testid="menu-success-message"
+        [message]="successMessage()!"
+        [closeLabel]="locale.uiText('notificationClose')"
+        (dismissed)="dismissPageNotification()"
+      />
+    }
+
+    @switch (pageState()) {
+      @case ('loading') {
+        <div class="menu-management-state" aria-busy="true" data-testid="menu-loading">
+          {{ locale.uiText('adminMenuLoading') }}
+        </div>
+      }
+
+      @case ('missing-context') {
+        <div class="menu-management-state menu-management-state--error" data-testid="menu-missing-context">
+          <h2>{{ locale.uiText('adminMenuMissingContextTitle') }}</h2>
+          <p>{{ locale.uiText('adminMenuMissingContextDescription') }}</p>
+        </div>
+      }
+
+      @case ('error') {
+        <div class="menu-management-state menu-management-state--error" data-testid="menu-error-state">
+          <h2>{{ locale.uiText('adminMenuListErrorTitle') }}</h2>
+          <p>{{ listErrorMessage() }}</p>
+          <button type="button" class="menu-management-secondary" (click)="loadCategories()">
+            {{ locale.uiText('adminMenuRetry') }}
+          </button>
+        </div>
+      }
+
+      @case ('ready') {
+        <section
+          class="menu-management-category-panel"
+          [class.is-reordering]="categoryReorderMode()"
+        >
+          <div
+            class="menu-management-categories"
+            data-testid="menu-category-strip"
+            [attr.aria-label]="locale.uiText('adminMenuCategoriesHeading')"
+          >
+            <button
+              type="button"
+              class="menu-management-category-pill"
+              data-testid="menu-category-all"
+              [class.is-active]="selectedCategoryId() === allItemsFilter"
+              [disabled]="categoryReorderMode()"
+              (click)="selectCategory(allItemsFilter)"
+            >
+              {{ locale.uiText('adminMenuAllItems') }}
+              <span>({{ allItemsCount() }})</span>
+            </button>
+
+            @for (category of categories(); track category.id) {
+              <div
+                class="menu-management-category-wrap"
+                [class.is-dragging]="draggingCategoryId() === category.id"
+                [class.is-drop-before]="categoryDropTargetId() === category.id && categoryDropPosition() === 'before'"
+                [class.is-drop-after]="categoryDropTargetId() === category.id && categoryDropPosition() === 'after'"
+                [attr.data-testid]="'menu-category-' + category.id"
+                [attr.data-category-reorder-id]="category.id"
+                (pointermove)="onCategoryPointerMove($event)"
+                (pointerup)="onCategoryPointerUp()"
+                (pointercancel)="onCategoryPointerCancel()"
+              >
+                <button
+                  type="button"
+                  class="menu-management-category-pill"
+                  [class.is-active]="selectedCategoryId() === category.id"
+                  [class.is-reorderable]="categoryReorderMode()"
+                  [attr.aria-disabled]="categoryReorderMode() ? 'true' : null"
+                  (pointerdown)="onCategoryPointerDown($event, category.id)"
+                  (click)="selectCategory(category.id)"
+                >
+                  {{ displayCategoryName(category) }}
+                  <span data-testid="menu-category-count">({{ category.itemCount }})</span>
+                </button>
+                @if (!categoryReorderMode()) {
+                  <div class="menu-management-category-manage">
+                    <button
+                      type="button"
+                      class="menu-management-icon-btn"
+                      [attr.data-testid]="'menu-edit-category-' + category.id"
+                      [attr.aria-label]="locale.uiText('adminMenuEdit') + ' ' + displayCategoryName(category)"
+                      (click)="openEditCategory(category)"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="menu-management-icon-btn menu-management-icon-btn--danger"
+                      [attr.data-testid]="'menu-delete-category-' + category.id"
+                      [attr.aria-label]="locale.uiText('adminMenuDelete') + ' ' + displayCategoryName(category)"
+                      (click)="openDeleteCategory(category)"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path fill="currentColor" d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12ZM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4Z" />
+                      </svg>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="menu-management-category-actions">
+            <button
+              type="button"
+              class="menu-management-secondary"
+              data-testid="menu-add-category-button"
+              [disabled]="categoryReorderMode() || categoryOrderBusy()"
+              (click)="openCreateCategory()"
+            >
+              {{ locale.uiText('adminMenuAddCategory') }}
+            </button>
+            <button
+              type="button"
+              class="menu-management-secondary menu-management-reorder-button"
+              data-testid="menu-reorder-categories-button"
+              [class.is-active]="categoryReorderMode()"
+              [disabled]="categories().length < 2 || categoryOrderBusy()"
+              (click)="toggleCategoryReorder()"
+            >
+              @if (categoryOrderBusy()) {
+                {{ locale.uiText('adminMenuSaving') }}
+              } @else if (categoryReorderMode()) {
+                {{ locale.uiText('adminMenuFinishCategoryReorder') }}
+              } @else {
+                {{ locale.uiText('adminMenuReorderCategories') }}
+              }
+            </button>
+          </div>
+        </section>
+
+        <section class="menu-management-meals" data-testid="menu-meals-section">
+          <div class="menu-management-section-head">
+            <h2>{{ selectedCategoryLabel() }}</h2>
+            @if (itemsState() === 'ready' && menuItems().length > 0) {
+              <span class="menu-management-count" data-testid="menu-meals-count">
+                {{ showingMealsCountLabel() }}
+              </span>
+            }
+          </div>
+
+          <div class="menu-management-controls">
+            <label class="menu-management-search">
+              <span class="menu-management-search__label">{{ locale.uiText('adminMenuSearchLabel') }}</span>
+              <svg class="menu-management-search__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path
+                  fill="currentColor"
+                  d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5ZM9.5 14A4.5 4.5 0 1 1 9.5 5a4.5 4.5 0 0 1 0 9Z"
+                />
+              </svg>
+              <input
+                type="search"
+                data-testid="menu-search-input"
+                [value]="searchQuery()"
+                [placeholder]="locale.uiText('adminMenuSearchPlaceholder')"
+                [attr.aria-label]="locale.uiText('adminMenuSearchLabel')"
+                autocomplete="off"
+                [disabled]="itemReorderMode()"
+                (input)="onSearchInput($event)"
+              />
+            </label>
+
+            <label class="menu-management-availability-filter">
+              <span class="menu-management-search__label">
+                {{ locale.uiText('adminMenuAvailabilityFilterLabel') }}
+              </span>
+              <select
+                data-testid="menu-availability-filter"
+                [value]="availabilityFilter()"
+                [disabled]="itemReorderMode()"
+                [attr.aria-label]="locale.uiText('adminMenuAvailabilityFilterLabel')"
+                (change)="onAvailabilityFilterChange($event)"
+              >
+                <option value="all">{{ locale.uiText('adminMenuFilterAllStatuses') }}</option>
+                <option value="available">{{ locale.uiText('adminMenuAvailableNow') }}</option>
+                <option value="unavailable">{{ locale.uiText('adminMenuUnavailable') }}</option>
+              </select>
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="m7 10 5 5 5-5H7Z" />
+              </svg>
+            </label>
+            <button
+              type="button"
+              class="menu-management-secondary menu-management-reorder-button"
+              data-testid="menu-reorder-items-button"
+              [class.is-active]="itemReorderMode()"
+              [disabled]="(!itemReorderMode() && !canReorderItems()) || itemOrderBusy()"
+              (click)="toggleItemReorder()"
+            >
+              @if (itemOrderBusy()) {
+                {{ locale.uiText('adminMenuSaving') }}
+              } @else if (itemReorderMode()) {
+                {{ locale.uiText('adminMenuFinishItemReorder') }}
+              } @else {
+                {{ locale.uiText('adminMenuReorderItems') }}
+              }
+            </button>
+          </div>
+
+          @if (itemReorderMode()) {
+            <p class="menu-management-reorder-hint" data-testid="menu-item-reorder-hint">
+              {{ locale.uiText('adminMenuItemReorderHint') }}
+            </p>
+          }
+
+          @switch (itemsState()) {
+            @case ('loading') {
+              <div class="menu-management-state" data-testid="menu-items-loading">
+                {{ locale.uiText('adminMenuLoading') }}
+              </div>
+            }
+
+            @case ('error') {
+              <div class="menu-management-state menu-management-state--error" data-testid="menu-items-error">
+                <p>{{ itemsErrorMessage() }}</p>
+                <button type="button" class="menu-management-secondary" (click)="loadMenuItems()">
+                  {{ locale.uiText('adminMenuRetry') }}
+                </button>
+              </div>
+            }
+
+            @case ('ready') {
+              @if (menuItems().length === 0) {
+                <div class="menu-management-state" data-testid="menu-items-empty">
+                  <h3>{{ locale.uiText('adminMenuEmptyItemsTitle') }}</h3>
+                  <p>{{ locale.uiText('adminMenuEmptyItemsDescription') }}</p>
+                  <button type="button" class="menu-management-primary" (click)="openCreateItem()">
+                    {{ locale.uiText('adminMenuAddItem') }}
+                  </button>
+                </div>
+              } @else {
+                @if (isFilteredEmpty()) {
+                  <div class="menu-management-empty-filtered" data-testid="menu-items-filtered-empty">
+                    {{ locale.uiText('adminMenuEmptyFiltered') }}
+                  </div>
+                } @else {
+                  <div class="menu-management-grid" data-testid="menu-items-grid">
+                    @for (item of filteredMenuItems(); track item.id) {
+                      <app-menu-management-meal-card
+                        [attr.data-item-reorder-id]="item.id"
+                        [class.menu-management-item-slot--drop-before]="itemDropTargetId() === item.id && itemDropPosition() === 'before'"
+                        [class.menu-management-item-slot--drop-after]="itemDropTargetId() === item.id && itemDropPosition() === 'after'"
+                        [item]="item"
+                        [categoryName]="categoryNameById(item.categoryId)"
+                        [imageSrc]="itemImageSrc(item)"
+                        [availabilityBusy]="availabilityBusyId() === item.id"
+                        [reorderMode]="itemReorderMode()"
+                        [dragging]="draggingItemId() === item.id"
+                        (toggleAvailability)="toggleAvailability($event)"
+                        (editItem)="openEditItem($event)"
+                        (deleteItem)="openDeleteItem($event)"
+                        (imageError)="onItemImageError($event)"
+                        (reorderPointerDown)="onItemPointerDown($event, item.id)"
+                        (pointermove)="onItemPointerMove($event)"
+                        (pointerup)="onItemPointerUp()"
+                        (pointercancel)="onItemPointerCancel()"
+                      />
+                    }
+
+                    @if (!itemReorderMode()) {
+                      <button
+                        type="button"
+                        class="menu-management-add-card"
+                        data-testid="menu-add-item-placeholder"
+                        (click)="openCreateItem()"
+                      >
+                        <span class="menu-management-add-card__icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" focusable="false">
+                            <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2Z" />
+                          </svg>
+                        </span>
+                        <strong>{{ locale.uiText('adminMenuAddNewMealTitle') }}</strong>
+                        <small>{{ locale.uiText('adminMenuAddNewMealDescription') }}</small>
+                      </button>
+                    }
+                  </div>
+                }
+              }
+            }
+          }
+        </section>
+      }
+    }
+  </div>
+</section>
+
+<app-modal-shell
+  [open]="modalKind() !== null"
+  [title]="modalTitle()"
+  [closeLabel]="locale.uiText('adminMenuCloseModal')"
+  titleId="menu-modal-title"
+  testId="menu-modal"
+  [blockCloseWhileBusy]="false"
+  (closed)="dismissModal()"
+>
+  @if (modalKind()) {
+    @if (modalErrorMessage()) {
+      <p class="menu-management-modal-error" role="alert">{{ modalErrorMessage() }}</p>
+    }
+
+    @switch (modalKind()) {
+      @case ('category') {
+        <form
+          id="menu-category-form"
+          class="menu-management-form"
+          [formGroup]="categoryForm"
+          (ngSubmit)="submitCategory()"
+        >
+          <div class="menu-management-form-notice" data-testid="menu-catalog-primary-notice">
+            <p>{{ catalogPrimaryNotice() }}</p>
+            <p data-testid="menu-catalog-primary-language">{{ catalogPrimaryLanguageLine() }}</p>
+          </div>
+          @if (catalogEditWarning()) {
+            <p
+              class="menu-management-form-alert"
+              role="alert"
+              data-testid="menu-catalog-missing-primary-locale"
+            >
+              {{ locale.uiText('adminMenuCatalogEditMissingPrimaryLocale') }}
+            </p>
+          }
+          <label>
+            {{ locale.uiText('adminMenuFormName') }}
+            <input type="text" formControlName="name" data-testid="menu-category-name" />
+          </label>
+          <label>
+            {{ locale.uiText('adminMenuFormDescription') }}
+            <textarea rows="2" formControlName="description" data-testid="menu-category-description"></textarea>
+          </label>
+          <label>
+            {{ locale.uiText('adminMenuFormDisplayOrder') }}
+            <input type="number" min="0" formControlName="displayOrder" />
+          </label>
+          <label class="menu-management-checkbox">
+            <input type="checkbox" formControlName="isActive" />
+            {{ locale.uiText('adminMenuFormIsActive') }}
+          </label>
+        </form>
+      }
+
+      @case ('item') {
+        <form
+          id="menu-item-form"
+          class="menu-management-form"
+          [formGroup]="itemForm"
+          (ngSubmit)="submitItem()"
+        >
+          <div class="menu-management-form-notice" data-testid="menu-catalog-primary-notice">
+            <p>{{ catalogPrimaryNotice() }}</p>
+            <p data-testid="menu-catalog-primary-language">{{ catalogPrimaryLanguageLine() }}</p>
+          </div>
+          @if (catalogEditWarning()) {
+            <p
+              class="menu-management-form-alert"
+              role="alert"
+              data-testid="menu-catalog-missing-primary-locale"
+            >
+              {{ locale.uiText('adminMenuCatalogEditMissingPrimaryLocale') }}
+            </p>
+          }
+          <label>
+            {{ locale.uiText('adminMenuFormCategory') }}
+            <select formControlName="categoryId">
+              @for (category of categories(); track category.id) {
+                <option [value]="category.id">{{ displayCategoryName(category) }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            {{ locale.uiText('adminMenuFormName') }}
+            <input type="text" formControlName="name" data-testid="menu-item-name" />
+          </label>
+          <label>
+            {{ locale.uiText('adminMenuFormDescription') }}
+            <textarea rows="2" formControlName="description" data-testid="menu-item-description"></textarea>
+          </label>
+          <label>
+            {{ locale.uiText('adminMenuFormPrice') }}
+            <input type="number" min="0" step="0.01" formControlName="price" />
+          </label>
+          <label>
+            {{ locale.uiText('adminMenuFormDiscountPrice') }}
+            <input type="number" min="0" step="0.01" formControlName="discountPrice" />
+          </label>
+          @if (itemForm.hasError('discountGreaterThanPrice')) {
+            <p class="menu-management-field-error">{{ locale.uiText('adminMenuDiscountInvalid') }}</p>
+          }
+          <label>
+            {{ locale.uiText('adminMenuFormDisplayOrder') }}
+            <input type="number" min="0" formControlName="displayOrder" />
+          </label>
+          <label class="menu-management-checkbox">
+            <input type="checkbox" formControlName="isAvailable" />
+            {{ locale.uiText('adminMenuFormIsAvailable') }}
+          </label>
+          <label class="menu-management-checkbox">
+            <input type="checkbox" formControlName="isActive" />
+            {{ locale.uiText('adminMenuFormIsActive') }}
+          </label>
+          <div class="menu-management-image-field">
+            <label for="menu-item-image-input">{{ locale.uiText('adminMenuFormImage') }}</label>
+            <input
+              id="menu-item-image-input"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              data-testid="menu-item-image-input"
+              (change)="onImageSelected($event)"
+            />
+            <p class="menu-management-help">{{ locale.uiText('adminMenuImageHelp') }}</p>
+            @if (imageValidationError()) {
+              <p class="menu-management-field-error">{{ imageValidationError() }}</p>
+            }
+            @if (imagePreviewUrl(); as previewUrl) {
+              <img
+                class="menu-management-image-preview"
+                [src]="previewUrl"
+                [alt]="locale.uiText('adminMenuImagePreviewAlt')"
+                data-testid="menu-item-image-preview"
+              />
+            }
+          </div>
+        </form>
+      }
+
+      @case ('deleteCategory') {
+        <div class="menu-management-confirm">
+          <p>{{ locale.uiText('adminMenuDeleteCategoryMessage') }}</p>
+          @if ((deletingCategory()?.itemCount ?? 0) > 0) {
+            <p class="menu-management-warning" data-testid="menu-delete-category-warning">
+              {{ locale.uiText('adminMenuDeleteCategoryWarning') }}
+            </p>
+          }
+        </div>
+      }
+
+      @case ('deleteItem') {
+        <div class="menu-management-confirm">
+          <p>{{ locale.uiText('adminMenuDeleteItemMessage') }}</p>
+        </div>
+      }
+    }
+
+    @if (modalKind() === 'category') {
+      <div orderModalFooter class="menu-management-modal-actions">
+        <button
+          type="button"
+          class="button-secondary"
+          data-testid="menu-dismiss-modal"
+          (click)="dismissModal()"
+        >
+          {{ locale.uiText('adminMenuCancel') }}
+        </button>
+        <button
+          type="submit"
+          class="button-primary"
+          form="menu-category-form"
+          [disabled]="modalSubmitting()"
+        >
+          {{
+            modalSubmitting()
+              ? locale.uiText('adminMenuSaving')
+              : locale.uiText('adminMenuSave')
+          }}
+        </button>
+      </div>
+    }
+
+    @if (modalKind() === 'item') {
+      <div orderModalFooter class="menu-management-modal-actions">
+        <button
+          type="button"
+          class="button-secondary"
+          data-testid="menu-dismiss-modal"
+          (click)="dismissModal()"
+        >
+          {{ locale.uiText('adminMenuCancel') }}
+        </button>
+        <button
+          type="submit"
+          class="button-primary"
+          form="menu-item-form"
+          [disabled]="modalSubmitting()"
+        >
+          {{
+            modalSubmitting()
+              ? locale.uiText('adminMenuSaving')
+              : locale.uiText('adminMenuSave')
+          }}
+        </button>
+      </div>
+    }
+
+    @if (modalKind() === 'deleteCategory' || modalKind() === 'deleteItem') {
+      <div orderModalFooter class="menu-management-modal-actions">
+        <button
+          type="button"
+          class="button-secondary"
+          data-testid="menu-dismiss-delete"
+          (click)="dismissModal()"
+        >
+          {{ locale.uiText('adminMenuDismissDelete') }}
+        </button>
+        @if (modalKind() === 'deleteCategory') {
+          <button
+            type="button"
+            class="button-danger menu-management-delete-confirm"
+            data-testid="menu-confirm-delete-category"
+            [disabled]="modalSubmitting()"
+            (click)="submitDeleteCategory()"
+          >
+            {{
+              modalSubmitting()
+                ? locale.uiText('adminMenuDeleting')
+                : locale.uiText('adminMenuConfirmDelete')
+            }}
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="button-danger menu-management-delete-confirm"
+            data-testid="menu-confirm-delete-item"
+            [disabled]="modalSubmitting()"
+            (click)="submitDeleteItem()"
+          >
+            {{
+              modalSubmitting()
+                ? locale.uiText('adminMenuDeleting')
+                : locale.uiText('adminMenuConfirmDelete')
+            }}
+          </button>
+        }
+      </div>
+    }
+  }
+</app-modal-shell>

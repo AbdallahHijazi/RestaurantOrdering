@@ -1,0 +1,13 @@
+.numeric-ltr,
+.identifier-ltr,
+.phone-ltr,
+.currency-ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: start;
+}
+
+.identifier-ltr {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}

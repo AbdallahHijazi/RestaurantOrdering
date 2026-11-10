@@ -1,0 +1,378 @@
+@import '@fontsource/playfair-display/400.css';
+@import '@fontsource/playfair-display/500.css';
+@import '@fontsource/playfair-display/600.css';
+@import '@fontsource/playfair-display/700.css';
+@import '@fontsource/playfair-display/800.css';
+@import '@fontsource/playfair-display/900.css';
+
+:root {
+  /* Strict three-color palette */
+  --restaurant-ivory: #f7f5eb;
+  --restaurant-sage: #a4b48a;
+  --restaurant-olive: #6e7b4e;
+  --restaurant-palette-ivory: var(--restaurant-ivory);
+  --restaurant-palette-sage: var(--restaurant-sage);
+  --restaurant-palette-olive: var(--restaurant-olive);
+
+  /* Z-index */
+  --z-admin-header: 100;
+  --z-modal-backdrop: 1300;
+  --z-modal-dialog: 1301;
+  --z-preview-overlay: 1400;
+
+  /* Typography */
+  --restaurant-font-display-en: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --restaurant-font-display-ar: 'Amiri', Georgia, serif;
+  --restaurant-font-body-en: Arial, Helvetica, sans-serif;
+  --restaurant-font-body-ar: 'Amiri', Georgia, serif;
+  --restaurant-font-display: var(--restaurant-font-display-en);
+  --restaurant-font-body: var(--restaurant-font-body-en);
+  --restaurant-font-ar: var(--restaurant-font-body-ar);
+  --restaurant-font-en: var(--restaurant-font-body-en);
+  --restaurant-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-display: var(--restaurant-font-display);
+  --font-body: var(--restaurant-font-body);
+
+  /* Core backgrounds */
+  --restaurant-background: var(--restaurant-palette-ivory);
+  --restaurant-background-soft: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 10%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-background-deep: color-mix(
+    in srgb,
+    var(--restaurant-palette-olive) 8%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-background-menu: var(--restaurant-background);
+  --restaurant-background-orders: var(--restaurant-background-soft);
+
+  /* Surfaces */
+  --restaurant-surface: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 14%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-surface-soft: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 20%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-surface-elevated: var(--restaurant-palette-ivory);
+  --restaurant-surface-muted: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 28%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-surface-white: var(--restaurant-palette-ivory);
+  --restaurant-surface-glass: color-mix(in srgb, var(--restaurant-palette-ivory) 92%, transparent);
+  --restaurant-alternate-surface: var(--restaurant-surface-soft);
+
+  /* Accent scale (legacy aliases → olive / sage) */
+  --restaurant-gold-dark: color-mix(in srgb, var(--restaurant-olive) 86%, var(--restaurant-sage));
+  --restaurant-gold-deep: var(--restaurant-olive);
+  --restaurant-gold-base: var(--restaurant-olive);
+  --restaurant-gold-light: var(--restaurant-sage);
+  --restaurant-gold-champagne: var(--restaurant-ivory);
+
+  /* Accent (flat) */
+  --restaurant-accent: var(--restaurant-olive);
+  --restaurant-accent-strong: color-mix(in srgb, var(--restaurant-olive) 86%, var(--restaurant-sage));
+  --restaurant-accent-deep: color-mix(in srgb, var(--restaurant-olive) 92%, var(--restaurant-sage));
+  --restaurant-accent-soft: color-mix(in srgb, var(--restaurant-sage) 32%, transparent);
+  --restaurant-accent-border: color-mix(in srgb, var(--restaurant-olive) 42%, transparent);
+  --restaurant-champagne: var(--restaurant-ivory);
+
+  /* Primary buttons (olive + sage only — no ivory shine through text) */
+  --restaurant-primary-button-bg: linear-gradient(
+    135deg,
+    var(--restaurant-olive) 0%,
+    color-mix(in srgb, var(--restaurant-olive) 74%, var(--restaurant-sage)) 100%
+  );
+  --restaurant-primary-button-bg-hover: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--restaurant-olive) 86%, var(--restaurant-sage)) 0%,
+    color-mix(in srgb, var(--restaurant-olive) 78%, var(--restaurant-sage)) 100%
+  );
+  --restaurant-primary-button-bg-active: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--restaurant-olive) 92%, var(--restaurant-sage)) 0%,
+    color-mix(in srgb, var(--restaurant-olive) 88%, var(--restaurant-sage)) 100%
+  );
+  --restaurant-primary-button-bg-soft: linear-gradient(
+    135deg,
+    var(--restaurant-olive) 0%,
+    color-mix(in srgb, var(--restaurant-olive) 68%, var(--restaurant-sage)) 100%
+  );
+  --restaurant-primary-button-text: var(--restaurant-ivory);
+  --restaurant-primary-button-highlight: color-mix(in srgb, var(--restaurant-sage) 34%, transparent);
+  --restaurant-primary-button-shadow: 0 10px 24px rgb(110 123 78 / 0.18);
+  --restaurant-primary-button-shadow-hover: 0 12px 28px rgb(110 123 78 / 0.22);
+
+  /* Card hover + focus (palette-only) */
+  --restaurant-card-hover-border: color-mix(in srgb, var(--restaurant-olive) 42%, transparent);
+  --restaurant-card-hover-shadow: 0 18px 42px rgb(110 123 78 / 0.16);
+  --restaurant-focus-ring: color-mix(in srgb, var(--restaurant-olive) 54%, transparent);
+
+  /* Legacy gradient aliases (mapped to readable primary buttons) */
+  --restaurant-gold-metallic: var(--restaurant-primary-button-bg);
+  --restaurant-gold-metallic-soft: var(--restaurant-primary-button-bg-soft);
+  --restaurant-gold-metallic-shadow: var(--restaurant-primary-button-shadow);
+  --restaurant-gold-metallic-shadow-hover: var(--restaurant-primary-button-shadow-hover);
+  --restaurant-gold-shine: linear-gradient(
+    90deg,
+    var(--restaurant-olive) 0%,
+    var(--restaurant-sage) 32%,
+    color-mix(in srgb, var(--restaurant-sage) 72%, var(--restaurant-ivory)) 50%,
+    var(--restaurant-sage) 68%,
+    var(--restaurant-olive) 100%
+  );
+
+  /* Text */
+  --restaurant-text: var(--restaurant-palette-olive);
+  --restaurant-text-soft: color-mix(
+    in srgb,
+    var(--restaurant-palette-olive) 72%,
+    var(--restaurant-palette-sage)
+  );
+  --restaurant-muted-text: color-mix(
+    in srgb,
+    var(--restaurant-palette-olive) 48%,
+    var(--restaurant-palette-sage)
+  );
+  --restaurant-subtle-text: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 78%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-text-on-gold: var(--restaurant-palette-ivory);
+  --restaurant-text-on-accent: var(--restaurant-palette-ivory);
+  --restaurant-text-on-dark: var(--restaurant-palette-ivory);
+
+  /* Borders */
+  --restaurant-border: color-mix(in srgb, var(--restaurant-palette-olive) 18%, transparent);
+  --restaurant-border-strong: color-mix(in srgb, var(--restaurant-palette-olive) 38%, transparent);
+  --restaurant-border-soft: color-mix(in srgb, var(--restaurant-palette-sage) 22%, transparent);
+  --restaurant-border-menu: var(--restaurant-border);
+  --restaurant-border-menu-strong: var(--restaurant-border-strong);
+  --restaurant-border-admin: var(--restaurant-border);
+  --restaurant-border-orders: var(--restaurant-border);
+  --restaurant-border-slate: var(--restaurant-border-soft);
+
+  /* Footer */
+  --restaurant-footer: var(--restaurant-background-deep);
+  --restaurant-footer-text: var(--restaurant-text);
+
+  /* Semantic colors (palette-only) */
+  --restaurant-success: var(--restaurant-palette-sage);
+  --restaurant-success-soft: color-mix(in srgb, var(--restaurant-palette-sage) 20%, transparent);
+  --restaurant-danger: var(--restaurant-palette-olive);
+  --restaurant-danger-soft: color-mix(in srgb, var(--restaurant-palette-olive) 14%, transparent);
+  --restaurant-danger-medium: color-mix(
+    in srgb,
+    var(--restaurant-palette-olive) 82%,
+    var(--restaurant-palette-sage)
+  );
+  --restaurant-danger-menu: var(--restaurant-danger);
+  --restaurant-danger-admin: var(--restaurant-danger);
+  --restaurant-danger-surface: color-mix(in srgb, var(--restaurant-palette-olive) 10%, transparent);
+  --restaurant-warning: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 52%,
+    var(--restaurant-palette-olive)
+  );
+  --restaurant-warning-soft: color-mix(in srgb, var(--restaurant-palette-sage) 18%, transparent);
+  --restaurant-info: var(--restaurant-palette-sage);
+  --restaurant-info-soft: color-mix(in srgb, var(--restaurant-palette-sage) 16%, transparent);
+  --restaurant-sage-menu: var(--restaurant-sage);
+  --restaurant-sage-soft: color-mix(in srgb, var(--restaurant-palette-sage) 18%, transparent);
+  --restaurant-sage-soft-menu: var(--restaurant-sage-soft);
+  --restaurant-amber: var(--restaurant-warning);
+  --restaurant-amber-soft: var(--restaurant-warning-soft);
+
+  /* Admin console palette */
+  --restaurant-console-accent: var(--restaurant-accent);
+  --restaurant-console-accent-soft: var(--restaurant-accent-soft);
+  --restaurant-console-text: var(--restaurant-text);
+  --restaurant-console-charcoal: var(--restaurant-surface-elevated);
+  --restaurant-console-muted: var(--restaurant-muted-text);
+  --restaurant-console-stat-muted: var(--restaurant-subtle-text);
+  --restaurant-console-border: var(--restaurant-border);
+  --restaurant-console-outline: var(--restaurant-border-strong);
+  --restaurant-console-surface: var(--restaurant-background);
+  --restaurant-console-surface-elevated: var(--restaurant-surface);
+  --restaurant-console-surface-muted: var(--restaurant-surface-muted);
+  --restaurant-console-surface-panel: var(--restaurant-surface-soft);
+  --restaurant-console-text-on-dark: var(--restaurant-text-on-dark);
+  --restaurant-console-text-on-dark-muted: var(--restaurant-text-soft);
+  --restaurant-console-shadow: var(--restaurant-shadow-sm);
+  --restaurant-console-backdrop: color-mix(in srgb, var(--restaurant-palette-olive) 42%, transparent);
+
+  /* Kitchen functional status colors */
+  --restaurant-kitchen-new: var(--restaurant-palette-sage);
+  --restaurant-kitchen-new-text: var(--restaurant-palette-olive);
+  --restaurant-kitchen-indicator: var(--restaurant-surface-muted);
+  --restaurant-kitchen-delivery: color-mix(in srgb, var(--restaurant-palette-sage) 24%, transparent);
+  --restaurant-kitchen-delivery-text: var(--restaurant-text);
+
+  /* Live preview status */
+  --restaurant-preview-sync-border: color-mix(in srgb, var(--restaurant-palette-sage) 38%, transparent);
+  --restaurant-preview-sync-bg: color-mix(in srgb, var(--restaurant-palette-sage) 14%, transparent);
+  --restaurant-preview-sync-text: var(--restaurant-palette-sage);
+  --restaurant-preview-unsaved-border: color-mix(
+    in srgb,
+    var(--restaurant-palette-olive) 32%,
+    transparent
+  );
+  --restaurant-preview-unsaved-bg: color-mix(in srgb, var(--restaurant-palette-sage) 12%, transparent);
+  --restaurant-preview-unsaved-text: var(--restaurant-palette-olive);
+  --restaurant-preview-dot-live: var(--restaurant-palette-sage);
+  --restaurant-preview-dot-unsaved: var(--restaurant-palette-olive);
+  --restaurant-preview-canvas-bg: var(--restaurant-background-soft);
+  --restaurant-preview-frame-border: var(--restaurant-border);
+  --restaurant-preview-muted: var(--restaurant-muted-text);
+  --restaurant-preview-device-chrome: var(--restaurant-surface-elevated);
+
+  /* Print-safe palette */
+  --restaurant-print-surface: var(--restaurant-palette-ivory);
+  --restaurant-print-surface-soft: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 8%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-print-text: var(--restaurant-palette-olive);
+  --restaurant-print-muted: color-mix(
+    in srgb,
+    var(--restaurant-palette-olive) 55%,
+    var(--restaurant-palette-sage)
+  );
+  --restaurant-print-border: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 72%,
+    var(--restaurant-palette-olive)
+  );
+
+  /* Dark surfaces (remapped to olive-tinted ivory) */
+  --restaurant-dark: color-mix(
+    in srgb,
+    var(--restaurant-palette-olive) 12%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-dark-deep: color-mix(
+    in srgb,
+    var(--restaurant-palette-olive) 18%,
+    var(--restaurant-palette-ivory)
+  );
+
+  /* Neutral scale */
+  --restaurant-neutral-950: var(--restaurant-dark-deep);
+  --restaurant-neutral-900: var(--restaurant-dark);
+  --restaurant-neutral-800: var(--restaurant-surface);
+  --restaurant-neutral-700: var(--restaurant-muted-text);
+  --restaurant-neutral-500: var(--restaurant-subtle-text);
+  --restaurant-neutral-300: var(--restaurant-border);
+  --restaurant-neutral-100: var(--restaurant-surface-soft);
+
+  /* Radius */
+  --restaurant-radius-xs: 8px;
+  --restaurant-radius-sm: 10px;
+  --restaurant-radius-md: 14px;
+  --restaurant-radius-lg: 18px;
+  --restaurant-radius-xl: 24px;
+  --restaurant-radius-pill: 999px;
+  --radius-sm: var(--restaurant-radius-sm);
+  --radius-md: var(--restaurant-radius-md);
+  --radius-lg: var(--restaurant-radius-lg);
+
+  /* Shadows */
+  --restaurant-shadow-xs: 0 4px 12px color-mix(in srgb, var(--restaurant-palette-olive) 10%, transparent);
+  --restaurant-shadow-sm: 0 10px 26px color-mix(in srgb, var(--restaurant-palette-olive) 14%, transparent);
+  --restaurant-shadow-md: 0 18px 48px color-mix(in srgb, var(--restaurant-palette-olive) 18%, transparent);
+  --restaurant-shadow-lg: 0 28px 84px color-mix(in srgb, var(--restaurant-palette-olive) 22%, transparent);
+  --shadow-soft: var(--restaurant-shadow-sm);
+  --restaurant-shadow-menu-sm: var(--restaurant-shadow-xs);
+  --restaurant-shadow-menu-md: var(--restaurant-shadow-sm);
+  --restaurant-shadow-admin-sm: var(--restaurant-shadow-xs);
+  --restaurant-shadow-admin-md: var(--restaurant-shadow-sm);
+  --restaurant-overlay-backdrop: color-mix(in srgb, var(--restaurant-palette-olive) 55%, transparent);
+
+  /* Motion */
+  --restaurant-motion-fast: 160ms;
+  --restaurant-motion-normal: 240ms;
+  --restaurant-motion-slow: 340ms;
+  --restaurant-ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-base: var(--restaurant-motion-normal) var(--restaurant-ease-standard);
+}
+
+html[dir='rtl'] {
+  --restaurant-font-display: var(--restaurant-font-display-ar);
+  --restaurant-font-body: var(--restaurant-font-body-ar);
+}
+
+html[dir='ltr'] {
+  --restaurant-font-display: var(--restaurant-font-display-en);
+  --restaurant-font-body: var(--restaurant-font-body-en);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html[dir='rtl'] body {
+  font-family: var(--restaurant-font-body-ar);
+}
+
+html[dir='ltr'] body {
+  font-family: var(--restaurant-font-body-en);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--restaurant-text);
+  background: var(--restaurant-background);
+  line-height: 1.5;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+@import './app/shared/styles/app-buttons.scss';
+@import './app/shared/styles/modal-shell.scss';
+@import './app/shared/styles/order-ltr.scss';
+@import './app/shared/styles/order-details.scss';
+
+body.order-modal-scroll-lock {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

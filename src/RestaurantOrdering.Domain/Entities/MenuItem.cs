@@ -17,6 +17,7 @@ public class MenuItem : AuditableEntity, ISoftDelete
     public bool IsAvailable { get; set; } = true;
     public bool IsActive { get; set; } = true;
     public bool IsDeleted { get; set; }
+    public int ContentVersion { get; set; } = 1;
 
     public Restaurant Restaurant { get; set; } = null!;
     public Category Category { get; set; } = null!;

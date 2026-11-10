@@ -1,0 +1,534 @@
+import { Component } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter, Router, RouterOutlet } from '@angular/router';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { API_BASE_URL } from '../../config/api-config';
+import { RestaurantLocaleOptionsService } from '../../localization/restaurant-locale-options.service';
+import { ApplicationRoles } from '../../auth/application-roles';
+import { AuthService } from '../../auth/auth.service';
+import { LocaleService } from '../../localization/locale';
+import { AdminBrandingService } from '../admin-layout/admin-branding.service';
+import { ProfileConsoleLayout } from './profile-console-layout';
+
+function setViewportWidth(width: number): void {
+  Object.defineProperty(window, 'innerWidth', {
+    configurable: true,
+    writable: true,
+    value: width,
+  });
+  window.dispatchEvent(new Event('resize'));
+}
+
+function getInjectedStyleText(): string {
+  let cssText = '';
+  for (const sheet of Array.from(document.styleSheets)) {
+    try {
+      for (const rule of Array.from(sheet.cssRules)) {
+        cssText += `${rule.cssText}\n`;
+      }
+    } catch {
+      // Ignore inaccessible stylesheets in the test environment.
+    }
+  }
+  return cssText;
+}
+
+function getLayoutStylesheetText(): string {
+  return readFileSync(resolve(__dirname, 'profile-console-layout.scss'), 'utf8');
+}
+
+describe('ProfileConsoleLayout', () => {
+  let fixture: ComponentFixture<ProfileConsoleLayout>;
+  let httpMock: HttpTestingController;
+  let auth: {
+    logout: ReturnType<typeof vi.fn>;
+    hasAnyRole: ReturnType<typeof vi.fn>;
+    restaurantId?: ReturnType<typeof vi.fn>;
+  };
+
+  beforeEach(async () => {
+    setViewportWidth(1280);
+    auth = {
+      logout: vi.fn(),
+      hasAnyRole: vi.fn((role: string) => role === ApplicationRoles.RestaurantOwner),
+      restaurantId: vi.fn(() => 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [ProfileConsoleLayout],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AuthService, useValue: auth },
+      ],
+    }).compileComponents();
+
+    httpMock = TestBed.inject(HttpTestingController);
+    TestBed.inject(LocaleService).setLocale('en');
+    fixture = TestBed.createComponent(ProfileConsoleLayout);
+    fixture.detectChanges();
+    flushLocaleSettings(httpMock);
+  });
+
+  afterEach(() => {
+    httpMock.match(() => true).forEach((req) => {
+      if (!req.cancelled) {
+        req.flush({
+          defaultLocale: 'ar',
+          translationMode: 'ManualOnly',
+          supportedLocales: [
+            { code: 'ar', isEnabled: true, sortOrder: 1 },
+            { code: 'en', isEnabled: true, sortOrder: 2 },
+          ],
+          availableLocales: [
+            { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+            { code: 'en', displayName: 'English', nativeName: 'English', direction: 'ltr' },
+          ],
+          canManageLocales: true,
+        });
+      }
+    });
+    httpMock.verify();
+  });
+
+  it('renders compact header with six primary navigation links for owners', () => {
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-console-header"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.profile-console__header--compact')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-console-header-start"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-console-header-end"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-console-nav-dashboard"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-console-nav-profile"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-console-nav-orders"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-console-nav-menu"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-console-nav-staff"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-console-nav-tables"]')).toBeTruthy();
+  });
+
+  it('defines desktop single-row balanced grid rules at min-width 1100px', () => {
+    const cssText = getInjectedStyleText();
+
+    expect(cssText).toContain('min-width: 1100px');
+    expect(cssText).toContain('grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr)');
+    expect(cssText).toContain('grid-template-areas: none');
+    expect(cssText).toContain('grid-row: 1');
+  });
+
+  it('uses balanced three-zone header grid for true navigation centering on desktop', () => {
+    const cssText = getInjectedStyleText();
+    const nav = fixture.nativeElement.querySelector('.profile-console__header-nav') as HTMLElement;
+
+    expect(cssText).toContain('grid-column: 2');
+    expect(cssText).toContain('justify-self: center');
+    expect(nav.classList.contains('profile-console__header-nav')).toBe(true);
+    expect(getComputedStyle(nav).flexWrap).toBe('nowrap');
+  });
+
+  it('keeps desktop header on one row without multi-row grid areas', () => {
+    const cssText = getInjectedStyleText();
+    const header = fixture.nativeElement.querySelector(
+      '[data-testid="profile-console-header"]',
+    ) as HTMLElement;
+
+    expect(cssText).toContain('grid-template-rows: auto');
+    expect(cssText).toContain('header-end header-start');
+    expect(getComputedStyle(header).alignItems).toBe('center');
+  });
+
+  it('renders exactly one top bar without legacy sidebar', () => {
+    expect(fixture.nativeElement.querySelectorAll('[data-testid="profile-console-header"]').length).toBe(1);
+    expect(fixture.nativeElement.querySelector('[data-testid="admin-sidebar"]')).toBeNull();
+  });
+
+  it('places LTR zones with identity in column 1 and actions in column 3 on desktop', () => {
+    TestBed.inject(LocaleService).setLocale('en');
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement.querySelector('[data-testid="profile-console"]') as HTMLElement;
+    const cssText = getLayoutStylesheetText();
+
+    expect(root.getAttribute('dir')).toBe('ltr');
+    expect(cssText).toContain(".profile-console[dir='ltr'] .profile-console__header-start");
+    expect(cssText).toContain(".profile-console[dir='ltr'] .profile-console__header-end");
+    expect(cssText).toMatch(/\[dir='ltr'\][\s\S]*profile-console__header-start[\s\S]*grid-column:\s*3/);
+    expect(cssText).toMatch(/\[dir='ltr'\][\s\S]*profile-console__header-end[\s\S]*grid-column:\s*1/);
+    expect(cssText).toContain('grid-column: 2');
+    expect(cssText).toContain('justify-self: center');
+  });
+
+  it('places RTL zones with actions in column 3 and identity in column 1 on desktop', () => {
+    TestBed.inject(LocaleService).setLocale('ar');
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement.querySelector('[data-testid="profile-console"]') as HTMLElement;
+    const cssText = getLayoutStylesheetText();
+
+    expect(root.getAttribute('dir')).toBe('rtl');
+    expect(cssText).toContain(".profile-console[dir='rtl'] .profile-console__header-start");
+    expect(cssText).toContain(".profile-console[dir='rtl'] .profile-console__header-end");
+    expect(cssText).toMatch(/\[dir='rtl'\][\s\S]*profile-console__header-start[\s\S]*grid-column:\s*3/);
+    expect(cssText).toMatch(/\[dir='rtl'\][\s\S]*profile-console__header-end[\s\S]*grid-column:\s*1/);
+    expect(cssText).toContain('grid-column: 2');
+  });
+
+  it('uses two-row header layout on tablet widths only', () => {
+    setViewportWidth(900);
+    fixture.detectChanges();
+
+    const header = fixture.nativeElement.querySelector(
+      '[data-testid="profile-console-header"]',
+    ) as HTMLElement;
+    const nav = fixture.nativeElement.querySelector('.profile-console__header-nav') as HTMLElement;
+    const headerStyle = getComputedStyle(header);
+
+    expect(headerStyle.gridTemplateAreas).toContain('header-end');
+    expect(headerStyle.gridTemplateAreas).toContain('header-start');
+    expect(headerStyle.gridTemplateAreas).toContain('header-nav');
+    expect(getComputedStyle(nav).gridArea).toBe('header-nav');
+  });
+
+  it('keeps mobile grid on two rows with swapped corner zones for LTR and RTL', () => {
+    setViewportWidth(900);
+
+    TestBed.inject(LocaleService).setLocale('en');
+    fixture.detectChanges();
+
+    const end = fixture.nativeElement.querySelector(
+      '[data-testid="profile-console-header-end"]',
+    ) as HTMLElement;
+    const start = fixture.nativeElement.querySelector(
+      '[data-testid="profile-console-header-start"]',
+    ) as HTMLElement;
+
+    expect(getComputedStyle(end).gridArea).toBe('header-end');
+    expect(getComputedStyle(start).gridArea).toBe('header-start');
+    expect(getComputedStyle(end).justifySelf).toBe('start');
+    expect(getComputedStyle(start).justifySelf).toBe('end');
+
+    TestBed.inject(LocaleService).setLocale('ar');
+    fixture.detectChanges();
+
+    expect(getComputedStyle(end).justifySelf).toBe('start');
+    expect(getComputedStyle(start).justifySelf).toBe('end');
+  });
+
+  it('supports RTL header zones without manual navigation margins', () => {
+    TestBed.inject(LocaleService).setLocale('ar');
+    fixture.detectChanges();
+
+    const cssText = getInjectedStyleText();
+    const root = fixture.nativeElement.querySelector('[data-testid="profile-console"]') as HTMLElement;
+    const start = fixture.nativeElement.querySelector(
+      '[data-testid="profile-console-header-start"]',
+    ) as HTMLElement;
+    const end = fixture.nativeElement.querySelector(
+      '[data-testid="profile-console-header-end"]',
+    ) as HTMLElement;
+
+    expect(root.getAttribute('dir')).toBe('rtl');
+    expect(cssText).toContain('[dir="rtl"]');
+    expect(cssText).toContain('grid-column: 3');
+    expect(cssText).toContain('grid-column: 1');
+    expect(getComputedStyle(start).justifySelf).toBe('end');
+    expect(getComputedStyle(end).justifySelf).toBe('start');
+  });
+
+  it('keeps navigation links on one flex row with horizontal overflow when needed', () => {
+    setViewportWidth(900);
+    fixture.detectChanges();
+
+    const nav = fixture.nativeElement.querySelector('.profile-console__nav') as HTMLElement;
+    const navStyle = getComputedStyle(nav);
+
+    expect(navStyle.flexWrap).toBe('nowrap');
+    expect(navStyle.overflowX).toBe('auto');
+  });
+
+  it('uses real admin sidebar route targets', () => {
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="profile-console-nav-dashboard"]')?.getAttribute('href'),
+    ).toBe('/admin/dashboard');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="profile-console-nav-profile"]')?.getAttribute('href'),
+    ).toBe('/admin/restaurant-profile');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="profile-console-nav-orders"]')?.getAttribute('href'),
+    ).toBe('/admin/orders');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="profile-console-nav-menu"]')?.getAttribute('href'),
+    ).toBe('/admin/menu');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="profile-console-nav-staff"]')?.getAttribute('href'),
+    ).toBe('/admin/staff');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="profile-console-nav-tables"]')?.getAttribute('href'),
+    ).toBe('/admin/tables');
+  });
+
+  it('shows restaurant avatar from cover image before logo', () => {
+    const branding = TestBed.inject(AdminBrandingService);
+    branding.updateBranding({
+      logoUrl: 'https://example.test/logo.png',
+      coverImageUrl: 'https://example.test/cover.png',
+      nameAr: 'مطعم',
+      nameEn: 'Restaurant',
+    });
+    fixture.detectChanges();
+
+    const avatar = fixture.nativeElement.querySelector(
+      '[data-testid="profile-console-brand-avatar"]',
+    ) as HTMLImageElement;
+    expect(avatar).toBeTruthy();
+    expect(avatar.src).toContain('cover.png');
+  });
+
+  it('falls back to logo then initial when cover is unavailable', () => {
+    const branding = TestBed.inject(AdminBrandingService);
+    branding.updateBranding({
+      logoUrl: 'https://example.test/logo.png',
+      coverImageUrl: null,
+      nameAr: 'مطعم',
+      nameEn: 'Restaurant',
+    });
+    fixture.detectChanges();
+
+    const avatar = fixture.nativeElement.querySelector(
+      '[data-testid="profile-console-brand-avatar"]',
+    ) as HTMLImageElement;
+    expect(avatar.src).toContain('logo.png');
+  });
+
+  it('renders dynamic language switcher and icon-only logout', () => {
+    const switcher = fixture.nativeElement.querySelector(
+      '[data-testid="profile-console-language-switcher"] app-language-switcher',
+    );
+    const logoutButton = fixture.nativeElement.querySelector(
+      '[data-testid="profile-console-logout"]',
+    ) as HTMLButtonElement;
+
+    expect(switcher).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="language-switcher-select"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="language-switcher-ar"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="language-switcher-en"]')).toBeTruthy();
+    expect(logoutButton.querySelector('svg')).toBeTruthy();
+    expect(logoutButton.textContent?.trim()).toBe('');
+    expect(logoutButton.getAttribute('aria-label')).toBeTruthy();
+    expect(logoutButton.getAttribute('title')).toBeTruthy();
+  });
+
+  it('switches content locale from language switcher', () => {
+    const localeOptions = TestBed.inject(RestaurantLocaleOptionsService);
+    const select = fixture.nativeElement.querySelector(
+      '[data-testid="language-switcher-select"]',
+    ) as HTMLSelectElement;
+    select.value = 'ar';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(localeOptions.activeContentLocale()).toBe('ar');
+  });
+
+  it('does not render publish in the primary top bar', () => {
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-publish-live"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-testid="profile-publish-hint"]')).toBeNull();
+  });
+
+  it('calls AuthService.logout from icon-only logout button', () => {
+    (
+      fixture.nativeElement.querySelector('[data-testid="profile-console-logout"]') as HTMLButtonElement
+    ).click();
+    expect(auth.logout).toHaveBeenCalled();
+  });
+
+  it('hides owner-only navigation links for restaurant managers', async () => {
+    TestBed.resetTestingModule();
+    auth = {
+      logout: vi.fn(),
+      hasAnyRole: vi.fn((role: string) => role === ApplicationRoles.RestaurantManager),
+      restaurantId: vi.fn(() => 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [ProfileConsoleLayout],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AuthService, useValue: auth },
+      ],
+    }).compileComponents();
+
+    const http = TestBed.inject(HttpTestingController);
+    const managerFixture = TestBed.createComponent(ProfileConsoleLayout);
+    managerFixture.detectChanges();
+    flushLocaleSettings(http);
+
+    expect(managerFixture.nativeElement.querySelector('[data-testid="profile-console-nav-dashboard"]')).toBeTruthy();
+    expect(managerFixture.nativeElement.querySelector('[data-testid="profile-console-nav-orders"]')).toBeTruthy();
+    expect(managerFixture.nativeElement.querySelector('[data-testid="profile-console-nav-menu"]')).toBeTruthy();
+    expect(managerFixture.nativeElement.querySelector('[data-testid="profile-console-nav-profile"]')).toBeNull();
+    expect(managerFixture.nativeElement.querySelector('[data-testid="profile-console-nav-staff"]')).toBeNull();
+    expect(managerFixture.nativeElement.querySelector('[data-testid="profile-console-nav-tables"]')).toBeNull();
+  });
+
+  it('marks restaurant profile link active on profile route', async () => {
+    @Component({ template: '' })
+    class StubPage {}
+
+    @Component({ template: '<router-outlet />', imports: [RouterOutlet] })
+    class Host {}
+
+    TestBed.resetTestingModule();
+    auth = {
+      logout: vi.fn(),
+      hasAnyRole: vi.fn((role: string) => role === ApplicationRoles.RestaurantOwner),
+      restaurantId: vi.fn(() => 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [
+        provideRouter([
+          {
+            path: 'admin/restaurant-profile',
+            component: ProfileConsoleLayout,
+            children: [{ path: '', component: StubPage }],
+          },
+        ]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AuthService, useValue: auth },
+      ],
+    }).compileComponents();
+
+    const http = TestBed.inject(HttpTestingController);
+    const router = TestBed.inject(Router);
+    TestBed.inject(LocaleService).setLocale('en');
+    const hostFixture = TestBed.createComponent(Host);
+    await router.navigateByUrl('/admin/restaurant-profile');
+    await hostFixture.whenStable();
+    hostFixture.detectChanges();
+    flushLocaleSettings(http);
+
+    const profileLink = hostFixture.nativeElement.querySelector(
+      '[data-testid="profile-console-nav-profile"]',
+    ) as HTMLAnchorElement;
+    expect(profileLink.classList.contains('is-active')).toBe(true);
+  });
+
+  it('marks dashboard link active on dashboard route', async () => {
+    @Component({ template: '' })
+    class StubPage {}
+
+    @Component({ template: '<router-outlet />', imports: [RouterOutlet] })
+    class Host {}
+
+    TestBed.resetTestingModule();
+    auth = {
+      logout: vi.fn(),
+      hasAnyRole: vi.fn((role: string) => role === ApplicationRoles.RestaurantOwner),
+      restaurantId: vi.fn(() => 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [
+        provideRouter([
+          {
+            path: 'admin/dashboard',
+            component: ProfileConsoleLayout,
+            children: [{ path: '', component: StubPage }],
+          },
+        ]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AuthService, useValue: auth },
+      ],
+    }).compileComponents();
+
+    const http = TestBed.inject(HttpTestingController);
+    const router = TestBed.inject(Router);
+    const hostFixture = TestBed.createComponent(Host);
+    await router.navigateByUrl('/admin/dashboard');
+    await hostFixture.whenStable();
+    hostFixture.detectChanges();
+    flushLocaleSettings(http);
+
+    const dashboardLink = hostFixture.nativeElement.querySelector(
+      '[data-testid="profile-console-nav-dashboard"]',
+    ) as HTMLAnchorElement;
+    expect(dashboardLink.classList.contains('is-active')).toBe(true);
+    expect(hostFixture.nativeElement.querySelector('[data-testid="admin-sidebar"]')).toBeNull();
+  });
+
+  it('enables scrollable shell for non-profile routes', async () => {
+    @Component({ template: '' })
+    class StubPage {}
+
+    @Component({ template: '<router-outlet />', imports: [RouterOutlet] })
+    class Host {}
+
+    TestBed.resetTestingModule();
+    auth = {
+      logout: vi.fn(),
+      hasAnyRole: vi.fn((role: string) => role === ApplicationRoles.RestaurantOwner),
+      restaurantId: vi.fn(() => 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [
+        provideRouter([
+          {
+            path: 'admin/orders',
+            component: ProfileConsoleLayout,
+            children: [{ path: '', component: StubPage }],
+          },
+        ]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AuthService, useValue: auth },
+      ],
+    }).compileComponents();
+
+    const http = TestBed.inject(HttpTestingController);
+    const router = TestBed.inject(Router);
+    const hostFixture = TestBed.createComponent(Host);
+    await router.navigateByUrl('/admin/orders');
+    await hostFixture.whenStable();
+    hostFixture.detectChanges();
+    flushLocaleSettings(http);
+
+    expect(
+      hostFixture.nativeElement.querySelector('.profile-console__shell--scrollable'),
+    ).toBeTruthy();
+  });
+});
+
+function flushLocaleSettings(httpMock: HttpTestingController): void {
+  const requests = httpMock.match(() => true);
+  for (const req of requests) {
+    if (req.cancelled) {
+      continue;
+    }
+
+    if (req.request.url.includes('/locales')) {
+      req.flush({
+        defaultLocale: 'ar',
+        translationMode: 'ManualOnly',
+        supportedLocales: [
+          { code: 'ar', isEnabled: true, sortOrder: 1 },
+          { code: 'en', isEnabled: true, sortOrder: 2 },
+        ],
+        availableLocales: [
+          { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+          { code: 'en', displayName: 'English', nativeName: 'English', direction: 'ltr' },
+        ],
+        canManageLocales: true,
+      });
+    }
+  }
+}

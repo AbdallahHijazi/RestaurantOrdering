@@ -1,0 +1,274 @@
+<section
+  class="live-preview"
+  [class.live-preview--studio]="variant() === 'studio'"
+  [attr.aria-label]="variant() === 'studio' ? localeService.uiText('profilePreviewStudio') : null"
+  [attr.aria-labelledby]="variant() === 'studio' ? null : 'live-preview-title'"
+>
+  @if (variant() === 'studio') {
+    <div class="live-preview__studio-toolbar">
+      <div class="live-preview__toolbar-start">
+        <div class="live-preview__toolbar-group" role="group" [attr.aria-label]="localeService.uiText('profilePreviewDeviceLabel')">
+          <span class="live-preview__group-label">{{ localeService.uiText('profilePreviewDeviceLabel') }}</span>
+          <div class="live-preview__device-group">
+            <button
+              type="button"
+              class="live-preview__device-btn"
+              [class.is-active]="viewport() === 'desktop'"
+              data-testid="live-preview-device-desktop"
+              (click)="setViewport('desktop')"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21 2H3a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h7v2H7v2h10v-2h-4v-2h7a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1Z"/></svg>
+            </button>
+            <button
+              type="button"
+              class="live-preview__device-btn"
+              [class.is-active]="viewport() === 'tablet'"
+              data-testid="live-preview-device-tablet"
+              (click)="setViewport('tablet')"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18 0H6a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2ZM8 22H6v-2h2v2Zm4 0h-2v-2h2v2Zm4 0h-2v-2h2v2Zm2-4H6V4h12v14Z"/></svg>
+            </button>
+            <button
+              type="button"
+              class="live-preview__device-btn"
+              [class.is-active]="viewport() === 'mobile'"
+              data-testid="live-preview-device-mobile"
+              (click)="setViewport('mobile')"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 1H8a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-2 19h-4v-1h4v1Zm2-3H8V4h8v13Z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="button" class="live-preview__full" data-testid="live-preview-full" (click)="openFullPreview()">
+          {{ localeService.uiText('fullPreview') }}
+        </button>
+      </div>
+
+      <div class="live-preview__toolbar-end">
+        <ng-container *ngTemplateOutlet="previewLangControls" />
+
+        <p
+          class="live-preview__sync-capsule"
+          role="status"
+          data-testid="live-preview-sync-status"
+          [class.live-preview__sync-capsule--unsaved]="previewSyncStatus() === 'unsaved'"
+        >
+          <span class="live-preview__sync-dot" aria-hidden="true"></span>
+          {{
+            previewSyncStatus() === 'unsaved'
+              ? localeService.uiText('profileUnsavedChanges')
+              : localeService.uiText('profileLiveSync')
+          }}
+        </p>
+      </div>
+      <!-- <div class="live-preview__publish-slot">
+        <ng-content select="[preview-publish-actions]" />
+      </div> -->
+    </div>
+  } @else {
+    <div class="live-preview__toolbar">
+      <div class="live-preview__toolbar-head">
+        <h2 id="live-preview-title">{{ localeService.uiText('previewTitle') }}</h2>
+        @if (menuState() === 'demo') {
+          <p class="live-preview__mode" data-testid="live-preview-demo-mode">
+            {{ localeService.uiText('profilePreviewDemoMode') }}
+          </p>
+        } @else if (menuState() === 'loaded' || menuState() === 'empty') {
+          <p class="live-preview__mode" data-testid="live-preview-real-mode">
+            {{ localeService.uiText('profilePreviewRealMenu') }}
+          </p>
+        }
+      </div>
+
+      <div class="live-preview__controls" role="group" aria-label="Viewport size">
+        <button type="button" [class.is-active]="viewport() === 'desktop'" (click)="setViewport('desktop')">
+          Desktop
+        </button>
+        <button type="button" [class.is-active]="viewport() === 'tablet'" (click)="setViewport('tablet')">
+          Tablet
+        </button>
+        <button type="button" [class.is-active]="viewport() === 'mobile'" (click)="setViewport('mobile')">
+          Mobile
+        </button>
+      </div>
+
+      <ng-container *ngTemplateOutlet="previewLangControls" />
+
+      <div class="live-preview__toolbar-actions">
+        <button type="button" class="live-preview__full" (click)="openFullPreview()">
+          {{ localeService.uiText('fullPreview') }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <div class="live-preview__frame-wrapper">
+    <div class="live-preview__canvas">
+      <div
+        class="live-preview__frame"
+        [class.live-preview__frame--desktop]="viewport() === 'desktop'"
+        [class.live-preview__frame--tablet]="viewport() === 'tablet'"
+        [class.live-preview__frame--mobile]="viewport() === 'mobile'"
+        [attr.dir]="previewDirection()"
+      >
+        <div class="live-preview__mini-header">
+          @if (restaurantProfile().logoUrl; as logo) {
+            <img [src]="logo" [alt]="restaurantProfile().nameAr" />
+          }
+          <strong>
+            {{
+              pickPreviewText(
+                restaurantProfile().name,
+                { ar: restaurantProfile().nameAr, en: restaurantProfile().nameEn },
+                restaurantProfile().nameAr
+              )
+            }}
+          </strong>
+        </div>
+
+        <div class="live-preview__viewport" data-testid="live-preview-viewport">
+          <ng-container
+            [ngTemplateOutlet]="previewMenuBody"
+            [ngTemplateOutletContext]="{ gridClass: '', showFooter: false }"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+@if (fullPreviewOpen()) {
+  <div
+    #previewOverlay
+    class="live-preview__modal-host live-preview__modal-host--open"
+    data-testid="live-preview-overlay-host"
+  >
+  <div
+    class="live-preview__modal"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="localeService.uiText('fullPreview')"
+    data-testid="live-preview-modal"
+  >
+    <button
+      type="button"
+      class="live-preview__modal-backdrop"
+      [attr.aria-label]="localeService.uiText('closePreviewAria')"
+      (click)="closeFullPreview()"
+    ></button>
+
+    <div class="live-preview__modal-panel">
+      <header class="live-preview__modal-header">
+        <strong>{{ localeService.uiText('fullPreview') }}</strong>
+        <button
+          type="button"
+          class="modal-close-button"
+          data-testid="live-preview-close"
+          [attr.aria-label]="localeService.uiText('closePreviewAria')"
+          (click)="closeFullPreview()"
+        >
+          <span class="modal-close-button__icon" aria-hidden="true">&times;</span>
+        </button>
+      </header>
+
+      <div
+        class="live-preview__modal-body"
+        [attr.dir]="previewDirection()"
+      >
+        <ng-container
+          [ngTemplateOutlet]="previewMenuBody"
+          [ngTemplateOutletContext]="{ gridClass: ' live-preview__grid--full', showFooter: true }"
+        />
+      </div>
+    </div>
+  </div>
+  </div>
+}
+
+<ng-template #previewMenuBody let-gridClass="gridClass" let-showFooter="showFooter">
+  @if (menuState() === 'loading') {
+    <div data-testid="live-preview-menu-loading">
+      <app-loading-state [locale]="localeService" />
+    </div>
+  } @else if (menuState() === 'error') {
+    <app-error-state
+      [locale]="localeService"
+      [title]="localeService.uiText('profilePreviewErrorMenu')"
+      [message]="localeService.uiText('profilePreviewErrorMenu')"
+      [showRetry]="true"
+      data-testid="live-preview-menu-error"
+      (retry)="requestRefresh()"
+    />
+  } @else if (menuState() === 'empty') {
+    <app-empty-state
+      [title]="localeService.uiText('profilePreviewEmptyMenu')"
+      [locale]="localeService"
+      data-testid="live-preview-menu-empty"
+    />
+  } @else if (showMenuCatalog()) {
+    <app-restaurant-cover-hero
+      [restaurant]="restaurantProfile()"
+      [imageFallback]="imageFallback"
+      [displayLocale]="contentLocale()"
+    />
+
+    @if (previewCategories().length > 0) {
+      <app-category-navigation
+        [categories]="previewCategories()"
+        [activeCategoryId]="activeCategoryId()"
+        [displayLocale]="contentLocale()"
+        (categorySelected)="selectCategory($event)"
+      />
+    }
+
+    @if (filteredPreviewItems().length === 0) {
+      <app-empty-state
+        [title]="localeService.uiText('emptyItems')"
+        [locale]="localeService"
+        data-testid="live-preview-category-empty"
+      />
+    } @else {
+      <div class="live-preview__grid{{ gridClass }}">
+        @for (item of filteredPreviewItems(); track item.id) {
+          <app-menu-item-card
+            [item]="item"
+            [currencyCode]="restaurantProfile().currencyCode"
+            [countryCode]="restaurantProfile().countryCode"
+            [quantity]="quantityFor(item.id)"
+            [imageFallback]="imageFallback"
+            [displayLocale]="contentLocale()"
+            (quantityChange)="updatePreviewQuantity(item.id, $event)"
+          />
+        }
+      </div>
+    }
+
+    @if (showFooter) {
+      <footer class="live-preview__footer">
+        <p>
+          {{
+            pickPreviewText(
+              restaurantProfile().address,
+              { ar: restaurantProfile().addressAr, en: restaurantProfile().addressEn },
+              '—'
+            )
+          }}
+        </p>
+      </footer>
+    }
+  }
+</ng-template>
+
+<ng-template #previewLangControls>
+  <div
+    class="live-preview__toolbar-group live-preview__toolbar-group--lang"
+    data-testid="live-preview-lang-switcher"
+  >
+    <span class="live-preview__group-label">{{ localeService.uiText('profilePreviewLang') }}</span>
+    <app-language-switcher
+      [restaurantId]="restaurantId()"
+      [ariaLabel]="localeService.uiText('profilePreviewLang')"
+    />
+  </div>
+</ng-template>

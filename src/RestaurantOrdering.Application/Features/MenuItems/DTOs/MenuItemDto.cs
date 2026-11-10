@@ -6,6 +6,7 @@ public class MenuItemDto
     public Guid RestaurantId { get; init; }
     public Guid CategoryId { get; init; }
     public Guid? ImageFileId { get; init; }
+    public string? ImageUrl { get; init; }
     public string NameAr { get; init; } = string.Empty;
     public string? NameEn { get; init; }
     public string? DescriptionAr { get; init; }
@@ -17,4 +18,8 @@ public class MenuItemDto
     public bool IsActive { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; init; }
+    public string? PrimaryName { get; init; }
+    public string? PrimaryDescription { get; init; }
+    public string? PrimaryLocale { get; init; }
+    public bool PrimaryFallbackApplied { get; init; }
 }

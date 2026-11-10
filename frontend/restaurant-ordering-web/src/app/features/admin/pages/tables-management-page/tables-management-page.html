@@ -1,0 +1,293 @@
+<section class="tables-management-page" data-testid="tables-management-page">
+  <div class="tables-management-shell">
+    @if (successMessage()) {
+      <app-floating-notification-pill
+        data-testid="tables-success-message"
+        [message]="successMessage()!"
+        [closeLabel]="locale.uiText('notificationClose')"
+        (dismissed)="dismissSuccessMessage()"
+      />
+    }
+
+    <header class="tables-management-head">
+      <div class="tables-management-title">
+        <h1>{{ locale.uiText('tablesPageTitle') }}</h1>
+        <p>{{ locale.uiText('tablesPageLead') }}</p>
+      </div>
+      <div class="tables-management-head__actions">
+        <button
+          type="button"
+          class="tables-management-secondary"
+          data-testid="tables-print-all-button"
+          [disabled]="pageState() !== 'ready' || filteredTables().length === 0"
+          (click)="printAllTables()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M6 2h12v5H6V2Zm10 2H8v3h8V4Zm3 4a3 3 0 0 1 3 3v6h-4v5H6v-5H2v-6a3 3 0 0 1 3-3h14Zm-3 12v-5H8v5h8Zm3-5h1v-4a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v4h2v-2h12v2h1Z" />
+          </svg>
+          {{ locale.uiText('tablesPrintAll') }}
+        </button>
+        <button
+          type="button"
+          class="tables-management-primary"
+          data-testid="tables-add-button"
+          [disabled]="pageState() === 'loading' || pageState() === 'missing-context'"
+          (click)="openCreateModal()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z" />
+          </svg>
+          {{ locale.uiText('tablesAddTable') }}
+        </button>
+      </div>
+    </header>
+
+    @switch (pageState()) {
+      @case ('loading') {
+        <section class="tables-management-stats tables-management-stats--loading" aria-busy="true">
+          @for (card of [1, 2, 3]; track card) {
+            <div class="tables-management-stats__card tables-management-stats__card--skeleton"></div>
+          }
+        </section>
+        <section class="tables-management-workspace tables-management-workspace--loading" data-testid="tables-loading">
+          <div class="tables-management-skeleton-toolbar"></div>
+          <div class="tables-management-skeleton-grid"></div>
+        </section>
+      }
+
+      @case ('missing-context') {
+        <div class="tables-management-state tables-management-state--error" data-testid="tables-missing-context">
+          <h2>{{ locale.uiText('tablesMissingContextTitle') }}</h2>
+          <p>{{ locale.uiText('tablesMissingContextDescription') }}</p>
+        </div>
+      }
+
+      @case ('error') {
+        <div class="tables-management-state tables-management-state--error" data-testid="tables-error-state">
+          <h2>{{ locale.uiText('tablesListErrorTitle') }}</h2>
+          <p>{{ listErrorMessage() }}</p>
+          <button type="button" class="tables-management-secondary" (click)="loadTables()">
+            {{ locale.uiText('tablesRetry') }}
+          </button>
+        </div>
+      }
+
+      @case ('ready') {
+        <section class="tables-management-stats" data-testid="tables-stats">
+          <article class="tables-management-stats__card">
+            <span class="tables-management-stats__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path fill="currentColor" d="M4 4h16v5H4V4Zm0 7h7v9H4v-9Zm9 0h7v9h-7v-9ZM6 6v1h12V6H6Zm0 7v5h3v-5H6Zm9 0v5h3v-5h-3Z" />
+              </svg>
+            </span>
+            <div class="tables-management-stats__content">
+              <span>{{ locale.uiText('tablesStatTotal') }}</span>
+              <strong data-testid="tables-stat-total">{{ totalTables() }}</strong>
+            </div>
+          </article>
+          <article class="tables-management-stats__card tables-management-stats__card--active">
+            <span class="tables-management-stats__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1.2 14.2-4-4 1.4-1.4 2.6 2.6 5-5 1.4 1.4-6.4 6.4Z" />
+              </svg>
+            </span>
+            <div class="tables-management-stats__content">
+              <span>{{ locale.uiText('tablesStatActive') }}</span>
+              <strong data-testid="tables-stat-active">{{ activeTables() }}</strong>
+            </div>
+          </article>
+          <article class="tables-management-stats__card tables-management-stats__card--zones">
+            <span class="tables-management-stats__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z" />
+              </svg>
+            </span>
+            <div class="tables-management-stats__content">
+              <span>{{ locale.uiText('tablesStatZones') }}</span>
+              <strong data-testid="tables-stat-zones">{{ distinctZoneCount() }}</strong>
+            </div>
+          </article>
+        </section>
+
+        <section class="tables-management-workspace">
+          <div class="tables-management-workspace-top">
+            <label class="tables-management-search">
+              <span class="tables-management-search__label">{{ locale.uiText('tablesSearchPlaceholder') }}</span>
+              <svg class="tables-management-search__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="m20.7 19.3-4.2-4.2a7.5 7.5 0 1 0-1.4 1.4l4.2 4.2 1.4-1.4ZM5 10.5a5.5 5.5 0 1 1 11 0 5.5 5.5 0 0 1-11 0Z" />
+              </svg>
+              <input
+                type="search"
+                data-testid="tables-search-input"
+                [value]="searchQuery()"
+                [placeholder]="locale.uiText('tablesSearchPlaceholder')"
+                (input)="setSearchQuery($any($event.target).value)"
+              />
+            </label>
+            <div class="tables-management-filters">
+              <app-tables-management-select
+                class="tables-management-filter"
+                [options]="zoneFilterOptions()"
+                [value]="zoneFilter()"
+                [label]="locale.uiText('tablesColZone')"
+                testId="tables-zone-filter"
+                (valueChange)="setZoneFilter($event)"
+              />
+              <app-tables-management-select
+                class="tables-management-filter"
+                [options]="statusFilterOptions()"
+                [value]="statusFilter()"
+                [label]="locale.uiText('tablesColStatus')"
+                testId="tables-status-filter"
+                (valueChange)="setStatusFilter($event)"
+              />
+            </div>
+            <!-- @if (tables().length > 0) {
+              <span class="tables-management-summary" data-testid="tables-summary">
+                {{ showingTablesLabel() }}
+              </span>
+            } -->
+          </div>
+
+          @if (tables().length === 0) {
+            <div class="tables-management-empty" data-testid="tables-empty-state">
+              <h2>{{ locale.uiText('tablesEmptyTitle') }}</h2>
+              <p>{{ locale.uiText('tablesEmptyDescription') }}</p>
+              <button type="button" class="tables-management-primary" (click)="openCreateModal()">
+                {{ locale.uiText('tablesAddFirstTable') }}
+              </button>
+            </div>
+          } @else if (filteredTables().length === 0) {
+            <div class="tables-management-empty tables-management-empty--filtered" data-testid="tables-empty-filtered">
+              <p>{{ locale.uiText('tablesEmptyFiltered') }}</p>
+            </div>
+          } @else {
+            <div class="tables-management-grid" data-testid="tables-grid">
+              @for (table of filteredTables(); track table.id) {
+                <app-table-card
+                  [table]="table"
+                  [restaurantName]="restaurantDisplayName()"
+                  [restaurantLogoUrl]="restaurantLogoUrl()"
+                  [brandInitial]="restaurantBrandInitial()"
+                  [qrSvg]="qrSvgFor(table.id)"
+                  [qrLoading]="qrLoadingFor(table.id)"
+                  (edit)="openEditModal($event)"
+                  (toggleStatus)="openStatusConfirm($event)"
+                  (print)="printTable($event)"
+                  (downloadQr)="downloadQr($event)"
+                  (regenerateToken)="openRegenerateConfirm($event)"
+                />
+              }
+            </div>
+          }
+
+        </section>
+      }
+    }
+  </div>
+</section>
+
+<div #printAreaHost id="printAreaHost">
+  <div
+    #printArea
+    class="tables-print-area"
+    data-testid="tables-print-area"
+    [class.tables-print-area--all]="printMode() === 'all'"
+  >
+    @for (entry of printEntries(); track entry.table.id) {
+      <app-table-print-card
+        variant="print"
+        [table]="entry.table"
+        [restaurantName]="restaurantDisplayName()"
+        [restaurantLogoUrl]="restaurantLogoUrl()"
+        [brandInitial]="restaurantBrandInitial()"
+        [qrSvg]="entry.qrSvg"
+      />
+    }
+  </div>
+</div>
+
+<app-modal-shell
+  [open]="modalKind() !== null"
+  [title]="modalTitle()"
+  [closeLabel]="locale.uiText('tablesCloseModal')"
+  [titleId]="modalTestId() + '-title'"
+  [testId]="modalTestId()"
+  [blockCloseWhileBusy]="confirmSubmitting() || createSubmitting() || editSubmitting()"
+  (closed)="dismissModal()"
+>
+  @if (modalKind() === 'create') {
+    <app-table-form-modal
+      [form]="createForm"
+      mode="create"
+      [submitting]="createSubmitting()"
+      [errorMessage]="createErrorMessage()"
+      (submitted)="submitCreate()"
+      (cancelled)="closeCreateModal()"
+    />
+  }
+
+  @if (modalKind() === 'create') {
+    <app-staff-modal-actions orderModalFooter>
+      <button
+        type="submit"
+        class="staff-modal-actions__save"
+        form="tables-create-form"
+        data-testid="tables-create-submit"
+        [disabled]="createSubmitting()"
+      >
+        {{
+          createSubmitting()
+            ? locale.uiText('tablesSaving')
+            : locale.uiText('tablesCreateSubmit')
+        }}
+      </button>
+      <button type="button" class="staff-modal-actions__cancel" (click)="closeCreateModal()">
+        {{ locale.uiText('tablesCancel') }}
+      </button>
+    </app-staff-modal-actions>
+  }
+
+  @if (modalKind() === 'edit') {
+    <app-table-form-modal
+      [form]="editForm"
+      mode="edit"
+      [submitting]="editSubmitting()"
+      [errorMessage]="editErrorMessage()"
+      (submitted)="submitEdit()"
+      (cancelled)="closeEditModal()"
+    />
+  }
+
+  @if (modalKind() === 'edit') {
+    <app-staff-modal-actions orderModalFooter>
+      <button
+        type="submit"
+        class="staff-modal-actions__save"
+        form="tables-edit-form"
+        data-testid="tables-edit-submit"
+        [disabled]="editSubmitting()"
+      >
+        {{
+          editSubmitting()
+            ? locale.uiText('tablesSaving')
+            : locale.uiText('tablesEditSubmit')
+        }}
+      </button>
+      <button type="button" class="staff-modal-actions__cancel" (click)="closeEditModal()">
+        {{ locale.uiText('tablesCancel') }}
+      </button>
+    </app-staff-modal-actions>
+  }
+
+  @if (modalKind() === 'confirm' && selectedTable(); as table) {
+    <app-table-confirm-modal
+      [kind]="confirmKind()"
+      [tableName]="table.name"
+      [submitting]="confirmSubmitting()"
+      [errorMessage]="confirmErrorMessage()"
+      (confirmed)="submitConfirm()"
+      (cancelled)="closeConfirmModal()"
+    />
+  }
+</app-modal-shell>

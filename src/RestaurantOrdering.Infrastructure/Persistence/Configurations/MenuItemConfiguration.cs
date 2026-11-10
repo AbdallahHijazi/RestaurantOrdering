@@ -28,6 +28,10 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
         builder.Property(m => m.DiscountPrice)
             .HasPrecision(10, 2);
 
+        builder.Property(m => m.ContentVersion)
+            .IsRequired()
+            .HasDefaultValue(1);
+
         builder.HasIndex(m => new { m.RestaurantId, m.CategoryId, m.IsActive, m.IsDeleted });
 
         builder.HasIndex(m => new { m.RestaurantId, m.IsAvailable, m.IsDeleted });
@@ -53,13 +57,15 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
 
         builder.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_MenuItems_Price", "[Price] >= 0");
+            t.HasCheckConstraint("CK_MenuItems_Price", "\"Price\" >= 0");
             t.HasCheckConstraint(
                 "CK_MenuItems_DiscountPrice",
-                "[DiscountPrice] IS NULL OR [DiscountPrice] >= 0");
+                "\"DiscountPrice\" IS NULL OR \"DiscountPrice\" >= 0");
             t.HasCheckConstraint(
                 "CK_MenuItems_DiscountPrice_NotGreaterThanPrice",
-                "[DiscountPrice] IS NULL OR [DiscountPrice] <= [Price]");
+                "\"DiscountPrice\" IS NULL OR \"DiscountPrice\" <= \"Price\"");
+            t.HasCheckConstraint("CK_MenuItems_ContentVersion", "\"ContentVersion\" >= 1");
         });
     }
 }
+

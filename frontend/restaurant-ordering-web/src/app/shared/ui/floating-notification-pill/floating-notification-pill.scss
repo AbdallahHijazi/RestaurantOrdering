@@ -1,0 +1,143 @@
+:host {
+  position: fixed;
+  top: calc(var(--profile-header-height, 3.75rem) + 0.75rem);
+  left: 50%;
+  z-index: 9999;
+
+  display: block;
+  width: max-content;
+  max-width: min(28rem, calc(100vw - 2rem));
+
+  margin: 0;
+  padding: 0;
+
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.floating-notification-pill {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+
+  width: max-content;
+  max-width: 100%;
+  min-height: 3.25rem;
+
+  gap: 0.65rem;
+  padding: 0.55rem 0.65rem 0.55rem 0.8rem;
+
+  border: 1px solid var(--restaurant-accent-border);
+  border-radius: 999px;
+
+  color: var(--restaurant-text);
+  background: color-mix(
+    in srgb,
+    var(--restaurant-surface) 94%,
+    var(--restaurant-surface-soft)
+  );
+
+  box-shadow:
+    0 0.75rem 2rem color-mix(
+      in srgb,
+      var(--restaurant-text) 14%,
+      transparent
+    );
+
+  pointer-events: auto;
+
+  animation: floating-notification-pill-in 180ms ease-out;
+}
+
+.floating-notification-pill__icon {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--restaurant-success);
+  background: var(--restaurant-success-soft);
+}
+
+.floating-notification-pill__icon svg,
+.floating-notification-pill__close svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.floating-notification-pill p {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 750;
+  line-height: 1.5;
+  text-align: start;
+}
+
+.floating-notification-pill__close {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: var(--restaurant-muted-text);
+  background: transparent;
+  cursor: pointer;
+}
+
+.floating-notification-pill__close:hover {
+  color: var(--restaurant-text);
+  background: var(--restaurant-surface-muted);
+}
+
+.floating-notification-pill--error {
+  border-color: color-mix(in srgb, var(--restaurant-danger) 32%, var(--restaurant-border));
+}
+
+.floating-notification-pill--error .floating-notification-pill__icon {
+  color: var(--restaurant-danger);
+  background: var(--restaurant-danger-soft);
+}
+
+.floating-notification-pill--warning {
+  border-color: color-mix(in srgb, var(--restaurant-warning, #9a6700) 32%, var(--restaurant-border));
+}
+
+.floating-notification-pill--warning .floating-notification-pill__icon {
+  color: var(--restaurant-warning, #9a6700);
+  background: color-mix(in srgb, var(--restaurant-warning, #9a6700) 12%, var(--restaurant-surface));
+}
+
+@keyframes floating-notification-pill-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem) scale(0.98);
+  }
+}
+
+@media (max-width: 68.6875rem) {
+  :host {
+    top: 6.8rem;
+  }
+}
+
+@media (max-width: 40rem) {
+  :host {
+    top: 6.45rem;
+    width: max-content;
+    max-width: calc(100vw - 1rem);
+  }
+
+  .floating-notification-pill {
+    width: max-content;
+    max-width: 100%;
+    border-radius: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-notification-pill {
+    animation: none;
+  }
+}

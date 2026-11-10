@@ -1,0 +1,75 @@
+export interface ProfileContentValue {
+  name: string;
+  description: string;
+  address: string;
+}
+
+export interface RestaurantProfileFormValue {
+  profileContent: ProfileContentValue;
+  nameAr: string;
+  nameEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
+  slug: string;
+  logoUrl: string | null;
+  coverImageUrl: string | null;
+  primaryAccentColor: string;
+  countryCode: string;
+  defaultLocale: 'ar' | 'en';
+  supportedLocales: ('ar' | 'en')[];
+  currencyCode: string;
+  timeZone: string;
+  phoneCountryCode: string;
+  phoneNumber: string;
+  whatsAppNumber: string;
+  email: string;
+  city: string;
+  addressAr: string;
+  addressEn: string;
+  isPickupEnabled: boolean;
+  isDeliveryEnabled: boolean;
+  deliveryFee: number;
+  minimumOrderAmount: number;
+  taxRate: number;
+}
+
+/** Fields returned by GET settings but not edited in this step. */
+export interface RestaurantSettingsSnapshot {
+  workingHoursJson: string | null;
+}
+
+export interface RestaurantProfilePreviewData {
+  slug: string;
+  primaryLocale: string;
+  primaryName?: string | null;
+  primaryDescription?: string | null;
+  primaryAddress?: string | null;
+  nameAr: string;
+  nameEn?: string | null;
+  descriptionAr?: string | null;
+  descriptionEn?: string | null;
+  logoUrl?: string | null;
+  coverImageUrl?: string | null;
+  primaryAccentColor?: string | null;
+  countryCode: string;
+  currencyCode: string;
+  timeZone?: string | null;
+  phoneNumber?: string | null;
+  whatsAppNumber?: string | null;
+  addressAr?: string | null;
+  addressEn?: string | null;
+  resolvedName?: string | null;
+  resolvedDescription?: string | null;
+  resolvedAddress?: string | null;
+}
+
+/** Demo restaurant ID used until auth provides the real tenant context. */
+export const DEMO_RESTAURANT_ID = '00000000-0000-0000-0000-000000000001';
+
+export type ProfilePreviewMenuState =
+  | 'idle'
+  | 'loading'
+  | 'loaded'
+  | 'empty'
+  | 'error'
+  | 'demo';

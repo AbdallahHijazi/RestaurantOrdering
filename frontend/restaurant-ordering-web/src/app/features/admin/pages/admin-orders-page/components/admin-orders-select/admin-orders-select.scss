@@ -1,0 +1,124 @@
+.admin-orders-select {
+  position: relative;
+  min-width: min(100%, 6.8rem);
+}
+
+.admin-orders-select__label {
+  display: block;
+  margin-block-end: 0.12rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--orders-bluegray, var(--restaurant-muted-text));
+}
+
+.admin-orders-select__trigger {
+  inline-size: 100%;
+  min-height: 1.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-inline: 0.55rem;
+  border: 1px solid var(--orders-line, var(--restaurant-border));
+  border-radius: 0.45rem;
+  background: var(--orders-surface, var(--restaurant-surface-soft));
+  color: var(--orders-charcoal, var(--restaurant-text));
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-orders-select__trigger:hover:not(:disabled) {
+  border-color: var(--restaurant-accent-border);
+}
+
+.admin-orders-select__trigger:focus-visible {
+  outline: 2px solid var(--restaurant-accent-border);
+  outline-offset: 2px;
+}
+
+.admin-orders-select__trigger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-orders-select__value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: start;
+}
+
+.admin-orders-select__chevron {
+  inline-size: 1rem;
+  block-size: 1rem;
+  flex-shrink: 0;
+  color: var(--orders-bluegray, var(--restaurant-subtle-text));
+  transition: transform 0.2s ease;
+}
+
+.admin-orders-select--open .admin-orders-select__chevron {
+  transform: rotate(180deg);
+}
+
+.admin-orders-select__panel {
+  position: absolute;
+  inset-block-start: calc(100% + 0.5rem);
+  inset-inline-start: 0;
+  inline-size: 100%;
+  min-inline-size: 100%;
+  z-index: 80;
+  overflow-y: auto;
+  border: 1px solid var(--orders-line, var(--restaurant-border));
+  border-radius: 0.55rem;
+  background: var(--orders-surface, var(--restaurant-surface-elevated));
+  box-shadow: var(--restaurant-shadow-md);
+}
+
+.admin-orders-select--open-up .admin-orders-select__panel {
+  inset-block-start: auto;
+  inset-block-end: calc(100% + 0.5rem);
+}
+
+.admin-orders-select__option {
+  inline-size: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  border: 0;
+  background: transparent;
+  color: var(--orders-charcoal, var(--restaurant-text));
+  font: inherit;
+  font-size: 0.76rem;
+  text-align: start;
+  cursor: pointer;
+}
+
+.admin-orders-select__option:hover,
+.admin-orders-select__option:focus-visible {
+  background: var(--orders-terracotta-soft, var(--restaurant-accent-soft));
+  outline: none;
+}
+
+.admin-orders-select__option--selected {
+  font-weight: 700;
+  color: var(--orders-terracotta, var(--restaurant-accent));
+}
+
+.admin-orders-select__check {
+  inline-size: 1rem;
+  block-size: 1rem;
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-orders-select__trigger,
+  .admin-orders-select__chevron {
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,59 @@
+<div
+  class="admin-orders-select"
+  [class.admin-orders-select--open]="open()"
+  [class.admin-orders-select--open-up]="openUpward()"
+>
+  @if (label()) {
+    <span class="admin-orders-select__label">{{ label() }}</span>
+  }
+
+  <button
+    #triggerButton
+    type="button"
+    class="admin-orders-select__trigger"
+    [attr.data-testid]="testId()"
+    [attr.aria-label]="label() || selectedLabel()"
+    [attr.aria-expanded]="open()"
+    [attr.aria-controls]="listboxId()"
+    aria-haspopup="listbox"
+    [disabled]="disabled()"
+    (click)="toggleOpen()"
+    (keydown)="onTriggerKeydown($event)"
+  >
+    <span class="admin-orders-select__value">{{ selectedLabel() }}</span>
+    <svg class="admin-orders-select__chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M7 10l5 5 5-5H7Z" />
+    </svg>
+  </button>
+
+  @if (open()) {
+    <div
+      #optionsPanel
+      class="admin-orders-select__panel"
+      [id]="listboxId()"
+      role="listbox"
+      [attr.aria-label]="label() || selectedLabel()"
+      [style.max-height]="panelMaxHeight()"
+    >
+      @for (option of options(); track option.value; let index = $index) {
+        <button
+          type="button"
+          class="admin-orders-select__option"
+          role="option"
+          [class.admin-orders-select__option--selected]="option.value === value()"
+          [attr.aria-selected]="option.value === value()"
+          [attr.data-option-index]="index"
+          (click)="selectOption(option, index)"
+          (keydown)="onOptionKeydown($event, option, index)"
+        >
+          <span>{{ option.label }}</span>
+          @if (option.value === value()) {
+            <svg class="admin-orders-select__check" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z" />
+            </svg>
+          }
+        </button>
+      }
+    </div>
+  }
+</div>

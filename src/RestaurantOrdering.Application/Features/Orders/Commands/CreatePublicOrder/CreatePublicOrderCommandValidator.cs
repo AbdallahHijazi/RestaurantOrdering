@@ -28,6 +28,12 @@ public sealed class CreatePublicOrderCommandValidator : AbstractValidator<Create
         RuleFor(x => x.OrderType)
             .IsInEnum();
 
+        RuleFor(x => x.TableToken)
+            .Must(token => !string.IsNullOrWhiteSpace(token))
+            .WithMessage("Table token is required for dine-in orders.")
+            .MaximumLength(32)
+            .When(x => x.OrderType == OrderType.DineIn);
+
         RuleFor(x => x.DeliveryAddress)
             .Must(address => !string.IsNullOrWhiteSpace(address))
             .WithMessage("Delivery address is required.")
@@ -37,14 +43,23 @@ public sealed class CreatePublicOrderCommandValidator : AbstractValidator<Create
             .MaximumLength(400)
             .When(x => !string.IsNullOrWhiteSpace(x.DeliveryAddress));
 
+        RuleFor(x => x.TableToken)
+            .MaximumLength(32)
+            .When(x => !string.IsNullOrWhiteSpace(x.TableToken));
+
         RuleFor(x => x.Notes)
             .MaximumLength(500)
             .When(x => !string.IsNullOrWhiteSpace(x.Notes));
 
         RuleFor(x => x.Items)
             .NotEmpty()
-            .Must(items => items is null || items.Count <= 100)
-            .WithMessage("An order cannot contain more than 100 item lines.");
+            .Must(items => items.Count <= PublicOrderLimits.MaxItemLines)
+            .WithMessage(
+                $"An order cannot contain more than {PublicOrderLimits.MaxItemLines} item lines.")
+            .Must(items =>
+                items.Select(i => i.MenuItemId).Distinct().Count() == items.Count)
+            .WithMessage(
+                "Each menu item may only appear once per order. Combine quantities on a single line.");
 
         RuleForEach(x => x.Items).ChildRules(item =>
         {
@@ -52,7 +67,12 @@ public sealed class CreatePublicOrderCommandValidator : AbstractValidator<Create
                 .NotEmpty();
 
             item.RuleFor(i => i.Quantity)
-                .GreaterThan(0);
+                .GreaterThanOrEqualTo(PublicOrderLimits.MinQuantityPerItem)
+                .WithMessage(
+                    $"Quantity must be at least {PublicOrderLimits.MinQuantityPerItem}.")
+                .LessThanOrEqualTo(PublicOrderLimits.MaxQuantityPerItem)
+                .WithMessage(
+                    $"Quantity cannot exceed {PublicOrderLimits.MaxQuantityPerItem} per item line.");
 
             item.RuleFor(i => i.Notes)
                 .MaximumLength(200)

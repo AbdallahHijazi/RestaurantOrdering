@@ -1,0 +1,413 @@
+.tables-management-page {
+  --tables-line: var(--restaurant-border);
+  --tables-text: var(--restaurant-text);
+  --tables-muted: var(--restaurant-muted-text);
+  --tables-green: var(--restaurant-success);
+  --tables-green-soft: var(--restaurant-success-soft);
+  --tables-terracotta: var(--restaurant-accent);
+  --tables-red: var(--restaurant-danger);
+  --tables-red-soft: var(--restaurant-danger-soft);
+  --tables-shadow: var(--restaurant-shadow-sm);
+  --tables-shadow-md: var(--restaurant-shadow-md);
+
+  min-height: 100%;
+  padding: clamp(1.25rem, 2.5vw, 2.25rem) clamp(0.875rem, 3vw, 3rem) clamp(2.5rem, 5vw, 4.5rem);
+  overflow: hidden;
+  color: var(--tables-text);
+  background: var(--restaurant-background);
+}
+
+.tables-management-shell {
+  width: 100%;
+  max-width: 88rem;
+  margin-inline: auto;
+}
+
+.tables-management-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-block-end: 1.25rem;
+}
+
+.tables-management-head__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+
+.tables-management-title h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
+  font-weight: 850;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.tables-management-title p {
+  max-width: 42rem;
+  margin: 0.5rem 0 0;
+  color: var(--tables-muted);
+  font-size: clamp(0.9rem, 1.4vw, 1rem);
+  line-height: 1.7;
+}
+
+.tables-management-primary,
+.tables-management-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+  border-radius: 0.75rem;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tables-management-primary svg,
+.tables-management-secondary svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex: 0 0 auto;
+}
+
+.tables-management-primary {
+  min-height: 3rem;
+  border: 1px solid var(--restaurant-accent-border);
+  color: var(--restaurant-primary-button-text);
+  background: var(--restaurant-primary-button-bg);
+  box-shadow: var(--restaurant-primary-button-shadow);
+}
+
+.tables-management-primary:hover:not(:disabled),
+.tables-management-secondary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--restaurant-primary-button-shadow-hover);
+}
+
+.tables-management-secondary {
+  border: 1px solid var(--tables-line);
+  color: var(--restaurant-muted-text);
+  background: var(--restaurant-surface);
+}
+
+.tables-management-primary:focus-visible,
+.tables-management-secondary:focus-visible {
+  outline: 2px solid var(--restaurant-accent-border);
+  outline-offset: 3px;
+}
+
+.tables-management-primary:disabled,
+.tables-management-secondary:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.tables-management-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-block-end: 1rem;
+}
+
+.tables-management-stats__card {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-height: 5rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--tables-line);
+  border-radius: 1rem;
+  background: var(--restaurant-surface);
+  box-shadow: var(--restaurant-shadow-xs);
+}
+
+.tables-management-stats__icon {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.875rem;
+  color: var(--tables-terracotta);
+  background: var(--restaurant-accent-soft);
+}
+
+.tables-management-stats__icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.tables-management-stats__card--active .tables-management-stats__icon {
+  color: var(--tables-green);
+  background: var(--tables-green-soft);
+}
+
+.tables-management-stats__content {
+  display: grid;
+  min-width: 0;
+  gap: 0.2rem;
+}
+
+.tables-management-stats__content span {
+  overflow: hidden;
+  color: var(--tables-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tables-management-stats__content strong {
+  font-size: 1.45rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.tables-management-stats__card--skeleton {
+  min-height: 5rem;
+  background: var(--restaurant-surface-muted);
+}
+
+.tables-management-workspace-top {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.875rem;
+  padding: 0.875rem;
+  border: 1px solid var(--tables-line);
+  border-radius: 1.125rem;
+  background: var(--restaurant-surface);
+  box-shadow: var(--restaurant-shadow-xs);
+}
+
+.tables-management-search {
+  position: relative;
+  flex: 1 1 24rem;
+  min-width: 12rem;
+}
+
+.tables-management-search__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.tables-management-search__icon {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  inset-inline-start: 0.875rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--restaurant-subtle-text);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.tables-management-search input {
+  width: 100%;
+  height: 2.875rem;
+  padding-inline: 2.75rem 1rem;
+  border: 1px solid var(--tables-line);
+  border-radius: 0.75rem;
+  outline: none;
+  color: var(--tables-text);
+  background: var(--restaurant-surface);
+  font: inherit;
+}
+
+.tables-management-search input:focus {
+  border-color: var(--tables-terracotta);
+  box-shadow: 0 0 0 4px var(--restaurant-accent-soft);
+}
+
+.tables-management-filters {
+  display: flex;
+  gap: 0.625rem;
+}
+
+.tables-management-filter {
+  flex: 1 1 9rem;
+  min-width: 9rem;
+}
+
+.tables-management-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  padding-block: 1rem;
+}
+
+.tables-management-summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  flex: 0 0 auto;
+  padding-inline: 0.75rem;
+  border-radius: 999px;
+  color: var(--tables-muted);
+  background: var(--restaurant-surface-soft);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.tables-management-empty {
+  margin-block-start: 1rem;
+  padding: 3rem 1.25rem;
+  border: 1px dashed var(--tables-line);
+  border-radius: 1.125rem;
+  color: var(--tables-muted);
+  background: var(--restaurant-surface-soft);
+  text-align: center;
+}
+
+.tables-management-empty h2 {
+  margin: 0 0 0.5rem;
+  color: var(--tables-text);
+  font-size: 1.125rem;
+}
+
+.tables-management-empty p {
+  margin: 0 0 1rem;
+}
+
+.tables-management-state {
+  padding: 1.5rem 1.35rem;
+  border: 1px solid var(--tables-line);
+  border-radius: 1.125rem;
+  background: var(--restaurant-surface-soft);
+  box-shadow: var(--tables-shadow);
+}
+
+.tables-management-state h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+}
+
+.tables-management-state p {
+  margin: 0 0 1rem;
+  color: var(--tables-muted);
+}
+
+.tables-management-state--error {
+  border-color: var(--tables-red);
+  background: var(--tables-red-soft);
+}
+
+.tables-management-workspace--loading {
+  padding: 0.875rem;
+  border: 1px solid var(--tables-line);
+  border-radius: 1.125rem;
+  background: var(--restaurant-surface);
+}
+
+.tables-management-skeleton-toolbar,
+.tables-management-skeleton-grid {
+  border-radius: 0.875rem;
+  background: var(--restaurant-surface-muted);
+}
+
+.tables-management-skeleton-toolbar {
+  height: 3rem;
+}
+
+.tables-management-skeleton-grid {
+  height: 18rem;
+  margin-block-start: 1rem;
+}
+
+@media (min-width: 43rem) {
+  .tables-management-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 78rem) {
+  .tables-management-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 56rem) {
+  .tables-management-workspace-top {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .tables-management-search {
+    flex-basis: auto;
+  }
+
+  .tables-management-filters {
+    width: 100%;
+  }
+
+  .tables-management-summary {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 48rem) {
+  .tables-management-head {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .tables-management-head__actions {
+    width: 100%;
+  }
+
+  .tables-management-head__actions > button {
+    flex: 1 1 12rem;
+  }
+}
+
+@media (max-width: 36rem) {
+  .tables-management-page {
+    padding-inline: 0.75rem;
+  }
+
+  .tables-management-stats {
+    gap: 0.5rem;
+  }
+
+  .tables-management-stats__card {
+    min-height: 4.5rem;
+    padding: 0.75rem;
+  }
+
+  .tables-management-stats__icon {
+    display: none;
+  }
+
+  .tables-management-stats__content span {
+    font-size: 0.7rem;
+  }
+
+  .tables-management-stats__content strong {
+    font-size: 1.25rem;
+  }
+
+  .tables-management-filters {
+    flex-direction: column;
+  }
+
+  .tables-management-filter {
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tables-management-page * {
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,26 @@
+<p class="table-confirm-modal__meta">
+  <strong>{{ tableName() }}</strong>
+</p>
+<p class="table-confirm-modal__message">{{ locale.uiText(messageKey()) }}</p>
+
+@if (errorMessage(); as message) {
+  <p class="table-confirm-modal__error" role="alert">{{ message }}</p>
+}
+
+<app-staff-modal-actions orderModalFooter>
+  <button
+    type="button"
+    class="staff-modal-actions__save"
+    [class.staff-modal-actions__save--danger]="destructive()"
+    data-testid="table-confirm-submit"
+    [disabled]="submitting()"
+    (click)="confirmed.emit()"
+  >
+    {{
+      submitting() ? locale.uiText('tablesSaving') : locale.uiText(confirmKey())
+    }}
+  </button>
+  <button type="button" class="staff-modal-actions__cancel" (click)="cancelled.emit()">
+    {{ locale.uiText('tablesCancel') }}
+  </button>
+</app-staff-modal-actions>

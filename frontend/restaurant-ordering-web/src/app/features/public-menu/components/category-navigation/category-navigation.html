@@ -1,0 +1,46 @@
+<div class="public-menu-filter" data-testid="public-menu-filter-bar">
+  <label class="public-menu-filter__search">
+    <span class="visually-hidden">{{ ui().publicMenuSearchLabel }}</span>
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="11" cy="11" r="6" />
+      <path d="m16 16 4 4" />
+    </svg>
+    <input
+      type="search"
+      data-testid="public-menu-search"
+      [placeholder]="ui().publicMenuSearchPlaceholder"
+      [value]="searchQuery()"
+      (input)="onSearchInput($any($event.target).value)"
+    />
+  </label>
+
+  <nav class="public-menu-filter__categories" [attr.aria-label]="ui().menuTitle">
+    <div class="public-menu-filter__scroll" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        class="public-menu-filter__pill"
+        [class.public-menu-filter__pill--active]="activeCategoryId() === allCategoriesId"
+        [attr.aria-selected]="activeCategoryId() === allCategoriesId"
+        data-testid="public-menu-filter-all"
+        (click)="categorySelected.emit(allCategoriesId)"
+      >
+        {{ ui().publicMenuAllCategories }}
+      </button>
+
+      @for (category of visibleCategories(); track category.id) {
+        <button
+          type="button"
+          role="tab"
+          class="public-menu-filter__pill"
+          [class.public-menu-filter__pill--active]="category.id === activeCategoryId()"
+          [attr.aria-selected]="category.id === activeCategoryId()"
+          [attr.data-testid]="'public-menu-filter-' + category.id"
+          (click)="categorySelected.emit(category.id)"
+        >
+          {{ categoryLabels().get(category.id) }}
+        </button>
+      }
+    </div>
+  </nav>
+</div>

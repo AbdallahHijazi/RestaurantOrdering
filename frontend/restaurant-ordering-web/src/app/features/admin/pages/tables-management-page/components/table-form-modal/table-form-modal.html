@@ -1,0 +1,27 @@
+<form
+  [id]="formId()"
+  class="tables-form-modal"
+  [formGroup]="form()"
+  (ngSubmit)="submitted.emit()"
+>
+  <label class="tables-form-modal__field" for="tables-form-name">
+    <span>{{ locale.uiText('tablesFormName') }}</span>
+    <input id="tables-form-name" type="text" formControlName="name" autocomplete="off" />
+  </label>
+
+  <label class="tables-form-modal__field" for="tables-form-zone">
+    <span>{{ locale.uiText('tablesFormZone') }}</span>
+    <input id="tables-form-zone" type="text" formControlName="zone" autocomplete="off" />
+  </label>
+
+  @if (mode() === 'create') {
+    <label class="tables-form-modal__checkbox">
+      <input type="checkbox" formControlName="isActive" />
+      <span>{{ locale.uiText('tablesFormActiveOnCreate') }}</span>
+    </label>
+  }
+</form>
+
+@if (errorMessage(); as message) {
+  <p class="tables-form-modal__error" role="alert">{{ message }}</p>
+}

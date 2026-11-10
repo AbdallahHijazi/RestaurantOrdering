@@ -13,4 +13,5 @@ public sealed class UpdateRestaurantRequest
     public string? AddressEn { get; init; }
     public decimal? Latitude { get; init; }
     public decimal? Longitude { get; init; }
+    public string AccentColor { get; init; } = "#B8663F";
 }

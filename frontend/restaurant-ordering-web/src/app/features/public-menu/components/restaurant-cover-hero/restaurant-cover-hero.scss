@@ -1,0 +1,269 @@
+.public-menu-hero {
+  position: relative;
+  min-height: clamp(19rem, 36vw, 23.5rem);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.public-menu-hero__media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+.public-menu-hero__media img,
+.public-menu-hero__fallback {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+}
+
+.public-menu-hero__fallback {
+  background: linear-gradient(
+    135deg,
+    var(--restaurant-olive),
+    color-mix(in srgb, var(--restaurant-olive) 72%, var(--restaurant-sage))
+  );
+}
+
+.public-menu-hero__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--restaurant-olive) 82%, transparent) 0%,
+      color-mix(in srgb, var(--restaurant-olive) 58%, transparent) 38%,
+      color-mix(in srgb, var(--restaurant-olive) 78%, transparent) 100%
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--restaurant-olive) 42%, transparent),
+      color-mix(in srgb, var(--restaurant-olive) 18%, transparent),
+      color-mix(in srgb, var(--restaurant-olive) 42%, transparent)
+    );
+}
+
+.public-menu-hero__content {
+  width: min(100% - 2rem, 52rem);
+  padding-block: 4.6rem 2rem;
+  color: var(--restaurant-text-on-dark);
+  text-align: center;
+  animation: public-menu-hero-in 0.55s var(--restaurant-ease-standard) both;
+}
+
+.public-menu-hero__inner {
+  display: grid;
+  justify-items: center;
+  gap: 0.65rem;
+}
+
+.public-menu-hero__logo-wrap {
+  position: relative;
+  width: 4rem;
+  height: 4rem;
+}
+
+.public-menu-hero__logo,
+.public-menu-hero__monogram {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 2px solid color-mix(in srgb, var(--restaurant-palette-ivory) 56%, transparent);
+  border-radius: 1.1rem;
+  background: var(--restaurant-accent);
+  color: var(--restaurant-text-on-accent);
+  box-shadow: var(--restaurant-shadow-md);
+  object-fit: cover;
+}
+
+.public-menu-hero__monogram {
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 900;
+}
+
+.public-menu-hero__status-dot {
+  position: absolute;
+  inset-inline-end: -0.2rem;
+  bottom: -0.2rem;
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 2px solid var(--restaurant-olive);
+  border-radius: 50%;
+  background: var(--restaurant-sage);
+}
+
+.public-menu-hero__status-dot--closed {
+  background: var(--restaurant-muted-text);
+}
+
+.public-menu-hero__identity {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.public-menu-hero__title {
+  margin: 0;
+  color: var(--restaurant-text-on-dark);
+  font-family: var(--font-display);
+  font-size: clamp(1.65rem, 4.4vw, 2.45rem);
+  line-height: 1.2;
+  font-weight: 900;
+  text-shadow: 0 0.35rem 1.5rem color-mix(in srgb, var(--restaurant-olive) 72%, transparent);
+}
+
+.public-menu-hero__secondary-name {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.55rem;
+  padding-inline: 0.55rem;
+  border: 1px solid var(--restaurant-accent-border);
+  border-radius: 0.4rem;
+  color: var(--restaurant-text-on-dark);
+  background: color-mix(in srgb, var(--restaurant-olive) 54%, transparent);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  backdrop-filter: blur(8px);
+}
+
+.public-menu-hero__lead {
+  max-width: 35rem;
+  margin: 0;
+  overflow: hidden;
+  color: var(--restaurant-text-on-dark);
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  line-height: 1.7;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-shadow: 0 0.2rem 1rem color-mix(in srgb, var(--restaurant-olive) 82%, transparent);
+}
+
+.public-menu-hero__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.15rem;
+}
+
+.public-menu-hero__cta,
+.public-menu-hero__hours {
+  min-height: 2.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding-inline: 0.85rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.public-menu-hero__hours {
+  border: 1px solid color-mix(in srgb, var(--restaurant-palette-ivory) 32%, transparent);
+  color: var(--restaurant-text-on-dark);
+  background: color-mix(in srgb, var(--restaurant-olive) 48%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.public-menu-hero__hours-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--restaurant-sage);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--restaurant-sage) 22%, transparent);
+}
+
+.public-menu-hero__hours--closed {
+  color: var(--restaurant-text-soft);
+}
+
+.public-menu-hero__hours--closed .public-menu-hero__hours-dot {
+  background: var(--restaurant-muted-text);
+  box-shadow: none;
+}
+
+.public-menu-hero__cta {
+  border: 1px solid var(--restaurant-accent-border);
+  color: var(--restaurant-primary-button-text);
+  background-color: var(--restaurant-olive);
+  background-image: var(--restaurant-primary-button-bg);
+  box-shadow: var(--restaurant-primary-button-shadow);
+  cursor: pointer;
+  transition:
+    transform var(--restaurant-motion-fast) var(--restaurant-ease-standard),
+    box-shadow var(--restaurant-motion-normal) ease;
+}
+
+.public-menu-hero__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--restaurant-primary-button-shadow-hover);
+}
+
+.public-menu-hero__cta:active {
+  transform: scale(0.98);
+}
+
+.public-menu-hero__cta:focus-visible {
+  outline: 3px solid var(--restaurant-accent-border);
+  outline-offset: 3px;
+}
+
+.public-menu-hero__cta svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes public-menu-hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 30rem) {
+  .public-menu-hero {
+    min-height: 20.5rem;
+  }
+
+  .public-menu-hero__content {
+    width: min(100% - 1.5rem, 52rem);
+    padding-block: 4.5rem 1.4rem;
+  }
+
+  .public-menu-hero__logo-wrap {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-menu-hero__content,
+  .public-menu-hero__cta {
+    animation: none;
+    transition: none;
+  }
+}

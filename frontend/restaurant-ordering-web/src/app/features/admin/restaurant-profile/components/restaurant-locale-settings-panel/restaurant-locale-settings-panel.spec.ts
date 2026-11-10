@@ -1,0 +1,228 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { API_BASE_URL } from '../../../../../core/config/api-config';
+import { AuthService } from '../../../../../core/auth/auth.service';
+import { LocaleService } from '../../../../../core/localization/locale';
+import { RestaurantLocaleSettingsPanel } from './restaurant-locale-settings-panel';
+
+const RESTAURANT_ID = 'aaaaaaaa-1111-1111-1111-111111111111';
+
+const LOCALE_SETTINGS_RESPONSE = {
+  defaultLocale: 'ar',
+  translationMode: 'ManualOnly',
+  supportedLocales: [
+    { code: 'ar', isEnabled: true, sortOrder: 1 },
+    { code: 'en', isEnabled: true, sortOrder: 2 },
+    { code: 'fr', isEnabled: false, sortOrder: 3 },
+  ],
+  availableLocales: [
+    { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+    { code: 'en', displayName: 'English', nativeName: 'English', direction: 'ltr' },
+    { code: 'fr', displayName: 'French', nativeName: 'Français', direction: 'ltr' },
+  ],
+  canManageLocales: true,
+};
+
+describe('RestaurantLocaleSettingsPanel', () => {
+  let fixture: ComponentFixture<RestaurantLocaleSettingsPanel>;
+  let httpMock: HttpTestingController;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [RestaurantLocaleSettingsPanel],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: AuthService,
+          useValue: { restaurantId: () => RESTAURANT_ID },
+        },
+      ],
+    }).compileComponents();
+
+    TestBed.inject(LocaleService).setLocale('en');
+    httpMock = TestBed.inject(HttpTestingController);
+    fixture = TestBed.createComponent(RestaurantLocaleSettingsPanel);
+    fixture.componentRef.setInput('active', true);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  function flushLocaleSettingsLoad(): void {
+    const req = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
+    );
+    req.flush(LOCALE_SETTINGS_RESPONSE);
+    fixture.detectChanges();
+  }
+
+  it('loads locale settings and shows default locale selector', async () => {
+    flushLocaleSettingsLoad();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const select = fixture.nativeElement.querySelector(
+      '[data-testid="locale-settings-default-locale"]',
+    ) as HTMLSelectElement | null;
+
+    expect(select).toBeTruthy();
+    expect(select?.value).toBe('ar');
+    expect(select?.classList.contains('locale-settings__select')).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('العربية — Arabic');
+    expect(fixture.nativeElement.textContent).toContain('Français — French');
+  });
+
+  it('shows RTL/LTR badges from metadata', () => {
+    flushLocaleSettingsLoad();
+
+    expect(
+      (
+        fixture.nativeElement.querySelector(
+          '[data-testid="locale-settings-direction-ar"]',
+        ) as HTMLElement
+      ).textContent,
+    ).toContain('RTL');
+    expect(
+      (
+        fixture.nativeElement.querySelector(
+          '[data-testid="locale-settings-direction-en"]',
+        ) as HTMLElement
+      ).textContent,
+    ).toContain('LTR');
+  });
+
+  it('shows primary badge on default locale card', () => {
+    flushLocaleSettingsLoad();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="locale-settings-primary-badge-ar"]'),
+    ).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('Primary');
+  });
+
+  it('marks selected translation mode card', () => {
+    flushLocaleSettingsLoad();
+
+    const manualCard = fixture.nativeElement.querySelector(
+      '.locale-settings__mode-card',
+    ) as HTMLElement;
+    expect(manualCard.classList.contains('is-selected')).toBe(true);
+  });
+
+  it('auto-enables default locale when changed and keeps default toggle disabled', () => {
+    flushLocaleSettingsLoad();
+
+    const select = fixture.nativeElement.querySelector(
+      '[data-testid="locale-settings-default-locale"]',
+    ) as HTMLSelectElement;
+    select.value = 'fr';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+
+    const frenchToggle = fixture.nativeElement.querySelector(
+      '[data-testid="locale-settings-toggle-fr"]',
+    ) as HTMLInputElement;
+    const arabicToggle = fixture.nativeElement.querySelector(
+      '[data-testid="locale-settings-toggle-ar"]',
+    ) as HTMLInputElement;
+
+    expect(frenchToggle.checked).toBe(true);
+    expect(frenchToggle.disabled).toBe(true);
+    expect(arabicToggle.disabled).toBe(false);
+  });
+
+  it('toggles supported locales and sends correct save payload', () => {
+    flushLocaleSettingsLoad();
+
+    const frenchToggle = fixture.nativeElement.querySelector(
+      '[data-testid="locale-settings-toggle-fr"]',
+    ) as HTMLInputElement;
+    frenchToggle.checked = true;
+    frenchToggle.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+
+    const autoDrafts = fixture.nativeElement.querySelector(
+      'input[type="radio"][value="AutoGenerateDrafts"]',
+    ) as HTMLInputElement;
+    autoDrafts.click();
+    fixture.detectChanges();
+
+    (
+      fixture.nativeElement.querySelector('[data-testid="locale-settings-save"]') as HTMLButtonElement
+    ).click();
+
+    const saveReq = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
+    );
+    expect(saveReq.request.method).toBe('PUT');
+    expect(saveReq.request.body).toEqual({
+      defaultLocale: 'ar',
+      translationMode: 'AutoGenerateDrafts',
+      supportedLocales: [
+        { code: 'ar', isEnabled: true, sortOrder: 1 },
+        { code: 'en', isEnabled: true, sortOrder: 2 },
+        { code: 'fr', isEnabled: true, sortOrder: 3 },
+      ],
+    });
+
+    saveReq.flush({
+      ...LOCALE_SETTINGS_RESPONSE,
+      translationMode: 'AutoGenerateDrafts',
+      supportedLocales: [
+        { code: 'ar', isEnabled: true, sortOrder: 1 },
+        { code: 'en', isEnabled: true, sortOrder: 2 },
+        { code: 'fr', isEnabled: true, sortOrder: 3 },
+      ],
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="locale-settings-save-success"]')).toBeTruthy();
+  });
+
+  it('shows missing translation error with counts', () => {
+    flushLocaleSettingsLoad();
+
+    (
+      fixture.nativeElement.querySelector('[data-testid="locale-settings-save"]') as HTMLButtonElement
+    ).click();
+
+    const saveReq = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
+    );
+    saveReq.flush(
+      {
+        title: 'Validation failed',
+        errors: {
+          missingRestaurantTranslations: ['1'],
+          missingCategoryTranslations: ['2'],
+          missingMenuItemTranslations: ['3'],
+        },
+      },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="locale-settings-save-error"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-testid="locale-settings-missing-counts"]')?.textContent).toContain(
+      'Restaurant: 1',
+    );
+  });
+
+  it('renders read-only state when canManageLocales is false', () => {
+    const req = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`,
+    );
+    req.flush({ ...LOCALE_SETTINGS_RESPONSE, canManageLocales: false });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-testid="locale-settings-readonly"]')).toBeTruthy();
+    expect(
+      (fixture.nativeElement.querySelector('[data-testid="locale-settings-save"]') as HTMLButtonElement).disabled,
+    ).toBe(true);
+  });
+});

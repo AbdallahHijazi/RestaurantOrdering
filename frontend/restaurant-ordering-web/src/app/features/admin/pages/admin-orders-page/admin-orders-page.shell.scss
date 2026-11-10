@@ -1,0 +1,591 @@
+.orders-management-page {
+  --orders-bg: var(--restaurant-background);
+  --orders-surface: var(--restaurant-surface-elevated);
+  --orders-surface-soft: var(--restaurant-surface-soft);
+  --orders-charcoal: var(--restaurant-text);
+  --orders-accent: var(--restaurant-accent);
+  --orders-accent-soft: var(--restaurant-accent-soft);
+  --orders-muted: var(--restaurant-muted-text);
+  --orders-line: var(--restaurant-border);
+  --orders-line-strong: var(--restaurant-border-strong);
+  --orders-amber: var(--restaurant-warning);
+  --orders-amber-soft: var(--restaurant-warning-soft);
+  --orders-bluegray: var(--restaurant-muted-text);
+  --orders-bluegray-soft: var(--restaurant-info-soft);
+  --orders-red: var(--restaurant-danger);
+  --orders-red-soft: var(--restaurant-danger-soft);
+  --orders-sage: var(--restaurant-success);
+  --orders-sage-soft: var(--restaurant-success-soft);
+  width: 100%;
+  max-width: none;
+  margin-inline: auto;
+  padding-block: 0.65rem;
+  padding-inline: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+  color: var(--orders-charcoal);
+  background: var(--orders-bg);
+}
+
+.orders-management-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-block-end: 0;
+}
+
+.orders-management-page__intro {
+
+  min-width: 0;
+
+}
+
+.orders-management-page__eyebrow,
+
+.orders-management-page__orders-eyebrow {
+  margin-block-end: 0.05rem;
+  font-size: 0.62rem;
+  color: var(--orders-muted);
+}
+
+.orders-management-page__title,
+.orders-management-page__state h2,
+.orders-management-page__confirm-panel h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+  line-height: 1.2;
+}
+
+.orders-management-page__lead,
+.orders-management-page__state p,
+.orders-management-page__confirm-panel p {
+  margin: 0.15rem 0 0;
+  color: var(--orders-muted);
+  max-width: 46rem;
+  line-height: 1.45;
+  font-size: 0.64rem;
+}
+
+.orders-management-page__refresh,
+
+.orders-management-page__primary,
+
+.orders-management-page__secondary,
+
+.orders-management-page__clear-filters,
+
+.orders-management-page__details-btn,
+
+.orders-management-page__danger,
+
+.orders-management-page__view-button {
+
+  font: inherit;
+
+  cursor: pointer;
+
+  transition:
+
+    background-color 160ms ease,
+
+    color 160ms ease,
+
+    border-color 160ms ease,
+
+    box-shadow 160ms ease,
+
+    transform 160ms ease;
+
+}
+
+.orders-management-page__refresh {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 0.5rem;
+
+  min-height: 2rem;
+  padding-inline: 0.7rem;
+  border: 1px solid var(--orders-line-strong);
+  border-radius: 0.45rem;
+  background: var(--orders-surface);
+  color: var(--orders-accent);
+  font-size: 0.68rem;
+  font-weight: 700;
+
+  box-shadow: none;
+
+}
+
+.orders-management-page__refresh svg {
+
+  inline-size: 0.8rem;
+  block-size: 0.8rem;
+
+}
+
+.orders-management-page__refresh:hover:not(:disabled) {
+
+  background: var(--orders-accent-soft);
+  color: var(--orders-accent);
+
+}
+
+.orders-management-page__refresh:disabled {
+
+  opacity: 0.55;
+
+  cursor: not-allowed;
+
+}
+
+.orders-management-page__feedback {
+
+  margin: 0;
+
+  padding: 0.7rem 0.9rem;
+
+  border: 1px solid var(--orders-line);
+
+  border-radius: 0.75rem;
+
+  background: var(--orders-surface-soft);
+
+  color: var(--orders-charcoal);
+
+}
+
+.orders-management-page__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--orders-line);
+  border-radius: 0.75rem;
+  background: var(--orders-surface);
+  box-shadow: 0 1px 6px rgb(38 45 32 / 3%);
+}
+
+.orders-management-page__filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  min-width: 0;
+  direction: ltr;
+}
+
+.orders-management-page__status-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 0 1 auto;
+  direction: rtl;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  padding-block-end: 0;
+}
+
+.orders-management-page__status-pill {
+  flex: 0 0 auto;
+  min-height: 1.85rem;
+  padding-inline: 0.48rem;
+  border: 1px solid transparent;
+  border-radius: var(--restaurant-radius-pill);
+  background: transparent;
+  color: var(--orders-muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.orders-management-page__status-pill:hover:not(.orders-management-page__status-pill--active) {
+
+  border-color: var(--orders-line-strong);
+
+  background: var(--orders-surface-soft);
+
+  color: var(--orders-charcoal);
+
+}
+
+.orders-management-page__status-pill--active {
+
+  border-color: var(--orders-accent);
+
+  background: var(--orders-accent);
+
+  color: var(--restaurant-text-on-accent);
+
+}
+
+.orders-management-page__search {
+  position: relative;
+  flex: 0 0 min(17rem, 34%);
+  min-width: 12rem;
+  order: 2;
+}
+
+.orders-management-page__search-label {
+
+  position: absolute;
+
+  inline-size: 1px;
+
+  block-size: 1px;
+
+  overflow: hidden;
+
+  clip: rect(0 0 0 0);
+
+  white-space: nowrap;
+
+}
+
+.orders-management-page__search-icon {
+
+  position: absolute;
+  inset-inline-start: auto;
+  inset-inline-end: 0.65rem;
+  inset-block-start: 50%;
+
+  transform: translateY(-50%);
+
+  inline-size: 0.8rem;
+  block-size: 0.8rem;
+
+  color: var(--orders-muted);
+
+  pointer-events: none;
+
+}
+
+.orders-management-page__search input {
+  inline-size: 100%;
+  min-height: 1.85rem;
+  padding-inline: 2rem 0.65rem;
+  border: 1px solid var(--orders-line);
+  border-radius: 0.55rem;
+  background: var(--restaurant-surface-soft);
+  color: var(--orders-charcoal);
+  font: inherit;
+  font-size: 0.66rem;
+}
+
+.orders-management-page__search input:focus {
+
+  outline: 2px solid var(--restaurant-focus-ring);
+
+  outline-offset: 1px;
+
+  border-color: var(--orders-accent);
+
+}
+
+.orders-management-page__extra-filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 1.9rem;
+  direction: rtl;
+  padding-block-start: 0;
+}
+
+.orders-management-page__extra-filters-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 0 0 auto;
+  margin-inline-end: 0.05rem;
+  color: var(--orders-muted);
+  font-size: 0.64rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.orders-management-page__extra-filters-icon {
+
+  display: block;
+
+  inline-size: 0.8rem;
+  block-size: 0.8rem;
+
+  fill: none;
+
+  stroke: currentColor;
+
+  stroke-width: 1.8;
+
+  stroke-linecap: round;
+
+  stroke-linejoin: round;
+
+}
+
+.orders-management-page__extra-filters-row .admin-orders-select__trigger {
+  min-height: 1.85rem;
+}
+
+.orders-management-page__clear-filters,
+.orders-management-page__secondary {
+  min-height: 1.85rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--orders-line);
+  border-radius: 0.55rem;
+  background: transparent;
+  color: var(--orders-muted);
+  font-size: 0.64rem;
+  font-weight: 800;
+}
+
+.orders-management-page__clear-filters:hover:not(:disabled),
+
+.orders-management-page__secondary:hover {
+
+  border-color: var(--orders-accent-border);
+
+  background: var(--orders-accent-soft);
+
+  color: var(--orders-accent);
+
+}
+
+.orders-management-page__clear-filters:disabled {
+
+  opacity: 0.45;
+
+  cursor: not-allowed;
+
+}
+
+.orders-management-page__orders {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.orders-management-page__orders-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  min-height: 2.5rem;
+  padding: 0.25rem 0.1rem;
+}
+
+.orders-management-page__orders-summary {
+
+  min-width: 0;
+
+}
+
+.orders-management-page__result-count {
+  margin: 0;
+  color: var(--orders-charcoal);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.orders-management-page__details-btn {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 0.35rem;
+
+  min-height: 2.35rem;
+
+  padding-inline: 0.7rem;
+
+  border: 1px solid var(--orders-line-strong);
+
+  border-radius: 0.6rem;
+
+  background: transparent;
+
+  color: var(--orders-accent);
+
+  font-size: 0.66rem;
+
+  font-weight: 800;
+
+  white-space: nowrap;
+
+}
+
+.orders-management-page__details-btn svg {
+
+  inline-size: 0.95rem;
+
+  block-size: 0.95rem;
+
+}
+
+.orders-management-page__details-btn:hover {
+
+  border-color: var(--orders-accent);
+
+  background: var(--orders-accent);
+
+  color: var(--restaurant-text-on-accent);
+
+}
+
+.orders-management-page__details-btn--compact {
+
+  min-height: 2.15rem;
+
+  padding-inline: 0.65rem;
+
+}
+
+.orders-management-page__pagination {
+
+  display: flex;
+
+  justify-content: center;
+
+  padding-block-start: 0.2rem;
+
+}
+
+.orders-management-page__sr-only {
+
+  position: absolute;
+
+  inline-size: 1px;
+
+  block-size: 1px;
+
+  padding: 0;
+
+  margin: -1px;
+
+  overflow: hidden;
+
+  clip: rect(0, 0, 0, 0);
+
+  white-space: nowrap;
+
+  border: 0;
+
+}
+
+@media (max-width: 56rem) {
+  .orders-management-page__filter-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .orders-management-page__search {
+    order: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 40rem) {
+
+  .orders-management-page {
+
+    padding-inline: 0.85rem;
+
+  }
+
+  .orders-management-page__header {
+
+    flex-direction: column;
+
+    align-items: stretch;
+
+  }
+
+  .orders-management-page__refresh {
+
+    inline-size: 100%;
+
+  }
+
+  .orders-management-page__orders-header {
+
+    align-items: stretch;
+
+    flex-direction: column;
+
+  }
+
+  .orders-management-page__view-switcher {
+
+    align-self: flex-start;
+
+  }
+
+  .orders-management-page__extra-filters-row {
+
+    align-items: stretch;
+
+    flex-direction: column;
+
+  }
+
+  .orders-management-page__extra-filters-label {
+
+    min-height: 2rem;
+
+  }
+
+  .orders-management-page__extra-filters-row .admin-orders-select__trigger,
+
+  .orders-management-page__extra-filters-row > .orders-management-page__clear-filters {
+
+    width: 100%;
+
+  }
+
+  .orders-management-page__table {
+
+    min-width: 52rem;
+
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .orders-management-page__refresh,
+
+  .orders-management-page__status-pill,
+
+  .orders-management-page__view-button,
+
+  .orders-management-page__card,
+
+  .orders-management-page__details-btn,
+
+  .orders-management-page__clear-filters,
+
+  .orders-management-page__secondary {
+
+    transition-duration: 0.01ms !important;
+
+  }
+
+}

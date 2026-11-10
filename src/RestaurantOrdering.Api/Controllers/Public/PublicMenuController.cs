@@ -24,9 +24,10 @@ public sealed class PublicMenuController : ControllerBase
     [ProducesResponseType(typeof(PublicMenuDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<PublicMenuDto>> GetMenu(
         string slug,
+        [FromQuery] string? lang,
         CancellationToken cancellationToken)
     {
-        var result = await _sender.Send(new GetPublicMenuBySlugQuery(slug), cancellationToken);
+        var result = await _sender.Send(new GetPublicMenuBySlugQuery(slug, lang), cancellationToken);
         return Ok(result);
     }
 }

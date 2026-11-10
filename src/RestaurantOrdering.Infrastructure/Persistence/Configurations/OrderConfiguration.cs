@@ -24,6 +24,18 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.Notes)
             .HasMaxLength(500);
 
+        builder.Property(o => o.RequestedLocale)
+            .HasMaxLength(20);
+
+        builder.Property(o => o.ResolvedLocale)
+            .HasMaxLength(20)
+            .HasDefaultValue("ar")
+            .IsRequired();
+
+        builder.Property(o => o.FallbackApplied)
+            .HasDefaultValue(false)
+            .IsRequired();
+
         builder.Property(o => o.CurrencyCode)
             .HasMaxLength(3)
             .IsRequired();
@@ -81,17 +93,25 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasForeignKey(o => o.CustomerId)
             .OnDelete(DeleteBehavior.NoAction);
 
+        builder.HasOne(o => o.Table)
+            .WithMany(t => t.Orders)
+            .HasForeignKey(o => o.TableId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasIndex(o => o.TableId);
+
         builder.HasQueryFilter(o => !o.IsDeleted);
 
         builder.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_Orders_OrderType", "[OrderType] IN (1, 2)");
-            t.HasCheckConstraint("CK_Orders_OrderStatus", "[OrderStatus] IN (1, 2, 3, 4, 5)");
-            t.HasCheckConstraint("CK_Orders_Subtotal", "[Subtotal] >= 0");
-            t.HasCheckConstraint("CK_Orders_DiscountAmount", "[DiscountAmount] >= 0");
-            t.HasCheckConstraint("CK_Orders_TaxAmount", "[TaxAmount] >= 0");
-            t.HasCheckConstraint("CK_Orders_DeliveryFee", "[DeliveryFee] >= 0");
-            t.HasCheckConstraint("CK_Orders_TotalAmount", "[TotalAmount] >= 0");
+            t.HasCheckConstraint("CK_Orders_OrderType", "\"OrderType\" IN (1, 2, 3)");
+            t.HasCheckConstraint("CK_Orders_OrderStatus", "\"OrderStatus\" IN (1, 2, 3, 4, 5)");
+            t.HasCheckConstraint("CK_Orders_Subtotal", "\"Subtotal\" >= 0");
+            t.HasCheckConstraint("CK_Orders_DiscountAmount", "\"DiscountAmount\" >= 0");
+            t.HasCheckConstraint("CK_Orders_TaxAmount", "\"TaxAmount\" >= 0");
+            t.HasCheckConstraint("CK_Orders_DeliveryFee", "\"DeliveryFee\" >= 0");
+            t.HasCheckConstraint("CK_Orders_TotalAmount", "\"TotalAmount\" >= 0");
         });
     }
 }
+

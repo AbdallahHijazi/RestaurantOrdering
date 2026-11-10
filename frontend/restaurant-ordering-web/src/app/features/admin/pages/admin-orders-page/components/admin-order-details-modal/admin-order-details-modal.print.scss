@@ -1,0 +1,512 @@
+.order-invoice-print-area {
+  display: none;
+}
+
+/* =========================================================
+   FINAL 80MM THERMAL RECEIPT
+   Black & white / RTL + LTR / Dynamic height
+   ========================================================= */
+
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .order-invoice-print-area,
+  .order-invoice-print-area * {
+    visibility: visible !important;
+  }
+
+  /* Remove the application shell from the printed document */
+
+  .modal-overlay,
+  [data-testid='admin-order-details-modal'].modal-dialog,
+  .order-details-modal {
+    position: static !important;
+    inset: auto !important;
+
+    width: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: visible !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .order-details-modal__header,
+  .order-details-modal__scroll,
+  .order-details-modal__footer,
+  .order-details-modal__aside,
+  .order-details-modal__status-actions,
+  .order-details-modal__timeline,
+  .topbar,
+  .orders-management-page {
+    display: none !important;
+  }
+
+  /* =========================================================
+     RECEIPT
+     ========================================================= */
+
+  .order-invoice-print-area {
+    display: block !important;
+
+    position: absolute !important;
+    inset-block-start: 0 !important;
+    inset-inline-start: 0 !important;
+
+    box-sizing: border-box;
+
+    width: 80mm !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 4mm 4mm 5mm !important;
+
+    border: 0 !important;
+
+    background: #fff !important;
+    color: #000 !important;
+
+    box-shadow: none !important;
+
+    font-family: Arial, Tahoma, sans-serif !important;
+    font-size: 10pt;
+    line-height: 1.35;
+
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* =========================================================
+     HEADER
+     ========================================================= */
+
+  .order-invoice-print-area__header {
+    margin: 0 0 3mm !important;
+    padding: 0 0 3mm !important;
+
+    border: 0 !important;
+    border-bottom: 1px dashed #000 !important;
+
+    text-align: center !important;
+
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .order-invoice-print-area__title {
+    margin: 0 0 1mm !important;
+
+    color: #000 !important;
+
+    font-size: 16pt !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
+
+    text-align: center !important;
+  }
+
+  .order-invoice-print-area__order-number {
+    margin: 0 !important;
+
+    color: #000 !important;
+
+    font-family: Arial, Tahoma, sans-serif !important;
+    font-size: 8.5pt !important;
+    font-weight: 500 !important;
+    line-height: 1.25 !important;
+
+    text-align: center !important;
+
+    direction: ltr !important;
+    unicode-bidi: isolate !important;
+
+    overflow-wrap: anywhere;
+  }
+
+  /* =========================================================
+     ORDER INFORMATION
+     ========================================================= */
+
+  .order-invoice-print-area__meta {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+
+    gap: 0 !important;
+
+    margin: 0 0 3mm !important;
+    padding: 0 0 3mm !important;
+
+    border: 0 !important;
+    border-bottom: 1px dashed #000 !important;
+
+    background: transparent !important;
+
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .order-invoice-print-area__meta > div {
+    display: grid !important;
+    grid-template-columns: minmax(25mm, 0.9fr) minmax(0, 1.35fr) !important;
+
+    align-items: start !important;
+
+    gap: 2mm !important;
+
+    min-width: 0;
+
+    padding: 0.65mm 0 !important;
+
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  .order-invoice-print-area__meta dt,
+  .order-invoice-print-area__meta dd {
+    min-width: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #000 !important;
+
+    font-size: 8.5pt !important;
+    line-height: 1.35 !important;
+
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+  }
+
+  .order-invoice-print-area__meta dt {
+    font-weight: 700 !important;
+  }
+
+  .order-invoice-print-area__meta dd {
+    font-weight: 400 !important;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .order-invoice-print-area__ltr {
+    direction: ltr !important;
+    unicode-bidi: isolate !important;
+  }
+
+  /* =========================================================
+     ITEMS TABLE
+     ========================================================= */
+
+  .order-invoice-print-area__table {
+    width: 100% !important;
+
+    margin: 0 0 3mm !important;
+
+    border: 0 !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+
+    background: transparent !important;
+    color: #000 !important;
+
+    table-layout: fixed !important;
+
+    font-size: 8.25pt !important;
+    line-height: 1.3 !important;
+  }
+
+  .order-invoice-print-area__table thead {
+    display: table-header-group !important;
+
+    border-top: 0 !important;
+    border-bottom: 1px dashed #000 !important;
+  }
+
+  .order-invoice-print-area__table th,
+  .order-invoice-print-area__table td {
+    box-sizing: border-box;
+
+    border: 0 !important;
+
+    background: transparent !important;
+    color: #000 !important;
+
+    vertical-align: top !important;
+  }
+
+  .order-invoice-print-area__table th {
+    padding: 1.25mm 0.6mm !important;
+
+    font-size: 7.5pt !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
+
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+
+    white-space: normal !important;
+  }
+
+  .order-invoice-print-area__table td {
+    padding: 1.4mm 0.6mm !important;
+
+    font-size: 8.25pt !important;
+    line-height: 1.3 !important;
+  }
+
+  /* Product gets the largest area */
+  .order-invoice-print-area__table th:nth-child(1),
+  .order-invoice-print-area__table td:nth-child(1) {
+    width: 43% !important;
+    text-align: start !important;
+  }
+
+  /* Quantity */
+  .order-invoice-print-area__table th:nth-child(2),
+  .order-invoice-print-area__table td:nth-child(2) {
+    width: 13% !important;
+    text-align: center !important;
+  }
+
+  /* Unit price */
+  .order-invoice-print-area__table th:nth-child(3),
+  .order-invoice-print-area__table td:nth-child(3) {
+    width: 20% !important;
+    text-align: center !important;
+  }
+
+  /* Line total */
+  .order-invoice-print-area__table th:nth-child(4),
+  .order-invoice-print-area__table td:nth-child(4) {
+    width: 24% !important;
+    text-align: end !important;
+  }
+
+  .order-invoice-print-area__item-name {
+    display: block;
+
+    color: #000 !important;
+
+    font-size: 8.5pt !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+
+    overflow-wrap: anywhere;
+  }
+
+  .order-invoice-print-area__item-notes {
+    display: block;
+
+    margin-top: 0.6mm !important;
+
+    color: #000 !important;
+
+    font-size: 7pt !important;
+    font-weight: 400 !important;
+    line-height: 1.25 !important;
+
+    overflow-wrap: anywhere;
+  }
+
+  .order-invoice-print-area__table tbody tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Small breathing room between items without grid clutter */
+  .order-invoice-print-area__table tbody tr + tr td {
+    padding-top: 1.2mm !important;
+  }
+
+  /* =========================================================
+     TOTALS
+     ========================================================= */
+
+  .order-invoice-print-area__summary {
+    width: 100% !important;
+
+    margin: 0 0 3mm !important;
+    padding: 2mm 0 0 !important;
+
+    border: 0 !important;
+    border-top: 1px dashed #000 !important;
+
+    background: transparent !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .order-invoice-print-area__summary-line {
+    display: flex !important;
+
+    align-items: baseline !important;
+    justify-content: space-between !important;
+
+    gap: 3mm !important;
+
+    padding: 0.65mm 0 !important;
+
+    border: 0 !important;
+
+    color: #000 !important;
+
+    font-size: 8.75pt !important;
+    line-height: 1.3 !important;
+  }
+
+  .order-invoice-print-area__summary-line span {
+    color: #000 !important;
+    font-weight: 600 !important;
+  }
+
+  .order-invoice-print-area__summary-line strong {
+    color: #000 !important;
+
+    font-size: 9pt !important;
+    font-weight: 700 !important;
+
+    white-space: nowrap;
+  }
+
+  .order-invoice-print-area__summary-line--total {
+    margin-top: 1.5mm !important;
+
+    padding: 2mm 0 !important;
+
+    border-top: 3px double #000 !important;
+    border-bottom: 1px dashed #000 !important;
+
+    color: #000 !important;
+
+    font-size: 13pt !important;
+    font-weight: 800 !important;
+    line-height: 1.1 !important;
+  }
+
+  .order-invoice-print-area__summary-line--total span {
+    font-size: 13pt !important;
+    font-weight: 800 !important;
+  }
+
+  .order-invoice-print-area__summary-line--total strong {
+    color: #000 !important;
+
+    font-size: 15pt !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+  }
+
+  /* =========================================================
+     FOOTER
+     ========================================================= */
+
+  .order-invoice-print-area__thanks {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: 0 !important;
+
+    color: #000 !important;
+
+    font-size: 8pt !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+
+    text-align: center !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* =========================================================
+     ARABIC / RTL
+     ========================================================= */
+
+  .order-invoice-print-area[dir='rtl'] {
+    direction: rtl !important;
+    text-align: right !important;
+
+    font-family: Tahoma, Arial, sans-serif !important;
+  }
+
+  .order-invoice-print-area[dir='rtl']
+    .order-invoice-print-area__meta {
+    direction: rtl !important;
+  }
+
+  .order-invoice-print-area[dir='rtl']
+    .order-invoice-print-area__meta > div {
+    direction: rtl !important;
+  }
+
+  .order-invoice-print-area[dir='rtl']
+    .order-invoice-print-area__meta dt {
+    text-align: right !important;
+  }
+
+  .order-invoice-print-area[dir='rtl']
+    .order-invoice-print-area__meta dd:not(.order-invoice-print-area__ltr) {
+    text-align: left !important;
+  }
+
+  .order-invoice-print-area[dir='rtl']
+    .order-invoice-print-area__table {
+    direction: rtl !important;
+  }
+
+  /* =========================================================
+     ENGLISH / LTR
+     ========================================================= */
+
+  .order-invoice-print-area[dir='ltr'] {
+    direction: ltr !important;
+    text-align: left !important;
+  }
+
+  .order-invoice-print-area[dir='ltr']
+    .order-invoice-print-area__meta dt {
+    text-align: left !important;
+  }
+
+  .order-invoice-print-area[dir='ltr']
+    .order-invoice-print-area__meta dd {
+    text-align: right !important;
+  }
+
+  /* =========================================================
+     LONG CONTENT SAFETY
+     ========================================================= */
+
+  .order-invoice-print-area__table,
+  .order-invoice-print-area__table tbody {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+
+  .order-invoice-print-area__table tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}

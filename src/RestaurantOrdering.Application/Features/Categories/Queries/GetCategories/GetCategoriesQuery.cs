@@ -1,6 +1,8 @@
 using MediatR;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Application.Features.Categories.DTOs;
 
 namespace RestaurantOrdering.Application.Features.Categories.Queries.GetCategories;
 
-public sealed record GetCategoriesQuery(Guid RestaurantId) : IRequest<IReadOnlyList<CategoryDto>>;
+public sealed record GetCategoriesQuery(Guid RestaurantId)
+    : IRequest<IReadOnlyList<CategoryDto>>, IRestaurantDashboardScopedRequest;

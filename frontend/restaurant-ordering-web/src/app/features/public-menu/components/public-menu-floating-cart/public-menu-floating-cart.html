@@ -1,0 +1,17 @@
+@if (visible() && cart.itemCount() > 0) {
+  <aside class="public-menu-floating-cart" data-testid="public-menu-floating-cart" aria-live="polite">
+    <span class="public-menu-floating-cart__count" aria-hidden="true">
+      {{ cart.itemCount() }}
+    </span>
+    <div class="public-menu-floating-cart__copy">
+      <small>{{ ui().publicMenuCartReady }}</small>
+      <strong><bdi dir="ltr">{{ totalLabel() }}</bdi></strong>
+    </div>
+    <button type="button" class="public-menu-floating-cart__btn" (click)="viewCart.emit()">
+      <span>{{ ui().publicMenuViewCart }}</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M5 12h14M13 6l6 6-6 6" />
+      </svg>
+    </button>
+  </aside>
+}

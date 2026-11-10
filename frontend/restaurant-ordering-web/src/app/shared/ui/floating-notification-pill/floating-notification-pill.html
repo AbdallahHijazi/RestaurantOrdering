@@ -1,0 +1,33 @@
+<div
+  class="floating-notification-pill"
+  [class.floating-notification-pill--error]="tone() === 'error'"
+  [class.floating-notification-pill--warning]="tone() === 'warning'"
+  [attr.role]="tone() === 'error' ? 'alert' : 'status'"
+  [attr.aria-live]="tone() === 'error' ? 'assertive' : 'polite'"
+  aria-atomic="true"
+>
+  <span class="floating-notification-pill__icon" aria-hidden="true">
+    @if (tone() === 'success') {
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path fill="currentColor" d="m9.55 17.35-5.3-5.3 1.4-1.4 3.9 3.9 8.8-8.8 1.4 1.4-10.2 10.2Z" />
+      </svg>
+    } @else {
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path fill="currentColor" d="M11 7h2v6h-2V7Zm0 8h2v2h-2v-2Zm1-13a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" />
+      </svg>
+    }
+  </span>
+
+  <p>{{ message() }}</p>
+
+  <button
+    type="button"
+    class="floating-notification-pill__close"
+    [attr.aria-label]="closeLabel()"
+    (click)="dismissed.emit()"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="m18.3 5.71-1.41-1.42L12 9.17 7.11 4.29 5.7 5.71 10.59 10.59 5.7 15.48l1.41 1.41L12 12l4.89 4.89 1.41-1.41-4.89-4.89 4.89-4.88Z" />
+    </svg>
+  </button>
+</div>

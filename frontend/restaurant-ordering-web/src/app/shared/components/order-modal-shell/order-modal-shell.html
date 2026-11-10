@@ -1,0 +1,43 @@
+@if (open()) {
+  <div
+    class="modal-overlay"
+    role="presentation"
+    data-testid="order-modal-backdrop"
+    (click)="onBackdropClick($event)"
+  >
+    <section
+      class="modal-dialog"
+      [class.modal-dialog--wide]="wide()"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="titleId()"
+      [attr.data-testid]="testId()"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="modal-dialog__header">
+        <div class="modal-dialog__header-main">
+          <h2 class="modal-dialog__title" [id]="titleId()">{{ title() }}</h2>
+          <ng-content select="[orderModalHeaderExtra]" />
+        </div>
+        <button
+          type="button"
+          class="modal-close-button"
+          data-testid="order-modal-close"
+          [attr.aria-label]="closeLabel()"
+          [disabled]="blockCloseWhileBusy()"
+          (click)="requestClose()"
+        >
+          <span class="modal-close-button__icon" aria-hidden="true">&times;</span>
+        </button>
+      </header>
+
+      <div class="modal-dialog__body">
+        <ng-content />
+      </div>
+
+      <footer class="modal-dialog__footer">
+        <ng-content select="[orderModalFooter]" />
+      </footer>
+    </section>
+  </div>
+}

@@ -1,0 +1,171 @@
+@if (active()) {
+  @if (loadState() === 'loading') {
+    <div class="locale-settings__loading" data-testid="locale-settings-loading">
+      <span class="locale-settings__spinner" aria-hidden="true"></span>
+      <span>{{ localeService.uiText('profileLocaleLoading') }}</span>
+    </div>
+  }
+
+  @if (loadState() === 'error') {
+    <div class="locale-settings__alert" role="alert" data-testid="locale-settings-load-error">
+      <p>{{ localeService.uiText('profileLocaleLoadError') }}</p>
+      <button type="button" class="profile-console__btn profile-console__btn--secondary" (click)="retryLoad()">
+        {{ localeService.uiText('profileLocaleRetry') }}
+      </button>
+    </div>
+  }
+
+  @if (loadState() === 'ready' && !settings()) {
+    <div class="locale-settings__alert locale-settings__alert--info" data-testid="locale-settings-demo">
+      <p>{{ localeService.uiText('profileLocaleDemoNotice') }}</p>
+    </div>
+  }
+
+  @if (loadState() === 'ready' && settings(); as currentSettings) {
+    <section class="locale-settings" data-testid="locale-settings-panel">
+      <header class="profile-console__panel-heading">
+        <h2>{{ localeService.uiText('profileTabLanguages') }}</h2>
+        <p>{{ localeService.uiText('profileLanguagesSectionDesc') }}</p>
+      </header>
+
+      @if (isReadOnly()) {
+        <div class="locale-settings__alert locale-settings__alert--info" role="status" data-testid="locale-settings-readonly">
+          <p>{{ localeService.uiText('profileLocaleReadOnlyNotice') }}</p>
+        </div>
+      }
+
+      <div class="locale-settings__card">
+        <label class="locale-settings__field">
+          <span class="locale-settings__field-label">{{ localeService.uiText('profileLocaleDefaultLabel') }}</span>
+          <div class="locale-settings__select-wrap">
+            <select
+              class="locale-settings__select"
+              data-testid="locale-settings-default-locale"
+              [disabled]="isReadOnly()"
+              [ngModel]="editor()?.defaultLocale"
+              (ngModelChange)="onDefaultLocaleChange($event)"
+            >
+              @for (locale of availableLocales(); track locale.code) {
+                <option [value]="locale.code">{{ localeOptionLabel(locale) }}</option>
+              }
+            </select>
+            <span class="locale-settings__select-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
+              </svg>
+            </span>
+          </div>
+        </label>
+
+        <div class="locale-settings__section">
+          <h3>{{ localeService.uiText('profileLocaleSupportedHeading') }}</h3>
+          <ul class="locale-settings__lang-grid" data-testid="locale-settings-supported-list">
+            @for (row of supportedLocaleRows(); track row.locale.code) {
+              <li
+                class="locale-settings__lang-card"
+                [class.is-primary]="row.isDefault"
+                [class.is-disabled]="isReadOnly() || row.isDefault"
+              >
+                <label class="locale-settings__lang-card-main">
+                  <input
+                    type="checkbox"
+                    class="locale-settings__checkbox"
+                    [attr.data-testid]="'locale-settings-toggle-' + row.locale.code"
+                    [checked]="row.enabled"
+                    [disabled]="isReadOnly() || row.isDefault"
+                    (change)="toggleSupportedLocale(row.locale, $any($event.target).checked)"
+                  />
+                  <span class="locale-settings__lang-card-body">
+                    <span class="locale-settings__lang-card-title">
+                      <strong>{{ row.locale.nativeName }}</strong>
+                      @if (row.isDefault) {
+                        <span
+                          class="locale-settings__primary-badge"
+                          [attr.data-testid]="'locale-settings-primary-badge-' + row.locale.code"
+                        >
+                          {{ primaryLocaleBadge() }}
+                        </span>
+                      }
+                    </span>
+                    <span class="locale-settings__lang-card-sub">{{ row.locale.displayName }}</span>
+                    <span class="locale-settings__lang-card-meta">
+                      <code class="locale-settings__code-badge">{{ row.locale.code }}</code>
+                      <span
+                        class="locale-settings__direction"
+                        [class.locale-settings__direction--rtl]="row.directionLabel === localeService.uiText('profileLocaleDirectionRtl')"
+                        [attr.data-testid]="'locale-settings-direction-' + row.locale.code"
+                      >
+                        {{ row.directionLabel }}
+                      </span>
+                    </span>
+                  </span>
+                </label>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <div class="locale-settings__section">
+          <h3>{{ localeService.uiText('profileLocaleTranslationModeLabel') }}</h3>
+          <div class="locale-settings__modes" data-testid="locale-settings-translation-mode">
+            @for (mode of translationModeOptions; track mode) {
+              <label
+                class="locale-settings__mode-card"
+                [class.is-selected]="isTranslationModeSelected(mode)"
+                [class.is-disabled]="isReadOnly()"
+              >
+                <input
+                  type="radio"
+                  class="locale-settings__radio"
+                  name="translationMode"
+                  [value]="mode"
+                  [disabled]="isReadOnly()"
+                  [checked]="isTranslationModeSelected(mode)"
+                  (change)="onTranslationModeChange(mode)"
+                />
+                <span class="locale-settings__mode-copy">
+                  <strong>{{ translationModeLabel(mode) }}</strong>
+                  <span>{{ translationModeDescription(mode) }}</span>
+                </span>
+              </label>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (errorNotice()) {
+        <div class="locale-settings__alert" role="alert" data-testid="locale-settings-save-error">
+          <p>{{ errorNotice() }}</p>
+          @if (missingCountsMessage(); as countsMessage) {
+            <p data-testid="locale-settings-missing-counts">{{ countsMessage }}</p>
+          }
+        </div>
+      }
+
+      @if (saveNotice()) {
+        <p class="profile-console__notice" role="status" data-testid="locale-settings-save-success">
+          {{ saveNotice() }}
+        </p>
+      }
+
+      <div class="locale-settings__actions">
+        <button
+          type="button"
+          class="profile-console__btn profile-console__btn--primary profile-console__btn--panel-save premium-btn"
+          data-testid="locale-settings-save"
+          [disabled]="isReadOnly() || saving()"
+          (click)="saveSettings()"
+        >
+          @if (saving()) {
+            <span class="profile-console__spinner" aria-hidden="true"></span>
+          }
+          {{
+            saving()
+              ? localeService.uiText('profileLocaleSaving')
+              : localeService.uiText('profileLocaleSave')
+          }}
+        </button>
+      </div>
+    </section>
+  }
+}

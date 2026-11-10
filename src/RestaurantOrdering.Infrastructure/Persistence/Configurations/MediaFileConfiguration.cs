@@ -42,7 +42,8 @@ public class MediaFileConfiguration : IEntityTypeConfiguration<MediaFile>
 
         builder.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_MediaFiles_FileSizeBytes", "[FileSizeBytes] >= 0");
+            t.HasCheckConstraint("CK_MediaFiles_FileSizeBytes", "\"FileSizeBytes\" >= 0");
         });
     }
 }
+
