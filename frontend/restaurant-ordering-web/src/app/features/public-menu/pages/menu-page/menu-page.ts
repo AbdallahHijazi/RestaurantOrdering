@@ -169,11 +169,11 @@ export class MenuPage implements OnDestroy {
   );
 
   protected readonly menuAccentStrongColor = computed(
-    () => `color-mix(in srgb, ${this.menuAccentColor()} 82%, black)`,
+    () => `color-mix(in srgb, ${this.menuAccentColor()} 82%, var(--restaurant-shadow-ink))`,
   );
 
   protected readonly menuAccentSoftColor = computed(
-    () => `color-mix(in srgb, ${this.menuAccentColor()} 18%, white)`,
+    () => `color-mix(in srgb, ${this.menuAccentColor()} 18%, var(--restaurant-surface-white))`,
   );
 
   protected readonly filteredItems = computed(() => {
@@ -481,6 +481,9 @@ export class MenuPage implements OnDestroy {
       }))
       .subscribe({
         next: (data) => {
+          // Must run before menuData is set: the language switcher receives the restaurant id from
+          // menuData and would otherwise fall back to the (staff-only) admin locale endpoint.
+          this.localeOptions.applyPublicLocales(data.restaurant.id, data.supportedLocales);
           this.menuData.set(data);
           this.themeService.applyAccent(data.restaurant.primaryAccentColor);
           this.activeCategoryId.set(PUBLIC_MENU_ALL_CATEGORIES_ID);

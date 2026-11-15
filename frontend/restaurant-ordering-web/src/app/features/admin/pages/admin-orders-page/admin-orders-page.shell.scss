@@ -172,7 +172,7 @@
   border: 1px solid var(--orders-line);
   border-radius: 0.75rem;
   background: var(--orders-surface);
-  box-shadow: 0 1px 6px rgb(38 45 32 / 3%);
+  box-shadow: 0 1px 6px color-mix(in srgb, var(--restaurant-shadow-ink) 3%, transparent);
 }
 
 .orders-management-page__filter-row {

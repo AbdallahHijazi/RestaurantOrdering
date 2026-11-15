@@ -10,7 +10,7 @@
 .staff-roster__employee small{display:block;margin-top:.1875rem;color:var(--restaurant-muted-text);font-size:.75rem}
 .staff-roster__avatar{width:2.625rem;height:2.625rem;display:grid;place-items:center;border-radius:.8125rem;color:var(--restaurant-text-on-accent);background:linear-gradient(135deg,var(--restaurant-success),color-mix(in srgb,var(--restaurant-success) 70%,var(--restaurant-palette-olive)));font-size:.875rem;font-weight:800;flex-shrink:0}
 .staff-roster__avatar--terra{background:linear-gradient(135deg,var(--restaurant-accent),var(--restaurant-accent-strong))}
-.staff-roster__ltr{direction:ltr;display:inline-block;font-family:Arial,sans-serif}
+.staff-roster__ltr{direction:ltr;display:inline-block;font-family: var(--restaurant-font-body-en)}
 .staff-roster__badge{display:inline-flex;align-items:center;gap:.375rem;min-height:1.875rem;padding-inline:.625rem;border-radius:var(--restaurant-radius-pill);font-size:.75rem;font-weight:800;white-space:nowrap}
 .staff-roster__badge--role{color:var(--restaurant-accent);background:var(--restaurant-accent-soft);border:1px solid var(--restaurant-accent-border)}
 .staff-roster__badge--status{color:var(--restaurant-success);background:var(--restaurant-success-soft);border:1px solid color-mix(in srgb,var(--restaurant-success) 35%,transparent)}

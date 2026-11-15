@@ -226,16 +226,16 @@ describe('RestaurantThemeService accent', () => {
     TestBed.configureTestingModule({});
   });
 
-  it('accepts #c6a15b but applies olive accent to the UI', () => {
+  it('accepts #c6a15b but leaves the UI accent to the central palette in styles.scss', () => {
     const theme = TestBed.inject(RestaurantThemeService);
     const accent = theme.applyAccent('#c6a15b');
     expect(accent).toBe('#c6a15b');
-    expect(document.documentElement.style.getPropertyValue('--restaurant-accent')).toBe('#6e7b4e');
+    expect(document.documentElement.style.getPropertyValue('--restaurant-accent')).toBe('');
   });
 
   it('falls back for invalid accent values', () => {
     const theme = TestBed.inject(RestaurantThemeService);
-    expect(theme.sanitizeAccentColor('red')).toBe('#6e7b4e');
+    expect(theme.sanitizeAccentColor('red')).toBe('#9c3d2e');
   });
 });
 

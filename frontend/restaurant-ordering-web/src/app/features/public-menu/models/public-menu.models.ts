@@ -1,6 +1,7 @@
 import type {
   AdminUiLocale,
   ContentLocale,
+  LocaleMetadata,
   LocalizedText,
   PublicMenuLocaleContext,
 } from '../../../core/localization/locale.types';
@@ -75,6 +76,8 @@ export interface PublicMenuPageData {
   categories: PublicMenuCategory[];
   items: PublicMenuItem[];
   locale: PublicMenuLocaleContext;
+  /** Languages offered by the restaurant; empty when the API/mock does not provide them. */
+  supportedLocales: LocaleMetadata[];
 }
 
 /** Backend OrderType: Pickup = 1, Delivery = 2, DineIn = 3 */

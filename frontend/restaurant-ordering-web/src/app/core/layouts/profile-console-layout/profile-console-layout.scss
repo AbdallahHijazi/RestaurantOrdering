@@ -70,7 +70,7 @@
   object-fit: cover;
   background: var(--restaurant-surface, #ffffff);
   border: 1px solid var(--restaurant-accent-border, #ccd5c1);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 6%);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--restaurant-shadow-ink) 6%, transparent);
 }
 
 .profile-console__brand-fallback {
@@ -80,7 +80,7 @@
   background: var(--restaurant-accent, #5b6849);
   border: 1px solid var(--restaurant-accent, #5b6849);
 
-  color: #ffffff;
+  color: var(--restaurant-text-on-accent);
   font-size: 0.8125rem;
   font-weight: 700;
 }
@@ -162,7 +162,7 @@
   background: var(--restaurant-accent-soft, #dfe5d5);
   color: var(--restaurant-accent, #4a553b);
   font-weight: 700;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--restaurant-shadow-ink) 5%, transparent);
 }
 
 /*
@@ -213,7 +213,7 @@
 
   cursor: pointer;
 
-  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--restaurant-shadow-ink) 4%, transparent);
 
   transition:
     color 160ms ease,

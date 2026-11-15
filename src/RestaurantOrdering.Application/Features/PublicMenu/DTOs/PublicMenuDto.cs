@@ -31,5 +31,6 @@ public class PublicMenuDto
     public string Name { get; init; } = string.Empty;
     public string? Description { get; init; }
     public string? Address { get; init; }
+    public IReadOnlyList<PublicMenuLocaleDto> SupportedLocales { get; init; } = Array.Empty<PublicMenuLocaleDto>();
     public IReadOnlyList<PublicMenuCategoryDto> Categories { get; init; } = Array.Empty<PublicMenuCategoryDto>();
 }

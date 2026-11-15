@@ -47,7 +47,7 @@
   border: 1px solid var(--profile-border);
   border-radius: 0.9rem;
   background: var(--profile-card);
-  box-shadow: 0 1px 3px rgb(31 33 26 / 5%);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--restaurant-shadow-ink) 5%, transparent);
 }
 
 .profile-console__card--details {
@@ -163,8 +163,8 @@
   overflow: hidden;
   border: 1px solid var(--profile-border-strong);
   border-radius: 0.65rem;
-  background: color-mix(in srgb, var(--profile-linen-soft) 65%, #fff);
-  box-shadow: 0 1px 2px rgb(31 33 26 / 3%);
+  background: color-mix(in srgb, var(--profile-linen-soft) 65%, var(--restaurant-surface-white));
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--restaurant-shadow-ink) 3%, transparent);
 }
 
 .profile-console__slug-control:focus-within {
@@ -179,7 +179,7 @@
   padding-inline: 0.7rem;
   color: var(--profile-muted);
   background: color-mix(in srgb, var(--profile-linen-soft) 88%, var(--profile-border));
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--restaurant-font-mono);
   font-size: 0.7rem;
   white-space: nowrap;
 }
@@ -191,7 +191,7 @@
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--restaurant-font-mono);
 }
 
 .profile-console__slug-control input:focus {

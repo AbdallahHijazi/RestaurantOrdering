@@ -5,6 +5,7 @@ import type {
 } from '../models/public-menu.models';
 import { resolveApiAssetUrl } from '../../../core/config/resolve-api-asset-url';
 import { normalizeDirection } from '../../../core/localization/direction.service';
+import type { LocaleMetadata } from '../../../core/localization/locale.types';
 
 function mapOrderSettings(dto: PublicMenuApiDto): PublicRestaurantOrderSettings {
   return {
@@ -25,6 +26,20 @@ function mapLocaleContext(dto: PublicMenuApiDto) {
     fallbackApplied: dto.fallbackApplied ?? false,
     direction: normalizeDirection(dto.direction),
   };
+}
+
+function mapSupportedLocales(dto: PublicMenuApiDto): LocaleMetadata[] {
+  return (dto.supportedLocales ?? [])
+    .filter((locale) => !!locale?.code?.trim())
+    .map((locale) => {
+      const code = locale.code.trim().toLowerCase();
+      return {
+        code,
+        displayName: locale.displayName?.trim() || code,
+        nativeName: locale.nativeName?.trim() || locale.displayName?.trim() || code,
+        direction: normalizeDirection(locale.direction),
+      };
+    });
 }
 
 export function mapPublicMenuApiDto(dto: PublicMenuApiDto): PublicMenuPageData {
@@ -94,5 +109,6 @@ export function mapPublicMenuApiDto(dto: PublicMenuApiDto): PublicMenuPageData {
     categories,
     items,
     locale: mapLocaleContext(dto),
+    supportedLocales: mapSupportedLocales(dto),
   };
 }

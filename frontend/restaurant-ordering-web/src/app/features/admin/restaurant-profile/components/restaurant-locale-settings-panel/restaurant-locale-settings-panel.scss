@@ -18,8 +18,8 @@
   margin: 0 0 1rem;
   padding: 0.875rem 1rem;
   border-radius: 0.75rem;
-  background: color-mix(in srgb, #b42318 10%, white);
-  color: #7a271a;
+  background: var(--restaurant-danger-surface);
+  color: var(--restaurant-danger);
 }
 
 .locale-settings__alert--info {
@@ -226,7 +226,7 @@
 }
 
 .locale-settings__direction--rtl {
-  background: color-mix(in srgb, #6e7b4e 16%, white);
+  background: color-mix(in srgb, var(--restaurant-olive) 16%, var(--restaurant-surface-white));
 }
 
 .locale-settings__modes {

@@ -128,6 +128,24 @@ export class RestaurantLocaleOptionsService {
 
 
 
+  /**
+   * Public (customer) pages: use the languages delivered with the public menu itself.
+   * Anonymous visitors must never call the admin locale endpoint. Marks the restaurant as loaded,
+   * so a later loadForRestaurant(restaurantId) from the language switcher is a no-op.
+   */
+  applyPublicLocales(
+    restaurantId: string | null | undefined,
+    locales: readonly LocaleMetadata[] | null | undefined,
+  ): void {
+    const normalizedId = restaurantId?.trim() ?? '';
+    const enabled = locales && locales.length > 0 ? [...locales] : [...FALLBACK_PREVIEW_LOCALES];
+
+    this.loadedRestaurantId = normalizedId || null;
+    this.enabledLocalesSignal.set(enabled);
+    this.directionService.registerLocales(enabled);
+    this.ensureActiveLocaleInEnabledList();
+  }
+
   selectContentLocale(localeCode: ContentLocale, options?: { persist?: boolean }): void {
 
     const normalized = normalizeContentLocale(localeCode) ?? ensurePreviewLocaleInList('', this.enabledLocalesSignal());

@@ -32,8 +32,8 @@
   min-height: 3.25rem;
   padding: 0.5rem 1.25rem;
 
-  background: #fff;
-  border-bottom: 1px solid #dfdccf;
+  background: var(--restaurant-surface-white);
+  border-bottom: 1px solid var(--restaurant-border);
 }
 
 .live-preview__toolbar-start,
@@ -62,7 +62,7 @@
 
 .live-preview__group-label {
   margin: 0;
-  color: #747b6c;
+  color: var(--restaurant-muted-text);
   font-size: 0.6875rem;
   font-weight: 600;
   line-height: 1;
@@ -76,10 +76,10 @@
 
   padding: 0.125rem;
 
-  border: 1px solid #dfdccf;
+  border: 1px solid var(--restaurant-border);
   border-radius: 0.5rem;
 
-  background: #f5f2e8;
+  background: var(--restaurant-surface-soft);
 }
 
 .live-preview__device-btn {
@@ -94,7 +94,7 @@
   border-radius: 0.375rem;
 
   background: transparent;
-  color: #747b6c;
+  color: var(--restaurant-muted-text);
 
   cursor: pointer;
 
@@ -105,14 +105,14 @@
 }
 
 .live-preview__device-btn:hover {
-  background: #ebe8dc;
-  color: #4a553b;
+  background: var(--restaurant-surface-muted);
+  color: var(--restaurant-text-soft);
 }
 
 .live-preview__device-btn.is-active {
-  background: #5b6849;
-  color: #fff;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+  background: var(--restaurant-accent-strong);
+  color: var(--restaurant-text-on-accent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--restaurant-shadow-ink) 10%, transparent);
 }
 
 .live-preview__device-btn svg {
@@ -129,11 +129,11 @@
   height: 2rem;
   padding: 0 0.75rem;
 
-  border: 1px solid #dfdccf;
+  border: 1px solid var(--restaurant-border);
   border-radius: 0.45rem;
 
-  background: #fff;
-  color: #4a553b;
+  background: var(--restaurant-surface-white);
+  color: var(--restaurant-text-soft);
 
   font-size: 0.6875rem;
   font-weight: 600;
@@ -149,9 +149,9 @@
 }
 
 .live-preview__full:hover {
-  background: #f5f2e8;
-  border-color: #cfd4c5;
-  color: #262d20;
+  background: var(--restaurant-surface-soft);
+  border-color: var(--restaurant-border-strong);
+  color: var(--restaurant-text);
 }
 
 @media (max-width: 1100px) {
@@ -201,11 +201,11 @@
   min-width: 7rem;
   padding: 0 0.7rem;
 
-  border: 1px solid #dfdccf;
+  border: 1px solid var(--restaurant-border);
   border-radius: 0.45rem;
 
-  background: #fff;
-  color: #4a553b;
+  background: var(--restaurant-surface-white);
+  color: var(--restaurant-text-soft);
 
   font-size: 0.6875rem;
   font-weight: 600;
@@ -218,18 +218,18 @@
 }
 
 .live-preview__lang-dropdown-trigger:hover {
-  background: #f5f2e8;
-  border-color: #cfd4c5;
+  background: var(--restaurant-surface-soft);
+  border-color: var(--restaurant-border-strong);
 }
 
 .live-preview__lang-dropdown-trigger svg {
   width: 0.875rem;
   height: 0.875rem;
-  color: #747b6c;
+  color: var(--restaurant-muted-text);
 }
 
 .live-preview__lang-dropdown-trigger:focus-visible {
-  outline: 2px solid rgb(91 104 73 / 18%);
+  outline: 2px solid color-mix(in srgb, var(--restaurant-palette-olive) 18%, transparent);
   outline-offset: 1px;
 }
 .live-preview__toolbar-group--lang {
@@ -245,11 +245,11 @@
   margin: 0;
   padding: 0 0.7rem;
 
-  border: 1px solid #d3e1d0;
+  border: 1px solid color-mix(in srgb, var(--restaurant-success) 40%, transparent);
   border-radius: 999px;
 
-  background: #eaf2e7;
-  color: #4e8652;
+  background: var(--restaurant-success-soft);
+  color: var(--restaurant-accent-strong);
 
   font-size: 0.6875rem;
   font-weight: 700;

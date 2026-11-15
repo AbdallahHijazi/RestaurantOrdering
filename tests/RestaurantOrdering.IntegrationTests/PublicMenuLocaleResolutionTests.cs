@@ -46,6 +46,30 @@ public sealed class PublicMenuLocaleResolutionTests : IClassFixture<TestWebAppli
     }
 
     [Fact]
+    public async Task PublicMenu_ExposesSupportedLocales_SoAnonymousVisitorsNeedNoAdminEndpoint()
+    {
+        await SeedScenarioAsync();
+
+        using var client = _factory.CreateClient();
+        var menu = await GetMenuAsync(client, "en");
+
+        menu.SupportedLocales.Should().NotBeEmpty();
+        menu.SupportedLocales.Select(locale => locale.Code).Should().Contain(["ar", "en"]);
+
+        var arabic = menu.SupportedLocales.Single(locale => locale.Code == "ar");
+        arabic.IsDefault.Should().BeTrue();
+        arabic.Direction.Should().Be("rtl");
+        arabic.NativeName.Should().NotBeNullOrWhiteSpace();
+
+        var english = menu.SupportedLocales.Single(locale => locale.Code == "en");
+        english.IsDefault.Should().BeFalse();
+        english.Direction.Should().Be("ltr");
+
+        // The same data must be reachable without any credentials (customers are anonymous).
+        client.DefaultRequestHeaders.Authorization.Should().BeNull();
+    }
+
+    [Fact]
     public async Task LangAr_ReturnsArabicWithRtlDirection()
     {
         await SeedScenarioAsync();
@@ -491,7 +515,17 @@ public sealed class PublicMenuLocaleResolutionTests : IClassFixture<TestWebAppli
         public string Name { get; init; } = string.Empty;
         public string NameAr { get; init; } = string.Empty;
         public string? NameEn { get; init; }
+        public List<PublicMenuLocaleResponse> SupportedLocales { get; init; } = [];
         public List<PublicMenuCategoryResponse> Categories { get; init; } = [];
+    }
+
+    private sealed class PublicMenuLocaleResponse
+    {
+        public string Code { get; init; } = string.Empty;
+        public string DisplayName { get; init; } = string.Empty;
+        public string NativeName { get; init; } = string.Empty;
+        public string Direction { get; init; } = string.Empty;
+        public bool IsDefault { get; init; }
     }
 
     private sealed class PublicMenuCategoryResponse

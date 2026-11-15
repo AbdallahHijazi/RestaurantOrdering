@@ -1,7 +1,7 @@
 :host {
   --profile-linen: var(--restaurant-background, #faf9f5);
   --profile-linen-soft: var(--restaurant-surface-soft, #f7f5ee);
-  --profile-card: color-mix(in srgb, var(--restaurant-surface-elevated, #fff) 94%, #fff);
+  --profile-card: color-mix(in srgb, var(--restaurant-surface-elevated, #fff) 94%, var(--restaurant-surface-white));
   --profile-border: var(--restaurant-border, #e5e2d8);
   --profile-border-strong: var(--restaurant-border-strong, #d5d0c2);
   --profile-olive: var(--restaurant-accent, #4a583a);
@@ -32,7 +32,7 @@
   min-width: 0;
   padding: 0.5rem clamp(1rem, 3vw, 2rem);
   border-bottom: 1px solid var(--profile-border);
-  background: color-mix(in srgb, var(--profile-linen) 94%, #fff);
+  background: color-mix(in srgb, var(--profile-linen) 94%, var(--restaurant-surface-white));
 }
 
 .profile-console__tabs {
@@ -80,7 +80,7 @@
   color: var(--profile-olive-dark);
   background: var(--profile-olive-soft);
   font-weight: 750;
-  box-shadow: 0 1px 2px rgb(31 33 26 / 5%);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--restaurant-shadow-ink) 5%, transparent);
 }
 
 .profile-console__tab:focus-visible,
@@ -147,7 +147,7 @@
   padding: 0.68rem 0.8rem;
   outline: none;
   color: var(--profile-text);
-  background: color-mix(in srgb, var(--profile-linen-soft) 65%, #fff);
+  background: color-mix(in srgb, var(--profile-linen-soft) 65%, var(--restaurant-surface-white));
   font: inherit;
   font-size: 0.84rem;
   line-height: 1.55;
@@ -236,7 +236,7 @@
 .profile-console__btn--primary:not(:disabled):hover {
   border-color: var(--profile-olive-dark);
   background: var(--profile-olive-dark);
-  box-shadow: 0 0.3rem 0.75rem rgb(31 33 26 / 12%);
+  box-shadow: 0 0.3rem 0.75rem color-mix(in srgb, var(--restaurant-shadow-ink) 12%, transparent);
 }
 
 .profile-console__btn--secondary {

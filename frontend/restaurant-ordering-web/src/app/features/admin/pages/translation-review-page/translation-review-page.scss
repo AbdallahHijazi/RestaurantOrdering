@@ -95,7 +95,7 @@
 .translation-review-page__bulk {
   justify-self: start;
   background: var(--restaurant-accent);
-  color: #fff;
+  color: var(--restaurant-text-on-accent);
   border-color: transparent;
 }
 
@@ -157,7 +157,7 @@
 
 .translation-review-page__action--primary {
   background: var(--restaurant-accent);
-  color: #fff;
+  color: var(--restaurant-text-on-accent);
   border-color: transparent;
 }
 

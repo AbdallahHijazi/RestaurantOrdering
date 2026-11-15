@@ -7,6 +7,7 @@ using RestaurantOrdering.Application.Features.PublicMenu.Common;
 using RestaurantOrdering.Application.Features.PublicMenu.DTOs;
 using RestaurantOrdering.Application.Features.Restaurants.Common;
 using RestaurantOrdering.Domain.Entities;
+using RestaurantOrdering.Domain.Enums;
 
 namespace RestaurantOrdering.Application.Features.PublicMenu.Queries.GetPublicMenuBySlug;
 
@@ -60,6 +61,28 @@ public sealed class GetPublicMenuBySlugQueryHandler
             defaultLocale,
             supportedLocales,
             localeDefinitions);
+
+        var enabledLocaleCodes = supportedLocales
+            .Where(item => item.IsEnabled)
+            .OrderBy(item => item.SortOrder)
+            .Select(item => item.LocaleCode)
+            .ToList();
+        var localeNames = await _context.LocaleDefinitions
+            .AsNoTracking()
+            .Where(item => item.IsEnabled && enabledLocaleCodes.Contains(item.Code))
+            .ToDictionaryAsync(item => item.Code, cancellationToken);
+        var supportedLocaleDtos = enabledLocaleCodes
+            .Where(localeNames.ContainsKey)
+            .Select(code => new PublicMenuLocaleDto
+            {
+                Code = code,
+                DisplayName = localeNames[code].DisplayName,
+                NativeName = localeNames[code].NativeName,
+                Direction = localeNames[code].Direction == TextDirection.Rtl ? "rtl" : "ltr",
+                IsDefault = string.Equals(code, defaultLocale, StringComparison.OrdinalIgnoreCase)
+            })
+            .ToList()
+            .AsReadOnly();
 
         var legacyRestaurantTranslations = await LegacyBilingualTranslationLoader.LoadRestaurantAsync(
             _context,
@@ -287,6 +310,7 @@ public sealed class GetPublicMenuBySlugQueryHandler
             Name = localizedRestaurant.Name,
             Description = localizedRestaurant.Description,
             Address = localizedRestaurant.Address,
+            SupportedLocales = supportedLocaleDtos,
             Categories = categoryDtos
         };
     }

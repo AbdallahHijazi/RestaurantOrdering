@@ -17,8 +17,8 @@
   body {
     margin: 0 !important;
     padding: 0 !important;
-    background: #fff !important;
-    color: #000 !important;
+    background: var(--receipt-paper) !important;
+    color: var(--receipt-ink) !important;
   }
 
   body * {
@@ -86,12 +86,12 @@
 
     border: 0 !important;
 
-    background: #fff !important;
-    color: #000 !important;
+    background: var(--receipt-paper) !important;
+    color: var(--receipt-ink) !important;
 
     box-shadow: none !important;
 
-    font-family: Arial, Tahoma, sans-serif !important;
+    font-family: var(--restaurant-font-print) !important;
     font-size: 10pt;
     line-height: 1.35;
 
@@ -108,7 +108,7 @@
     padding: 0 0 3mm !important;
 
     border: 0 !important;
-    border-bottom: 1px dashed #000 !important;
+    border-bottom: 1px dashed var(--receipt-ink) !important;
 
     text-align: center !important;
 
@@ -119,7 +119,7 @@
   .order-invoice-print-area__title {
     margin: 0 0 1mm !important;
 
-    color: #000 !important;
+    color: var(--receipt-ink) !important;
 
     font-size: 16pt !important;
     font-weight: 800 !important;
@@ -131,9 +131,9 @@
   .order-invoice-print-area__order-number {
     margin: 0 !important;
 
-    color: #000 !important;
+    color: var(--receipt-ink) !important;
 
-    font-family: Arial, Tahoma, sans-serif !important;
+    font-family: var(--restaurant-font-print) !important;
     font-size: 8.5pt !important;
     font-weight: 500 !important;
     line-height: 1.25 !important;
@@ -160,7 +160,7 @@
     padding: 0 0 3mm !important;
 
     border: 0 !important;
-    border-bottom: 1px dashed #000 !important;
+    border-bottom: 1px dashed var(--receipt-ink) !important;
 
     background: transparent !important;
 
@@ -190,7 +190,7 @@
     margin: 0 !important;
     padding: 0 !important;
 
-    color: #000 !important;
+    color: var(--receipt-ink) !important;
 
     font-size: 8.5pt !important;
     line-height: 1.35 !important;
@@ -228,7 +228,7 @@
     border-spacing: 0 !important;
 
     background: transparent !important;
-    color: #000 !important;
+    color: var(--receipt-ink) !important;
 
     table-layout: fixed !important;
 
@@ -240,7 +240,7 @@
     display: table-header-group !important;
 
     border-top: 0 !important;
-    border-bottom: 1px dashed #000 !important;
+    border-bottom: 1px dashed var(--receipt-ink) !important;
   }
 
   .order-invoice-print-area__table th,
@@ -250,7 +250,7 @@
     border: 0 !important;
 
     background: transparent !important;
-    color: #000 !important;
+    color: var(--receipt-ink) !important;
 
     vertical-align: top !important;
   }
@@ -306,7 +306,7 @@
   .order-invoice-print-area__item-name {
     display: block;
 
-    color: #000 !important;
+    color: var(--receipt-ink) !important;
 
     font-size: 8.5pt !important;
     font-weight: 600 !important;
@@ -320,7 +320,7 @@
 
     margin-top: 0.6mm !important;
 
-    color: #000 !important;
+    color: var(--receipt-ink) !important;
 
     font-size: 7pt !important;
     font-weight: 400 !important;
@@ -350,7 +350,7 @@
     padding: 2mm 0 0 !important;
 
     border: 0 !important;
-    border-top: 1px dashed #000 !important;
+    border-top: 1px dashed var(--receipt-ink) !important;
 
     background: transparent !important;
 
@@ -370,19 +370,19 @@
 
     border: 0 !important;
 
-    color: #000 !important;
+    color: var(--receipt-ink) !important;
 
     font-size: 8.75pt !important;
     line-height: 1.3 !important;
   }
 
   .order-invoice-print-area__summary-line span {
-    color: #000 !important;
+    color: var(--receipt-ink) !important;
     font-weight: 600 !important;
   }
 
   .order-invoice-print-area__summary-line strong {
-    color: #000 !important;
+    color: var(--receipt-ink) !important;
 
     font-size: 9pt !important;
     font-weight: 700 !important;
@@ -395,10 +395,10 @@
 
     padding: 2mm 0 !important;
 
-    border-top: 3px double #000 !important;
-    border-bottom: 1px dashed #000 !important;
+    border-top: 3px double var(--receipt-ink) !important;
+    border-bottom: 1px dashed var(--receipt-ink) !important;
 
-    color: #000 !important;
+    color: var(--receipt-ink) !important;
 
     font-size: 13pt !important;
     font-weight: 800 !important;
@@ -411,7 +411,7 @@
   }
 
   .order-invoice-print-area__summary-line--total strong {
-    color: #000 !important;
+    color: var(--receipt-ink) !important;
 
     font-size: 15pt !important;
     font-weight: 900 !important;
@@ -428,7 +428,7 @@
 
     border: 0 !important;
 
-    color: #000 !important;
+    color: var(--receipt-ink) !important;
 
     font-size: 8pt !important;
     font-weight: 600 !important;
@@ -448,7 +448,7 @@
     direction: rtl !important;
     text-align: right !important;
 
-    font-family: Tahoma, Arial, sans-serif !important;
+    font-family: var(--restaurant-font-print-alt) !important;
   }
 
   .order-invoice-print-area[dir='rtl']

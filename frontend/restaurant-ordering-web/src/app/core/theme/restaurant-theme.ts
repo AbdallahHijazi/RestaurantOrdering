@@ -1,103 +1,57 @@
 import { Injectable } from '@angular/core';
 
-
-
-export const DEFAULT_RESTAURANT_ACCENT = '#6e7b4e';
-
-
+/**
+ * Last-resort fallback ONLY (used when the stylesheet is not available, e.g. unit tests / SSR).
+ * The single source of truth for the palette is `src/styles.scss` (`--restaurant-olive`, …).
+ * Change colours there; do not rely on this constant.
+ */
+export const DEFAULT_RESTAURANT_ACCENT = '#9c3d2e';
 
 const HEX_COLOR_PATTERN = /^#[0-9A-Fa-f]{6}$/;
 
-
-
-@Injectable({
-
-  providedIn: 'root',
-
-})
-
-export class RestaurantThemeService {
-
-  private appliedAccent = DEFAULT_RESTAURANT_ACCENT;
-
-
-
-  constructor() {
-
-    this.applyAccent(DEFAULT_RESTAURANT_ACCENT);
-
+/** Reads the central accent from the live stylesheet (resolved custom property). */
+function readCentralAccent(): string {
+  try {
+    if (typeof document === 'undefined') {
+      return DEFAULT_RESTAURANT_ACCENT;
+    }
+    const value = getComputedStyle(document.documentElement)
+      .getPropertyValue('--restaurant-olive')
+      .trim();
+    return HEX_COLOR_PATTERN.test(value) ? value : DEFAULT_RESTAURANT_ACCENT;
+  } catch {
+    return DEFAULT_RESTAURANT_ACCENT;
   }
-
-
-
-  sanitizeAccentColor(value: string | null | undefined): string {
-
-    const trimmed = (value ?? '').trim();
-
-    return HEX_COLOR_PATTERN.test(trimmed) ? trimmed : DEFAULT_RESTAURANT_ACCENT;
-
-  }
-
-
-
-  applyAccent(value: string | null | undefined): string {
-
-    const sanitized = this.sanitizeAccentColor(value);
-
-    // Three-color identity: backend accent is validated/stored but UI always uses Olive.
-
-    this.appliedAccent = DEFAULT_RESTAURANT_ACCENT;
-
-    const root = document.documentElement.style;
-
-    root.setProperty('--restaurant-accent', DEFAULT_RESTAURANT_ACCENT);
-
-    root.setProperty(
-
-      '--restaurant-accent-strong',
-
-      'color-mix(in srgb, var(--restaurant-olive) 86%, var(--restaurant-sage))',
-
-    );
-
-    root.setProperty(
-
-      '--restaurant-accent-soft',
-
-      'color-mix(in srgb, var(--restaurant-sage) 32%, transparent)',
-
-    );
-
-    root.setProperty(
-
-      '--restaurant-accent-border',
-
-      'color-mix(in srgb, var(--restaurant-olive) 42%, transparent)',
-
-    );
-
-    return sanitized;
-
-  }
-
-
-
-  getAppliedAccent(): string {
-
-    return this.appliedAccent;
-
-  }
-
 }
 
+/**
+ * Validates restaurant accent values coming from the API.
+ *
+ * Theme variables (`--restaurant-accent`, `-strong`, `-soft`, `-border`, …) are defined centrally in
+ * `src/styles.scss` and derived from the three palette colours. This service deliberately does NOT
+ * write them to the document: a per-restaurant accent is applied locally by the public menu page
+ * (see `[style.--restaurant-accent]` in menu-page.html), and the admin UI always follows the palette.
+ */
+@Injectable({
+  providedIn: 'root',
+})
+export class RestaurantThemeService {
+  sanitizeAccentColor(value: string | null | undefined): string {
+    const trimmed = (value ?? '').trim();
+    return HEX_COLOR_PATTERN.test(trimmed) ? trimmed : readCentralAccent();
+  }
 
+  /** Validates the backend accent; the UI itself keeps following the central palette. */
+  applyAccent(value: string | null | undefined): string {
+    return this.sanitizeAccentColor(value);
+  }
+
+  getAppliedAccent(): string {
+    return readCentralAccent();
+  }
+}
 
 export { HEX_COLOR_PATTERN as RESTAURANT_ACCENT_HEX_PATTERN };
 
-
-
 /** @deprecated Use RestaurantThemeService */
-
 export { RestaurantThemeService as RestaurantTheme };
-
-

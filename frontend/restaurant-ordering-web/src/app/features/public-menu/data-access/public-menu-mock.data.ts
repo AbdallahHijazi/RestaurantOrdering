@@ -47,7 +47,7 @@ export const MOCK_PUBLIC_MENU: PublicMenuPageData = {
       'A seasonal culinary experience blending local heritage with botanical elegance.',
     logoUrl: IMAGE.logo,
     coverImageUrl: IMAGE.cover,
-    primaryAccentColor: '#6E7B4E',
+    primaryAccentColor: '#9C3D2E',
     countryCode: 'SA',
     currencyCode: 'SAR',
     timeZone: 'Asia/Riyadh',
@@ -191,6 +191,7 @@ export const MOCK_PUBLIC_MENU: PublicMenuPageData = {
     },
   ],
   locale: createDefaultPublicMenuLocaleContext('ar'),
+  supportedLocales: [],
 };
 
 export const MOCK_IMAGE_FALLBACK =

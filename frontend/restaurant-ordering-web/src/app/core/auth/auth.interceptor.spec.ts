@@ -120,6 +120,21 @@ describe('authInterceptor', () => {
     expect(navigateSpy).toHaveBeenCalledWith('/login');
   });
 
+  it('does not redirect to login when an anonymous (no session) admin request returns 401', () => {
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigateByUrl');
+
+    http.get(`${API_BASE_URL}/api/v1/admin/restaurants/111/locales`).subscribe({
+      error: () => undefined,
+    });
+
+    const req = httpMock.expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/111/locales`);
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    req.flush({}, { status: 401, statusText: 'Unauthorized' });
+
+    expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
   it('does not clear session when login returns 401', () => {
     saveValidSession();
 

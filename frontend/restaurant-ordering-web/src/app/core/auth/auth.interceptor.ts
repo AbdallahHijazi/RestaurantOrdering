@@ -37,19 +37,22 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const sessionService = inject(AuthSessionService);
   const shouldAttach = isTrustedAdminApiRequest(request.url, API_BASE_URL);
 
-  const requestWithAuth =
-    shouldAttach && sessionService.getAccessToken()
-      ? request.clone({
-          setHeaders: {
-            Authorization: `Bearer ${sessionService.getAccessToken()}`,
-          },
-        })
-      : request;
+  const accessToken = shouldAttach ? sessionService.getAccessToken() : null;
+
+  const requestWithAuth = accessToken
+    ? request.clone({
+        setHeaders: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+    : request;
 
   return next(requestWithAuth).pipe(
     catchError((error: unknown) => {
+      // Only a request that actually carried a token can mean "session expired".
+      // An anonymous 401 must never redirect (e.g. customers browsing the public menu).
       if (
-        shouldAttach &&
+        accessToken &&
         error instanceof HttpErrorResponse &&
         error.status === 401
       ) {

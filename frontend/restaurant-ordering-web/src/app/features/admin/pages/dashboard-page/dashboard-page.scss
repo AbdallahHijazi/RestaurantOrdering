@@ -10,7 +10,7 @@
   --dashboard-surface-soft: var(--restaurant-surface-soft, #f8f7f1);
   --dashboard-page: var(--restaurant-background, #f6f4ea);
 
-  --dashboard-shadow: 0 1px 3px rgb(38 45 32 / 4%);
+  --dashboard-shadow: 0 1px 3px color-mix(in srgb, var(--restaurant-shadow-ink) 4%, transparent);
 
   width: min(100%, 75rem);
   margin-inline: auto;
@@ -130,7 +130,7 @@
   background: var(--dashboard-surface-soft);
   border-color: var(--dashboard-accent);
 
-  box-shadow: 0 1px 3px rgb(38 45 32 / 5%);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--restaurant-shadow-ink) 5%, transparent);
 }
 
 .dashboard-button:disabled {
@@ -181,7 +181,7 @@
 
 .stat-card:hover {
   border-color: var(--dashboard-border-strong);
-  box-shadow: 0 3px 8px rgb(38 45 32 / 6%);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--restaurant-shadow-ink) 6%, transparent);
 }
 
 .stat-card__icon {
@@ -514,28 +514,28 @@
 }
 
 .status--new {
-  background: #f3eee1;
-  color: #806b3d;
+  background: var(--restaurant-status-new-bg);
+  color: var(--restaurant-status-new-text);
 }
 
 .status--preparing {
-  background: #f0ecdf;
-  color: #76683f;
+  background: var(--restaurant-status-preparing-bg);
+  color: var(--restaurant-status-preparing-text);
 }
 
 .status--ready {
-  background: #e9efe3;
-  color: #587044;
+  background: var(--restaurant-status-ready-bg);
+  color: var(--restaurant-status-ready-text);
 }
 
 .status--completed {
-  background: #e7eee0;
-  color: #536d40;
+  background: var(--restaurant-status-completed-bg);
+  color: var(--restaurant-status-completed-text);
 }
 
 .status--cancelled {
-  background: #f0e8e3;
-  color: #8a6757;
+  background: var(--restaurant-status-cancelled-bg);
+  color: var(--restaurant-status-cancelled-text);
 }
 
 /* =========================================================
@@ -647,7 +647,7 @@
 
 .quick-actions__primary:hover {
   opacity: 0.92;
-  box-shadow: 0 2px 6px rgb(38 45 32 / 10%);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--restaurant-shadow-ink) 10%, transparent);
 }
 
 .quick-actions__link {

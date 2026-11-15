@@ -4,15 +4,21 @@
 @import '@fontsource/playfair-display/700.css';
 @import '@fontsource/playfair-display/800.css';
 @import '@fontsource/playfair-display/900.css';
+/* Arabic display/body face (referenced by --restaurant-font-*-ar below). */
+@import '@fontsource/amiri/400.css';
+@import '@fontsource/amiri/700.css';
 
 :root {
   /* Strict three-color palette */
-  --restaurant-ivory: #f7f5eb;
-  --restaurant-sage: #a4b48a;
-  --restaurant-olive: #6e7b4e;
+  --restaurant-ivory: #f8f3ea;
+  --restaurant-sage: #d2a58c;
+  --restaurant-olive: #9c3d2e;
   --restaurant-palette-ivory: var(--restaurant-ivory);
   --restaurant-palette-sage: var(--restaurant-sage);
   --restaurant-palette-olive: var(--restaurant-olive);
+  /* Ink: text colour (dark warm brown). Brand colour (olive slot) is for accents/buttons, not body text. */
+  --restaurant-ink: #3b2a25;
+  --restaurant-palette-ink: var(--restaurant-ink);
 
   /* Z-index */
   --z-admin-header: 100;
@@ -30,6 +36,9 @@
   --restaurant-font-ar: var(--restaurant-font-body-ar);
   --restaurant-font-en: var(--restaurant-font-body-en);
   --restaurant-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* Receipt / thermal-printer output: plain system faces that print reliably. */
+  --restaurant-font-print: Arial, Tahoma, sans-serif;
+  --restaurant-font-print-alt: Tahoma, Arial, sans-serif;
   --font-display: var(--restaurant-font-display);
   --font-body: var(--restaurant-font-body);
 
@@ -107,12 +116,12 @@
   );
   --restaurant-primary-button-text: var(--restaurant-ivory);
   --restaurant-primary-button-highlight: color-mix(in srgb, var(--restaurant-sage) 34%, transparent);
-  --restaurant-primary-button-shadow: 0 10px 24px rgb(110 123 78 / 0.18);
-  --restaurant-primary-button-shadow-hover: 0 12px 28px rgb(110 123 78 / 0.22);
+  --restaurant-primary-button-shadow: 0 10px 24px color-mix(in srgb, var(--restaurant-palette-olive) 18%, transparent);
+  --restaurant-primary-button-shadow-hover: 0 12px 28px color-mix(in srgb, var(--restaurant-palette-olive) 22%, transparent);
 
   /* Card hover + focus (palette-only) */
   --restaurant-card-hover-border: color-mix(in srgb, var(--restaurant-olive) 42%, transparent);
-  --restaurant-card-hover-shadow: 0 18px 42px rgb(110 123 78 / 0.16);
+  --restaurant-card-hover-shadow: 0 18px 42px color-mix(in srgb, var(--restaurant-palette-olive) 16%, transparent);
   --restaurant-focus-ring: color-mix(in srgb, var(--restaurant-olive) 54%, transparent);
 
   /* Legacy gradient aliases (mapped to readable primary buttons) */
@@ -130,29 +139,17 @@
   );
 
   /* Text */
-  --restaurant-text: var(--restaurant-palette-olive);
-  --restaurant-text-soft: color-mix(
-    in srgb,
-    var(--restaurant-palette-olive) 72%,
-    var(--restaurant-palette-sage)
-  );
-  --restaurant-muted-text: color-mix(
-    in srgb,
-    var(--restaurant-palette-olive) 48%,
-    var(--restaurant-palette-sage)
-  );
-  --restaurant-subtle-text: color-mix(
-    in srgb,
-    var(--restaurant-palette-sage) 78%,
-    var(--restaurant-palette-ivory)
-  );
+  --restaurant-text: var(--restaurant-palette-ink);
+  --restaurant-text-soft: color-mix(in srgb, var(--restaurant-palette-ink) 80%, var(--restaurant-palette-ivory));
+  --restaurant-muted-text: color-mix(in srgb, var(--restaurant-palette-ink) 62%, var(--restaurant-palette-ivory));
+  --restaurant-subtle-text: color-mix(in srgb, var(--restaurant-palette-ink) 46%, var(--restaurant-palette-ivory));
   --restaurant-text-on-gold: var(--restaurant-palette-ivory);
   --restaurant-text-on-accent: var(--restaurant-palette-ivory);
   --restaurant-text-on-dark: var(--restaurant-palette-ivory);
 
   /* Borders */
-  --restaurant-border: color-mix(in srgb, var(--restaurant-palette-olive) 18%, transparent);
-  --restaurant-border-strong: color-mix(in srgb, var(--restaurant-palette-olive) 38%, transparent);
+  --restaurant-border: color-mix(in srgb, var(--restaurant-palette-ink) 14%, transparent);
+  --restaurant-border-strong: color-mix(in srgb, var(--restaurant-palette-ink) 30%, transparent);
   --restaurant-border-soft: color-mix(in srgb, var(--restaurant-palette-sage) 22%, transparent);
   --restaurant-border-menu: var(--restaurant-border);
   --restaurant-border-menu-strong: var(--restaurant-border-strong);
@@ -207,11 +204,11 @@
   --restaurant-console-text-on-dark: var(--restaurant-text-on-dark);
   --restaurant-console-text-on-dark-muted: var(--restaurant-text-soft);
   --restaurant-console-shadow: var(--restaurant-shadow-sm);
-  --restaurant-console-backdrop: color-mix(in srgb, var(--restaurant-palette-olive) 42%, transparent);
+  --restaurant-console-backdrop: color-mix(in srgb, var(--restaurant-palette-ink) 42%, transparent);
 
   /* Kitchen functional status colors */
   --restaurant-kitchen-new: var(--restaurant-palette-sage);
-  --restaurant-kitchen-new-text: var(--restaurant-palette-olive);
+  --restaurant-kitchen-new-text: var(--restaurant-palette-ink);
   --restaurant-kitchen-indicator: var(--restaurant-surface-muted);
   --restaurant-kitchen-delivery: color-mix(in srgb, var(--restaurant-palette-sage) 24%, transparent);
   --restaurant-kitchen-delivery-text: var(--restaurant-text);
@@ -234,6 +231,25 @@
   --restaurant-preview-muted: var(--restaurant-muted-text);
   --restaurant-preview-device-chrome: var(--restaurant-surface-elevated);
 
+  /* Shadow ink: base colour for every soft drop-shadow (kept dark for depth, tinted by the palette). */
+  --restaurant-shadow-ink: color-mix(in srgb, var(--restaurant-palette-ink) 80%, black);
+
+  /* Order status chips (dashboard) */
+  --restaurant-status-new-bg: color-mix(in srgb, var(--restaurant-palette-sage) 12%, var(--restaurant-palette-ivory));
+  --restaurant-status-new-text: var(--restaurant-text-soft);
+  --restaurant-status-preparing-bg: color-mix(in srgb, var(--restaurant-palette-sage) 22%, var(--restaurant-palette-ivory));
+  --restaurant-status-preparing-text: var(--restaurant-text-soft);
+  --restaurant-status-ready-bg: color-mix(in srgb, var(--restaurant-palette-sage) 32%, var(--restaurant-palette-ivory));
+  --restaurant-status-ready-text: var(--restaurant-text);
+  --restaurant-status-completed-bg: color-mix(in srgb, var(--restaurant-palette-olive) 16%, var(--restaurant-palette-ivory));
+  --restaurant-status-completed-text: var(--restaurant-text);
+  --restaurant-status-cancelled-bg: color-mix(in srgb, var(--restaurant-palette-olive) 7%, var(--restaurant-palette-ivory));
+  --restaurant-status-cancelled-text: var(--restaurant-muted-text);
+
+  /* Receipt printing is deliberately pure black on white (thermal printers). */
+  --receipt-ink: #000;
+  --receipt-paper: #fff;
+
   /* Print-safe palette */
   --restaurant-print-surface: var(--restaurant-palette-ivory);
   --restaurant-print-surface-soft: color-mix(
@@ -241,7 +257,7 @@
     var(--restaurant-palette-sage) 8%,
     var(--restaurant-palette-ivory)
   );
-  --restaurant-print-text: var(--restaurant-palette-olive);
+  --restaurant-print-text: var(--restaurant-palette-ink);
   --restaurant-print-muted: color-mix(
     in srgb,
     var(--restaurant-palette-olive) 55%,
@@ -286,16 +302,16 @@
   --radius-lg: var(--restaurant-radius-lg);
 
   /* Shadows */
-  --restaurant-shadow-xs: 0 4px 12px color-mix(in srgb, var(--restaurant-palette-olive) 10%, transparent);
-  --restaurant-shadow-sm: 0 10px 26px color-mix(in srgb, var(--restaurant-palette-olive) 14%, transparent);
-  --restaurant-shadow-md: 0 18px 48px color-mix(in srgb, var(--restaurant-palette-olive) 18%, transparent);
-  --restaurant-shadow-lg: 0 28px 84px color-mix(in srgb, var(--restaurant-palette-olive) 22%, transparent);
+  --restaurant-shadow-xs: 0 4px 12px color-mix(in srgb, var(--restaurant-palette-ink) 10%, transparent);
+  --restaurant-shadow-sm: 0 10px 26px color-mix(in srgb, var(--restaurant-palette-ink) 14%, transparent);
+  --restaurant-shadow-md: 0 18px 48px color-mix(in srgb, var(--restaurant-palette-ink) 18%, transparent);
+  --restaurant-shadow-lg: 0 28px 84px color-mix(in srgb, var(--restaurant-palette-ink) 22%, transparent);
   --shadow-soft: var(--restaurant-shadow-sm);
   --restaurant-shadow-menu-sm: var(--restaurant-shadow-xs);
   --restaurant-shadow-menu-md: var(--restaurant-shadow-sm);
   --restaurant-shadow-admin-sm: var(--restaurant-shadow-xs);
   --restaurant-shadow-admin-md: var(--restaurant-shadow-sm);
-  --restaurant-overlay-backdrop: color-mix(in srgb, var(--restaurant-palette-olive) 55%, transparent);
+  --restaurant-overlay-backdrop: color-mix(in srgb, var(--restaurant-palette-ink) 55%, transparent);
 
   /* Motion */
   --restaurant-motion-fast: 160ms;

@@ -29,7 +29,17 @@ export interface PublicMenuApiDto {
   name?: string | null;
   description?: string | null;
   address?: string | null;
+  /** Languages the restaurant offers publicly (so anonymous visitors never call admin endpoints). */
+  supportedLocales?: PublicMenuLocaleApiDto[] | null;
   categories: PublicMenuCategoryApiDto[];
+}
+
+export interface PublicMenuLocaleApiDto {
+  code: string;
+  displayName?: string | null;
+  nativeName?: string | null;
+  direction?: string | null;
+  isDefault?: boolean | null;
 }
 
 export interface PublicMenuCategoryApiDto {

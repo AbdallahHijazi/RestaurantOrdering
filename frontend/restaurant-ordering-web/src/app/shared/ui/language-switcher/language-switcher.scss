@@ -22,7 +22,7 @@
   background: var(--restaurant-surface, #fff);
   color: var(--restaurant-text, #262d20);
 
-  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--restaurant-shadow-ink) 4%, transparent);
 
   font: inherit;
   font-size: 0.75rem;
@@ -37,16 +37,16 @@
 }
 
 .language-switcher__trigger:hover {
-  background: #faf8f2;
-  border-color: #ccd5c1;
+  background: var(--restaurant-surface-elevated);
+  border-color: var(--restaurant-border-strong);
 }
 
 .language-switcher__trigger.is-open {
-  border-color: #5b6849;
+  border-color: var(--restaurant-accent-strong);
 
   box-shadow:
-    0 0 0 2px rgb(91 104 73 / 12%),
-    0 1px 2px rgb(0 0 0 / 4%);
+    0 0 0 2px color-mix(in srgb, var(--restaurant-palette-olive) 12%, transparent),
+    0 1px 2px color-mix(in srgb, var(--restaurant-shadow-ink) 4%, transparent);
 }
 
 .language-switcher__trigger:disabled {
@@ -63,7 +63,7 @@
 
   flex: 0 0 auto;
 
-  color: #747b6c;
+  color: var(--restaurant-muted-text);
 }
 
 .language-switcher__globe svg {
@@ -94,7 +94,7 @@
 
   flex: 0 0 auto;
 
-  color: #747b6c;
+  color: var(--restaurant-muted-text);
 
   transition: transform 160ms ease;
 }
@@ -124,21 +124,21 @@
   max-width: calc(100vw - 1rem);
   padding: 0.45rem;
 
-  border: 1px solid #e1ded2;
+  border: 1px solid var(--restaurant-border);
   border-radius: 0.75rem;
 
-  background: #fff;
+  background: var(--restaurant-surface-white);
 
   box-shadow:
-    0 12px 30px rgb(38 45 32 / 12%),
-    0 2px 8px rgb(38 45 32 / 6%);
+    0 12px 30px color-mix(in srgb, var(--restaurant-shadow-ink) 12%, transparent),
+    0 2px 8px color-mix(in srgb, var(--restaurant-shadow-ink) 6%, transparent);
 }
 
 .language-switcher__menu-title {
   margin: 0;
   padding: 0.45rem 0.55rem 0.5rem;
 
-  color: #8a8f82;
+  color: var(--restaurant-subtle-text);
 
   font-size: 0.625rem;
   font-weight: 700;
@@ -168,7 +168,7 @@
   border-radius: 0.5rem;
 
   background: transparent;
-  color: #5d6556;
+  color: var(--restaurant-text-soft);
 
   font: inherit;
   font-size: 0.75rem;
@@ -202,13 +202,13 @@
 }
 
 .language-switcher__option:hover {
-  background: #f5f2e8;
-  color: #262d20;
+  background: var(--restaurant-surface-soft);
+  color: var(--restaurant-text);
 }
 
 .language-switcher__option.is-selected {
-  background: #eaf0e3;
-  color: #3b4b28;
+  background: var(--restaurant-success-soft);
+  color: var(--restaurant-text);
 
   font-weight: 700;
 }
@@ -220,7 +220,7 @@
   width: 1rem;
   height: 1rem;
 
-  color: #5b6849;
+  color: var(--restaurant-accent-strong);
 }
 
 .language-switcher__check svg {
@@ -253,8 +253,8 @@
 
   border-radius: 0.3rem;
 
-  background: #f0efe7;
-  color: #8a8f82;
+  background: var(--restaurant-surface-muted);
+  color: var(--restaurant-subtle-text);
 
   font-size: 0.5625rem;
   font-weight: 700;
@@ -262,17 +262,17 @@
 }
 
 .language-switcher__option.is-selected .language-switcher__badge {
-  background: #dfe7d6;
-  color: #5b6849;
+  background: var(--restaurant-surface-muted);
+  color: var(--restaurant-accent-strong);
 }
 
 .language-switcher__footer {
   margin-top: 0.4rem;
   padding: 0.55rem 0.55rem 0.25rem;
 
-  border-top: 1px solid #eeeae0;
+  border-top: 1px solid var(--restaurant-border-soft);
 
-  color: #8a8f82;
+  color: var(--restaurant-subtle-text);
 
   font-size: 0.6rem;
   font-weight: 400;
