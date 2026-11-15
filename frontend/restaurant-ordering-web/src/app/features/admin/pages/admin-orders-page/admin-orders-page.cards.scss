@@ -422,6 +422,13 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+/* Large screens: let the cards view add columns instead of stretching three wide cards. */
+@media (min-width: 90rem) {
+  .orders-management-page__grid,
+  .orders-management-page__skeleton-grid {
+    grid-template-columns: repeat(auto-fill, minmax(clamp(22rem, 16vw, 32rem), 1fr));
+  }
+}
 @media (max-width: 40rem) {
   .orders-management-page__view-switcher {
     align-self: flex-start;

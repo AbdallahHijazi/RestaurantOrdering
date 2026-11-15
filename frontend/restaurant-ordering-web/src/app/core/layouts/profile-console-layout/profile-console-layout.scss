@@ -392,5 +392,5 @@
 .profile-console__shell--scrollable {
   overflow-x: hidden;
   overflow-y: auto;
-  padding: clamp(1rem, 2.5vw, 1.75rem);
+  padding: clamp(1rem, 2.5vw, 1.75rem) var(--layout-gutter);
 }

@@ -12,7 +12,7 @@
 
   --dashboard-shadow: 0 1px 3px color-mix(in srgb, var(--restaurant-shadow-ink) 4%, transparent);
 
-  width: min(100%, 75rem);
+  width: 100%;
   margin-inline: auto;
 
   display: flex;
@@ -242,7 +242,7 @@
 
   grid-template-columns:
     minmax(0, 1fr)
-    16.5rem;
+    clamp(16.5rem, 15vw, 28rem);
 
   gap: 0.9rem;
 

@@ -14,9 +14,9 @@
   --kitchen-delivery: var(--restaurant-kitchen-delivery);
   --kitchen-delivery-text: var(--restaurant-kitchen-delivery-text);
 
-  width: min(100%, 80rem);
+  width: 100%;
   margin-inline: auto;
-  padding: clamp(1rem, 3vw, 1.75rem);
+  padding: clamp(1rem, 3vw, 1.75rem) var(--layout-gutter);
   display: flex;
   flex-direction: column;
   gap: 1rem;

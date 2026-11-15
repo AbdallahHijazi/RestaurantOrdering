@@ -33,7 +33,7 @@
 
 .menu-page__header-inner,
 .menu-page__container {
-  width: min(100% - 2rem, 80rem);
+  width: calc(100% - 2 * var(--layout-gutter));
   margin-inline: auto;
 }
 
@@ -365,7 +365,7 @@
 }
 
 .menu-page__loading {
-  width: min(100% - 2rem, 80rem);
+  width: calc(100% - 2 * var(--layout-gutter));
   margin-inline: auto;
   padding-block: 1rem 2rem;
 }
@@ -417,6 +417,14 @@
   .menu-page__skeleton-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 1.15rem;
+  }
+}
+
+/* Large screens: add columns (cards keep their proportions) instead of capping at four. */
+@media (min-width: 64rem) {
+  .menu-page__grid,
+  .menu-page__skeleton-grid {
+    grid-template-columns: repeat(auto-fill, minmax(clamp(14rem, 14.5vw, 22rem), 1fr));
   }
 }
 

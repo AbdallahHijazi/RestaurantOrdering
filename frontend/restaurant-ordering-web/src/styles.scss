@@ -290,6 +290,13 @@
   --restaurant-neutral-300: var(--restaurant-border);
   --restaurant-neutral-100: var(--restaurant-surface-soft);
 
+  /* Fluid layout system.
+     --layout-gutter is the ONE side margin of every page shell. It grows with the viewport (about 2.2vw), so desktop
+     pages use roughly 95% of the width while phones keep a comfortable edge and 4K keeps a sane one.
+     Main containers have NO max-width; only forms (--layout-form-max), readable text and dialogs keep caps. */
+  --layout-gutter: clamp(1.1rem, 2.2vw, 3.5rem);
+  --layout-form-max: min(72vw, 90rem);
+
   /* Radius */
   --restaurant-radius-xs: 8px;
   --restaurant-radius-sm: 10px;
@@ -339,6 +346,9 @@ html[dir='ltr'] {
 
 html {
   scroll-behavior: smooth;
+  /* Ultra-wide / 4K: grow rem-based UI gently (1rem at <=2200px up to 1.375rem at 3840px) so density stays intentional.
+     Not a zoom/transform: layout, typography and spacing simply scale with the viewport. */
+  font-size: clamp(1rem, calc(1rem + (100vw - 2200px) * 0.00366), 1.375rem);
 }
 
 html[dir='rtl'] body {

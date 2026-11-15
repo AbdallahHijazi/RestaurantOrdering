@@ -29,6 +29,7 @@
 
 .locale-settings__card {
   display: grid;
+  container-type: inline-size;
   gap: 1.5rem;
   margin-bottom: 1rem;
 }
@@ -308,5 +309,17 @@
 @keyframes locale-settings-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Wide panels (large monitors): spread languages and translation modes over several columns
+   instead of stretching single, mostly empty rows. Narrower panels keep the original stacked list. */
+@container (min-width: 60rem) {
+  .locale-settings__lang-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  }
+
+  .locale-settings__modes {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
   }
 }

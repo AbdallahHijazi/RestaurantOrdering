@@ -184,7 +184,7 @@
   z-index: 45;
   inset-inline: 0;
   inset-block-end: 0;
-  padding: 0.65rem clamp(1rem, 3.5vw, 2.5rem);
+  padding: 0.65rem var(--layout-gutter);
   border-top: 1px solid var(--profile-border);
   background: color-mix(in srgb, var(--profile-card) 94%, transparent);
   box-shadow: 0 -0.4rem 1.4rem color-mix(in srgb, var(--restaurant-shadow-ink) 8%, transparent);
@@ -196,7 +196,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  width: min(100%, 80rem);
+  width: 100%;
   margin-inline: auto;
 }
 
