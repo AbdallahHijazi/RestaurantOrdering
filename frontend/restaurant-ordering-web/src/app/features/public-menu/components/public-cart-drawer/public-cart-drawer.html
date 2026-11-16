@@ -44,22 +44,14 @@
           </div>
         </div>
         <button
-          type="button"
-          class="public-cart-drawer__close"
+          appIconButton
+          icon="x"
+          variant="ghost"
+          size="sm"
+          [label]="ui().publicCartCloseAria"
           data-testid="public-cart-drawer-close"
-          [attr.aria-label]="ui().publicCartCloseAria"
           (click)="closed.emit()"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path
-              d="m7 7 10 10M17 7 7 17"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
+        ></button>
       </header>
 
       <div class="public-cart-drawer__body">
@@ -159,24 +151,14 @@
                       </button>
                     </div>
                     <button
-                      type="button"
-                      class="public-cart-drawer__remove"
+                      appIconButton
+                      icon="trash"
+                      variant="ghost"
+                      size="sm"
+                      [label]="ui().publicCartRemove"
                       data-testid="public-cart-remove"
-                      [attr.aria-label]="ui().publicCartRemove"
                       (click)="remove(line.menuItemId)"
-                    >
-                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <path
-                          d="M4 7h16M10 11v6M14 11v6M6 7l1 12h10l1-12M9 7V5h6v2"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                      <span>{{ ui().publicCartRemove }}</span>
-                    </button>
+                    ></button>
                   </div>
                 </div>
               </article>

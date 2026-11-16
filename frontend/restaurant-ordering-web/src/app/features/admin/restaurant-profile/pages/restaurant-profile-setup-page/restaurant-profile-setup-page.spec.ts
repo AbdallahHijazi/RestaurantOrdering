@@ -460,7 +460,9 @@ describe('RestaurantProfileSetupPage', () => {
     flushLoadedSettings();
     const saveButton = fixture.nativeElement.querySelector('[data-testid="profile-save-identity"]');
     expect(saveButton).toBeTruthy();
-    expect(saveButton?.textContent).toContain('Save identity changes');
+    // icon-only (UX-008): the action name lives in the localized aria-label / tooltip
+    expect(saveButton?.getAttribute('aria-label')).toContain('Save identity changes');
+    expect(saveButton?.querySelector('svg')).toBeTruthy();
   });
 
   it('saves ordering settings independently from restaurant profile', () => {
@@ -505,7 +507,9 @@ describe('RestaurantProfileSetupPage', () => {
     fixture.detectChanges();
     expect(document.documentElement.dir).toBe('rtl');
     selectTab('delivery');
-    expect(fixture.nativeElement.textContent).toContain('إعدادات التوصيل والطلبات');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="profile-save-ordering-settings"]')?.getAttribute('aria-label'),
+    ).toContain('إعدادات التوصيل والطلبات');
   });
 
   it('supports keyboard tab navigation with Home and End', () => {

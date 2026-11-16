@@ -22,6 +22,7 @@ import { RestaurantProfileApiService } from '../../restaurant-profile/data-acces
 import { RestaurantTablesService } from '../../data-access/restaurant-tables.service';
 import type { RestaurantTable } from '../../data-access/restaurant-tables.models';
 import { StaffModalActions } from '../staff-management-page/components/staff-modal-actions/staff-modal-actions';
+import { IconButton } from '../../../../shared/ui/icon-button/icon-button';
 import { TableCard } from './components/table-card/table-card';
 import { TableConfirmModal, type TableConfirmKind } from './components/table-confirm-modal/table-confirm-modal';
 import { TableFormModal } from './components/table-form-modal/table-form-modal';
@@ -38,7 +39,7 @@ import {
 
 type PageState = 'loading' | 'ready' | 'error' | 'missing-context';
 type ModalKind = 'create' | 'edit' | 'confirm' | null;
-type StatusFilterValue = 'all' | 'active' | 'inactive';
+type StatusFilterValue = 'all' | 'active' | 'inactive' | 'archived';
 
 interface PrintEntry {
   table: RestaurantTable;
@@ -53,6 +54,7 @@ interface PrintEntry {
     ModalShell,
     StaffModalActions,
     TablesManagementSelect,
+    IconButton,
     TableCard,
     TablePrintCard,
     TableFormModal,
@@ -107,14 +109,17 @@ export class TablesManagementPage {
   protected readonly printEntries = signal<PrintEntry[]>([]);
   protected readonly printMode = signal<'single' | 'all' | null>(null);
 
-  protected readonly totalTables = computed(() => this.tables().length);
+  /** Archived (soft-deleted) tables are excluded from every figure and list except the "archived" filter. */
+  protected readonly liveTables = computed(() => this.tables().filter((table) => !table.isArchived));
+
+  protected readonly totalTables = computed(() => this.liveTables().length);
   protected readonly activeTables = computed(
-    () => this.tables().filter((table) => table.isActive).length,
+    () => this.liveTables().filter((table) => table.isActive).length,
   );
   protected readonly distinctZoneCount = computed(
     () =>
       new Set(
-        this.tables()
+        this.liveTables()
           .map((table) => table.zone?.trim())
           .filter((zone): zone is string => Boolean(zone)),
       ).size,
@@ -122,7 +127,7 @@ export class TablesManagementPage {
 
   protected readonly zoneFilterOptions = computed<TablesSelectOption[]>(() => {
     const zones = [...new Set(
-      this.tables()
+      this.liveTables()
         .map((table) => table.zone?.trim())
         .filter((zone): zone is string => Boolean(zone)),
     )].sort((a, b) => a.localeCompare(b));
@@ -137,6 +142,7 @@ export class TablesManagementPage {
     { value: 'all', label: this.locale.uiText('tablesFilterAllStatuses') },
     { value: 'active', label: this.locale.uiText('tablesStatusActive') },
     { value: 'inactive', label: this.locale.uiText('tablesStatusInactive') },
+    { value: 'archived', label: this.locale.uiText('tablesStatusArchived') },
   ]);
 
   protected readonly filteredTables = computed(() => {
@@ -145,6 +151,14 @@ export class TablesManagementPage {
     const status = this.statusFilter();
 
     return this.tables().filter((table) => {
+      if (status === 'archived') {
+        if (!table.isArchived) {
+          return false;
+        }
+      } else if (table.isArchived) {
+        return false;
+      }
+
       if (zone !== 'all' && (table.zone?.trim() ?? '') !== zone) {
         return false;
       }
@@ -259,7 +273,7 @@ export class TablesManagementPage {
   }
 
   protected setStatusFilter(value: string): void {
-    if (value === 'all' || value === 'active' || value === 'inactive') {
+    if (value === 'all' || value === 'active' || value === 'inactive' || value === 'archived') {
       this.statusFilter.set(value);
     }
   }
@@ -389,6 +403,15 @@ export class TablesManagementPage {
     this.modalKind.set('confirm');
   }
 
+  protected openArchiveConfirm(table: RestaurantTable): void {
+    this.clearSuccessMessage();
+    this.selectedTable.set(table);
+    this.confirmKind.set(table.isArchived ? 'restore' : 'archive');
+    this.confirmErrorMessage.set(null);
+    this.confirmSubmitting.set(false);
+    this.modalKind.set('confirm');
+  }
+
   protected openRegenerateConfirm(table: RestaurantTable): void {
     this.clearSuccessMessage();
     this.selectedTable.set(table);
@@ -414,12 +437,15 @@ export class TablesManagementPage {
     this.confirmSubmitting.set(true);
     this.confirmErrorMessage.set(null);
 
+    const kind = this.confirmKind();
     const request$ =
-      this.confirmKind() === 'regenerateToken'
+      kind === 'regenerateToken'
         ? this.tablesService.regenerateTableToken(table.id)
-        : this.tablesService.updateTableStatus(table.id, {
-            isActive: this.confirmKind() === 'activate',
-          });
+        : kind === 'archive' || kind === 'restore'
+          ? this.tablesService.archiveTable(table.id, kind === 'archive')
+          : this.tablesService.updateTableStatus(table.id, {
+              isActive: kind === 'activate',
+            });
 
     request$
       .pipe(
@@ -433,9 +459,13 @@ export class TablesManagementPage {
           );
           this.closeConfirmModal();
           this.showSuccessMessage(
-            this.confirmKind() === 'regenerateToken'
+            kind === 'regenerateToken'
               ? this.locale.uiText('tablesRegenerateSuccess')
-              : updated.isActive
+              : kind === 'archive'
+                ? this.locale.uiText('tablesArchiveSuccess')
+                : kind === 'restore'
+                  ? this.locale.uiText('tablesRestoreSuccess')
+                  : updated.isActive
                 ? this.locale.uiText('tablesActivateSuccess')
                 : this.locale.uiText('tablesDeactivateSuccess'),
           );
@@ -501,6 +531,10 @@ export class TablesManagementPage {
           return this.locale.uiText('tablesConfirmActivateTitle');
         case 'regenerateToken':
           return this.locale.uiText('tablesConfirmRegenerateTitle');
+        case 'archive':
+          return this.locale.uiText('tablesConfirmArchiveTitle');
+        case 'restore':
+          return this.locale.uiText('tablesConfirmRestoreTitle');
       }
     }
 

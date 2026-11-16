@@ -206,6 +206,103 @@ public sealed class RestaurantUserManagementService : IRestaurantUserManagementS
         };
     }
 
+    public async Task<RestaurantUserDto> UpdateRestaurantStaffUserAsync(
+        Guid restaurantId,
+        Guid userId,
+        string? fullName,
+        string? phoneNumber,
+        CancellationToken cancellationToken)
+    {
+        var (user, role) = await LoadManageableStaffUserAsync(restaurantId, userId, cancellationToken);
+
+        user.FullName = string.IsNullOrWhiteSpace(fullName) ? null : fullName.Trim();
+        user.PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber.Trim();
+        user.UpdatedAt = DateTime.UtcNow;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"Failed to update staff user: {FormatIdentityErrors(result)}");
+        }
+
+        return ToDto(user, restaurantId, role);
+    }
+
+    public async Task<RestaurantUserDto> SetRestaurantStaffUserActiveAsync(
+        Guid restaurantId,
+        Guid userId,
+        bool isActive,
+        Guid currentUserId,
+        CancellationToken cancellationToken)
+    {
+        if (userId == currentUserId)
+        {
+            throw new ForbiddenException("You are not allowed to change your own account status.");
+        }
+
+        var (user, role) = await LoadManageableStaffUserAsync(restaurantId, userId, cancellationToken);
+
+        user.IsActive = isActive;
+        user.UpdatedAt = DateTime.UtcNow;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"Failed to update staff account status: {FormatIdentityErrors(result)}");
+        }
+
+        return ToDto(user, restaurantId, role);
+    }
+
+    /// <summary>Finds a non-owner staff member of this restaurant; anything else is "not found" or forbidden.</summary>
+    private async Task<(ApplicationUser User, string Role)> LoadManageableStaffUserAsync(
+        Guid restaurantId,
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user is null || user.IsDeleted || user.RestaurantId != restaurantId)
+        {
+            throw new NotFoundException("User", userId);
+        }
+
+        var restaurantOwnerId = await _context.Restaurants
+            .AsNoTracking()
+            .Where(restaurant => restaurant.Id == restaurantId)
+            .Select(restaurant => restaurant.OwnerId)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (restaurantOwnerId == userId || await _userManager.IsInRoleAsync(user, ApplicationRoles.RestaurantOwner))
+        {
+            throw new ForbiddenException("You are not allowed to modify this user.");
+        }
+
+        var roles = await _userManager.GetRolesAsync(user);
+        var staffRole = roles.FirstOrDefault(AssignableRestaurantStaffRoles.IsAllowed);
+        if (staffRole is null)
+        {
+            throw new NotFoundException("User", userId);
+        }
+
+        return (user, staffRole);
+    }
+
+    private static RestaurantUserDto ToDto(ApplicationUser user, Guid restaurantId, string role) =>
+        new()
+        {
+            Id = user.Id,
+            Email = user.Email ?? string.Empty,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            RestaurantId = restaurantId,
+            Role = role,
+            IsActive = user.IsActive
+        };
+
     public async Task<IReadOnlyList<RestaurantUserDto>> ListRestaurantStaffUsersAsync(
         Guid restaurantId,
         CancellationToken cancellationToken)

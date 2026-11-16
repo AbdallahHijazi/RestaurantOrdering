@@ -12,20 +12,13 @@
       </div>
 
       <button
-        type="button"
-        class="profile-console__header-action profile-console__logout"
+        appIconButton
+        icon="logout"
+        variant="ghost"
+        [label]="localeService.uiText('adminLogout')"
         data-testid="profile-console-logout"
-        [attr.aria-label]="localeService.uiText('adminLogout')"
-        [attr.title]="localeService.uiText('adminLogout')"
         (click)="logout()"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path
-            fill="currentColor"
-            d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5ZM4 5h8V3H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8v-2H4V5Z"
-          />
-        </svg>
-      </button>
+      ></button>
     </div>
 
     <nav

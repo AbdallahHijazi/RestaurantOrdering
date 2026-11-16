@@ -34,7 +34,7 @@
 .public-confirmation__lead {
   margin: 0;
   color: var(--confirmation-muted, var(--restaurant-muted-text));
-  font-size: 0.92rem;
+  font-size: var(--fs-secondary);
   line-height: 1.6;
 }
 
@@ -49,12 +49,12 @@
 
 .public-confirmation__order-number span {
   color: var(--confirmation-muted, var(--restaurant-muted-text));
-  font-size: 0.75rem;
+  font-size: var(--fs-small);
   font-weight: 800;
 }
 
 .public-confirmation__order-number strong {
-  font-size: 1.1rem;
+  font-size: var(--fs-card);
 }
 
 .public-confirmation__footer {

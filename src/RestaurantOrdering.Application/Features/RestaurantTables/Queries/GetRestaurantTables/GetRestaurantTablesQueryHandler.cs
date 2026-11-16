@@ -22,7 +22,7 @@ public sealed class GetRestaurantTablesQueryHandler
     {
         var tables = await _context.RestaurantTables
             .AsNoTracking()
-            .Where(t => t.RestaurantId == request.RestaurantId)
+            .Where(t => t.RestaurantId == request.RestaurantId && (request.IncludeArchived || !t.IsArchived))
             .OrderBy(t => t.Name)
             .ToListAsync(cancellationToken);
 

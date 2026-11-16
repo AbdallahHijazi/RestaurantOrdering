@@ -1,7 +1,9 @@
 import { Component, input, output } from '@angular/core';
 import { LocaleService } from '../../../core/localization/locale';
+import { IconButton } from '../icon-button/icon-button';
 
 @Component({
+  imports: [IconButton],
   selector: 'app-error-state',
   templateUrl: './error-state.html',
   styleUrl: './error-state.scss',

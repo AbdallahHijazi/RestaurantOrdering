@@ -4,6 +4,9 @@ export interface RestaurantTable {
   zone: string | null;
   publicToken: string;
   isActive: boolean;
+  /** Soft delete: archived tables are hidden/unusable but kept for historical orders. */
+  isArchived?: boolean;
+  archivedAt?: string | null;
   createdAt: string;
   updatedAt: string | null;
 }

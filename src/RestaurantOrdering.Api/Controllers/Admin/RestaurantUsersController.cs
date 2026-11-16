@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.RateLimiting;
 using RestaurantOrdering.Api.Contracts.Admin.Users;
 using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Application.Features.RestaurantUsers.Commands.CreateRestaurantUser;
+using RestaurantOrdering.Application.Features.RestaurantUsers.Commands.SetRestaurantUserActive;
+using RestaurantOrdering.Application.Features.RestaurantUsers.Commands.UpdateRestaurantUser;
 using RestaurantOrdering.Application.Features.RestaurantUsers.Commands.UpdateRestaurantUserRole;
 using RestaurantOrdering.Application.Features.RestaurantUsers.DTOs;
 using RestaurantOrdering.Application.Features.RestaurantUsers.Queries.GetRestaurantStaffUsers;
@@ -69,6 +71,40 @@ public sealed class RestaurantUsersController : ControllerBase
         var command = new UpdateRestaurantUserRoleCommand(restaurantId, userId, request.Role);
         var result = await _sender.Send(command, cancellationToken);
         return Ok(MapRoleResponse(result));
+    }
+
+    [HttpPatch("{userId:guid}")]
+    [EnableRateLimiting("restaurant-user-management")]
+    [Consumes("application/json")]
+    [RequestSizeLimit(16384)]
+    [ProducesResponseType(typeof(RestaurantUserResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<RestaurantUserResponse>> Update(
+        Guid restaurantId,
+        Guid userId,
+        [FromBody] UpdateRestaurantUserRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(
+            new UpdateRestaurantUserCommand(restaurantId, userId, request.FullName, request.PhoneNumber),
+            cancellationToken);
+        return Ok(MapUserResponse(result));
+    }
+
+    [HttpPatch("{userId:guid}/status")]
+    [EnableRateLimiting("restaurant-user-management")]
+    [Consumes("application/json")]
+    [RequestSizeLimit(16384)]
+    [ProducesResponseType(typeof(RestaurantUserResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<RestaurantUserResponse>> SetStatus(
+        Guid restaurantId,
+        Guid userId,
+        [FromBody] UpdateRestaurantUserStatusRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(
+            new SetRestaurantUserActiveCommand(restaurantId, userId, request.IsActive),
+            cancellationToken);
+        return Ok(MapUserResponse(result));
     }
 
     private static RestaurantUserResponse MapUserResponse(RestaurantUserDto dto) =>

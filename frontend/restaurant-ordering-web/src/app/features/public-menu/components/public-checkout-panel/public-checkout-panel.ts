@@ -27,6 +27,7 @@ import {
 } from '../../models/public-menu.models';
 import { estimateOrderTotals } from '../../utils/order-estimate.util';
 import { isValidCustomerPhone } from '../../../../shared/utils/customer-phone.util';
+import { IconButton } from '../../../../shared/ui/icon-button/icon-button';
 
 /** Unique, URL-safe key for one checkout attempt (8-64 chars; letters, digits, '-', '_'). */
 function createIdempotencyKey(): string {
@@ -42,7 +43,7 @@ function createIdempotencyKey(): string {
 
 @Component({
   selector: 'app-public-checkout-panel',
-  imports: [FormsModule],
+  imports: [IconButton, FormsModule],
   templateUrl: './public-checkout-panel.html',
   styleUrl: './public-checkout-panel.scss',
 })

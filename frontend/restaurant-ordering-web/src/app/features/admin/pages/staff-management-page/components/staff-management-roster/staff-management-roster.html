@@ -48,20 +48,33 @@
               </span>
             </td>
             <td>
-              <button
-                type="button"
-                class="staff-roster__action"
-                [attr.data-testid]="'staff-change-role-' + member.id"
-                (click)="onChangeRole(member)"
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path
-                    fill="currentColor"
-                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Zm6.5-9.5L19 4l-5 5 1.5 1.5L19 7l1.5-1.5L18.5 4.5Z"
-                  />
-                </svg>
-                {{ locale.uiText('staffChangeRole') }}
-              </button>
+              <div class="staff-roster__actions">
+                <button
+                  appIconButton
+                  size="sm"
+                  icon="edit"
+                  [label]="locale.uiText('actionEdit')"
+                  [attr.data-testid]="'staff-edit-' + member.id"
+                  (click)="editMember.emit(member)"
+                ></button>
+                <button
+                  appIconButton
+                  size="sm"
+                  icon="shield"
+                  [label]="locale.uiText('staffChangeRole')"
+                  [attr.data-testid]="'staff-change-role-' + member.id"
+                  (click)="onChangeRole(member)"
+                ></button>
+                <button
+                  appIconButton
+                  size="sm"
+                  [icon]="member.isActive ? 'user-x' : 'user-check'"
+                  [variant]="member.isActive ? 'danger' : 'success'"
+                  [label]="locale.uiText(member.isActive ? 'actionDeactivate' : 'actionActivate')"
+                  [attr.data-testid]="'staff-toggle-status-' + member.id"
+                  (click)="toggleStatus.emit(member)"
+                ></button>
+              </div>
             </td>
           </tr>
         }
@@ -111,9 +124,33 @@
           </span>
         </div>
         <div class="staff-roster__card-actions">
-          <button type="button" class="staff-roster__action" (click)="onChangeRole(member)">
-            {{ locale.uiText('staffChangeRole') }}
-          </button>
+<div class="staff-roster__actions">
+            <button
+              appIconButton
+              size="sm"
+              icon="edit"
+              [label]="locale.uiText('actionEdit')"
+              [attr.data-testid]="'staff-edit-card-' + member.id"
+              (click)="editMember.emit(member)"
+            ></button>
+            <button
+              appIconButton
+              size="sm"
+              icon="shield"
+              [label]="locale.uiText('staffChangeRole')"
+              [attr.data-testid]="'staff-change-role-card-' + member.id"
+              (click)="onChangeRole(member)"
+            ></button>
+            <button
+              appIconButton
+              size="sm"
+              [icon]="member.isActive ? 'user-x' : 'user-check'"
+              [variant]="member.isActive ? 'danger' : 'success'"
+              [label]="locale.uiText(member.isActive ? 'actionDeactivate' : 'actionActivate')"
+              [attr.data-testid]="'staff-toggle-status-card-' + member.id"
+              (click)="toggleStatus.emit(member)"
+            ></button>
+          </div>
         </div>
       </article>
     }

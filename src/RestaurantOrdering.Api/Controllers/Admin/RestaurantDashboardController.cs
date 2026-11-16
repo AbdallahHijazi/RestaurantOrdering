@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Application.Features.Orders.DTOs;
+using RestaurantOrdering.Application.Features.Orders.Queries.GetDashboardActivity;
 using RestaurantOrdering.Application.Features.Orders.Queries.GetDashboardSummary;
 
 namespace RestaurantOrdering.Api.Controllers.Admin;
@@ -30,6 +31,18 @@ public sealed class RestaurantDashboardController : ControllerBase
         CancellationToken cancellationToken)
     {
         var result = await _sender.Send(new GetDashboardSummaryQuery(restaurantId), cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>Real per-day order counts and sales for the last N days (default 7) — no sample data.</summary>
+    [HttpGet("activity")]
+    [ProducesResponseType(typeof(DashboardActivityDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<DashboardActivityDto>> GetActivity(
+        Guid restaurantId,
+        [FromQuery] int days = 7,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _sender.Send(new GetDashboardActivityQuery(restaurantId, days), cancellationToken);
         return Ok(result);
     }
 }

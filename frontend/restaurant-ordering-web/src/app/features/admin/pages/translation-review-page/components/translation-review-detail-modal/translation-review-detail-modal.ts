@@ -10,10 +10,11 @@ import {
   isTranslationRetryVisible,
   validateDraftForm,
 } from '../../translation-review-page.util';
+import { IconButton } from '../../../../../../shared/ui/icon-button/icon-button';
 
 @Component({
   selector: 'app-translation-review-detail-modal',
-  imports: [],
+  imports: [IconButton],
   templateUrl: './translation-review-detail-modal.html',
   styleUrl: './translation-review-detail-modal.scss',
 })

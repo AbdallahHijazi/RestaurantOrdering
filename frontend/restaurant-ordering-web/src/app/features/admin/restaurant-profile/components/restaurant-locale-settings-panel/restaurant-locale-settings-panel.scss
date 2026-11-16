@@ -36,7 +36,7 @@
 
 .locale-settings__section h3 {
   margin: 0 0 0.875rem;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: var(--restaurant-text);
 }
@@ -47,7 +47,7 @@
 }
 
 .locale-settings__field-label {
-  font-size: 0.6875rem;
+  font-size: var(--fs-small);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -68,7 +68,7 @@
   padding: 0.9rem 2.75rem 0.9rem 1rem;
   background: var(--restaurant-surface-soft);
   color: var(--restaurant-text);
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   font-weight: 600;
   line-height: 1.35;
   outline: none;
@@ -172,7 +172,7 @@
 }
 
 .locale-settings__lang-card-title strong {
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   color: var(--restaurant-text);
 }
 
@@ -183,13 +183,13 @@
   border-radius: 999px;
   background: var(--restaurant-accent-soft);
   color: var(--restaurant-accent);
-  font-size: 0.6875rem;
+  font-size: var(--fs-small);
   font-weight: 700;
   letter-spacing: 0.02em;
 }
 
 .locale-settings__lang-card-sub {
-  font-size: 0.8125rem;
+  font-size: var(--fs-secondary);
   color: var(--restaurant-muted-text);
 }
 
@@ -208,7 +208,7 @@
   border-radius: 0.375rem;
   background: var(--restaurant-surface-soft);
   color: var(--restaurant-muted-text);
-  font-size: 0.6875rem;
+  font-size: var(--fs-small);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -219,7 +219,7 @@
   align-items: center;
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
-  font-size: 0.6875rem;
+  font-size: var(--fs-small);
   font-weight: 700;
   letter-spacing: 0.04em;
   background: color-mix(in srgb, var(--restaurant-accent) 12%, white);
@@ -275,12 +275,12 @@
 }
 
 .locale-settings__mode-copy strong {
-  font-size: 0.9rem;
+  font-size: var(--fs-secondary);
   color: var(--restaurant-text);
 }
 
 .locale-settings__mode-copy span {
-  font-size: 0.8125rem;
+  font-size: var(--fs-secondary);
   color: var(--restaurant-muted-text);
   line-height: 1.45;
 }

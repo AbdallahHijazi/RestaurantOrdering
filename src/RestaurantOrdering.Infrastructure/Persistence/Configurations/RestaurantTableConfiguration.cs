@@ -19,6 +19,10 @@ public class RestaurantTableConfiguration : IEntityTypeConfiguration<RestaurantT
             .HasMaxLength(32)
             .IsRequired();
 
+        builder.Property(t => t.IsArchived)
+            .HasDefaultValue(false)
+            .IsRequired();
+
         builder.HasIndex(t => t.RestaurantId);
 
         builder.HasIndex(t => t.PublicToken)

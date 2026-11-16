@@ -1,10 +1,13 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import {
+  ChangeDetectorRef,
   Component,
   DestroyRef,
+  ElementRef,
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { ModalShell } from '../../../../shared/components/order-modal-shell/order-modal-shell';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -26,6 +29,8 @@ import {
   validateImageFile,
 } from '../../restaurant-profile/data-access/image-preview.util';
 import { AdminMenuService } from '../../data-access/admin-menu.service';
+import { IconButton } from '../../../../shared/ui/icon-button/icon-button';
+import { AppTooltip } from '../../../../shared/ui/tooltip/tooltip';
 import { MenuManagementMealCard } from './components/menu-management-meal-card/menu-management-meal-card';
 import { FloatingNotificationPill } from '../../../../shared/ui/floating-notification-pill/floating-notification-pill';
 import {
@@ -35,6 +40,14 @@ import {
   resolveEditPrimaryContent,
   resolvePrimaryLocaleContent,
 } from './menu-catalog.util';
+import {
+  ReorderDragSession,
+  captureRects,
+  findScrollParent,
+  motionTokenMs,
+  motionTokenString,
+  playFlip,
+} from './menu-reorder.util';
 import {
   ALL_MENU_ITEMS_FILTER,
   type AdminCategory,
@@ -47,11 +60,18 @@ import {
 type PageState = 'loading' | 'ready' | 'error' | 'missing-context';
 type ModalKind = 'category' | 'item' | 'deleteCategory' | 'deleteItem' | null;
 type AvailabilityFilter = 'all' | 'available' | 'unavailable';
-type DropPosition = 'before' | 'after';
+
 
 @Component({
   selector: 'app-menu-management-page',
-  imports: [ReactiveFormsModule, ModalShell, MenuManagementMealCard, FloatingNotificationPill],
+  imports: [
+    ReactiveFormsModule,
+    ModalShell,
+    MenuManagementMealCard,
+    FloatingNotificationPill,
+    IconButton,
+    AppTooltip,
+  ],
   templateUrl: './menu-management-page.html',
   styleUrls: [
     './menu-management-page.scss',
@@ -65,6 +85,7 @@ export class MenuManagementPage {
   private readonly localeApi = inject(LocaleApiService);
   private readonly directionService = inject(DirectionService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   protected readonly locale = inject(LocaleService);
   protected readonly allItemsFilter = ALL_MENU_ITEMS_FILTER;
@@ -91,13 +112,34 @@ export class MenuManagementPage {
   protected readonly itemOrderBusy = signal(false);
   protected readonly draggingCategoryId = signal<string | null>(null);
   protected readonly draggingItemId = signal<string | null>(null);
-  protected readonly categoryDropTargetId = signal<string | null>(null);
-  protected readonly categoryDropPosition = signal<DropPosition | null>(null);
-  protected readonly itemDropTargetId = signal<string | null>(null);
-  protected readonly itemDropPosition = signal<DropPosition | null>(null);
+  /** Category ids in previewed order during a drag; null when no drag is active. */
+  protected readonly categoryPreviewOrder = signal<string[] | null>(null);
+  private readonly categoryStrip = viewChild<ElementRef<HTMLElement>>('categoryStrip');
+  private categoryDrag: ReorderDragSession | null = null;
+  /** Item ids in the order they are *previewed* during a drag; null when no drag is active. */
+  protected readonly itemPreviewOrder = signal<string[] | null>(null);
+  protected readonly dragGhost = signal<{ label: string; position: number } | null>(null);
+  /** Briefly set after a successful drop so the card can play its settled feedback. */
+  protected readonly settledItemId = signal<string | null>(null);
+  /** Last selected real category: kept while All is selected so the action row can animate closed. */
+  private readonly lastManagedCategoryId = signal<string | null>(null);
+  private readonly itemGrid = viewChild<ElementRef<HTMLElement>>('itemGrid');
+  private readonly dragGhostEl = viewChild<ElementRef<HTMLElement>>('dragGhostEl');
+  private itemDrag: ReorderDragSession | null = null;
+  private readonly releaseDragOnDestroy = this.destroyRef.onDestroy(() => {
+    this.itemDrag?.dispose();
+    this.categoryDrag?.dispose();
+    if (this.settleTimer) {
+      clearTimeout(this.settleTimer);
+    }
+  });
+  private settleTimer: ReturnType<typeof setTimeout> | null = null;
   protected readonly reorderErrorMessage = signal<string | null>(null);
   protected readonly imagePreviewUrl = signal<string | null>(null);
   protected readonly imageValidationError = signal<string | null>(null);
+  /** UX-006: the user chose to remove the meal's current image (applied on save). */
+  protected readonly imageRemoved = signal(false);
+  private readonly categoryNameDraft = signal('');
   protected readonly pendingImageFile = signal<File | null>(null);
   protected readonly uploadedMedia = signal<UploadedMediaFile | null>(null);
   protected readonly failedImageIds = signal<ReadonlySet<string>>(new Set());
@@ -110,6 +152,23 @@ export class MenuManagementPage {
     description: ['', [Validators.maxLength(1000)]],
     displayOrder: [0, [Validators.required, Validators.min(0)]],
     isActive: [true],
+  });
+
+  /** UX-006: non-blocking warning when another category already has the typed name. */
+  protected readonly duplicateCategoryName = computed(() => {
+    const typed = this.normalizeName(this.categoryNameDraft());
+    if (!typed) {
+      return false;
+    }
+
+    const editingId = this.editingCategory()?.id;
+    return this.categories().some(
+      (category) =>
+        category.id !== editingId &&
+        [this.displayCategoryName(category), category.nameAr, category.nameEn ?? ''].some(
+          (name) => this.normalizeName(name) === typed,
+        ),
+    );
   });
 
   protected readonly itemForm = this.fb.group(
@@ -128,9 +187,6 @@ export class MenuManagementPage {
 
   protected readonly searchQuery = signal('');
   protected readonly availabilityFilter = signal<AvailabilityFilter>('all');
-  private categoryOrderSnapshot: AdminCategory[] | null = null;
-  private itemOrderSnapshot: AdminMenuItem[] | null = null;
-  private reorderAnimationFrame: number | null = null;
   protected readonly filteredMenuItems = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
     const availability = this.availabilityFilter();
@@ -172,6 +228,42 @@ export class MenuManagementPage {
       this.availabilityFilter() === 'all',
   );
 
+  /** The contextual Edit/Delete row is open only while a real category is selected. */
+  protected readonly categoryManageOpen = computed(
+    () => this.selectedCategoryId() !== ALL_MENU_ITEMS_FILTER && !this.categoryReorderMode(),
+  );
+
+  /** Category the action row describes; retained while closing so its content does not vanish mid-animation. */
+  protected readonly contextCategory = computed(() => {
+    const selected = this.selectedCategoryId();
+    const id = selected !== ALL_MENU_ITEMS_FILTER ? selected : this.lastManagedCategoryId();
+    return this.categories().find((category) => category.id === id) ?? null;
+  });
+
+  /** Why the dish-reorder control is disabled (empty when it is usable or the page is not ready). */
+  protected readonly itemReorderDisabledReason = computed(() => {
+    if (this.itemReorderMode() || this.itemOrderBusy() || this.itemsState() !== 'ready') {
+      return '';
+    }
+    if (this.selectedCategoryId() === ALL_MENU_ITEMS_FILTER) {
+      return this.locale.uiText('adminMenuReorderNeedCategory');
+    }
+    if (this.searchQuery().trim() || this.availabilityFilter() !== 'all') {
+      return this.locale.uiText('adminMenuReorderClearFilters');
+    }
+    if (this.menuItems().length < 2) {
+      return this.locale.uiText('adminMenuReorderNeedTwoItems');
+    }
+    return '';
+  });
+
+  protected readonly dragGhostPositionLabel = computed(() => {
+    const ghost = this.dragGhost();
+    return ghost
+      ? this.locale.uiText('adminMenuDragPreviewPosition').replace('{position}', String(ghost.position))
+      : '';
+  });
+
   protected readonly selectedCategoryLabel = computed(() => {
     const selected = this.selectedCategoryId();
     if (selected === ALL_MENU_ITEMS_FILTER) {
@@ -185,6 +277,9 @@ export class MenuManagementPage {
   });
 
   constructor() {
+    this.categoryForm.controls.name.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => this.categoryNameDraft.set(value));
     this.loadLocaleSettings();
     this.loadCategories();
   }
@@ -284,6 +379,9 @@ export class MenuManagementPage {
       return;
     }
     this.selectedCategoryId.set(categoryId);
+    if (categoryId !== ALL_MENU_ITEMS_FILTER) {
+      this.lastManagedCategoryId.set(categoryId);
+    }
     this.searchQuery.set('');
     this.loadMenuItems();
   }
@@ -329,7 +427,7 @@ export class MenuManagementPage {
   }
 
   protected onCategoryPointerDown(event: PointerEvent, categoryId: string): void {
-    if ((event.pointerType === 'mouse' && event.button !== 0) || !this.beginCategoryDrag(categoryId)) {
+    if ((event.pointerType === 'mouse' && event.button !== 0) || !this.beginCategoryDrag(categoryId, event)) {
       return;
     }
     if (event.pointerType === 'mouse') {
@@ -338,294 +436,315 @@ export class MenuManagementPage {
     (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
   }
 
-  protected onCategoryPointerMove(event: PointerEvent): void {
-    if (!this.draggingCategoryId()) {
-      return;
-    }
-    this.autoScrollCategoryStrip(event);
-    const target = document
-      .elementFromPoint(event.clientX, event.clientY)
-      ?.closest<HTMLElement>('[data-category-reorder-id]');
-    const categoryId = target?.dataset['categoryReorderId'];
-    if (categoryId) {
-      this.previewCategoryMove(categoryId);
-    }
-  }
-
-  protected onCategoryPointerUp(): void {
-    if (this.draggingCategoryId()) {
-      this.finishCategoryDrag();
-    }
-  }
-
-  protected onCategoryPointerCancel(): void {
-    this.cancelCategoryDrag();
-  }
-
   protected onItemPointerDown(event: PointerEvent, itemId: string): void {
-    if ((event.pointerType === 'mouse' && event.button !== 0) || !this.beginItemDrag(itemId)) {
+    if ((event.pointerType === 'mouse' && event.button !== 0) || !this.beginItemDrag(itemId, event)) {
       return;
     }
     event.preventDefault();
   }
 
-  protected onItemPointerMove(event: PointerEvent): void {
-    if (!this.draggingItemId()) {
-      return;
-    }
-    const target = document
-      .elementFromPoint(event.clientX, event.clientY)
-      ?.closest<HTMLElement>('[data-item-reorder-id]');
-    const itemId = target?.dataset['itemReorderId'];
-    if (itemId) {
-      this.previewItemMove(itemId);
-    }
-  }
 
-  protected onItemPointerUp(): void {
-    if (this.draggingItemId()) {
-      this.finishItemDrag();
-    }
-  }
-
-  protected onItemPointerCancel(): void {
-    this.cancelItemDrag();
-  }
-
-
-  private captureReorderPositions(
-  selector: string,
-  dataKey: 'categoryReorderId' | 'itemReorderId',
-  ): Map<string, DOMRect> {
-    if (this.reorderAnimationFrame !== null) {
-      cancelAnimationFrame(this.reorderAnimationFrame);
-      this.reorderAnimationFrame = null;
-    }
-
-    const positions = new Map<string, DOMRect>();
-
-    document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
-      element
-        .getAnimations()
-        .filter((animation) => animation.id === 'menu-reorder-flip')
-        .forEach((animation) => animation.cancel());
-
-      const id = element.dataset[dataKey];
-
-      if (id) {
-        positions.set(id, element.getBoundingClientRect());
-      }
-    });
-
-    return positions;
-  }
-
-private animateReorder(
-    selector: string,
-    dataKey: 'categoryReorderId' | 'itemReorderId',
-    previousPositions: Map<string, DOMRect>,
-  ): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    this.reorderAnimationFrame = requestAnimationFrame(() => {
-      this.reorderAnimationFrame = null;
-
-      document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
-        const id = element.dataset[dataKey];
-
-        if (!id) {
-          return;
-        }
-
-        const previous = previousPositions.get(id);
-
-        if (!previous) {
-          return;
-        }
-
-        const current = element.getBoundingClientRect();
-
-        const deltaX = previous.left - current.left;
-        const deltaY = previous.top - current.top;
-
-        if (Math.abs(deltaX) < 0.5 && Math.abs(deltaY) < 0.5) {
-          return;
-        }
-
-        element.animate(
-          [
-            {
-              transform: `translate3d(${deltaX}px, ${deltaY}px, 0)`,
-            },
-            {
-              transform: 'translate3d(0, 0, 0)',
-            },
-          ],
-          {
-            id: 'menu-reorder-flip',
-            duration: 320,
-            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-            fill: 'both',
-          },
-        );
-      });
-    });
-  }
-
-  private beginCategoryDrag(categoryId: string): boolean {
-    if (!this.categoryReorderMode() || this.categoryOrderBusy()) {
+  /**
+   * Category drag: same stable mechanism as the meal drag (see menu-reorder.util): CSS `order` preview,
+   * geometry-snapshot hit-testing, one commit on drop.
+   */
+  private beginCategoryDrag(categoryId: string, event: PointerEvent): boolean {
+    const strip = this.categoryStrip()?.nativeElement;
+    if (!this.categoryReorderMode() || this.categoryOrderBusy() || this.categoryDrag || !strip) {
       return false;
     }
-    if (!this.categoryOrderSnapshot) {
-      this.categoryOrderSnapshot = [...this.categories()];
+
+    const startIds = this.categories().map((category) => category.id);
+    const drag = ReorderDragSession.begin({
+      sourceId: categoryId,
+      pointerId: event.pointerId,
+      container: strip,
+      elements: Array.from(strip.querySelectorAll<HTMLElement>('[data-category-reorder-id]')),
+      dataKey: 'categoryReorderId',
+      startIds,
+      onMove: (move) => this.moveDragGhost(move),
+      onPreview: (order) => this.applyCategoryPreview(order),
+      onDrop: (order, changed) => this.commitCategoryDrag(order, changed),
+      onCancel: () => this.cancelCategoryDrag(),
+    });
+    if (!drag) {
+      return false;
     }
+
+    this.categoryDrag = drag;
     this.draggingCategoryId.set(categoryId);
+    this.categoryPreviewOrder.set(startIds);
+    const source = this.categories().find((category) => category.id === categoryId)!;
+    this.dragGhost.set({
+      label: this.displayCategoryName(source),
+      position: startIds.indexOf(categoryId) + 1,
+    });
+    this.cdr.detectChanges();
+    this.moveDragGhost(event);
     return true;
   }
 
-  private previewCategoryMove(targetId: string): void {
-    const sourceId = this.draggingCategoryId();
-
-    if (!sourceId || sourceId === targetId) {
-      return;
-    }
-
-    const entries = this.categories();
-
-    const sourceIndex = entries.findIndex((entry) => entry.id === sourceId);
-    const targetIndex = entries.findIndex((entry) => entry.id === targetId);
-
-    if (sourceIndex < 0 || targetIndex < 0) {
-      return;
-    }
-
-    const previousPositions = this.captureReorderPositions(
-      '[data-category-reorder-id]',
-      'categoryReorderId',
-    );
-
-    this.categoryDropTargetId.set(targetId);
-
-    this.categoryDropPosition.set(
-      sourceIndex < targetIndex ? 'after' : 'before',
-    );
-
-    this.categories.set(
-      this.moveEntry(entries, sourceId, targetId),
-    );
-
-    this.animateReorder(
-      '[data-category-reorder-id]',
-      'categoryReorderId',
-      previousPositions,
+  private applyCategoryPreview(order: string[] | null): void {
+    this.flipAround(this.categoryStrip(), '[data-category-reorder-id]', 'categoryReorderId', () =>
+      this.categoryPreviewOrder.set(order),
     );
   }
 
-  protected finishCategoryDrag(): void {
-    const previous = this.categoryOrderSnapshot;
-    this.categoryOrderSnapshot = null;
+  private commitCategoryDrag(order: string[], changed: boolean): void {
+    this.categoryDrag = null;
     this.draggingCategoryId.set(null);
-    this.categoryDropTargetId.set(null);
-    this.categoryDropPosition.set(null);
-    if (!previous || this.sameOrder(previous, this.categories())) {
+    this.dragGhost.set(null);
+    if (!changed) {
+      this.categoryPreviewOrder.set(null);
+      this.cdr.detectChanges();
       return;
     }
 
-    const reordered = this.categories().map((category, index) => ({
-      ...category,
-      displayOrder: index + 1,
-    }));
+    const previous = [...this.categories()];
+    const byId = new Map(previous.map((category) => [category.id, category]));
+    const reordered = order.map((id, index) => ({ ...byId.get(id)!, displayOrder: index + 1 }));
     this.categories.set(reordered);
+    this.categoryPreviewOrder.set(null);
+    this.cdr.detectChanges();
     this.persistCategoryOrder(previous, reordered);
   }
 
   private cancelCategoryDrag(): void {
-    if (this.categoryOrderSnapshot) {
-      this.categories.set(this.categoryOrderSnapshot);
-    }
-    this.categoryOrderSnapshot = null;
+    const drag = this.categoryDrag;
+    this.categoryDrag = null;
+    drag?.dispose();
     this.draggingCategoryId.set(null);
-    this.categoryDropTargetId.set(null);
-    this.categoryDropPosition.set(null);
+    this.dragGhost.set(null);
+    if (drag && this.categoryPreviewOrder()) {
+      this.applyCategoryPreview(null);
+    } else {
+      this.categoryPreviewOrder.set(null);
+    }
   }
 
-  private beginItemDrag(itemId: string): boolean {
+  /** CSS `order` of a category chip while a drag preview is active. */
+  protected categoryVisualOrder(categoryId: string): number | null {
+    const preview = this.categoryPreviewOrder();
+    return preview ? preview.indexOf(categoryId) + 1 : null;
+  }
+
+  /** Runs `mutate`, re-renders, then slides the matching elements from where they were (FLIP). */
+  private flipAround(
+    container: ElementRef<HTMLElement> | undefined,
+    selector: string,
+    dataKey: string,
+    mutate: () => void,
+  ): void {
+    const elements = () =>
+      Array.from(container?.nativeElement.querySelectorAll<HTMLElement>(selector) ?? []);
+    const before = captureRects(elements(), dataKey);
+    mutate();
+    this.cdr.detectChanges();
+    playFlip(elements(), dataKey, before, this.flipOptions());
+  }
+
+  /** UX-005: keyboard/button alternative to drag & drop for categories (-1 = up, +1 = down). */
+  protected moveCategoryBy(categoryId: string, delta: -1 | 1): void {
+    if (!this.categoryReorderMode() || this.categoryOrderBusy()) {
+      return;
+    }
+
+    const previous = [...this.categories()];
+    const next = this.swapEntries(previous, categoryId, delta);
+    if (!next) {
+      return;
+    }
+
+    const reordered = next.map((category, index) => ({ ...category, displayOrder: index + 1 }));
+    this.setCategoriesAnimated(reordered);
+    this.persistCategoryOrder(previous, reordered);
+  }
+
+  /** UX-005: keyboard/button alternative to drag & drop for meals. */
+  protected moveItemBy(itemId: string, delta: -1 | 1): void {
     if (!this.itemReorderMode() || this.itemOrderBusy()) {
+      return;
+    }
+
+    const previous = [...this.menuItems()];
+    const next = this.swapEntries(previous, itemId, delta);
+    if (!next) {
+      return;
+    }
+
+    const reordered = next.map((item, index) => ({ ...item, displayOrder: index + 1 }));
+    this.setItemsAnimated(reordered);
+    this.markSettled(itemId);
+    this.persistItemOrder(previous, reordered);
+  }
+
+  private setCategoriesAnimated(categories: AdminCategory[]): void {
+    this.flipAround(this.categoryStrip(), '[data-category-reorder-id]', 'categoryReorderId', () =>
+      this.categories.set(categories),
+    );
+  }
+
+  /** Replaces the item list and slides cards to their new positions (FLIP, transform only). */
+  private setItemsAnimated(items: AdminMenuItem[]): void {
+    this.flipAround(this.itemGrid(), '[data-item-reorder-id]', 'itemReorderId', () =>
+      this.menuItems.set(items),
+    );
+  }
+
+  protected canMoveCategory(categoryId: string, delta: -1 | 1): boolean {
+    return this.canMoveWithin(this.categories(), categoryId, delta);
+  }
+
+  protected canMoveItem(itemId: string, delta: -1 | 1): boolean {
+    return this.canMoveWithin(this.menuItems(), itemId, delta) && !this.itemOrderBusy();
+  }
+
+  private canMoveWithin(entries: readonly { id: string }[], id: string, delta: -1 | 1): boolean {
+    const index = entries.findIndex((entry) => entry.id === id);
+    const target = index + delta;
+    return index >= 0 && target >= 0 && target < entries.length;
+  }
+
+  private swapEntries<T extends { id: string }>(entries: T[], id: string, delta: -1 | 1): T[] | null {
+    if (!this.canMoveWithin(entries, id, delta)) {
+      return null;
+    }
+
+    const index = entries.findIndex((entry) => entry.id === id);
+    const next = [...entries];
+    [next[index], next[index + delta]] = [next[index + delta]!, next[index]!];
+    return next;
+  }
+
+  private normalizeName(value: string | null | undefined): string {
+    return (value ?? '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
+  }
+
+  /**
+   * Starts a meal drag. The list itself is NOT touched while dragging: the card order is previewed with
+   * CSS `order` (no DOM moves, so pointer capture survives) and hit-testing uses a geometry snapshot, so
+   * displacing cards can never feed back into the hit test. The order is committed once, on drop.
+   */
+  private beginItemDrag(itemId: string, event: PointerEvent): boolean {
+    const grid = this.itemGrid()?.nativeElement;
+    if (!this.itemReorderMode() || this.itemOrderBusy() || this.itemDrag || !grid) {
       return false;
     }
-    if (!this.itemOrderSnapshot) {
-      this.itemOrderSnapshot = [...this.menuItems()];
+
+    const startIds = this.menuItems().map((item) => item.id);
+    const drag = ReorderDragSession.begin({
+      sourceId: itemId,
+      pointerId: event.pointerId,
+      container: grid,
+      elements: Array.from(grid.querySelectorAll<HTMLElement>('[data-item-reorder-id]')),
+      dataKey: 'itemReorderId',
+      startIds,
+      onMove: (move) => {
+        this.moveDragGhost(move);
+        this.autoScrollNearEdge(grid, move);
+      },
+      onPreview: (order) => this.applyItemPreview(order),
+      onDrop: (order, changed) => this.commitItemDrag(order, changed, itemId),
+      onCancel: () => this.cancelItemDrag(),
+    });
+    if (!drag) {
+      return false;
     }
+
+    this.itemDrag = drag;
     this.draggingItemId.set(itemId);
+    this.itemPreviewOrder.set(startIds);
+    const source = this.menuItems().find((item) => item.id === itemId)!;
+    this.dragGhost.set({ label: this.displayItemName(source), position: startIds.indexOf(itemId) + 1 });
+    this.cdr.detectChanges();
+    this.moveDragGhost(event);
     return true;
   }
 
-  private previewItemMove(targetId: string): void {
-    const sourceId = this.draggingItemId();
-
-    if (!sourceId || sourceId === targetId) {
-      return;
-    }
-
-    const entries = this.menuItems();
-
-    const sourceIndex = entries.findIndex((entry) => entry.id === sourceId);
-    const targetIndex = entries.findIndex((entry) => entry.id === targetId);
-
-    if (sourceIndex < 0 || targetIndex < 0) {
-      return;
-    }
-
-    const previousPositions = this.captureReorderPositions(
-      '[data-item-reorder-id]',
-      'itemReorderId',
-    );
-
-    this.itemDropTargetId.set(targetId);
-
-    this.itemDropPosition.set(
-      sourceIndex < targetIndex ? 'after' : 'before',
-    );
-
-    this.menuItems.set(
-      this.moveEntry(entries, sourceId, targetId),
-    );
-
-    this.animateReorder(
-      '[data-item-reorder-id]',
-      'itemReorderId',
-      previousPositions,
+  private applyItemPreview(order: string[] | null): void {
+    this.flipAround(this.itemGrid(), '[data-item-reorder-id]', 'itemReorderId', () =>
+      this.itemPreviewOrder.set(order),
     );
   }
 
-  protected finishItemDrag(): void {
-    const previous = this.itemOrderSnapshot;
-    this.itemOrderSnapshot = null;
+  private flipOptions(): { duration: number; easing: string } {
+    return {
+      duration: motionTokenMs('--restaurant-motion-normal', 240),
+      easing: motionTokenString('--restaurant-ease-standard', 'cubic-bezier(0.22, 1, 0.36, 1)'),
+    };
+  }
+
+  private moveDragGhost(event: PointerEvent): void {
+    const ghost = this.dragGhostEl()?.nativeElement;
+    if (ghost) {
+      ghost.style.transform = `translate3d(${event.clientX + 14}px, ${event.clientY + 14}px, 0)`;
+    }
+  }
+
+  /** Scrolls while dragging near the viewport edge (driven by pointer moves, no animation loop). */
+  private autoScrollNearEdge(grid: HTMLElement, event: PointerEvent): void {
+    const edge = 72;
+    const step = 18;
+    const scroller = findScrollParent(grid);
+    if (typeof scroller.scrollBy !== 'function') {
+      return;
+    }
+    if (event.clientY < edge) {
+      scroller.scrollBy({ top: -step });
+    } else if (event.clientY > window.innerHeight - edge) {
+      scroller.scrollBy({ top: step });
+    }
+  }
+
+  /** Commits the previewed order exactly once. */
+  private commitItemDrag(order: string[], changed: boolean, itemId: string): void {
+    this.itemDrag = null;
     this.draggingItemId.set(null);
-    this.itemDropTargetId.set(null);
-    this.itemDropPosition.set(null);
-    if (!previous || this.sameOrder(previous, this.menuItems())) {
+    this.dragGhost.set(null);
+    if (!changed) {
+      this.itemPreviewOrder.set(null);
+      this.cdr.detectChanges();
       return;
     }
 
-    const reordered = this.menuItems().map((item, index) => ({
-      ...item,
-      displayOrder: index + 1,
-    }));
+    const previous = [...this.menuItems()];
+    const byId = new Map(previous.map((item) => [item.id, item]));
+    const reordered = order.map((id, index) => ({ ...byId.get(id)!, displayOrder: index + 1 }));
     this.menuItems.set(reordered);
+    this.itemPreviewOrder.set(null);
+    this.cdr.detectChanges();
+    this.markSettled(itemId);
     this.persistItemOrder(previous, reordered);
   }
 
   private cancelItemDrag(): void {
-    if (this.itemOrderSnapshot) {
-      this.menuItems.set(this.itemOrderSnapshot);
-    }
-    this.itemOrderSnapshot = null;
+    const drag = this.itemDrag;
+    this.itemDrag = null;
+    drag?.dispose();
     this.draggingItemId.set(null);
-    this.itemDropTargetId.set(null);
-    this.itemDropPosition.set(null);
+    this.dragGhost.set(null);
+    if (drag && this.itemPreviewOrder()) {
+      this.applyItemPreview(null);
+    } else {
+      this.itemPreviewOrder.set(null);
+    }
+  }
+
+  private markSettled(itemId: string): void {
+    if (this.settleTimer) {
+      clearTimeout(this.settleTimer);
+    }
+    this.settledItemId.set(itemId);
+    this.settleTimer = setTimeout(() => {
+      this.settledItemId.set(null);
+      this.settleTimer = null;
+    }, 900);
+  }
+
+  /** Display position used as the CSS `order` of a card while a drag preview is active. */
+  protected itemVisualOrder(itemId: string): number | null {
+    const preview = this.itemPreviewOrder();
+    return preview ? preview.indexOf(itemId) + 1 : null;
   }
 
   protected dismissPageNotification(): void {
@@ -656,6 +775,7 @@ private animateReorder(
   }
 
   protected openCreateCategory(): void {
+    this.categoryNameDraft.set('');
     this.resetModalState();
     this.editingCategory.set(null);
     this.catalogEditWarning.set(false);
@@ -874,7 +994,7 @@ private animateReorder(
         switchMap((media) => {
           const request = this.toItemRequest(
             this.itemForm.getRawValue(),
-            media?.id ?? editing?.imageFileId ?? null,
+            media?.id ?? (this.imageRemoved() ? null : (editing?.imageFileId ?? null)),
           );
           return editing
             ? this.menuService.updateCatalogMenuItem(editing.id, request)
@@ -937,6 +1057,16 @@ private animateReorder(
       });
   }
 
+  /** UX-006: remove the current/pending image; the item is saved without an image. */
+  protected removeImage(): void {
+    revokeImagePreviewUrl(this.imagePreviewUrl());
+    this.imagePreviewUrl.set(null);
+    this.pendingImageFile.set(null);
+    this.uploadedMedia.set(null);
+    this.imageValidationError.set(null);
+    this.imageRemoved.set(true);
+  }
+
   protected onImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
@@ -947,6 +1077,7 @@ private animateReorder(
     this.uploadedMedia.set(null);
     this.imagePreviewUrl.set(null);
     this.imageValidationError.set(null);
+    this.imageRemoved.set(false);
 
     if (!file) {
       return;
@@ -1078,6 +1209,7 @@ private animateReorder(
     this.pendingImageFile.set(null);
     this.uploadedMedia.set(null);
     this.imageValidationError.set(null);
+    this.imageRemoved.set(false);
   }
 
   private persistCategoryOrder(
@@ -1155,7 +1287,8 @@ private animateReorder(
           this.showSuccessFeedback(this.locale.uiText('adminMenuItemUpdateSuccess'));
         },
         error: (error) => {
-          this.menuItems.set(previous);
+          this.setItemsAnimated(previous);
+          this.settledItemId.set(null);
           this.successMessage.set(null);
           this.reorderErrorMessage.set(this.mapMutationError(error));
         },
@@ -1258,43 +1391,6 @@ private animateReorder(
       isActive: item.isActive,
       ...overrides,
     };
-  }
-
-  private moveEntry<T extends { id: string }>(entries: T[], sourceId: string, targetId: string): T[] {
-    const sourceIndex = entries.findIndex((entry) => entry.id === sourceId);
-    const targetIndex = entries.findIndex((entry) => entry.id === targetId);
-    if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) {
-      return entries;
-    }
-
-    const moved = [...entries];
-    const [entry] = moved.splice(sourceIndex, 1);
-    moved.splice(targetIndex, 0, entry);
-    return moved;
-  }
-
-  private sameOrder<T extends { id: string }>(left: T[], right: T[]): boolean {
-    return left.length === right.length && left.every((entry, index) => entry.id === right[index]?.id);
-  }
-
-  private autoScrollCategoryStrip(event: PointerEvent): void {
-    const currentTarget = event.currentTarget;
-    if (!(currentTarget instanceof HTMLElement)) {
-      return;
-    }
-
-    const strip = currentTarget.closest<HTMLElement>('.menu-management-categories');
-    if (!strip || strip.scrollWidth <= strip.clientWidth) {
-      return;
-    }
-
-    const bounds = strip.getBoundingClientRect();
-    const edge = Math.min(48, bounds.width * 0.15);
-    if (event.clientX < bounds.left + edge) {
-      strip.scrollBy({ left: -18 });
-    } else if (event.clientX > bounds.right - edge) {
-      strip.scrollBy({ left: 18 });
-    }
   }
 
   private showSuccessFeedback(message: string): void {

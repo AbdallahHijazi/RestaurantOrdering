@@ -21,10 +21,20 @@ export class RestaurantTablesService {
     return this.authService.restaurantId();
   }
 
-  listTables(): Observable<RestaurantTable[]> {
+  listTables(includeArchived = true): Observable<RestaurantTable[]> {
     const restaurantId = this.requireRestaurantId();
     return this.http.get<RestaurantTable[]>(
       `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/tables`,
+      { params: { includeArchived: String(includeArchived) } },
+    );
+  }
+
+  /** Archive (soft delete) or restore a table; the row and its historical orders are kept. */
+  archiveTable(tableId: string, isArchived: boolean): Observable<RestaurantTable> {
+    const restaurantId = this.requireRestaurantId();
+    return this.http.patch<RestaurantTable>(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/tables/${tableId}/archive`,
+      { isArchived },
     );
   }
 

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../core/config/api-config';
 import { AuthService } from '../../../core/auth/auth.service';
 import type {
+  DashboardActivity,
   DashboardSummary,
   GetOrdersResult,
   OrderDetails,
@@ -67,6 +68,15 @@ export class AdminOrdersService {
     const restaurantId = this.requireRestaurantId();
     return this.http.get<DashboardSummary>(
       `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/dashboard/summary`,
+    );
+  }
+
+  /** Last N days of real order activity for the dashboard chart. */
+  getDashboardActivity(days = 7): Observable<DashboardActivity> {
+    const restaurantId = this.requireRestaurantId();
+    return this.http.get<DashboardActivity>(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/dashboard/activity`,
+      { params: { days: String(days) } },
     );
   }
 

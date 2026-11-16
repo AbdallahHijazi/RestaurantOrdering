@@ -29,6 +29,7 @@ import {
   type OrderSummary,
 } from '../../data-access/kitchen-orders.models';
 import { KitchenOrdersService } from '../../data-access/kitchen-orders.service';
+import { IconButton } from '../../../../shared/ui/icon-button/icon-button';
 
 type PageState = 'loading' | 'ready' | 'error' | 'missing-context';
 
@@ -48,7 +49,7 @@ const EMPTY_COLUMN: ColumnState = {
 
 @Component({
   selector: 'app-kitchen-dashboard-page',
-  imports: [OrderModalShell, LanguageSwitcher],
+  imports: [IconButton, OrderModalShell, LanguageSwitcher],
   templateUrl: './kitchen-dashboard-page.html',
   styleUrl: './kitchen-dashboard-page.scss',
 })

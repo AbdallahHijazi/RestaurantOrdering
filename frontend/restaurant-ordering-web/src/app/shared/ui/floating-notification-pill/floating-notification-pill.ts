@@ -5,10 +5,12 @@ import {
   input,
   output,
 } from '@angular/core';
+import { IconButton } from '../icon-button/icon-button';
 
 export type FloatingNotificationTone = 'success' | 'error' | 'warning';
 
 @Component({
+  imports: [IconButton],
   selector: 'app-floating-notification-pill',
   templateUrl: './floating-notification-pill.html',
   styleUrl: './floating-notification-pill.scss',

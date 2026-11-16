@@ -77,6 +77,119 @@ describe('StaffManagementPage', () => {
     },
   ];
 
+  // ───────────────────────── UX-001: edit employee + activate/deactivate ─────────────────────────
+
+  const MANAGER_ID = '11111111-1111-1111-1111-111111111101';
+  const KITCHEN_ID = '22222222-2222-2222-2222-222222222202';
+
+  function click(selector: string): void {
+    (document.body.querySelector(selector) as HTMLButtonElement).click();
+    fixture.detectChanges();
+  }
+
+  it('offers icon-only edit, role and status actions with localized accessible names (UX-001/008)', () => {
+    flushList(sampleUsers);
+    const locale = TestBed.inject(LocaleService);
+    const edit = root().querySelector(`[data-testid="staff-edit-${MANAGER_ID}"]`) as HTMLButtonElement;
+    const toggleActive = root().querySelector(`[data-testid="staff-toggle-status-${MANAGER_ID}"]`) as HTMLButtonElement;
+    const toggleInactive = root().querySelector(`[data-testid="staff-toggle-status-${KITCHEN_ID}"]`) as HTMLButtonElement;
+
+    expect(edit.getAttribute('aria-label')).toBe(locale.uiText('actionEdit'));
+    expect(toggleActive.getAttribute('aria-label')).toBe(locale.uiText('actionDeactivate'));
+    expect(toggleInactive.getAttribute('aria-label')).toBe(locale.uiText('actionActivate'));
+    expect(edit.textContent?.trim()).toBe('');
+    expect(edit.querySelector('svg')).toBeTruthy();
+  });
+
+  it('edits name and phone with a PATCH, keeping role and e-mail untouched (UX-001)', () => {
+    flushList(sampleUsers);
+    click(`[data-testid="staff-edit-${MANAGER_ID}"]`);
+
+    expect(document.body.querySelector('[data-testid="staff-edit-modal"]')).toBeTruthy();
+    const name = document.body.querySelector('#staff-edit-full-name') as HTMLInputElement;
+    const phone = document.body.querySelector('#staff-edit-phone') as HTMLInputElement;
+    expect(name.value).toBe('Manager User');
+    name.value = 'Renamed Manager';
+    name.dispatchEvent(new Event('input'));
+    phone.value = '  0790000000 ';
+    phone.dispatchEvent(new Event('input'));
+
+    click('[data-testid="staff-edit-submit"]');
+
+    const req = httpMock.expectOne(`${staffUrl()}/${MANAGER_ID}`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({ fullName: 'Renamed Manager', phoneNumber: '0790000000' });
+    req.flush({ ...sampleUsers[0]!, fullName: 'Renamed Manager', phoneNumber: '0790000000' });
+    fixture.detectChanges();
+
+    expect(document.body.querySelector('[data-testid="staff-edit-modal"]')).toBeNull();
+    expect(root().textContent).toContain('Renamed Manager');
+    expect(root().querySelector('[data-testid="staff-success-message"]')).toBeTruthy();
+  });
+
+  it('asks for confirmation before deactivating and then PATCHes the status (UX-001)', () => {
+    flushList(sampleUsers);
+    click(`[data-testid="staff-toggle-status-${MANAGER_ID}"]`);
+
+    expect(document.body.querySelector('[data-testid="staff-status-modal"]')).toBeTruthy();
+    expect(httpMock.match((r) => r.url.endsWith('/status')).length).toBe(0);
+    expect(document.body.querySelector('[data-testid="staff-status-confirm-text"]')!.textContent).toContain(
+      TestBed.inject(LocaleService).uiText('staffDeactivateConfirm'),
+    );
+
+    click('[data-testid="staff-status-confirm"]');
+
+    const req = httpMock.expectOne(`${staffUrl()}/${MANAGER_ID}/status`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({ isActive: false });
+    req.flush({ ...sampleUsers[0]!, isActive: false });
+    fixture.detectChanges();
+
+    expect(document.body.querySelector('[data-testid="staff-status-modal"]')).toBeNull();
+    const toggle = root().querySelector(`[data-testid="staff-toggle-status-${MANAGER_ID}"]`) as HTMLButtonElement;
+    expect(toggle.getAttribute('aria-label')).toBe(TestBed.inject(LocaleService).uiText('actionActivate'));
+  });
+
+  it('reactivates an inactive employee (UX-001)', () => {
+    flushList(sampleUsers);
+    click(`[data-testid="staff-toggle-status-${KITCHEN_ID}"]`);
+    click('[data-testid="staff-status-confirm"]');
+
+    const req = httpMock.expectOne(`${staffUrl()}/${KITCHEN_ID}/status`);
+    expect(req.request.body).toEqual({ isActive: true });
+    req.flush({ ...sampleUsers[1]!, isActive: true });
+    fixture.detectChanges();
+
+    expect(root().querySelector(`[data-testid="staff-toggle-status-${KITCHEN_ID}"]`)!.getAttribute('aria-label')).toBe(
+      TestBed.inject(LocaleService).uiText('actionDeactivate'),
+    );
+  });
+
+  it('shows a clear error when the server refuses the status change and keeps the list intact (UX-001)', () => {
+    flushList(sampleUsers);
+    click(`[data-testid="staff-toggle-status-${MANAGER_ID}"]`);
+    click('[data-testid="staff-status-confirm"]');
+
+    httpMock
+      .expectOne(`${staffUrl()}/${MANAGER_ID}/status`)
+      .flush({ title: 'forbidden' }, { status: 403, statusText: 'Forbidden' });
+    fixture.detectChanges();
+
+    expect(document.body.querySelector('[data-testid="staff-status-modal"] [role="alert"]')!.textContent).toContain(
+      TestBed.inject(LocaleService).uiText('staffErrorForbiddenAction'),
+    );
+    expect(root().querySelectorAll('[data-testid^="staff-row-"]').length).toBe(2);
+  });
+
+  it('cancelling the status confirmation sends nothing (UX-001)', () => {
+    flushList(sampleUsers);
+    click(`[data-testid="staff-toggle-status-${MANAGER_ID}"]`);
+    click('[data-testid="staff-status-modal"] .staff-modal-actions__cancel');
+
+    expect(document.body.querySelector('[data-testid="staff-status-modal"]')).toBeNull();
+    expect(httpMock.match((r) => r.method === 'PATCH').length).toBe(0);
+  });
+
   it('does not render a page-level top bar', () => {
     flushList([]);
     expect(root().querySelector('.topbar')).toBeNull();
@@ -186,7 +299,7 @@ describe('StaffManagementPage', () => {
     fixture.detectChanges();
 
     expect(root().querySelector('[data-testid="staff-error-state"]')).toBeTruthy();
-    root().querySelector<HTMLButtonElement>('.staff-management-secondary')?.click();
+    root().querySelector<HTMLButtonElement>('[data-testid="staff-retry"]')?.click();
     fixture.detectChanges();
 
     flushList([]);
@@ -358,74 +471,44 @@ describe('StaffManagementPage', () => {
     expect(component.createForm.controls.role.value).toBe(ApplicationRoles.KitchenManager);
   });
 
-  it('shows modal footer actions with visible terracotta save and secondary cancel', () => {
+  it('shows icon-only modal footer actions with localized accessible names (UX-008)', () => {
     flushList([]);
     root().querySelector<HTMLButtonElement>('[data-testid="staff-add-button"]')?.click();
     fixture.detectChanges();
 
+    const locale = TestBed.inject(LocaleService);
     const footer = document.body.querySelector('.staff-modal-actions') as HTMLElement;
     const saveButton = document.body.querySelector('.staff-modal-actions__save') as HTMLButtonElement;
     const cancelButton = document.body.querySelector('.staff-modal-actions__cancel') as HTMLButtonElement;
-    const saveIcon = document.body.querySelector('.staff-modal-actions__icon') as SVGElement;
 
     expect(footer).toBeTruthy();
-    expect(saveButton).toBeTruthy();
-    expect(cancelButton).toBeTruthy();
-    expect(saveIcon).toBeTruthy();
-    expect(saveButton.classList.contains('staff-modal-actions__save')).toBe(true);
-    expect(cancelButton.classList.contains('staff-modal-actions__cancel')).toBe(true);
-    expect(saveIcon.classList.contains('staff-modal-actions__icon')).toBe(true);
-    expect(saveIcon.getAttribute('viewBox')).toBe('0 0 24 24');
-    expect(saveButton.textContent).toContain('حفظ الموظف');
-    expect(cancelButton.textContent).toContain('إلغاء');
+    expect(saveButton.getAttribute('aria-label')).toBe(locale.uiText('staffCreateSubmit'));
+    expect(cancelButton.getAttribute('aria-label')).toBe(locale.uiText('staffCancel'));
+    expect(saveButton.getAttribute('title')).toBe(locale.uiText('staffCreateSubmit'));
+    expect(saveButton.querySelector('svg')).toBeTruthy();
+    expect(cancelButton.querySelector('svg')).toBeTruthy();
+    expect(saveButton.textContent?.trim()).toBe('');
+    expect(cancelButton.textContent?.trim()).toBe('');
     expect(saveButton.compareDocumentPosition(cancelButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-
-    const footerStyle = getComputedStyle(footer);
-    expect(footerStyle.display).toBe('flex');
-    expect(footerStyle.width).toBeTruthy();
-
-    const saveStyle = getComputedStyle(saveButton);
-    expect(saveStyle.width).not.toBe('100%');
-    expect(Number.parseFloat(saveStyle.minHeight)).toBeGreaterThanOrEqual(44);
-    expect(saveStyle.display).toBe('inline-flex');
-
-    const iconStyle = getComputedStyle(saveIcon);
-    expect(iconStyle.width).toBe('18px');
-    expect(iconStyle.height).toBe('18px');
-    expect(iconStyle.flexBasis).toBe('18px');
-
-    const cancelStyle = getComputedStyle(cancelButton);
-    expect(Number.parseFloat(cancelStyle.minHeight)).toBeGreaterThanOrEqual(44);
-    expect(cancelStyle.backgroundColor).not.toBe('');
-    expect(cancelStyle.borderWidth).not.toBe('0px');
+    expect(Number.parseFloat(getComputedStyle(saveButton).minHeight)).toBeGreaterThanOrEqual(44);
   });
 
-  it('shows change role modal footer with save and cancel actions', () => {
+  it('shows change role modal footer with icon save and cancel actions', () => {
     flushList([sampleUsers[0]!]);
     root()
       .querySelector<HTMLButtonElement>('[data-testid="staff-change-role-11111111-1111-1111-1111-111111111101"]')
       ?.click();
     fixture.detectChanges();
 
-    const footer = document.body.querySelector('[data-testid="staff-change-role-modal"] .staff-modal-actions');
-    const saveButton = document.body.querySelector(
-      '[data-testid="staff-change-role-modal"] .staff-modal-actions__save',
-    ) as HTMLButtonElement;
-    const cancelButton = document.body.querySelector(
-      '[data-testid="staff-change-role-modal"] .staff-modal-actions__cancel',
-    ) as HTMLButtonElement;
-    const saveIcon = document.body.querySelector(
-      '[data-testid="staff-change-role-modal"] .staff-modal-actions__icon',
-    ) as SVGElement;
+    const locale = TestBed.inject(LocaleService);
+    const modal = document.body.querySelector('[data-testid="staff-change-role-modal"]') as HTMLElement;
+    const saveButton = modal.querySelector('.staff-modal-actions__save') as HTMLButtonElement;
+    const cancelButton = modal.querySelector('.staff-modal-actions__cancel') as HTMLButtonElement;
 
-    expect(footer).toBeTruthy();
-    expect(saveButton).toBeTruthy();
-    expect(cancelButton).toBeTruthy();
-    expect(saveIcon).toBeTruthy();
-    expect(saveButton.textContent).toContain('حفظ التغيير');
-    expect(cancelButton.textContent).toContain('إلغاء');
-    expect(getComputedStyle(saveIcon).width).toBe('18px');
-    expect(getComputedStyle(saveIcon).height).toBe('18px');
+    expect(modal.querySelector('.staff-modal-actions')).toBeTruthy();
+    expect(saveButton.getAttribute('aria-label')).toBe(locale.uiText('staffChangeRoleSubmit'));
+    expect(cancelButton.getAttribute('aria-label')).toBe(locale.uiText('staffCancel'));
+    expect(saveButton.querySelector('svg')).toBeTruthy();
   });
 
   it('uses role dropdown panel with max-height and vertical scrolling', () => {

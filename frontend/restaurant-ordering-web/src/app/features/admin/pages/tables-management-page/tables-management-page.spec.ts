@@ -56,8 +56,8 @@ describe('TablesManagementPage', () => {
   function flushList(tables: RestaurantTable[] = []): void {
     const restaurantReq = httpMock.expectOne(restaurantUrl());
     restaurantReq.flush({ slug: 'demo-restaurant', nameAr: 'مطعم', nameEn: 'Restaurant' });
-    const req = httpMock.expectOne(tablesUrl());
-    expect(req.request.method).toBe('GET');
+    const req = httpMock.expectOne((r) => r.url === tablesUrl() && r.method === 'GET');
+    expect(req.request.params.get('includeArchived')).toBe('true');
     req.flush(tables);
     fixture.detectChanges();
   }
@@ -71,6 +71,83 @@ describe('TablesManagementPage', () => {
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: null,
   };
+
+  // ───────────────────────── UX-007: safe table archiving ─────────────────────────
+
+  it('archives a table after confirmation and hides it from the default list (UX-007)', () => {
+    flushList([sampleTable, { ...sampleTable, id: '22222222-2222-2222-2222-222222222202', name: 'Table 2', publicToken: 'tok2' }]);
+    vi.useFakeTimers();
+    try {
+      document.querySelector<HTMLButtonElement>('body');
+      root().querySelector<HTMLButtonElement>(`[data-testid="table-archive-${sampleTable.id}"]`)!.click();
+      fixture.detectChanges();
+
+      expect(httpMock.match((r) => r.url.endsWith('/archive')).length).toBe(0); // nothing before confirming
+      document.body.querySelector<HTMLButtonElement>('[data-testid="table-confirm-submit"]')!.click();
+
+      const req = httpMock.expectOne(tablesUrl(`/${sampleTable.id}/archive`));
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ isArchived: true });
+      req.flush({ ...sampleTable, isActive: false, isArchived: true, archivedAt: '2026-11-16T00:00:00Z' });
+      fixture.detectChanges();
+
+      expect(root().querySelector(`[data-testid="table-card-${sampleTable.id}"]`)).toBeNull();
+      expect(root().querySelectorAll('app-table-card')).toHaveLength(1);
+      expect(root().querySelector('[data-testid="tables-stat-total"]')!.textContent!.trim()).toBe('1');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('shows archived tables only under the archived filter, with a restore action (UX-007)', () => {
+    const archived = { ...sampleTable, isActive: false, isArchived: true, archivedAt: '2026-11-01T00:00:00Z' };
+    flushList([archived]);
+    const page = fixture.componentInstance as any;
+
+    expect(root().querySelector(`[data-testid="table-card-${archived.id}"]`)).toBeNull();
+
+    page.setStatusFilter('archived');
+    fixture.detectChanges();
+
+    const card = root().querySelector(`[data-testid="table-card-${archived.id}"]`)!;
+    expect(card).toBeTruthy();
+    expect(card.querySelector(`[data-testid="table-edit-${archived.id}"]`)).toBeNull(); // no editing while archived
+    const restore = card.querySelector(`[data-testid="table-archive-${archived.id}"]`) as HTMLButtonElement;
+    expect(restore.getAttribute('aria-label')).toBe(TestBed.inject(LocaleService).uiText('actionRestore'));
+  });
+
+  it('restores an archived table as inactive (UX-007)', () => {
+    const archived = { ...sampleTable, isActive: false, isArchived: true, archivedAt: '2026-11-01T00:00:00Z' };
+    flushList([archived]);
+    const page = fixture.componentInstance as any;
+    page.setStatusFilter('archived');
+    fixture.detectChanges();
+
+    root().querySelector<HTMLButtonElement>(`[data-testid="table-archive-${archived.id}"]`)!.click();
+    fixture.detectChanges();
+    document.body.querySelector<HTMLButtonElement>('[data-testid="table-confirm-submit"]')!.click();
+
+    const req = httpMock.expectOne(tablesUrl(`/${archived.id}/archive`));
+    expect(req.request.body).toEqual({ isArchived: false });
+    req.flush({ ...archived, isArchived: false, archivedAt: null });
+    fixture.detectChanges();
+
+    page.setStatusFilter('inactive');
+    fixture.detectChanges();
+    expect(root().querySelector(`[data-testid="table-card-${archived.id}"]`)).toBeTruthy();
+  });
+
+  it('offers icon-only actions on a table card with localized accessible names (UX-008)', () => {
+    flushList([sampleTable]);
+    const locale = TestBed.inject(LocaleService);
+    const edit = root().querySelector(`[data-testid="table-edit-${sampleTable.id}"]`) as HTMLButtonElement;
+    const print = root().querySelector(`[data-testid="table-print-${sampleTable.id}"]`) as HTMLButtonElement;
+
+    expect(edit.getAttribute('aria-label')).toBe(locale.uiText('tablesActionEdit'));
+    expect(print.getAttribute('aria-label')).toBe(locale.uiText('tablesActionPrint'));
+    expect(edit.textContent?.trim()).toBe('');
+    expect(edit.querySelector('svg')).toBeTruthy();
+  });
 
   it('shows the page actions together in the header without a duplicate print action', () => {
     flushList([]);

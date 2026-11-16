@@ -32,19 +32,14 @@
       }
 
       <button
-        type="button"
-        class="order-details-modal__close"
+        appIconButton
+        icon="x"
+        variant="ghost"
+        size="sm"
+        [label]="closeLabel() || locale.uiText('adminOrderDetailsClose')"
         data-testid="admin-order-details-close"
-        [attr.aria-label]="closeLabel() || locale.uiText('adminOrderDetailsClose')"
         (click)="requestClose()"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path
-            fill="currentColor"
-            d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.89 4.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4Z"
-          />
-        </svg>
-      </button>
+      ></button>
     </div>
   </header>
 
@@ -56,9 +51,12 @@
     } @else if (error()) {
       <div class="order-details-modal__state" data-testid="admin-orders-details-error">
         <p>{{ error() }}</p>
-        <button type="button" class="order-details-modal__retry" (click)="retry.emit()">
-          {{ locale.uiText('adminOrdersRetry') }}
-        </button>
+        <button
+          appIconButton
+          icon="refresh"
+          [label]="locale.uiText('adminOrdersRetry')"
+          (click)="retry.emit()"
+        ></button>
       </div>
     } @else if (details(); as order) {
       <div class="order-details-modal__body" data-testid="admin-orders-details-body">
@@ -309,16 +307,15 @@
               <div class="order-details-modal__status-buttons">
                 @for (action of actions(); track action.labelKey) {
                   <button
-                    type="button"
-                    class="order-details-modal__status-btn"
-                    [class.order-details-modal__status-btn--danger]="action.destructive"
-                    [class.order-details-modal__status-btn--success]="!action.destructive && action.newStatus === OrderStatus.Completed"
+                    appIconButton
+                    [icon]="action.destructive ? 'x' : (action.newStatus === OrderStatus.Preparing ? 'play' : 'check')"
+                    [variant]="action.destructive ? 'danger' : (action.newStatus === OrderStatus.Completed ? 'success' : 'primary')"
+                    [showLabel]="true"
+                    [label]="locale.uiText(action.labelKey)"
                     [disabled]="updating()"
                     [attr.data-testid]="'admin-order-modal-action-' + order.id + '-' + action.newStatus"
                     (click)="actionRequested.emit(action)"
-                  >
-                    {{ locale.uiText(action.labelKey) }}
-                  </button>
+                  ></button>
                 }
               </div>
             </div>
@@ -332,29 +329,20 @@
   <footer class="order-details-modal__footer">
     <div class="order-details-modal__footer-actions">
       <button
-        type="button"
-        class="order-details-modal__footer-close"
+        appIconButton
+        icon="x"
+        [label]="locale.uiText('adminOrderDetailsClose')"
         data-testid="admin-order-details-footer-close"
         (click)="requestClose()"
-      >
-        {{ locale.uiText('adminOrderDetailsClose') }}
-      </button>
+      ></button>
       <button
-        type="button"
-        class="order-details-modal__footer-print"
+        appIconButton
+        icon="print"
+        [label]="locale.uiText('adminOrderDetailsPrint')"
         data-testid="admin-order-details-print"
         [disabled]="!details() || loading()"
-        [attr.aria-label]="locale.uiText('adminOrderDetailsPrint')"
         (click)="printInvoice()"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path
-            fill="currentColor"
-            d="M19 8H5a3 3 0 0 0-3 3v6h4v4h12v-4h4v-6a3 3 0 0 0-3-3Zm-1 10H6v-4h12v4Zm3-6a1 1 0 1 1 1-1 1 1 0 0 1-1 1Zm-2-5H5v3h14V7Z"
-          />
-        </svg>
-        {{ locale.uiText('adminOrderDetailsPrint') }}
-      </button>
+      ></button>
     </div>
   </footer>
 

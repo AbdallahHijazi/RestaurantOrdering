@@ -31,6 +31,12 @@ public sealed class UserAuthenticationService : IUserAuthenticationService
             return null;
         }
 
+        // Deactivated / deleted accounts cannot sign in (same generic failure as bad credentials).
+        if (!user.IsActive || user.IsDeleted)
+        {
+            return null;
+        }
+
         var passwordValid = await _userManager.CheckPasswordAsync(user, password);
         if (!passwordValid)
         {

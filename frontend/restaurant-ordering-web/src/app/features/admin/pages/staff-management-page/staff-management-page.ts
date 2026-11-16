@@ -30,15 +30,16 @@ import {
   type StaffSelectOption,
 } from './components/staff-management-select/staff-management-select';
 import { StaffModalActions } from './components/staff-modal-actions/staff-modal-actions';
+import { IconButton } from '../../../../shared/ui/icon-button/icon-button';
 
 type PageState = 'loading' | 'ready' | 'error' | 'missing-context';
-type ModalKind = 'create' | 'changeRole' | null;
+type ModalKind = 'create' | 'changeRole' | 'edit' | 'status' | null;
 type StaffFilterValue = 'all' | AssignableStaffRole;
 type StatusFilterValue = 'all' | 'active' | 'inactive';
 
 @Component({
   selector: 'app-staff-management-page',
-  imports: [ReactiveFormsModule, ModalShell, StaffManagementRoster, StaffManagementStats, StaffManagementSelect, StaffModalActions],
+  imports: [ReactiveFormsModule, ModalShell, StaffManagementRoster, StaffManagementStats, StaffManagementSelect, StaffModalActions, IconButton],
   templateUrl: './staff-management-page.html',
   styleUrl: './staff-management-page.scss',
 })
@@ -65,6 +66,10 @@ export class StaffManagementPage {
   protected readonly changeRoleSubmitting = signal(false);
   protected readonly changeRoleErrorMessage = signal<string | null>(null);
   protected readonly selectedStaff = signal<RestaurantStaffUser | null>(null);
+  protected readonly editSubmitting = signal(false);
+  protected readonly editErrorMessage = signal<string | null>(null);
+  protected readonly statusSubmitting = signal(false);
+  protected readonly statusErrorMessage = signal<string | null>(null);
 
   protected readonly totalEmployees = computed(() => this.staff().length);
   protected readonly activeEmployees = computed(
@@ -133,6 +138,11 @@ export class StaffManagementPage {
     fullName: ['', [Validators.maxLength(150)]],
     phoneNumber: ['', [Validators.maxLength(32)]],
     role: [ApplicationRoles.RestaurantManager as AssignableStaffRole, [Validators.required]],
+  });
+
+  protected readonly editForm = this.fb.group({
+    fullName: ['', [Validators.maxLength(150)]],
+    phoneNumber: ['', [Validators.maxLength(32)]],
   });
 
   protected readonly changeRoleForm = this.fb.group({
@@ -269,9 +279,123 @@ export class StaffManagementPage {
     this.selectedStaff.set(null);
   }
 
+  protected openEditModal(member: RestaurantStaffUser): void {
+    this.selectedStaff.set(member);
+    this.editForm.reset({ fullName: member.fullName ?? '', phoneNumber: member.phoneNumber ?? '' });
+    this.editErrorMessage.set(null);
+    this.editSubmitting.set(false);
+    this.modalKind.set('edit');
+  }
+
+  protected closeEditModal(): void {
+    this.modalKind.set(null);
+    this.editSubmitting.set(false);
+    this.editErrorMessage.set(null);
+    this.selectedStaff.set(null);
+  }
+
+  protected submitEdit(): void {
+    const member = this.selectedStaff();
+    if (!member || this.editSubmitting()) {
+      return;
+    }
+
+    this.editForm.markAllAsTouched();
+    if (this.editForm.invalid) {
+      return;
+    }
+
+    const raw = this.editForm.getRawValue();
+    this.editSubmitting.set(true);
+    this.editErrorMessage.set(null);
+
+    this.staffService
+      .updateStaff(member.id, {
+        fullName: raw.fullName.trim() || null,
+        phoneNumber: raw.phoneNumber.trim() || null,
+      })
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.editSubmitting.set(false)),
+      )
+      .subscribe({
+        next: (updated) => {
+          this.replaceStaffMember(updated);
+          this.closeEditModal();
+          this.successMessage.set(this.locale.uiText('staffUpdateSuccess'));
+        },
+        error: (error) => this.editErrorMessage.set(this.mapMutationError(error)),
+      });
+  }
+
+  /** Activation/deactivation is confirmed first: it blocks or restores the employee's sign-in. */
+  protected openStatusModal(member: RestaurantStaffUser): void {
+    this.selectedStaff.set(member);
+    this.statusErrorMessage.set(null);
+    this.statusSubmitting.set(false);
+    this.modalKind.set('status');
+  }
+
+  protected closeStatusModal(): void {
+    this.modalKind.set(null);
+    this.statusSubmitting.set(false);
+    this.statusErrorMessage.set(null);
+    this.selectedStaff.set(null);
+  }
+
+  protected confirmStatusChange(): void {
+    const member = this.selectedStaff();
+    if (!member || this.statusSubmitting()) {
+      return;
+    }
+
+    this.statusSubmitting.set(true);
+    this.statusErrorMessage.set(null);
+
+    this.staffService
+      .setStaffActive(member.id, !member.isActive)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.statusSubmitting.set(false)),
+      )
+      .subscribe({
+        next: (updated) => {
+          this.replaceStaffMember(updated);
+          this.closeStatusModal();
+          this.successMessage.set(this.locale.uiText('staffStatusUpdateSuccess'));
+        },
+        error: (error) => this.statusErrorMessage.set(this.mapMutationError(error)),
+      });
+  }
+
+  protected modalTitleId(): string {
+    return `staff-${this.modalKind() ?? 'modal'}-title`;
+  }
+
+  protected modalTestId(): string {
+    const kind = this.modalKind();
+    return kind === 'changeRole' ? 'staff-change-role-modal' : `staff-${kind ?? 'modal'}-modal`;
+  }
+
+  private replaceStaffMember(updated: RestaurantStaffUser): void {
+    this.staff.update((users) =>
+      users.map((user) => (user.id === updated.id ? updated : user)).sort(this.compareStaff),
+    );
+  }
+
   protected dismissModal(): void {
     if (this.modalKind() === 'create') {
       this.closeCreateModal();
+      return;
+    }
+
+    if (this.modalKind() === 'edit') {
+      this.closeEditModal();
+      return;
+    }
+
+    if (this.modalKind() === 'status') {
+      this.closeStatusModal();
       return;
     }
 
@@ -332,6 +456,16 @@ export class StaffManagementPage {
       return this.locale.uiText('staffChangeRoleTitle');
     }
 
+    if (this.modalKind() === 'edit') {
+      return this.locale.uiText('staffEditTitle');
+    }
+
+    if (this.modalKind() === 'status') {
+      return this.locale.uiText(
+        this.selectedStaff()?.isActive ? 'staffDeactivateTitle' : 'staffActivateTitle',
+      );
+    }
+
     return '';
   }
 
@@ -380,6 +514,10 @@ export class StaffManagementPage {
     if (error instanceof HttpErrorResponse) {
       if (error.status === 400) {
         return this.readProblemDetail(error) ?? this.locale.uiText('staffErrorValidation');
+      }
+
+      if (error.status === 403 || error.status === 404) {
+        return this.locale.uiText('staffErrorForbiddenAction');
       }
 
       if (error.status === 409) {

@@ -5,12 +5,15 @@ import { RouterLink } from '@angular/router';
 import { ApplicationRoles } from '../../../../core/auth/application-roles';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { LocaleService } from '../../../../core/localization/locale';
+import { IconButton } from '../../../../shared/ui/icon-button/icon-button';
 
 import { AdminOrdersService } from '../../data-access/admin-orders.service';
 
 import {
   OrderStatus,
   OrderType,
+  type DashboardActivity,
+  type DashboardActivityDay,
   type DashboardSummary,
   type OrderSummary,
 } from '../../../kitchen/data-access/kitchen-orders.models';
@@ -27,7 +30,7 @@ type LoadState = 'loading' | 'ready' | 'error';
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [RouterLink],
+  imports: [RouterLink, IconButton],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
 })
@@ -45,6 +48,10 @@ export class DashboardPage {
 
   /** Authoritative aggregates computed by the server over the full dataset. */
   protected readonly summary = signal<DashboardSummary | null>(null);
+
+  protected readonly activity = signal<DashboardActivity | null>(null);
+  protected readonly activityState = signal<LoadState>('loading');
+  private activityRequestActive = false;
 
   protected readonly statsState = signal<LoadState>('loading');
   protected readonly ordersState = signal<LoadState>('loading');
@@ -96,6 +103,62 @@ export class DashboardPage {
   private load(): void {
     this.loadSummary();
     this.loadRecentOrders();
+    this.loadActivity();
+  }
+
+  private loadActivity(): void {
+    if (this.activityRequestActive) {
+      return;
+    }
+
+    this.activityRequestActive = true;
+    this.activityState.set('loading');
+
+    this.ordersService
+      .getDashboardActivity(7)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (activity) => {
+          this.activityRequestActive = false;
+          this.activity.set(activity);
+          this.activityState.set('ready');
+        },
+        error: () => {
+          this.activityRequestActive = false;
+          this.activity.set(null);
+          this.activityState.set('error');
+        },
+      });
+  }
+
+  /** Bars scale to the busiest day; a week without orders is reported as empty, never drawn as fake data. */
+  protected readonly activityMax = computed(() =>
+    Math.max(0, ...(this.activity()?.days ?? []).map((day) => day.orders)),
+  );
+
+  protected readonly activityHasOrders = computed(() => this.activityMax() > 0);
+
+  protected barHeight(day: DashboardActivityDay): number {
+    const max = this.activityMax();
+    return max === 0 ? 0 : Math.max(day.orders > 0 ? 6 : 0, Math.round((day.orders / max) * 100));
+  }
+
+  protected dayLabel(day: DashboardActivityDay): string {
+    const [year, month, date] = day.date.split('-').map(Number);
+    const value = new Date(Date.UTC(year!, month! - 1, date!));
+    const weekday = new Intl.DateTimeFormat(this.localeService.locale() === 'ar' ? 'ar' : 'en', {
+      weekday: 'short',
+      timeZone: 'UTC',
+    }).format(value);
+    return `${weekday} ${String(date).padStart(2, '0')}/${String(month).padStart(2, '0')}`;
+  }
+
+  protected isToday(index: number): boolean {
+    return index === (this.activity()?.days.length ?? 0) - 1;
+  }
+
+  protected activityTitle(day: DashboardActivityDay): string {
+    return `${this.dayLabel(day)}: ${day.orders} ${this.localeService.uiText('adminDashboardActivityOrders')}`;
   }
 
   private loadSummary(): void {

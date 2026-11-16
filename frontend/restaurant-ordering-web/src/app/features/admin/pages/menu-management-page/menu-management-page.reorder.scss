@@ -1,14 +1,19 @@
 .menu-management-category-panel {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-block-end: 1.5rem;
-  padding: 0.625rem;
+  flex-direction: column;
+  margin-block-end: var(--menu-section-gap, 1.5rem);
+  padding: 0.75rem;
   border: 1px solid var(--menu-line);
   border-radius: 1rem;
   background: var(--restaurant-surface);
   box-shadow: var(--restaurant-shadow-xs);
+}
+
+.menu-management-category-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .menu-management-categories {
@@ -25,6 +30,125 @@
   flex: 0 0 auto;
   align-items: center;
   gap: 0.5rem;
+}
+
+/* Contextual Edit/Delete row. In normal flow (never an overlay): grid-rows 0fr -> 1fr animates the height
+   without measuring it, opacity + a small directional shift carry the state change. State-driven (not
+   enter/leave keyframes) so rapid category switching can interrupt it mid-way without breaking. */
+.menu-management-category-context {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    opacity var(--restaurant-motion-fast) var(--restaurant-ease-exit);
+}
+
+.menu-management-category-context.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition:
+    grid-template-rows var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    opacity var(--restaurant-motion-normal) var(--restaurant-ease-standard);
+}
+
+.menu-management-category-context__clip {
+  min-block-size: 0;
+  overflow: hidden;
+  /* room for focus rings that would otherwise be clipped by overflow */
+  padding: 0.125rem;
+  margin: -0.125rem;
+}
+
+.menu-management-category-context__row {
+  display: flex;
+  align-items: center;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  gap: 1rem;
+  margin-block-start: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--restaurant-accent-border);
+  border-radius: var(--radius-md);
+  background: var(--restaurant-accent-soft);
+  animation: menu-context-swap var(--restaurant-motion-normal) var(--restaurant-ease-standard) both;
+}
+
+.menu-management-category-context__label {
+  display: grid;
+  min-inline-size: 0;
+  gap: 0.125rem;
+}
+
+.menu-management-category-context__label small {
+  color: var(--restaurant-muted-text);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.menu-management-category-context__label strong {
+  overflow: hidden;
+  color: var(--restaurant-accent-strong);
+  font-size: var(--fs-secondary);
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-management-category-context__buttons {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@keyframes menu-context-swap {
+  from {
+    opacity: 0;
+    transform: translate3d(0, calc(var(--restaurant-motion-distance-sm) * -1), 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Pointer-following preview while dragging a dish. */
+.menu-management-drag-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-preview-overlay);
+  display: grid;
+  gap: 0.125rem;
+  max-inline-size: 16rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--restaurant-accent);
+  border-radius: var(--radius-md);
+  color: var(--restaurant-text);
+  background: var(--restaurant-surface-elevated);
+  box-shadow: var(--restaurant-shadow-md);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.menu-management-drag-ghost strong {
+  overflow: hidden;
+  font-size: var(--fs-secondary);
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-management-drag-ghost small {
+  color: var(--restaurant-accent-strong);
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+
+.menu-management-reorder-anchor {
+  flex: 0 0 auto;
 }
 
 .menu-management-reorder-button {
@@ -45,7 +169,7 @@
   margin: -0.75rem 0 1rem;
   padding: 0.7rem 0.9rem;
   border-radius: 0.75rem;
-  font-size: 0.78rem;
+  font-size: var(--fs-small);
   font-weight: 700;
   line-height: 1.6;
 }
@@ -94,52 +218,18 @@
 //   will-change: transform;
 // }
 
-.menu-management-category-wrap.is-drop-before::before,
-.menu-management-category-wrap.is-drop-after::after {
-  position: absolute;
-  z-index: 4;
-  top: 0.2rem;
-  bottom: 0.2rem;
-  width: 0.2rem;
-  border-radius: 999px;
-  background: var(--restaurant-accent);
-  box-shadow: 0 0 0 0.2rem var(--restaurant-accent-soft);
-  content: '';
-}
-
-.menu-management-category-wrap.is-drop-before::before {
-  inset-inline-start: -0.35rem;
-}
-
-.menu-management-category-wrap.is-drop-after::after {
-  inset-inline-end: -0.35rem;
-}
-
-
-app-menu-management-meal-card.menu-management-item-slot--drop-before::before,
-app-menu-management-meal-card.menu-management-item-slot--drop-after::after {
-  position: absolute;
-  z-index: 6;
-  top: 0.6rem;
-  bottom: 0.6rem;
-  width: 0.25rem;
-  border-radius: 999px;
-  background: var(--restaurant-accent);
-  box-shadow: 0 0 0 0.25rem var(--restaurant-accent-soft);
-  content: '';
-  pointer-events: none;
-}
-
-app-menu-management-meal-card.menu-management-item-slot--drop-before::before {
-  inset-inline-start: -0.6rem;
-}
-
-app-menu-management-meal-card.menu-management-item-slot--drop-after::after {
-  inset-inline-end: -0.6rem;
+/* The dragged chip sits in its previewed slot as the drop placeholder. */
+.menu-management-category-wrap.is-dragging .menu-management-category-pill {
+  border-style: dashed;
+  border-color: var(--restaurant-accent);
+  color: var(--restaurant-accent-strong);
+  background: var(--restaurant-accent-soft);
+  box-shadow: none;
+  opacity: 0.7;
 }
 
 @media (max-width: 64rem) {
-  .menu-management-category-panel {
+  .menu-management-category-bar {
     align-items: stretch;
     flex-direction: column;
   }
@@ -159,24 +249,6 @@ app-menu-management-meal-card.menu-management-item-slot--drop-after::after {
     min-width: 0;
     white-space: normal;
   }
-
-  app-menu-management-meal-card.menu-management-item-slot--drop-before::before,
-  app-menu-management-meal-card.menu-management-item-slot--drop-after::after {
-    right: 0.6rem;
-    left: 0.6rem;
-    width: auto;
-    height: 0.25rem;
-  }
-
-  app-menu-management-meal-card.menu-management-item-slot--drop-before::before {
-    top: -0.6rem;
-    bottom: auto;
-  }
-
-  app-menu-management-meal-card.menu-management-item-slot--drop-after::after {
-    top: auto;
-    bottom: -0.6rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -189,27 +261,4 @@ app-menu-management-meal-card.menu-management-item-slot--drop-after::after {
     transition: none;
   }
 
-  .menu-management-category-wrap.is-drop-before::before,
-  .menu-management-category-wrap.is-drop-after::after,
-  app-menu-management-meal-card.menu-management-item-slot--drop-before::before,
-  app-menu-management-meal-card.menu-management-item-slot--drop-after::after {
-    animation: none;
-  }
-}
-
-.menu-management-category-wrap.is-drop-before::before,
-.menu-management-category-wrap.is-drop-after::after,
-app-menu-management-meal-card.menu-management-item-slot--drop-before::before,
-app-menu-management-meal-card.menu-management-item-slot--drop-after::after {
-  animation: menu-reorder-indicator-in 140ms ease-out;
-}
-
-@keyframes menu-reorder-indicator-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
 }

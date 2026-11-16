@@ -14,7 +14,7 @@
   margin: 0;
   color: var(--profile-text);
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 3vw, 2rem);
+  font-size: var(--fs-page-title);
   font-weight: 800;
   line-height: 1.3;
   letter-spacing: -0.02em;
@@ -24,7 +24,7 @@
   max-width: 48rem;
   margin: 0;
   color: var(--profile-muted);
-  font-size: 0.85rem;
+  font-size: var(--fs-secondary);
   line-height: 1.75;
 }
 
@@ -76,7 +76,7 @@
   margin: 0;
   color: var(--profile-text);
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 750;
   line-height: 1.45;
 }
@@ -95,7 +95,7 @@
 .profile-console__card-heading p {
   margin: 0;
   color: var(--profile-muted);
-  font-size: 0.74rem;
+  font-size: var(--fs-small);
   line-height: 1.65;
 }
 
@@ -112,7 +112,7 @@
   border-radius: 999px;
   color: var(--profile-olive-dark);
   background: var(--profile-olive-soft);
-  font-size: 0.67rem;
+  font-size: var(--fs-small);
   font-weight: 700;
   line-height: 1.35;
   white-space: nowrap;
@@ -125,7 +125,7 @@
   border-radius: 0.4rem;
   color: var(--profile-muted);
   background: color-mix(in srgb, var(--profile-olive-soft) 55%, transparent);
-  font-size: 0.72rem;
+  font-size: var(--fs-small);
   line-height: 1.65;
 }
 
@@ -180,7 +180,7 @@
   color: var(--profile-muted);
   background: color-mix(in srgb, var(--profile-linen-soft) 88%, var(--profile-border));
   font-family: var(--restaurant-font-mono);
-  font-size: 0.7rem;
+  font-size: var(--fs-small);
   white-space: nowrap;
 }
 
@@ -211,7 +211,7 @@
   color: var(--profile-olive-dark);
   background: var(--profile-card);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: var(--fs-small);
   font-weight: 750;
   cursor: pointer;
 }

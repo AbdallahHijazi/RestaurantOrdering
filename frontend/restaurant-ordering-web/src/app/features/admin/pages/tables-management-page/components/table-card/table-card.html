@@ -13,13 +13,15 @@
     </div>
     <span
       class="table-card__badge"
-      [class.table-card__badge--inactive]="!table().isActive"
+      [class.table-card__badge--inactive]="!table().isActive || table().isArchived"
       [attr.data-testid]="'table-status-' + table().id"
     >
       {{
-        table().isActive
-          ? locale.uiText('tablesStatusActive')
-          : locale.uiText('tablesStatusInactive')
+        table().isArchived
+          ? locale.uiText('tablesStatusArchived')
+          : table().isActive
+            ? locale.uiText('tablesStatusActive')
+            : locale.uiText('tablesStatusInactive')
       }}
     </span>
   </div>
@@ -38,7 +40,7 @@
       [qrSvg]="qrSvg() ?? ''"
       [qrLoading]="qrLoading()"
     />
-    @if (!table().isActive) {
+    @if (!table().isActive && !table().isArchived) {
       <div class="table-card__inactive-overlay" [attr.data-testid]="'table-inactive-overlay-' + table().id">
         <span class="table-card__inactive-label">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -47,76 +49,66 @@
           {{ locale.uiText('tablesOrderTemporarilyDisabled') }}
         </span>
         <button
-          type="button"
-          class="table-card__reactivate"
+          appIconButton
+          size="sm"
+          icon="power"
+          variant="primary"
+          [showLabel]="true"
+          [label]="locale.uiText('tablesReactivateNow')"
           [attr.data-testid]="'table-reactivate-' + table().id"
           (click)="toggleStatus.emit(table())"
-        >
-          {{ locale.uiText('tablesReactivateNow') }}
-        </button>
+        ></button>
       </div>
     }
   </div>
 
   <div class="table-card__actions">
+    @if (!table().isArchived) {
+      <button
+        appIconButton
+        variant="primary"
+        icon="edit"
+        [label]="locale.uiText('tablesActionEdit')"
+        [attr.data-testid]="'table-edit-' + table().id"
+        (click)="edit.emit(table())"
+      ></button>
+      <button
+        appIconButton
+        icon="print"
+        [label]="locale.uiText('tablesActionPrint')"
+        [attr.data-testid]="'table-print-' + table().id"
+        (click)="print.emit(table())"
+      ></button>
+      <button
+        appIconButton
+        icon="download"
+        [label]="locale.uiText('tablesActionDownloadQr')"
+        [attr.data-testid]="'table-download-qr-' + table().id"
+        (click)="downloadQr.emit(table())"
+      ></button>
+      <button
+        appIconButton
+        icon="power"
+        [label]="table().isActive ? locale.uiText('tablesActionDeactivate') : locale.uiText('tablesActionActivate')"
+        [attr.data-testid]="'table-toggle-status-' + table().id"
+        (click)="toggleStatus.emit(table())"
+      ></button>
+      <button
+        appIconButton
+        variant="danger"
+        icon="refresh"
+        [label]="locale.uiText('tablesActionRegenerateToken')"
+        [attr.data-testid]="'table-regenerate-' + table().id"
+        (click)="regenerateToken.emit(table())"
+      ></button>
+    }
     <button
-      type="button"
-      class="table-card__action table-card__action--primary"
-      [attr.data-testid]="'table-edit-' + table().id"
-      (click)="edit.emit(table())"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path fill="currentColor" d="m14.7 5.3 4 4L8 20H4v-4L14.7 5.3Zm1.4-1.4 1.2-1.2a1 1 0 0 1 1.4 0l2.6 2.6a1 1 0 0 1 0 1.4l-1.2 1.2-4-4Z" />
-      </svg>
-      {{ locale.uiText('tablesActionEdit') }}
-    </button>
-    <button
-      type="button"
-      class="table-card__action"
-      [attr.data-testid]="'table-print-' + table().id"
-      (click)="print.emit(table())"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path fill="currentColor" d="M6 2h12v5H6V2Zm13 6a3 3 0 0 1 3 3v6h-4v5H6v-5H2v-6a3 3 0 0 1 3-3h14Zm-3 12v-5H8v5h8Zm4-5v-4a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v4h1v-2h12v2h2Z" />
-      </svg>
-      {{ locale.uiText('tablesActionPrint') }}
-    </button>
-    <button
-      type="button"
-      class="table-card__action"
-      [attr.data-testid]="'table-download-qr-' + table().id"
-      (click)="downloadQr.emit(table())"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path fill="currentColor" d="M11 3h2v10.2l3.6-3.6 1.4 1.4-6 6-6-6 1.4-1.4 3.6 3.6V3ZM4 19h16v2H4v-2Z" />
-      </svg>
-      {{ locale.uiText('tablesActionDownloadQr') }}
-    </button>
-    <button
-      type="button"
-      class="table-card__action"
-      [attr.data-testid]="'table-toggle-status-' + table().id"
-      (click)="toggleStatus.emit(table())"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path fill="currentColor" d="M13 3v9h-2V3h2Zm4.8 2.2A9 9 0 1 1 6.2 5.2l1.3 1.5a7 7 0 1 0 9 0l1.3-1.5Z" />
-      </svg>
-      {{
-        table().isActive
-          ? locale.uiText('tablesActionDeactivate')
-          : locale.uiText('tablesActionActivate')
-      }}
-    </button>
-    <button
-      type="button"
-      class="table-card__action table-card__action--danger"
-      [attr.data-testid]="'table-regenerate-' + table().id"
-      (click)="regenerateToken.emit(table())"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path fill="currentColor" d="M12 4a8 8 0 0 1 7.7 6H22l-3.5 4L15 10h2.6A6 6 0 1 0 18 15l1.7 1A8 8 0 1 1 12 4Z" />
-      </svg>
-      {{ locale.uiText('tablesActionRegenerateToken') }}
-    </button>
+      appIconButton
+      [variant]="table().isArchived ? 'primary' : 'danger'"
+      [icon]="table().isArchived ? 'restore' : 'archive'"
+      [label]="table().isArchived ? locale.uiText('actionRestore') : locale.uiText('actionArchive')"
+      [attr.data-testid]="'table-archive-' + table().id"
+      (click)="archive.emit(table())"
+    ></button>
   </div>
 </article>

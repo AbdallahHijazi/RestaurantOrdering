@@ -17,8 +17,10 @@ import type { PublicRestaurantOrderSettings } from '../../models/public-menu.mod
 import { displayUnitPrice, estimateOrderTotals } from '../../utils/order-estimate.util';
 import { ORDER_TYPE_PICKUP } from '../../models/public-menu.models';
 import { MOCK_IMAGE_FALLBACK } from '../../data-access/public-menu-mock.data';
+import { IconButton } from '../../../../shared/ui/icon-button/icon-button';
 
 @Component({
+  imports: [IconButton],
   selector: 'app-public-cart-drawer',
   templateUrl: './public-cart-drawer.html',
   styleUrl: './public-cart-drawer.scss',

@@ -141,7 +141,7 @@
 }
 
 .login-page__brand-text {
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--muted);
@@ -149,7 +149,7 @@
 
 .login-page__card h1 {
   margin: 0 0 0.5rem;
-  font-size: 1.85rem;
+  font-size: var(--fs-page-title);
   color: var(--text);
 }
 
@@ -171,7 +171,7 @@
 .login-page__card label,
 .login-page__field-error,
 .login-page__error {
-  font-size: 0.875rem;
+  font-size: var(--fs-secondary);
 }
 
 .login-page__card label {

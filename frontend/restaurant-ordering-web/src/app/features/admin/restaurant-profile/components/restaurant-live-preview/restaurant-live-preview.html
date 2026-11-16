@@ -40,9 +40,13 @@
           </div>
         </div>
 
-        <button type="button" class="live-preview__full" data-testid="live-preview-full" (click)="openFullPreview()">
-          {{ localeService.uiText('fullPreview') }}
-        </button>
+        <button
+          appIconButton
+          icon="eye"
+          [label]="localeService.uiText('fullPreview')"
+          data-testid="live-preview-full"
+          (click)="openFullPreview()"
+        ></button>
       </div>
 
       <div class="live-preview__toolbar-end">

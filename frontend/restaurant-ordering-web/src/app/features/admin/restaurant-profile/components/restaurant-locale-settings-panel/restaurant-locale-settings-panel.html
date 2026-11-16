@@ -150,21 +150,15 @@
 
       <div class="locale-settings__actions">
         <button
-          type="button"
-          class="profile-console__btn profile-console__btn--primary profile-console__btn--panel-save premium-btn"
+          appIconButton
+          icon="save"
+          variant="primary"
+          [label]="localeService.uiText('profileLocaleSave')"
+          [loading]="saving()"
           data-testid="locale-settings-save"
           [disabled]="isReadOnly() || saving()"
           (click)="saveSettings()"
-        >
-          @if (saving()) {
-            <span class="profile-console__spinner" aria-hidden="true"></span>
-          }
-          {{
-            saving()
-              ? localeService.uiText('profileLocaleSaving')
-              : localeService.uiText('profileLocaleSave')
-          }}
-        </button>
+        ></button>
       </div>
     </section>
   }

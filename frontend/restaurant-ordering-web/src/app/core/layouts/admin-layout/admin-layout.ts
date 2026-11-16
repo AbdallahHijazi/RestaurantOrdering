@@ -8,12 +8,13 @@ import { AdminBrandingService } from './admin-branding.service';
 import { LocaleService } from '../../localization/locale';
 import { LanguageSwitcher } from '../../../shared/ui/language-switcher/language-switcher';
 import { ADMIN_SHELL_MOCK } from './admin-shell.config';
+import { IconButton } from '../../../shared/ui/icon-button/icon-button';
 
 type AdminPageKey = 'dashboard' | 'restaurantProfile' | 'staff' | 'orders' | 'menu';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, LanguageSwitcher],
+  imports: [IconButton, RouterOutlet, RouterLink, RouterLinkActive, LanguageSwitcher],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.scss',
 })

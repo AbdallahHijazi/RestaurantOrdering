@@ -2,9 +2,11 @@ import { Component, inject, input, output } from '@angular/core';
 import { ApplicationRoles } from '../../../../../../core/auth/application-roles';
 import { LocaleService } from '../../../../../../core/localization/locale';
 import type { RestaurantStaffUser } from '../../../../data-access/restaurant-staff.models';
+import { IconButton } from '../../../../../../shared/ui/icon-button/icon-button';
 
 @Component({
   selector: 'app-staff-management-roster',
+  imports: [IconButton],
   templateUrl: './staff-management-roster.html',
   styleUrl: './staff-management-roster.scss',
 })
@@ -13,6 +15,8 @@ export class StaffManagementRoster {
 
   readonly employees = input.required<RestaurantStaffUser[]>();
   readonly changeRole = output<RestaurantStaffUser>();
+  readonly editMember = output<RestaurantStaffUser>();
+  readonly toggleStatus = output<RestaurantStaffUser>();
 
   protected roleLabel(role: string): string {
     if (role === ApplicationRoles.RestaurantManager) {

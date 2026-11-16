@@ -24,12 +24,13 @@ import {
   type MissingTranslationErrorCounts,
   type TranslationModeOption,
 } from '../../data-access/restaurant-locale-settings.util';
+import { IconButton } from '../../../../../shared/ui/icon-button/icon-button';
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error';
 
 @Component({
   selector: 'app-restaurant-locale-settings-panel',
-  imports: [FormsModule],
+  imports: [IconButton, FormsModule],
   templateUrl: './restaurant-locale-settings-panel.html',
   styleUrl: './restaurant-locale-settings-panel.scss',
 })

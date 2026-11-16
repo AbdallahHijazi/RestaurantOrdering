@@ -13,6 +13,8 @@ internal static class RestaurantTableMappings
             Zone = table.Zone,
             PublicToken = table.PublicToken,
             IsActive = table.IsActive,
+            IsArchived = table.IsArchived,
+            ArchivedAt = table.ArchivedAt,
             CreatedAt = table.CreatedAt,
             UpdatedAt = table.UpdatedAt
         };

@@ -1,12 +1,13 @@
 import { Component, inject, input, output } from '@angular/core';
 import { LocaleService, type UiTextKey } from '../../../../../../core/localization/locale';
+import { IconButton } from '../../../../../../shared/ui/icon-button/icon-button';
 import { StaffModalActions } from '../../../staff-management-page/components/staff-modal-actions/staff-modal-actions';
 
-export type TableConfirmKind = 'deactivate' | 'activate' | 'regenerateToken';
+export type TableConfirmKind = 'deactivate' | 'activate' | 'regenerateToken' | 'archive' | 'restore';
 
 @Component({
   selector: 'app-table-confirm-modal',
-  imports: [StaffModalActions],
+  imports: [StaffModalActions, IconButton],
   templateUrl: './table-confirm-modal.html',
   styleUrl: './table-confirm-modal.scss',
 })
@@ -29,6 +30,10 @@ export class TableConfirmModal {
         return 'tablesConfirmActivateTitle';
       case 'regenerateToken':
         return 'tablesConfirmRegenerateTitle';
+      case 'archive':
+        return 'tablesConfirmArchiveTitle';
+      case 'restore':
+        return 'tablesConfirmRestoreTitle';
     }
   }
 
@@ -40,6 +45,10 @@ export class TableConfirmModal {
         return 'tablesConfirmActivateMessage';
       case 'regenerateToken':
         return 'tablesConfirmRegenerateMessage';
+      case 'archive':
+        return 'tablesConfirmArchiveMessage';
+      case 'restore':
+        return 'tablesConfirmRestoreMessage';
     }
   }
 
@@ -51,10 +60,14 @@ export class TableConfirmModal {
         return 'tablesConfirmActivateSubmit';
       case 'regenerateToken':
         return 'tablesConfirmRegenerateSubmit';
+      case 'archive':
+        return 'actionArchive';
+      case 'restore':
+        return 'actionRestore';
     }
   }
 
   protected destructive(): boolean {
-    return this.kind() === 'deactivate' || this.kind() === 'regenerateToken';
+    return this.kind() === 'deactivate' || this.kind() === 'regenerateToken' || this.kind() === 'archive';
   }
 }

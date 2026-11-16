@@ -68,6 +68,7 @@ import type {
   RestaurantProfilePreviewData,
   RestaurantSettingsSnapshot,
 } from '../../models/restaurant-profile.models';
+import { IconButton } from '../../../../../shared/ui/icon-button/icon-button';
 
 type PageLoadState = 'loading' | 'ready' | 'settings-error' | 'demo';
 type ProfileSavePhase = 'idle' | 'uploading-logo' | 'uploading-cover' | 'saving';
@@ -111,7 +112,7 @@ function orderingMethodsValidator(control: AbstractControl): ValidationErrors | 
 
 @Component({
   selector: 'app-restaurant-profile-setup-page',
-  imports: [ReactiveFormsModule, RestaurantLivePreview, RestaurantLocaleSettingsPanel],
+  imports: [IconButton, ReactiveFormsModule, RestaurantLivePreview, RestaurantLocaleSettingsPanel],
   templateUrl: './restaurant-profile-setup-page.html',
   styleUrls: [
     './restaurant-profile-setup-page.scss',

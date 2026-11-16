@@ -35,6 +35,11 @@ public sealed class UpdateRestaurantTableStatusCommandHandler
             throw new NotFoundException("RestaurantTable", request.TableId);
         }
 
+        if (table.IsArchived && request.IsActive)
+        {
+            throw new ConflictException("An archived table must be restored before it can be activated.");
+        }
+
         table.IsActive = request.IsActive;
         table.UpdatedAt = _dateTimeService.UtcNow;
 

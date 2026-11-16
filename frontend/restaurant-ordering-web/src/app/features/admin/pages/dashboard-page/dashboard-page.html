@@ -23,20 +23,14 @@
     </div>
 
     <button
-      type="button"
-      class="dashboard-button"
+      appIconButton
+      icon="refresh"
+      [label]="localeService.uiText('adminDashboardRefresh')"
+      [loading]="loading()"
+      data-testid="dashboard-refresh"
       [disabled]="loading()"
       (click)="refresh()"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          fill="currentColor"
-          d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.75 10h-2.1A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35Z"
-        />
-      </svg>
-
-      <span>{{ localeService.uiText('adminDashboardRefresh') }}</span>
-    </button>
+    ></button>
   </header>
 
 
@@ -46,14 +40,13 @@
       <span>{{ localeService.uiText('adminDashboardLoadError') }}</span>
 
       <button
-        type="button"
-        class="dashboard-button"
+        appIconButton
+        icon="refresh"
+        [label]="localeService.uiText('adminDashboardRetry')"
         data-testid="dashboard-stats-retry"
         [disabled]="loading()"
         (click)="refresh()"
-      >
-        {{ localeService.uiText('adminDashboardRetry') }}
-      </button>
+      ></button>
     </div>
   }
 
@@ -170,13 +163,12 @@
           <strong>{{ localeService.uiText('adminDashboardOrdersLoadError') }}</strong>
 
           <button
-            type="button"
-            class="dashboard-button"
+            appIconButton
+            icon="refresh"
+            [label]="localeService.uiText('adminDashboardRetry')"
             data-testid="dashboard-orders-retry"
             (click)="refresh()"
-          >
-            {{ localeService.uiText('adminDashboardRetry') }}
-          </button>
+          ></button>
         </div>
 
       } @else if (!orders().length) {
@@ -355,10 +347,48 @@
       </div>
     </header>
 
-    <div class="activity-card__chart">
-      <div class="activity-card__placeholder">
-        {{ localeService.uiText('adminDashboardActivityPlaceholder') }}
-      </div>
+    <div class="activity-card__chart" data-testid="dashboard-activity">
+      @switch (activityState()) {
+        @case ('loading') {
+          <div class="activity-card__placeholder">{{ localeService.uiText('adminDashboardOrdersLoading') }}</div>
+        }
+        @case ('error') {
+          <div class="activity-card__placeholder" role="alert" data-testid="dashboard-activity-error">
+            <span>{{ localeService.uiText('adminDashboardActivityLoadError') }}</span>
+            <button
+              appIconButton
+              size="sm"
+              icon="refresh"
+              [label]="localeService.uiText('adminDashboardRetry')"
+              data-testid="dashboard-activity-retry"
+              (click)="refresh()"
+            ></button>
+          </div>
+        }
+        @default {
+          @if (!activityHasOrders()) {
+            <div class="activity-card__placeholder" data-testid="dashboard-activity-empty">
+              {{ localeService.uiText('adminDashboardActivityEmpty') }}
+            </div>
+          } @else {
+            <ol class="activity-bars" role="img" [attr.aria-label]="localeService.uiText('adminDashboardActivityTitle')">
+              @for (day of activity()!.days; track day.date; let i = $index) {
+                <li class="activity-bars__item" [attr.data-testid]="'dashboard-activity-day-' + day.date" [attr.title]="activityTitle(day)">
+                  <span class="activity-bars__value">{{ day.orders }}</span>
+                  <span class="activity-bars__track">
+                    <span
+                      class="activity-bars__bar"
+                      [class.activity-bars__bar--today]="isToday(i)"
+                      [style.height.%]="barHeight(day)"
+                    ></span>
+                  </span>
+                  <span class="activity-bars__label">{{ isToday(i) ? localeService.uiText('adminDashboardActivityToday') : dayLabel(day) }}</span>
+                </li>
+              }
+            </ol>
+          }
+        }
+      }
     </div>
 
   </section>

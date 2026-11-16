@@ -128,6 +128,9 @@ public sealed class GetDashboardSummaryQueryHandler
         return (resolvedId, startUtc, endUtc);
     }
 
+    internal static DateTime ToUtcStartOfLocalDay(DateTime localMidnight, TimeZoneInfo zone) =>
+        ConvertLocalMidnightToUtc(localMidnight, zone);
+
     private static DateTime ConvertLocalMidnightToUtc(DateTime localMidnight, TimeZoneInfo zone)
     {
         var unspecified = DateTime.SpecifyKind(localMidnight, DateTimeKind.Unspecified);

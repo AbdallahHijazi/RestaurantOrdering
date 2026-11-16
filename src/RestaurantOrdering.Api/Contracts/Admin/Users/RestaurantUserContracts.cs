@@ -25,6 +25,18 @@ public sealed class UpdateRestaurantUserRoleRequest
     public string Role { get; init; } = string.Empty;
 }
 
+public sealed class UpdateRestaurantUserRequest
+{
+    public string? FullName { get; init; }
+
+    public string? PhoneNumber { get; init; }
+}
+
+public sealed class UpdateRestaurantUserStatusRequest
+{
+    public bool IsActive { get; init; }
+}
+
 public sealed class RestaurantUserResponse
 {
     public Guid Id { get; init; }

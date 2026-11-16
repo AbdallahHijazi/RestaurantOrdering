@@ -48,6 +48,8 @@ describe('DashboardPage statistics', () => {
   });
 
   afterEach(() => {
+    // tests that do not care about the weekly chart leave its request open: answer it so verify() stays strict
+    httpMock.match(`${BASE}/dashboard/activity?days=7`).forEach((req) => req.flush(createActivity([])));
     TestBed.inject(LocaleService).setLocale('ar');
     httpMock.verify({ ignoreCancelled: true });
     session.clearSession();
@@ -59,6 +61,10 @@ describe('DashboardPage statistics', () => {
 
   function summaryRequest() {
     return httpMock.expectOne(`${BASE}/dashboard/summary`);
+  }
+
+  function activityRequest() {
+    return httpMock.expectOne(`${BASE}/dashboard/activity?days=7`);
   }
 
   function ordersRequest() {
@@ -172,7 +178,7 @@ describe('DashboardPage statistics', () => {
     expect(text).toContain("Today's sales");
     expect(text).toContain('Average order');
     expect(text).toContain('Recent orders');
-    expect(text).toContain('Refresh');
+    expect(root().querySelector('[data-testid="dashboard-refresh"]')!.getAttribute('aria-label')).toBe('Refresh');
     expect(text).toContain('Quick actions');
     expect(text).toContain('Order no.');
     expect(text).toContain('Preparing');
@@ -207,7 +213,63 @@ describe('DashboardPage statistics', () => {
       /^\d{2}\/\d{2}\/\d{4}/,
     );
   });
+
+  // ───────────────────────── UX-004: real 7-day activity chart ─────────────────────────
+
+  it('draws the weekly chart from real backend data, scaled to the busiest day (UX-004)', () => {
+    summaryRequest().flush(createSummary());
+    ordersRequest().flush({ items: [], totalCount: 0, pageNumber: 1, pageSize: 5 });
+    activityRequest().flush(createActivity([0, 2, 4, 0, 8, 1, 3]));
+    fixture.detectChanges();
+
+    const items = root().querySelectorAll('[data-testid^="dashboard-activity-day-"]');
+    expect(items).toHaveLength(7);
+    const heights = Array.from(root().querySelectorAll<HTMLElement>('.activity-bars__bar')).map((bar) =>
+      Number.parseFloat(bar.style.height),
+    );
+    expect(heights[4]).toBe(100); // busiest day = full height
+    expect(heights[2]).toBe(50);
+    expect(heights[0]).toBe(0);
+    expect(root().querySelector('[data-testid="dashboard-activity-day-2026-11-13"]')!.textContent).toContain('8');
+    expect(root().querySelectorAll('.activity-bars__bar--today')).toHaveLength(1);
+    expect(root().querySelector('[data-testid="dashboard-activity-empty"]')).toBeNull();
+  });
+
+  it('shows an honest empty state — never invented bars — when there were no orders (UX-004)', () => {
+    summaryRequest().flush(createSummary());
+    ordersRequest().flush({ items: [], totalCount: 0, pageNumber: 1, pageSize: 5 });
+    activityRequest().flush(createActivity([0, 0, 0, 0, 0, 0, 0]));
+    fixture.detectChanges();
+
+    expect(root().querySelector('[data-testid="dashboard-activity-empty"]')).toBeTruthy();
+    expect(root().querySelectorAll('.activity-bars__bar')).toHaveLength(0);
+  });
+
+  it('reports a failed activity request with a retry instead of drawing anything (UX-004)', () => {
+    summaryRequest().flush(createSummary());
+    ordersRequest().flush({ items: [], totalCount: 0, pageNumber: 1, pageSize: 5 });
+    activityRequest().flush({}, { status: 500, statusText: 'Server Error' });
+    fixture.detectChanges();
+
+    expect(root().querySelector('[data-testid="dashboard-activity-error"]')).toBeTruthy();
+    expect(root().querySelector('[data-testid="dashboard-activity-retry"]')).toBeTruthy();
+    expect(root().querySelectorAll('.activity-bars__bar')).toHaveLength(0);
+  });
 });
+
+function createActivity(counts: number[]) {
+  return {
+    restaurantId: RESTAURANT_ID,
+    currencyCode: 'JOD',
+    timeZone: 'Asia/Amman',
+    days: counts.map((orders, index) => ({
+      date: `2026-11-${String(9 + index).padStart(2, '0')}`,
+      orders,
+      cancelledOrders: 0,
+      sales: orders * 10,
+    })),
+  };
+}
 
 function createSummary(overrides: Partial<DashboardSummary> = {}): DashboardSummary {
   return {

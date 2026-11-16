@@ -7,18 +7,14 @@
     </div>
 
     <button
-      type="button"
-      class="translation-review-page__refresh"
+      appIconButton
+      icon="refresh"
+      [label]="locale.uiText('translationReviewRefresh')"
+      [loading]="refreshing()"
       data-testid="translation-review-refresh"
       [disabled]="pageState() === 'loading' || refreshing()"
       (click)="refreshList()"
-    >
-      @if (refreshing()) {
-        {{ locale.uiText('translationReviewRefreshing') }}
-      } @else {
-        {{ locale.uiText('translationReviewRefresh') }}
-      }
-    </button>
+    ></button>
   </header>
 
   @if (feedbackMessage()) {
@@ -82,14 +78,15 @@
       </label>
 
       <button
-        type="button"
-        class="translation-review-page__bulk"
+        appIconButton
+        icon="check"
+        variant="primary"
+        [showLabel]="true"
+        [label]="locale.uiText('translationReviewBulkApprove')"
         data-testid="translation-review-bulk-approve"
         [disabled]="!bulkApproveEnabled()"
         (click)="bulkApproveSelected()"
-      >
-        {{ locale.uiText('translationReviewBulkApprove') }}
-      </button>
+      ></button>
     </div>
   }
 
@@ -111,9 +108,13 @@
       <section class="translation-review-page__state" data-testid="translation-review-error">
         <h3>{{ locale.uiText('translationReviewListErrorTitle') }}</h3>
         <p>{{ listError() }}</p>
-        <button type="button" data-testid="translation-review-retry-load" (click)="retryLoad()">
-          {{ locale.uiText('translationReviewRetryLoad') }}
-        </button>
+        <button
+          appIconButton
+          icon="refresh"
+          [label]="locale.uiText('translationReviewRetryLoad')"
+          data-testid="translation-review-retry-load"
+          (click)="retryLoad()"
+        ></button>
       </section>
     }
 
@@ -186,36 +187,37 @@
                   <td>{{ formatUpdatedAt(item.updatedAt) }}</td>
                   <td class="translation-review-page__actions">
                     <button
-                      type="button"
-                      class="translation-review-page__action"
+                      appIconButton
+                      icon="edit"
+                      size="sm"
+                      [label]="locale.uiText('translationReviewReviewEdit')"
                       [attr.data-testid]="'translation-review-edit-' + item.translationId"
                       (click)="openReview(item)"
-                    >
-                      {{ locale.uiText('translationReviewReviewEdit') }}
-                    </button>
+                    ></button>
 
                     @if (canApproveRow(item)) {
                       <button
-                        type="button"
-                        class="translation-review-page__action translation-review-page__action--primary"
+                        appIconButton
+                        icon="check"
+                        variant="primary"
+                        size="sm"
+                        [label]="locale.uiText('translationReviewApprove')"
                         [attr.data-testid]="'translation-review-approve-' + item.translationId"
                         [disabled]="isRowBusy(item.translationId)"
                         (click)="approveRow(item)"
-                      >
-                        {{ locale.uiText('translationReviewApprove') }}
-                      </button>
+                      ></button>
                     }
 
                     @if (canRetryRow(item)) {
                       <button
-                        type="button"
-                        class="translation-review-page__action"
+                        appIconButton
+                        icon="refresh"
+                        size="sm"
+                        [label]="locale.uiText('translationReviewRetry')"
                         [attr.data-testid]="'translation-review-retry-' + item.translationId"
                         [disabled]="isRowBusy(item.translationId)"
                         (click)="retryRow(item)"
-                      >
-                        {{ locale.uiText('translationReviewRetry') }}
-                      </button>
+                      ></button>
                     }
                   </td>
                 </tr>

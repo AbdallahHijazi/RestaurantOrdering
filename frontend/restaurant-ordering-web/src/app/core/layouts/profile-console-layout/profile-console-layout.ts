@@ -7,10 +7,11 @@ import { AuthService } from '../../auth/auth.service';
 import { LocaleService } from '../../localization/locale';
 import { LanguageSwitcher } from '../../../shared/ui/language-switcher/language-switcher';
 import { AdminBrandingService } from '../admin-layout/admin-branding.service';
+import { IconButton } from '../../../shared/ui/icon-button/icon-button';
 
 @Component({
   selector: 'app-profile-console-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, LanguageSwitcher],
+  imports: [IconButton, RouterOutlet, RouterLink, RouterLinkActive, LanguageSwitcher],
   templateUrl: './profile-console-layout.html',
   styleUrl: './profile-console-layout.scss',
 })

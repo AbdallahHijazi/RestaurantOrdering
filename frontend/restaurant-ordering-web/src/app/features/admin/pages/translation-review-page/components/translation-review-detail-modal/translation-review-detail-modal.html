@@ -102,37 +102,36 @@
 
     <div class="translation-review-detail__actions">
       <button
-        type="button"
-        class="translation-review-detail__secondary"
+        appIconButton
+        icon="save"
+        [label]="localeService.uiText('translationReviewSaveDraft')"
+        [loading]="saving()"
         data-testid="translation-review-save-draft"
         [disabled]="saving()"
         (click)="onSaveDraft()"
-      >
-        {{ saving() ? localeService.uiText('translationReviewSavingDraft') : localeService.uiText('translationReviewSaveDraft') }}
-      </button>
+      ></button>
 
       @if (canRetry(item)) {
         <button
-          type="button"
-          class="translation-review-detail__secondary"
+          appIconButton
+          icon="refresh"
+          [label]="localeService.uiText('translationReviewRetry')"
           data-testid="translation-review-retry"
           [disabled]="saving()"
           (click)="onRetry()"
-        >
-          {{ localeService.uiText('translationReviewRetry') }}
-        </button>
+        ></button>
       }
 
       @if (canApprove(item)) {
         <button
-          type="button"
-          class="translation-review-detail__primary"
+          appIconButton
+          icon="check"
+          variant="primary"
+          [label]="localeService.uiText('translationReviewApprove')"
           data-testid="translation-review-approve"
           [disabled]="saving()"
           (click)="onApprove()"
-        >
-          {{ localeService.uiText('translationReviewApprove') }}
-        </button>
+        ></button>
       }
     </div>
   </div>

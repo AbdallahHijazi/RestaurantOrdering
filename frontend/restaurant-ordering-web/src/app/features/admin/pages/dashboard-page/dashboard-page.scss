@@ -52,7 +52,7 @@
 
   color: var(--dashboard-muted);
 
-  font-size: 0.7rem;
+  font-size: var(--fs-small);
   font-weight: 600;
 }
 
@@ -62,7 +62,7 @@
   color: var(--dashboard-text);
 
   font-family: var(--font-display);
-  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  font-size: var(--fs-page-title);
   font-weight: 800;
   line-height: 1.25;
 }
@@ -74,7 +74,7 @@
 
   color: var(--dashboard-muted);
 
-  font-size: 0.78rem;
+  font-size: var(--fs-small);
   line-height: 1.6;
 }
 
@@ -83,7 +83,7 @@
 
   color: var(--dashboard-muted);
 
-  font-size: 0.72rem;
+  font-size: var(--fs-small);
 }
 
 .admin-dashboard__role strong {
@@ -94,54 +94,6 @@
 /* =========================================================
    DASHBOARD BUTTON
    ========================================================= */
-
-.dashboard-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  gap: 0.4rem;
-
-  flex: 0 0 auto;
-
-  min-height: 2.35rem;
-  padding-inline: 0.9rem;
-
-  border: 1px solid var(--dashboard-border-strong);
-  border-radius: 0.7rem;
-
-  background: var(--dashboard-surface);
-  color: var(--dashboard-accent);
-
-  font: inherit;
-  font-size: 0.72rem;
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition:
-    background-color 140ms ease,
-    border-color 140ms ease,
-    box-shadow 140ms ease,
-    opacity 140ms ease;
-}
-
-.dashboard-button:hover:not(:disabled) {
-  background: var(--dashboard-surface-soft);
-  border-color: var(--dashboard-accent);
-
-  box-shadow: 0 1px 3px color-mix(in srgb, var(--restaurant-shadow-ink) 5%, transparent);
-}
-
-.dashboard-button:disabled {
-  opacity: 0.55;
-  cursor: wait;
-}
-
-.dashboard-button svg {
-  inline-size: 0.9rem;
-  block-size: 0.9rem;
-}
 
 /* =========================================================
    LOAD FAILURE (statistics unavailable — never shown as zeros)
@@ -163,7 +115,7 @@
   background: var(--restaurant-danger-surface);
   color: var(--dashboard-text);
 
-  font-size: 0.78rem;
+  font-size: var(--fs-small);
   font-weight: 600;
 }
 
@@ -239,7 +191,7 @@
 
   color: var(--dashboard-muted);
 
-  font-size: 0.67rem;
+  font-size: var(--fs-small);
   font-weight: 600;
   line-height: 1.35;
 }
@@ -250,7 +202,7 @@
   color: var(--dashboard-text);
 
   font-family: var(--font-display);
-  font-size: clamp(1.45rem, 2.5vw, 1.95rem);
+  font-size: var(--fs-page-title);
   font-weight: 800;
   line-height: 1;
 
@@ -314,7 +266,7 @@
 
   color: var(--dashboard-text);
 
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   font-weight: 800;
 }
 
@@ -339,7 +291,7 @@
 
   color: var(--dashboard-accent);
 
-  font-size: 0.7rem;
+  font-size: var(--fs-small);
   font-weight: 700;
 
   text-decoration: none;
@@ -365,7 +317,7 @@
 
   table-layout: auto;
 
-  font-size: 0.7rem;
+  font-size: var(--fs-small);
 }
 
 .orders-table th {
@@ -375,7 +327,7 @@
 
   color: var(--dashboard-muted);
 
-  font-size: 0.62rem;
+  font-size: var(--fs-small);
   font-weight: 700;
 
   white-space: nowrap;
@@ -496,7 +448,7 @@
 
   color: var(--dashboard-accent);
 
-  font-size: 0.62rem;
+  font-size: var(--fs-small);
   font-weight: 700;
 
   text-decoration: none;
@@ -531,7 +483,7 @@
   background: var(--dashboard-surface-soft);
   color: var(--dashboard-muted);
 
-  font-size: 0.62rem;
+  font-size: var(--fs-small);
   font-weight: 700;
 
   white-space: nowrap;
@@ -589,11 +541,11 @@
 .orders-card__empty strong {
   color: var(--dashboard-text);
 
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
 }
 
 .orders-card__empty span {
-  font-size: 0.68rem;
+  font-size: var(--fs-small);
 }
 
 /* =========================================================
@@ -629,7 +581,7 @@
 
   color: var(--dashboard-text);
 
-  font-size: 0.9rem;
+  font-size: var(--fs-secondary);
   font-weight: 800;
 }
 
@@ -661,7 +613,7 @@
   background: var(--dashboard-accent);
   color: var(--dashboard-text-on-dark, #fff);
 
-  font-size: 0.68rem;
+  font-size: var(--fs-small);
   font-weight: 700;
 
   transition:
@@ -692,7 +644,7 @@
   background: var(--dashboard-surface-soft);
   color: var(--dashboard-text);
 
-  font-size: 0.68rem;
+  font-size: var(--fs-small);
 
   transition:
     border-color 120ms ease,
@@ -732,7 +684,7 @@
 
   color: var(--dashboard-text);
 
-  font-size: 0.85rem;
+  font-size: var(--fs-secondary);
   font-weight: 800;
 }
 
@@ -741,7 +693,7 @@
 
   color: var(--dashboard-muted);
 
-  font-size: 0.65rem;
+  font-size: var(--fs-small);
 }
 
 .activity-card__chart {
@@ -759,7 +711,7 @@
 .activity-card__placeholder {
   color: var(--dashboard-muted);
 
-  font-size: 0.7rem;
+  font-size: var(--fs-small);
 }
 
 /* =========================================================
@@ -823,11 +775,7 @@
     flex-direction: column;
   }
 
-  .dashboard-button {
-    align-self: flex-start;
-  }
-
-  .admin-dashboard__stats {
+    .admin-dashboard__stats {
     grid-template-columns: 1fr;
   }
 
@@ -858,4 +806,71 @@
   .orders-table {
     min-width: 36rem;
   }
+}
+/* =========================================================
+   WEEKLY ACTIVITY (real data from /dashboard/activity)
+   ========================================================= */
+
+.activity-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+  align-items: end;
+
+  min-height: 12rem;
+}
+
+.activity-bars__item {
+  display: grid;
+  grid-template-rows: auto 8rem auto;
+  justify-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.activity-bars__value {
+  color: var(--dashboard-text);
+  font-size: var(--fs-secondary);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.activity-bars__track {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.activity-bars__bar {
+  inline-size: min(70%, 2.5rem);
+  min-block-size: 0;
+  border-radius: 0.5rem 0.5rem 0.2rem 0.2rem;
+  background: var(--dashboard-accent-soft);
+  border: 1px solid var(--dashboard-border-strong);
+}
+
+.activity-bars__bar--today {
+  background: var(--dashboard-accent);
+  border-color: var(--dashboard-accent);
+}
+
+.activity-bars__label {
+  color: var(--dashboard-muted);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+
+.activity-card__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }

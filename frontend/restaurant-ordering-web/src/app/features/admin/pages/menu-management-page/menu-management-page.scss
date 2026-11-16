@@ -9,8 +9,12 @@
   --menu-red-soft: var(--restaurant-danger-soft);
   --menu-shadow-sm: var(--restaurant-shadow-sm);
 
+  /* One vertical rhythm for nav -> title -> categories -> meals. The gap under the admin navigation
+     comes from the layout shell, so the page adds no top padding of its own (it used to stack a second one). */
+  --menu-section-gap: clamp(1rem, 1.8vw, 1.5rem);
+
   min-height: 100%;
-  padding: clamp(1.25rem, 2.6vw, 2.5rem) 0 clamp(2.5rem, 5vw, 4.5rem);
+  padding: 0 0 clamp(2.5rem, 5vw, 4.5rem);
   overflow: hidden;
   color: var(--menu-text);
   background: var(--restaurant-background);
@@ -27,14 +31,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  margin-block-end: 1.25rem;
+  margin-block-end: var(--menu-section-gap);
 }
 
 .menu-management-title h1 {
   margin: 0;
   color: var(--menu-text);
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 3vw, 2.35rem);
+  font-size: var(--fs-page-title);
   font-weight: 850;
   letter-spacing: -0.025em;
   line-height: 1.2;
@@ -44,7 +48,7 @@
   max-width: 42rem;
   margin: 0.5rem 0 0;
   color: var(--menu-muted);
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   line-height: 1.7;
 }
 
@@ -112,6 +116,7 @@
 }
 
 .menu-management-category-wrap {
+  position: relative;
   flex: 0 0 auto;
   gap: 0.25rem;
 }
@@ -124,26 +129,73 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  min-height: 2.4rem;
-  padding-inline: 0.875rem;
-  border: 1px solid transparent;
-  border-radius: 0.7rem;
-  color: var(--restaurant-muted-text);
-  background: transparent;
-  font-size: 0.8rem;
-  font-weight: 800;
+  gap: 0.5rem;
+  min-block-size: 2.5rem;
+  padding-inline: 1rem;
+  border: 1px solid var(--restaurant-border-strong);
+  border-radius: var(--restaurant-radius-pill);
+  color: var(--restaurant-text);
+  background: var(--restaurant-surface-elevated);
+  box-shadow: var(--restaurant-shadow-xs);
+  font-size: var(--fs-secondary);
+  font-weight: 700;
+  line-height: 1.2;
   white-space: nowrap;
+  transition:
+    background-color var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    border-color var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    color var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    box-shadow var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    transform var(--restaurant-motion-fast) var(--restaurant-ease-standard);
 }
 
-.menu-management-category-pill:hover {
-  background: var(--restaurant-surface-soft);
+.menu-management-category-pill__count {
+  color: var(--restaurant-muted-text);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  transition: color var(--restaurant-motion-normal) var(--restaurant-ease-standard);
+}
+
+/* Hover only recolours (no movement), so the clickable area never shifts under the pointer. */
+.menu-management-category-pill:hover:not(:disabled):not(.is-active):not([aria-disabled='true']) {
+  border-color: color-mix(in srgb, var(--restaurant-accent) 55%, var(--restaurant-border-strong));
+  background: var(--restaurant-accent-soft);
+}
+
+.menu-management-category-pill:active:not(:disabled):not([aria-disabled='true']) {
+  transform: scale(0.97);
+}
+
+.menu-management-category-pill:focus-visible {
+  outline: 2px solid var(--restaurant-accent);
+  outline-offset: 2px;
 }
 
 .menu-management-category-pill.is-active {
-  border-color: var(--restaurant-accent-border);
-  color: var(--restaurant-accent-strong);
-  background: var(--restaurant-accent-soft);
+  border-color: var(--restaurant-accent);
+  color: var(--restaurant-text-on-accent);
+  background: var(--restaurant-accent);
+  box-shadow: 0 0.25rem 0.75rem color-mix(in srgb, var(--restaurant-accent) 28%, transparent);
+}
+
+.menu-management-category-pill.is-active .menu-management-category-pill__count {
+  color: color-mix(in srgb, var(--restaurant-text-on-accent) 82%, transparent);
+}
+
+.menu-management-category-pill:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.menu-management-category-pill.is-reorderable {
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+@media (pointer: coarse) {
+  .menu-management-category-pill {
+    min-block-size: var(--btn-size-md);
+  }
 }
 
 .menu-management-category-pill--add {
@@ -184,7 +236,7 @@
 .menu-management-section-head h2 {
   margin: 0;
   color: var(--menu-text);
-  font-size: 1.3rem;
+  font-size: var(--fs-section);
   font-weight: 850;
 }
 
@@ -193,7 +245,7 @@
   border-radius: 999px;
   color: var(--restaurant-accent-strong);
   background: var(--restaurant-accent-soft);
-  font-size: 0.75rem;
+  font-size: var(--fs-small);
   font-weight: 800;
   white-space: nowrap;
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestaurantOrdering.Api.Contracts.Admin.Tables;
 using RestaurantOrdering.Application.Common.Security;
+using RestaurantOrdering.Application.Features.RestaurantTables.Commands.ArchiveRestaurantTable;
 using RestaurantOrdering.Application.Features.RestaurantTables.Commands.CreateRestaurantTable;
 using RestaurantOrdering.Application.Features.RestaurantTables.Commands.RegenerateRestaurantTableToken;
 using RestaurantOrdering.Application.Features.RestaurantTables.Commands.UpdateRestaurantTable;
@@ -28,9 +29,10 @@ public sealed class RestaurantTablesController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyList<RestaurantTableResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<RestaurantTableResponse>>> GetAll(
         Guid restaurantId,
-        CancellationToken cancellationToken)
+        [FromQuery] bool includeArchived = false,
+        CancellationToken cancellationToken = default)
     {
-        var result = await _sender.Send(new GetRestaurantTablesQuery(restaurantId), cancellationToken);
+        var result = await _sender.Send(new GetRestaurantTablesQuery(restaurantId, includeArchived), cancellationToken);
         return Ok(result.Select(MapResponse).ToList());
     }
 
@@ -92,6 +94,22 @@ public sealed class RestaurantTablesController : ControllerBase
         return Ok(MapResponse(result));
     }
 
+    [HttpPatch("{tableId:guid}/archive")]
+    [Consumes("application/json")]
+    [RequestSizeLimit(16384)]
+    [ProducesResponseType(typeof(RestaurantTableResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<RestaurantTableResponse>> Archive(
+        Guid restaurantId,
+        Guid tableId,
+        [FromBody] ArchiveRestaurantTableRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(
+            new ArchiveRestaurantTableCommand(restaurantId, tableId, request.IsArchived),
+            cancellationToken);
+        return Ok(MapResponse(result));
+    }
+
     [HttpPost("{tableId:guid}/regenerate-token")]
     [ProducesResponseType(typeof(RestaurantTableResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<RestaurantTableResponse>> RegenerateToken(
@@ -112,6 +130,8 @@ public sealed class RestaurantTablesController : ControllerBase
             Zone = dto.Zone,
             PublicToken = dto.PublicToken,
             IsActive = dto.IsActive,
+            IsArchived = dto.IsArchived,
+            ArchivedAt = dto.ArchivedAt,
             CreatedAt = dto.CreatedAt,
             UpdatedAt = dto.UpdatedAt
         };

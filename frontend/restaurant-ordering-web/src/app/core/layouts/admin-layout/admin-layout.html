@@ -88,13 +88,13 @@
     <footer class="admin-layout__sidebar-footer" data-testid="admin-sidebar-footer">
       <span class="admin-layout__sidebar-role">{{ roleLabel() }}</span>
       <button
-        type="button"
-        class="admin-layout__sidebar-logout"
+        appIconButton
+        icon="logout"
+        variant="ghost"
+        [label]="localeService.uiText('adminLogout')"
         data-testid="admin-sidebar-logout"
         (click)="logout()"
-      >
-        {{ localeService.uiText('adminLogout') }}
-      </button>
+      ></button>
     </footer>
   </aside>
 

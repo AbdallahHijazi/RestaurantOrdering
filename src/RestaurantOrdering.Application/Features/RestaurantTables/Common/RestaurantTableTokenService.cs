@@ -47,6 +47,11 @@ internal static class RestaurantTableTokenService
             throw new NotFoundException("Table", normalizedToken);
         }
 
+        if (table.IsArchived)
+        {
+            throw new NotFoundException("Table", normalizedToken);
+        }
+
         if (!table.IsActive)
         {
             throw new ConflictException("This table QR code is disabled.");

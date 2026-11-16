@@ -297,19 +297,15 @@
 
               <div class="profile-console__action-buttons">
                 <button
-                  type="button"
-                  class="profile-console__btn profile-console__btn--primary profile-console__save-action premium-btn"
+                  appIconButton
+                  icon="save"
+                  variant="primary"
+                  [label]="localeService.uiText('profileSaveIdentityChanges')"
+                  [loading]="savingProfile()"
                   data-testid="profile-save-identity"
                   [disabled]="!canSaveSettings() || savingProfile()"
                   (click)="saveRestaurantProfile()"
-                >
-                  @if (savingProfile()) {
-                    <span class="profile-console__spinner" aria-hidden="true"></span>
-                  } @else {
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3m-1 4-3 3m0 0-3-3m3 3V4" /></svg>
-                  }
-                  {{ savingProfile() ? profileSaveLabel() : localeService.uiText('profileSaveIdentityChanges') }}
-                </button>
+                ></button>
 
                 <button
                   type="button"
@@ -324,14 +320,13 @@
                 </button>
 
                 <button
-                  type="button"
-                  class="profile-console__btn profile-console__btn--secondary"
+                  appIconButton
+                  icon="restore"
+                  [label]="localeService.uiText('profileCancelChanges')"
                   data-testid="profile-cancel-identity"
                   [disabled]="!hasUnsavedProfileChanges() || savingProfile()"
                   (click)="resetProfileChanges()"
-                >
-                  {{ localeService.uiText('profileCancelChanges') }}
-                </button>
+                ></button>
               </div>
             </div>
             @if (!publishAvailable) {
@@ -387,21 +382,15 @@
           </div>
 
           <button
-            type="button"
-            class="profile-console__btn profile-console__btn--primary profile-console__btn--panel-save premium-btn"
+            appIconButton
+            icon="save"
+            variant="primary"
+            [label]="localeService.uiText('profileSaveLocalization')"
+            [loading]="savingProfile()"
             data-testid="profile-save-localization"
             [disabled]="!canSaveSettings() || savingProfile()"
             (click)="saveLocalization()"
-          >
-            @if (savingProfile()) {
-              <span class="profile-console__spinner" aria-hidden="true"></span>
-            }
-            {{
-              savingProfile()
-                ? localeService.uiText('profileSavingRestaurant')
-                : localeService.uiText('profileSaveLocalization')
-            }}
-          </button>
+          ></button>
         </section>
         }
 
@@ -459,21 +448,15 @@
           </div>
 
           <button
-            type="button"
-            class="profile-console__btn profile-console__btn--primary profile-console__btn--panel-save premium-btn"
+            appIconButton
+            icon="save"
+            variant="primary"
+            [label]="localeService.uiText('profileSaveContactInfo')"
+            [loading]="savingProfile()"
             data-testid="profile-save-contact"
             [disabled]="!canSaveSettings() || savingProfile()"
             (click)="saveRestaurantProfile()"
-          >
-            @if (savingProfile()) {
-              <span class="profile-console__spinner" aria-hidden="true"></span>
-            }
-            {{
-              savingProfile()
-                ? localeService.uiText('profileSavingRestaurant')
-                : localeService.uiText('profileSaveContactInfo')
-            }}
-          </button>
+          ></button>
         </section>
         }
 
@@ -582,21 +565,15 @@
           }
 
           <button
-            type="button"
-            class="profile-console__btn profile-console__btn--primary profile-console__btn--panel-save premium-btn"
+            appIconButton
+            icon="save"
+            variant="primary"
+            [label]="localeService.uiText('profileSaveOrderingSettings')"
+            [loading]="savingSettings()"
             data-testid="profile-save-ordering-settings"
             [disabled]="!canSaveSettings() || savingSettings() || settingsLoadFailed()"
             (click)="saveOrderingSettings()"
-          >
-            @if (savingSettings()) {
-              <span class="profile-console__spinner" aria-hidden="true"></span>
-            }
-            {{
-              savingSettings()
-                ? localeService.uiText('adminMenuSaving')
-                : localeService.uiText('profileSaveOrderingSettings')
-            }}
-          </button>
+          ></button>
         </section>
         }
       </form>

@@ -35,12 +35,13 @@ import type {
   ProfilePreviewMenuState,
   RestaurantProfilePreviewData,
 } from '../../models/restaurant-profile.models';
+import { IconButton } from '../../../../../shared/ui/icon-button/icon-button';
 
 type PreviewViewport = 'desktop' | 'tablet' | 'mobile';
 
 @Component({
   selector: 'app-restaurant-live-preview',
-  imports: [
+  imports: [IconButton, 
     NgTemplateOutlet,
     LanguageSwitcher,
     RestaurantCoverHero,

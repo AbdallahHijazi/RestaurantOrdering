@@ -48,7 +48,7 @@
 
 .orders-management-page__orders-eyebrow {
   margin-block-end: 0.05rem;
-  font-size: 0.62rem;
+  font-size: var(--fs-small);
   color: var(--orders-muted);
 }
 
@@ -57,7 +57,7 @@
 .orders-management-page__confirm-panel h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+  font-size: var(--fs-page-title);
   line-height: 1.2;
 }
 
@@ -68,7 +68,7 @@
   color: var(--orders-muted);
   max-width: 46rem;
   line-height: 1.45;
-  font-size: 0.64rem;
+  font-size: var(--fs-small);
 }
 
 .orders-management-page__refresh,
@@ -119,7 +119,7 @@
   border-radius: 0.45rem;
   background: var(--orders-surface);
   color: var(--orders-accent);
-  font-size: 0.68rem;
+  font-size: var(--fs-small);
   font-weight: 700;
 
   box-shadow: none;
@@ -205,7 +205,7 @@
   border-radius: var(--restaurant-radius-pill);
   background: transparent;
   color: var(--orders-muted);
-  font-size: 0.66rem;
+  font-size: var(--fs-small);
   font-weight: 700;
   white-space: nowrap;
 }
@@ -280,7 +280,7 @@
   background: var(--restaurant-surface-soft);
   color: var(--orders-charcoal);
   font: inherit;
-  font-size: 0.66rem;
+  font-size: var(--fs-small);
 }
 
 .orders-management-page__search input:focus {
@@ -310,7 +310,7 @@
   flex: 0 0 auto;
   margin-inline-end: 0.05rem;
   color: var(--orders-muted);
-  font-size: 0.64rem;
+  font-size: var(--fs-small);
   font-weight: 800;
   white-space: nowrap;
 }
@@ -346,7 +346,7 @@
   border-radius: 0.55rem;
   background: transparent;
   color: var(--orders-muted);
-  font-size: 0.64rem;
+  font-size: var(--fs-small);
   font-weight: 800;
 }
 
@@ -396,7 +396,7 @@
 .orders-management-page__result-count {
   margin: 0;
   color: var(--orders-charcoal);
-  font-size: 0.68rem;
+  font-size: var(--fs-small);
   font-weight: 800;
 }
 
@@ -422,7 +422,7 @@
 
   color: var(--orders-accent);
 
-  font-size: 0.66rem;
+  font-size: var(--fs-small);
 
   font-weight: 800;
 

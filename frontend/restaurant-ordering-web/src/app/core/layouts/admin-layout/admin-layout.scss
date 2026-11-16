@@ -72,7 +72,7 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: var(--admin-accent);
 }
@@ -99,12 +99,12 @@
 
 .admin-layout__system-name {
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   font-weight: 600;
 }
 
 .admin-layout__restaurant-name {
-  font-size: 0.8125rem;
+  font-size: var(--fs-secondary);
   color: var(--admin-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -130,7 +130,7 @@
 }
 
 .admin-layout__sidebar-role {
-  font-size: 0.8125rem;
+  font-size: var(--fs-secondary);
   color: var(--admin-muted);
   padding-inline: 0.25rem;
 }
@@ -240,7 +240,7 @@
 .admin-layout__page-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  font-size: var(--fs-section);
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -260,7 +260,7 @@
   border-radius: 999px;
   background: var(--restaurant-console-surface-muted);
   color: var(--admin-muted);
-  font-size: 0.75rem;
+  font-size: var(--fs-small);
   font-weight: 600;
 }
 
@@ -277,7 +277,7 @@
   background: transparent;
   color: var(--admin-muted);
   padding: 0.35rem 0.65rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-small);
   font-weight: 600;
   cursor: pointer;
 }

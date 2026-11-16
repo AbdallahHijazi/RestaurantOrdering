@@ -36,6 +36,7 @@ import {
   type OrderListFilters,
   type OrderTypeFilter,
 } from './admin-orders-page.util';
+import { IconButton } from '../../../../shared/ui/icon-button/icon-button';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -64,7 +65,7 @@ const STATUS_FILTERS: readonly { key: StatusFilter; status: OrderStatus | null }
 
 @Component({
   selector: 'app-admin-orders-page',
-  imports: [OrderModalShell, AdminOrderDetailsModal, AdminOrdersSelect],
+  imports: [IconButton, OrderModalShell, AdminOrderDetailsModal, AdminOrdersSelect],
   templateUrl: './admin-orders-page.html',
   styleUrls: ['./admin-orders-page.shell.scss', './admin-orders-page.cards.scss'],
 })

@@ -2,10 +2,11 @@ import { DecimalPipe } from '@angular/common';
 import { Component, inject, input, output } from '@angular/core';
 import { LocaleService } from '../../../../../../core/localization/locale';
 import type { AdminMenuItem } from '../../../../data-access/admin-menu.models';
+import { IconButton } from '../../../../../../shared/ui/icon-button/icon-button';
 
 @Component({
   selector: 'app-menu-management-meal-card',
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, IconButton],
   templateUrl: './menu-management-meal-card.html',
   styleUrl: './menu-management-meal-card.scss',
 })
@@ -18,12 +19,18 @@ export class MenuManagementMealCard {
   readonly availabilityBusy = input(false);
   readonly reorderMode = input(false);
   readonly dragging = input(false);
+  /** True for a moment after this card was dropped/moved: plays the settled feedback. */
+  readonly settled = input(false);
+  readonly canMoveUp = input(false);
+  readonly canMoveDown = input(false);
 
   readonly toggleAvailability = output<AdminMenuItem>();
   readonly editItem = output<AdminMenuItem>();
   readonly deleteItem = output<AdminMenuItem>();
   readonly imageError = output<string>();
   readonly reorderPointerDown = output<PointerEvent>();
+  readonly moveUp = output<AdminMenuItem>();
+  readonly moveDown = output<AdminMenuItem>();
 
   protected beginPointerReorder(event: PointerEvent): void {
     if (event.pointerType === 'mouse' && event.button !== 0) {

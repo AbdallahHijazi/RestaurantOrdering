@@ -16,29 +16,22 @@
       </div>
       <div class="tables-management-head__actions">
         <button
-          type="button"
-          class="tables-management-secondary"
+          appIconButton
+          icon="print"
+          [label]="locale.uiText('tablesPrintAll')"
           data-testid="tables-print-all-button"
           [disabled]="pageState() !== 'ready' || filteredTables().length === 0"
           (click)="printAllTables()"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path fill="currentColor" d="M6 2h12v5H6V2Zm10 2H8v3h8V4Zm3 4a3 3 0 0 1 3 3v6h-4v5H6v-5H2v-6a3 3 0 0 1 3-3h14Zm-3 12v-5H8v5h8Zm3-5h1v-4a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v4h2v-2h12v2h1Z" />
-          </svg>
-          {{ locale.uiText('tablesPrintAll') }}
-        </button>
+        ></button>
         <button
-          type="button"
-          class="tables-management-primary"
+          appIconButton
+          icon="plus"
+          variant="primary"
+          [label]="locale.uiText('tablesAddTable')"
           data-testid="tables-add-button"
           [disabled]="pageState() === 'loading' || pageState() === 'missing-context'"
           (click)="openCreateModal()"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z" />
-          </svg>
-          {{ locale.uiText('tablesAddTable') }}
-        </button>
+        ></button>
       </div>
     </header>
 
@@ -66,9 +59,12 @@
         <div class="tables-management-state tables-management-state--error" data-testid="tables-error-state">
           <h2>{{ locale.uiText('tablesListErrorTitle') }}</h2>
           <p>{{ listErrorMessage() }}</p>
-          <button type="button" class="tables-management-secondary" (click)="loadTables()">
-            {{ locale.uiText('tablesRetry') }}
-          </button>
+          <button
+            appIconButton
+            icon="refresh"
+            [label]="locale.uiText('tablesRetry')"
+            (click)="loadTables()"
+          ></button>
         </div>
       }
 
@@ -153,9 +149,14 @@
             <div class="tables-management-empty" data-testid="tables-empty-state">
               <h2>{{ locale.uiText('tablesEmptyTitle') }}</h2>
               <p>{{ locale.uiText('tablesEmptyDescription') }}</p>
-              <button type="button" class="tables-management-primary" (click)="openCreateModal()">
-                {{ locale.uiText('tablesAddFirstTable') }}
-              </button>
+              <button
+                appIconButton
+                icon="plus"
+                variant="primary"
+                [showLabel]="true"
+                [label]="locale.uiText('tablesAddFirstTable')"
+                (click)="openCreateModal()"
+              ></button>
             </div>
           } @else if (filteredTables().length === 0) {
             <div class="tables-management-empty tables-management-empty--filtered" data-testid="tables-empty-filtered">
@@ -176,6 +177,7 @@
                   (print)="printTable($event)"
                   (downloadQr)="downloadQr($event)"
                   (regenerateToken)="openRegenerateConfirm($event)"
+                  (archive)="openArchiveConfirm($event)"
                 />
               }
             </div>
@@ -230,18 +232,16 @@
   @if (modalKind() === 'create') {
     <app-staff-modal-actions orderModalFooter>
       <button
+        appIconButton
         type="submit"
-        class="staff-modal-actions__save"
+        icon="check"
+        variant="primary"
+        [label]="locale.uiText('tablesCreateSubmit')"
+        [loading]="createSubmitting()"
         form="tables-create-form"
         data-testid="tables-create-submit"
         [disabled]="createSubmitting()"
-      >
-        {{
-          createSubmitting()
-            ? locale.uiText('tablesSaving')
-            : locale.uiText('tablesCreateSubmit')
-        }}
-      </button>
+      ></button>
       <button type="button" class="staff-modal-actions__cancel" (click)="closeCreateModal()">
         {{ locale.uiText('tablesCancel') }}
       </button>
@@ -262,18 +262,16 @@
   @if (modalKind() === 'edit') {
     <app-staff-modal-actions orderModalFooter>
       <button
+        appIconButton
         type="submit"
-        class="staff-modal-actions__save"
+        icon="check"
+        variant="primary"
+        [label]="locale.uiText('tablesEditSubmit')"
+        [loading]="editSubmitting()"
         form="tables-edit-form"
         data-testid="tables-edit-submit"
         [disabled]="editSubmitting()"
-      >
-        {{
-          editSubmitting()
-            ? locale.uiText('tablesSaving')
-            : locale.uiText('tablesEditSubmit')
-        }}
-      </button>
+      ></button>
       <button type="button" class="staff-modal-actions__cancel" (click)="closeEditModal()">
         {{ locale.uiText('tablesCancel') }}
       </button>

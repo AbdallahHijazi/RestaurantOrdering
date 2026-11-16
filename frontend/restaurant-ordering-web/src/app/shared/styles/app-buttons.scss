@@ -239,3 +239,69 @@
 }
 
 
+
+
+/* ---------------------------------------------------------------------------
+   Icon-only action buttons (IconButton component) — single source of truth for size, shape and states.
+   --------------------------------------------------------------------------- */
+.app-icon-btn {
+  padding: 0;
+  gap: 0.4rem;
+  inline-size: var(--btn-size-md);
+  block-size: var(--btn-size-md);
+  min-inline-size: var(--btn-size-md);
+  min-block-size: var(--btn-size-md);
+  border-radius: var(--radius-md);
+  position: relative;
+}
+
+.app-icon-btn--sm {
+  inline-size: var(--btn-size-sm);
+  block-size: var(--btn-size-sm);
+  min-inline-size: var(--btn-size-sm);
+  min-block-size: var(--btn-size-sm);
+}
+
+.app-icon-btn--lg {
+  inline-size: var(--btn-size-lg);
+  block-size: var(--btn-size-lg);
+  min-inline-size: var(--btn-size-lg);
+  min-block-size: var(--btn-size-lg);
+}
+
+/* Visible text kept for ambiguous / high-impact actions: the button grows horizontally. */
+.app-icon-btn--with-label {
+  inline-size: auto;
+  padding-inline: 1rem;
+  font-size: var(--fs-secondary);
+  font-weight: var(--fw-semibold);
+}
+
+.app-icon-btn[aria-busy=true] {
+  cursor: progress;
+}
+
+.app-icon-btn__spinner {
+  inline-size: var(--icon-size-md);
+  block-size: var(--icon-size-md);
+  border: 2px solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: 50%;
+  animation: app-icon-btn-spin 0.7s linear infinite;
+}
+
+@keyframes app-icon-btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Touch devices / small screens: every compact control still meets the 44px minimum. */
+@media (pointer: coarse), (max-width: 767.98px) {
+  .app-icon-btn--sm {
+    inline-size: var(--btn-size-md);
+    block-size: var(--btn-size-md);
+    min-inline-size: var(--btn-size-md);
+    min-block-size: var(--btn-size-md);
+  }
+}

@@ -69,6 +69,21 @@ export interface OrderDetails extends OrderSummary {
   items: OrderDetailsItem[];
 }
 
+/** GET /admin/restaurants/{id}/dashboard/activity — real per-day aggregates (restaurant time zone). */
+export interface DashboardActivityDay {
+  date: string;
+  orders: number;
+  cancelledOrders: number;
+  sales: number;
+}
+
+export interface DashboardActivity {
+  restaurantId: string;
+  currencyCode: string;
+  timeZone: string;
+  days: DashboardActivityDay[];
+}
+
 export interface GetOrdersResult {
   items: OrderSummary[];
   totalCount: number;

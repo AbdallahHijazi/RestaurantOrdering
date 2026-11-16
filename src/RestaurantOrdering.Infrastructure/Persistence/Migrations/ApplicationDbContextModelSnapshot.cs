@@ -1193,11 +1193,19 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsArchived")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Name")
                         .IsRequired()

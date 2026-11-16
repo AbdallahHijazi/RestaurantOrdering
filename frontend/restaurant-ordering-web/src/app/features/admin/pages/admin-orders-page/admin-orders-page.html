@@ -7,24 +7,14 @@
     </div>
 
     <button
-      type="button"
-      class="orders-management-page__refresh"
+      appIconButton
+      icon="refresh"
+      [label]="locale.uiText('adminOrdersRefresh')"
+      [loading]="refreshing()"
       data-testid="admin-orders-refresh"
       [disabled]="pageState() === 'loading' || refreshing()"
       (click)="refreshOrders()"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path
-          fill="currentColor"
-          d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.75 10h-2.1A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35Z"
-        />
-      </svg>
-      @if (refreshing()) {
-        {{ locale.uiText('adminOrdersRefreshing') }}
-      } @else {
-        {{ locale.uiText('adminOrdersRefresh') }}
-      }
-    </button>
+    ></button>
   </header>
 
   @if (feedbackMessage()) {
@@ -111,14 +101,13 @@
       />
 
       <button
-        type="button"
-        class="orders-management-page__clear-filters"
+        appIconButton
+        icon="x"
+        [label]="locale.uiText('adminOrdersClearFilters')"
         data-testid="admin-orders-clear-filters"
         [disabled]="!filtersActive()"
         (click)="clearFilters()"
-      >
-        {{ locale.uiText('adminOrdersClearFilters') }}
-      </button>
+      ></button>
     </div>
   </section>
 
@@ -138,32 +127,24 @@
         data-testid="admin-orders-view-switcher"
       >
         <button
-          type="button"
-          class="orders-management-page__view-button"
-          [class.orders-management-page__view-button--active]="viewMode() === 'table'"
+          appIconButton
+          icon="table"
+          [variant]="viewMode() === 'table' ? 'primary' : 'secondary'"
+          [label]="locale.uiText('adminOrdersViewTable')"
           [attr.aria-pressed]="viewMode() === 'table'"
           data-testid="admin-orders-view-table"
           (click)="setViewMode('table')"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path fill="currentColor" d="M4 5h16v3H4V5Zm0 5.5h16v3H4v-3Zm0 5.5h16v3H4v-3Z" />
-          </svg>
-          <span>{{ locale.uiText('adminOrdersViewTable') }}</span>
-        </button>
+        ></button>
 
         <button
-          type="button"
-          class="orders-management-page__view-button"
-          [class.orders-management-page__view-button--active]="viewMode() === 'cards'"
+          appIconButton
+          icon="grid"
+          [variant]="viewMode() === 'cards' ? 'primary' : 'secondary'"
+          [label]="locale.uiText('adminOrdersViewCards')"
           [attr.aria-pressed]="viewMode() === 'cards'"
           data-testid="admin-orders-view-cards"
           (click)="setViewMode('cards')"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path fill="currentColor" d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z" />
-          </svg>
-          <span>{{ locale.uiText('adminOrdersViewCards') }}</span>
-        </button>
+        ></button>
       </div>
     </header>
 
@@ -218,9 +199,13 @@
           </span>
           <h2>{{ locale.uiText('adminOrdersListErrorTitle') }}</h2>
           <p>{{ listError() }}</p>
-          <button type="button" class="orders-management-page__primary" data-testid="admin-orders-retry" (click)="loadOrders()">
-            {{ locale.uiText('adminOrdersRetry') }}
-          </button>
+          <button
+            appIconButton
+            icon="refresh"
+            [label]="locale.uiText('adminOrdersRetry')"
+            data-testid="admin-orders-retry"
+            (click)="loadOrders()"
+          ></button>
         </section>
       }
 
@@ -306,16 +291,13 @@
                     </td>
                     <td>
                       <button
-                        type="button"
-                        class="orders-management-page__details-btn orders-management-page__details-btn--compact"
+                        appIconButton
+                        icon="eye"
+                        size="sm"
+                        [label]="locale.uiText('adminOrdersViewDetails')"
                         [attr.data-testid]="'admin-order-details-' + order.id"
                         (click)="openDetails(order)"
-                      >
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5-4.27-7.5-9-7.5ZM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5Zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3Z" />
-                        </svg>
-                        {{ locale.uiText('adminOrdersViewDetails') }}
-                      </button>
+                      ></button>
                     </td>
                   </tr>
                 }
@@ -370,16 +352,13 @@
                   </div>
 
                   <button
-                    type="button"
-                    class="orders-management-page__details-btn"
+                    appIconButton
+                    icon="eye"
+                    size="sm"
+                    [label]="locale.uiText('adminOrdersViewDetails')"
                     [attr.data-testid]="'admin-order-details-' + order.id"
                     (click)="openDetails(order)"
-                  >
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                      <path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5-4.27-7.5-9-7.5ZM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5Zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3Z" />
-                    </svg>
-                    {{ locale.uiText('adminOrdersViewDetails') }}
-                  </button>
+                  ></button>
                 </footer>
               </article>
             }
@@ -389,13 +368,13 @@
         @if (hasMore()) {
           <div class="orders-management-page__pagination">
             <button
-              type="button"
-              class="orders-management-page__secondary"
+              appIconButton
+              icon="chevron-down"
+              [showLabel]="true"
+              [label]="locale.uiText('adminOrdersLoadMore')"
               data-testid="admin-orders-load-more"
               (click)="loadMore()"
-            >
-              {{ locale.uiText('adminOrdersLoadMore') }}
-            </button>
+            ></button>
           </div>
         }
       }
@@ -419,12 +398,20 @@
         <h3>{{ locale.uiText('adminOrdersCancelConfirmTitle') }}</h3>
         <p>{{ locale.uiText('adminOrdersCancelConfirmMessage') }}</p>
         <div class="orders-management-page__confirm-actions">
-          <button type="button" class="orders-management-page__secondary" (click)="dismissCancelConfirmation()">
-            {{ locale.uiText('adminOrdersCancelConfirmDismiss') }}
-          </button>
-          <button type="button" class="orders-management-page__danger" (click)="confirmCancel()">
-            {{ locale.uiText('adminOrdersActionCancel') }}
-          </button>
+          <button
+            appIconButton
+            icon="x"
+            [label]="locale.uiText('adminOrdersCancelConfirmDismiss')"
+            (click)="dismissCancelConfirmation()"
+          ></button>
+          <button
+            appIconButton
+            icon="check"
+            variant="danger"
+            [showLabel]="true"
+            [label]="locale.uiText('adminOrdersActionCancel')"
+            (click)="confirmCancel()"
+          ></button>
         </div>
       </div>
     </div>

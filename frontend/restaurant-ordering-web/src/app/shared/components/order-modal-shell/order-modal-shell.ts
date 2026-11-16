@@ -11,8 +11,10 @@ import {
   PLATFORM_ID,
 } from '@angular/core';
 import { attachElementToBody } from '../../utils/overlay-body-portal';
+import { IconButton } from '../../ui/icon-button/icon-button';
 
 @Component({
+  imports: [IconButton],
   selector: 'app-modal-shell, app-order-modal-shell',
   templateUrl: './order-modal-shell.html',
   styleUrl: './order-modal-shell.scss',

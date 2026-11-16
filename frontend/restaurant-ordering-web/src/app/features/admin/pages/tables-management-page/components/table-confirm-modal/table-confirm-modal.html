@@ -8,19 +8,22 @@
 }
 
 <app-staff-modal-actions orderModalFooter>
+  <!-- High-impact confirmation: the action text stays visible next to the icon. -->
   <button
-    type="button"
-    class="staff-modal-actions__save"
-    [class.staff-modal-actions__save--danger]="destructive()"
+    appIconButton
+    icon="check"
+    [variant]="destructive() ? 'danger' : 'primary'"
+    [showLabel]="true"
     data-testid="table-confirm-submit"
+    [label]="locale.uiText(confirmKey())"
+    [loading]="submitting()"
     [disabled]="submitting()"
     (click)="confirmed.emit()"
-  >
-    {{
-      submitting() ? locale.uiText('tablesSaving') : locale.uiText(confirmKey())
-    }}
-  </button>
-  <button type="button" class="staff-modal-actions__cancel" (click)="cancelled.emit()">
-    {{ locale.uiText('tablesCancel') }}
-  </button>
+  ></button>
+  <button
+    appIconButton
+    icon="x"
+    [label]="locale.uiText('tablesCancel')"
+    (click)="cancelled.emit()"
+  ></button>
 </app-staff-modal-actions>

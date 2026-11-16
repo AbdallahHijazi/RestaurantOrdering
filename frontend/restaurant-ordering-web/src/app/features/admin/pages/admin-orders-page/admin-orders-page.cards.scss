@@ -20,7 +20,7 @@
   background: transparent;
   color: var(--orders-muted);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: var(--fs-small);
   font-weight: 800;
   cursor: pointer;
   white-space: nowrap;
@@ -65,7 +65,7 @@
   border-collapse: separate;
   border-spacing: 0;
   color: var(--orders-charcoal);
-  font-size: 0.82rem;
+  font-size: var(--fs-secondary);
 }
 .orders-management-page__table th,
 .orders-management-page__table td {
@@ -77,7 +77,7 @@
 .orders-management-page__table th {
   background: var(--restaurant-surface-soft);
   color: var(--orders-muted);
-  font-size: 0.72rem;
+  font-size: var(--fs-small);
   font-weight: 800;
   white-space: nowrap;
 }
@@ -99,7 +99,7 @@
 .orders-management-page__table-order-number {
   color: var(--orders-charcoal);
   font-family: var(--restaurant-font-mono);
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
   font-weight: 900;
   direction: ltr;
   unicode-bidi: plaintext;
@@ -129,13 +129,13 @@
 }
 .orders-management-page__table-time {
   color: var(--orders-muted);
-  font-size: 0.76rem;
+  font-size: var(--fs-small);
   font-weight: 600;
   white-space: nowrap;
 }
 .orders-management-page__table-total {
   color: var(--orders-charcoal);
-  font-size: 0.86rem;
+  font-size: var(--fs-secondary);
   font-weight: 900;
   white-space: nowrap;
   direction: ltr;
@@ -150,7 +150,7 @@
   padding-inline: 0.6rem;
   border: 1px solid transparent;
   border-radius: var(--restaurant-radius-pill);
-  font-size: 0.72rem;
+  font-size: var(--fs-small);
   font-weight: 800;
   white-space: nowrap;
 }
@@ -320,7 +320,7 @@
   min-width: 0;
   color: var(--orders-charcoal);
   font-family: var(--restaurant-font-mono);
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   font-weight: 900;
   letter-spacing: 0.01em;
   overflow-wrap: anywhere;
@@ -332,7 +332,7 @@
 }
 .orders-management-page__card-time {
   color: var(--orders-muted);
-  font-size: 0.75rem;
+  font-size: var(--fs-small);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -344,7 +344,7 @@
 }
 .orders-management-page__card-label {
   color: var(--orders-muted);
-  font-size: 0.68rem;
+  font-size: var(--fs-small);
   font-weight: 800;
 }
 .orders-management-page__card-guest {
@@ -354,7 +354,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--orders-charcoal);
-  font-size: 0.9rem;
+  font-size: var(--fs-secondary);
   font-weight: 700;
 }
 .orders-management-page__card-footer {
@@ -366,11 +366,11 @@
 }
 .orders-management-page__card-total {
   color: var(--orders-muted);
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
 }
 .orders-management-page__card-total strong {
   color: var(--orders-charcoal);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 900;
 }
 .orders-management-page__details-btn {

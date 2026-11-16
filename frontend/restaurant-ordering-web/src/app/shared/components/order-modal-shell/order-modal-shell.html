@@ -20,15 +20,16 @@
           <ng-content select="[orderModalHeaderExtra]" />
         </div>
         <button
-          type="button"
+          appIconButton
           class="modal-close-button"
+          icon="x"
+          variant="ghost"
+          size="sm"
+          [label]="closeLabel()"
           data-testid="order-modal-close"
-          [attr.aria-label]="closeLabel()"
           [disabled]="blockCloseWhileBusy()"
           (click)="requestClose()"
-        >
-          <span class="modal-close-button__icon" aria-hidden="true">&times;</span>
-        </button>
+        ></button>
       </header>
 
       <div class="modal-dialog__body">

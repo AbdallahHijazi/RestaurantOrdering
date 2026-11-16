@@ -46,7 +46,7 @@
   background: var(--restaurant-surface-elevated);
   box-shadow: var(--menu-shadow-sm);
   font: inherit;
-  font-size: 0.82rem;
+  font-size: var(--fs-secondary);
   transition:
     border-color var(--restaurant-motion-fast) ease,
     box-shadow var(--restaurant-motion-fast) ease;
@@ -93,7 +93,7 @@
   color: var(--restaurant-text);
   background: var(--restaurant-surface-elevated);
   font: inherit;
-  font-size: 0.75rem;
+  font-size: var(--fs-small);
   font-weight: 800;
   white-space: nowrap;
   cursor: pointer;
@@ -150,13 +150,13 @@
 
   .public-menu-filter__search input {
     height: 2.75rem;
-    font-size: 0.78rem;
+    font-size: var(--fs-small);
   }
 
   .public-menu-filter__pill {
     min-height: 2.1rem;
     padding-inline: 0.75rem;
-    font-size: 0.72rem;
+    font-size: var(--fs-small);
   }
 }
 

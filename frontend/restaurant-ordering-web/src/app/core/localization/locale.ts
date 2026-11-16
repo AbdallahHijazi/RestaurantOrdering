@@ -455,6 +455,50 @@ export type UiTextKey =
   | 'adminDashboardLoadError'
   | 'adminDashboardOrdersLoadError'
   | 'adminDashboardRetry'
+  | 'adminDashboardActivityLoadError'
+  | 'adminDashboardActivityEmpty'
+  | 'adminDashboardActivityOrders'
+  | 'adminDashboardActivityToday'
+  | 'adminMenuDuplicateCategoryWarning'
+  | 'adminMenuImageWillBeRemoved'
+  | 'adminMenuCategoryMoved'
+  | 'tablesStatusArchived'
+  | 'tablesConfirmArchiveTitle'
+  | 'tablesConfirmArchiveMessage'
+  | 'tablesConfirmRestoreTitle'
+  | 'tablesConfirmRestoreMessage'
+  | 'tablesArchiveSuccess'
+  | 'tablesRestoreSuccess'
+  | 'actionSave'
+  | 'actionEdit'
+  | 'actionDelete'
+  | 'actionAdd'
+  | 'actionRefresh'
+  | 'actionView'
+  | 'actionClose'
+  | 'actionCancel'
+  | 'actionConfirm'
+  | 'actionSearch'
+  | 'actionMoveUp'
+  | 'actionMoveDown'
+  | 'actionArchive'
+  | 'actionRestore'
+  | 'actionActivate'
+  | 'actionDeactivate'
+  | 'actionCopy'
+  | 'actionPrint'
+  | 'actionDownload'
+  | 'actionRemoveImage'
+  | 'actionRetry'
+  | 'actionChangeRole'
+  | 'staffEditTitle'
+  | 'staffUpdateSuccess'
+  | 'staffDeactivateTitle'
+  | 'staffActivateTitle'
+  | 'staffDeactivateConfirm'
+  | 'staffActivateConfirm'
+  | 'staffStatusUpdateSuccess'
+  | 'staffErrorForbiddenAction'
   | 'adminOrdersTableLabel'
   | 'kitchenFieldTable'
   | 'staffPageTitle'
@@ -818,6 +862,11 @@ export type UiTextKey =
   | 'adminMenuReorderItems'
   | 'adminMenuFinishItemReorder'
   | 'adminMenuItemReorderHint'
+  | 'adminMenuReorderNeedCategory'
+  | 'adminMenuReorderClearFilters'
+  | 'adminMenuReorderNeedTwoItems'
+  | 'adminMenuCategoryActionsLabel'
+  | 'adminMenuDragPreviewPosition'
   | 'notificationClose'
   | 'publicCartTitle'
   | 'publicCartEmpty'
@@ -1231,6 +1280,50 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminDashboardLoadError: 'تعذّر تحميل إحصائيات لوحة التحكم. الأرقام غير متاحة حاليًا، حاول مرة أخرى.',
     adminDashboardOrdersLoadError: 'تعذّر تحميل الطلبات الحديثة.',
     adminDashboardRetry: 'إعادة المحاولة',
+    adminDashboardActivityLoadError: 'تعذّر تحميل نشاط الطلبات.',
+    adminDashboardActivityEmpty: 'لا توجد طلبات خلال آخر 7 أيام.',
+    adminDashboardActivityOrders: 'طلبات',
+    adminDashboardActivityToday: 'اليوم',
+    adminMenuDuplicateCategoryWarning: 'يوجد تصنيف آخر بنفس الاسم. يمكنك المتابعة، لكن قد يسبب ذلك ارتباكاً.',
+    adminMenuImageWillBeRemoved: 'ستُزال الصورة عند الحفظ.',
+    adminMenuCategoryMoved: 'تم تحديث ترتيب التصنيفات.',
+    tablesStatusArchived: 'مؤرشفة',
+    tablesConfirmArchiveTitle: 'أرشفة الطاولة',
+    tablesConfirmArchiveMessage: 'ستُخفى الطاولة وتتوقف عن استقبال الطلبات عبر QR. تبقى الطلبات السابقة وسجلها كما هي، ويمكنك استعادتها لاحقاً.',
+    tablesConfirmRestoreTitle: 'استعادة الطاولة',
+    tablesConfirmRestoreMessage: 'ستعود الطاولة إلى القائمة بحالة «غير نشطة» إلى أن تفعّلها بنفسك.',
+    tablesArchiveSuccess: 'تمت أرشفة الطاولة.',
+    tablesRestoreSuccess: 'تمت استعادة الطاولة.',
+    actionSave: 'حفظ',
+    actionEdit: 'تعديل',
+    actionDelete: 'حذف',
+    actionAdd: 'إضافة',
+    actionRefresh: 'تحديث',
+    actionView: 'عرض',
+    actionClose: 'إغلاق',
+    actionCancel: 'إلغاء',
+    actionConfirm: 'تأكيد',
+    actionSearch: 'بحث',
+    actionMoveUp: 'تحريك لأعلى',
+    actionMoveDown: 'تحريك لأسفل',
+    actionArchive: 'أرشفة',
+    actionRestore: 'استعادة',
+    actionActivate: 'تفعيل',
+    actionDeactivate: 'تعطيل',
+    actionCopy: 'نسخ',
+    actionPrint: 'طباعة',
+    actionDownload: 'تنزيل',
+    actionRemoveImage: 'إزالة الصورة',
+    actionRetry: 'إعادة المحاولة',
+    actionChangeRole: 'تغيير الدور',
+    staffEditTitle: 'تعديل بيانات الموظف',
+    staffUpdateSuccess: 'تم تحديث بيانات الموظف بنجاح.',
+    staffDeactivateTitle: 'تعطيل حساب الموظف',
+    staffActivateTitle: 'تفعيل حساب الموظف',
+    staffDeactivateConfirm: 'سيُمنع هذا الموظف من تسجيل الدخول حتى تعيد تفعيل حسابه. تبقى بياناته وسجله كما هي.',
+    staffActivateConfirm: 'سيتمكن هذا الموظف من تسجيل الدخول مجدداً.',
+    staffStatusUpdateSuccess: 'تم تحديث حالة الحساب.',
+    staffErrorForbiddenAction: 'لا يمكن تنفيذ هذا الإجراء على هذا الحساب.',
     adminOrdersTableLabel: 'الطاولة',
     kitchenFieldTable: 'الطاولة',
     staffPageTitle: 'إدارة الموظفين',
@@ -1599,6 +1692,11 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminMenuCategoryReorderHint: 'اسحب التصنيفات من المقبض لتغيير ترتيب ظهورها. يُحفظ الترتيب تلقائيًا.',
     adminMenuReorderItems: 'ترتيب الأطباق',
     adminMenuFinishItemReorder: 'إنهاء ترتيب الأطباق',
+    adminMenuReorderNeedCategory: 'اختر تصنيفاً أولاً لإعادة ترتيب الأطباق.',
+    adminMenuReorderClearFilters: 'أزل البحث والتصفية لإعادة ترتيب الأطباق.',
+    adminMenuReorderNeedTwoItems: 'أضف طبقين على الأقل لإعادة الترتيب.',
+    adminMenuCategoryActionsLabel: 'إجراءات التصنيف',
+    adminMenuDragPreviewPosition: 'الموضع {position}',
     adminMenuItemReorderHint: 'اسحب بطاقة الطبق من المقبض إلى موضعها الجديد. يُحفظ الترتيب تلقائيًا.',
     notificationClose: 'إغلاق الإشعار',
     publicCartTitle: 'سلتك',
@@ -2019,6 +2117,50 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminDashboardLoadError: 'Could not load the dashboard statistics. The figures are unavailable right now, please try again.',
     adminDashboardOrdersLoadError: 'Could not load recent orders.',
     adminDashboardRetry: 'Try again',
+    adminDashboardActivityLoadError: 'Could not load order activity.',
+    adminDashboardActivityEmpty: 'No orders in the last 7 days.',
+    adminDashboardActivityOrders: 'orders',
+    adminDashboardActivityToday: 'Today',
+    adminMenuDuplicateCategoryWarning: 'Another category already uses this name. You can continue, but it may be confusing.',
+    adminMenuImageWillBeRemoved: 'The image will be removed when you save.',
+    adminMenuCategoryMoved: 'Category order updated.',
+    tablesStatusArchived: 'Archived',
+    tablesConfirmArchiveTitle: 'Archive table',
+    tablesConfirmArchiveMessage: 'The table will be hidden and stop accepting QR orders. Past orders and their history are kept, and you can restore it later.',
+    tablesConfirmRestoreTitle: 'Restore table',
+    tablesConfirmRestoreMessage: 'The table returns to the list as inactive until you activate it yourself.',
+    tablesArchiveSuccess: 'Table archived.',
+    tablesRestoreSuccess: 'Table restored.',
+    actionSave: 'Save',
+    actionEdit: 'Edit',
+    actionDelete: 'Delete',
+    actionAdd: 'Add',
+    actionRefresh: 'Refresh',
+    actionView: 'View',
+    actionClose: 'Close',
+    actionCancel: 'Cancel',
+    actionConfirm: 'Confirm',
+    actionSearch: 'Search',
+    actionMoveUp: 'Move up',
+    actionMoveDown: 'Move down',
+    actionArchive: 'Archive',
+    actionRestore: 'Restore',
+    actionActivate: 'Activate',
+    actionDeactivate: 'Deactivate',
+    actionCopy: 'Copy',
+    actionPrint: 'Print',
+    actionDownload: 'Download',
+    actionRemoveImage: 'Remove image',
+    actionRetry: 'Try again',
+    actionChangeRole: 'Change role',
+    staffEditTitle: 'Edit employee',
+    staffUpdateSuccess: 'Employee details updated.',
+    staffDeactivateTitle: 'Deactivate employee account',
+    staffActivateTitle: 'Activate employee account',
+    staffDeactivateConfirm: 'This employee will be blocked from signing in until you reactivate the account. Their record and history are kept.',
+    staffActivateConfirm: 'This employee will be able to sign in again.',
+    staffStatusUpdateSuccess: 'Account status updated.',
+    staffErrorForbiddenAction: 'This action is not allowed for this account.',
     adminOrdersTableLabel: 'Table',
     kitchenFieldTable: 'Table',
     staffPageTitle: 'Employees Management',
@@ -2391,6 +2533,11 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminMenuCategoryReorderHint: 'Drag categories by the handle to change their display order. The order saves automatically.',
     adminMenuReorderItems: 'Reorder dishes',
     adminMenuFinishItemReorder: 'Finish dish reorder',
+    adminMenuReorderNeedCategory: 'Select a category first to reorder meals.',
+    adminMenuReorderClearFilters: 'Clear the search and filters to reorder meals.',
+    adminMenuReorderNeedTwoItems: 'Add at least two meals to reorder them.',
+    adminMenuCategoryActionsLabel: 'Category actions',
+    adminMenuDragPreviewPosition: 'Position {position}',
     adminMenuItemReorderHint: 'Drag a dish card by its handle to a new position. The order saves automatically.',
     notificationClose: 'Close notification',
     publicCartTitle: 'Your cart',

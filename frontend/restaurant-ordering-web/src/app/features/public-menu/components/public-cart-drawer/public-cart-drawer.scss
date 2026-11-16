@@ -77,7 +77,7 @@
 
 .public-cart-drawer__header h2 {
   margin: 0;
-  font-size: 1.5625rem;
+  font-size: var(--fs-section);
   line-height: 1.2;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -87,7 +87,7 @@
 .public-cart-drawer__subtitle {
   margin: 0.375rem 0 0;
   color: var(--cart-muted);
-  font-size: 0.8125rem;
+  font-size: var(--fs-secondary);
   line-height: 1.6;
 }
 
@@ -194,7 +194,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 800;
   color: var(--cart-text);
 }
@@ -203,12 +203,12 @@
   display: block;
   margin-top: 0.25rem;
   color: var(--cart-muted);
-  font-size: 0.75rem;
+  font-size: var(--fs-small);
   font-weight: 600;
 }
 
 .public-cart-drawer__line-price {
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 800;
   white-space: nowrap;
   color: var(--cart-text);
@@ -267,7 +267,7 @@
 .public-cart-drawer__qty-value {
   min-width: 1.75rem;
   text-align: center;
-  font-size: 0.8125rem;
+  font-size: var(--fs-secondary);
   font-weight: 800;
 }
 
@@ -279,7 +279,7 @@
   background: transparent;
   color: var(--cart-danger);
   font: inherit;
-  font-size: 0.75rem;
+  font-size: var(--fs-small);
   font-weight: 800;
   cursor: pointer;
   transition: transform 0.2s ease, color 0.2s ease;
@@ -311,14 +311,14 @@
 .public-cart-drawer__empty h3 {
   margin: 0;
   color: var(--cart-text);
-  font-size: 1.3125rem;
+  font-size: var(--fs-section);
   font-weight: 800;
 }
 
 .public-cart-drawer__empty p {
   max-width: 18.75rem;
   margin: 0.5rem auto 0;
-  font-size: 0.8125rem;
+  font-size: var(--fs-secondary);
   line-height: 1.7;
 }
 
@@ -358,7 +358,7 @@
   gap: 0.875rem;
   padding: 0.5rem 0;
   color: var(--cart-muted);
-  font-size: 0.8125rem;
+  font-size: var(--fs-secondary);
   font-weight: 600;
 }
 
@@ -368,26 +368,26 @@
 
 .public-cart-drawer__summary-row strong {
   color: var(--cart-text);
-  font-size: 0.875rem;
+  font-size: var(--fs-secondary);
   font-weight: 800;
 }
 
 .public-cart-drawer__summary-row--total {
   padding-top: 0.75rem;
   color: var(--cart-text);
-  font-size: 1.0625rem;
+  font-size: var(--fs-card);
   font-weight: 800;
 }
 
 .public-cart-drawer__summary-row--total strong {
   color: var(--restaurant-gold-light);
-  font-size: 1.5rem;
+  font-size: var(--fs-section);
 }
 
 .public-cart-drawer__note {
   margin: 0.5625rem 0 0;
   color: var(--cart-muted);
-  font-size: 0.75rem;
+  font-size: var(--fs-small);
   line-height: 1.7;
 }
 
@@ -403,7 +403,7 @@
   min-height: 3rem;
   border-radius: 0.75rem;
   font: inherit;
-  font-size: 0.8125rem;
+  font-size: var(--fs-secondary);
   font-weight: 800;
   cursor: pointer;
   transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.24s ease;
@@ -447,7 +447,7 @@
   background-image: var(--restaurant-primary-button-bg-soft);
   box-shadow: var(--restaurant-primary-button-shadow);
   font: inherit;
-  font-size: 0.8125rem;
+  font-size: var(--fs-secondary);
   font-weight: 800;
   cursor: pointer;
   transition:

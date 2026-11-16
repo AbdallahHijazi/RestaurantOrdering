@@ -22,28 +22,22 @@
       />
 
       <button
-        type="button"
-        class="kitchen-page__secondary-btn"
+        appIconButton
+        icon="refresh"
+        [label]="locale.uiText('kitchenRefresh')"
+        [loading]="refreshing()"
         data-testid="kitchen-refresh-btn"
-        [attr.aria-label]="locale.uiText('kitchenRefresh')"
         [disabled]="pageState() === 'loading' || refreshing()"
         (click)="refreshBoard()"
-      >
-        @if (refreshing()) {
-          {{ locale.uiText('kitchenRefreshing') }}
-        } @else {
-          {{ locale.uiText('kitchenRefresh') }}
-        }
-      </button>
+      ></button>
 
       <button
-        type="button"
-        class="button-secondary"
+        appIconButton
+        icon="logout"
+        [label]="locale.uiText('kitchenLogout')"
         data-testid="kitchen-logout-btn"
         (click)="logout()"
-      >
-        {{ locale.uiText('kitchenLogout') }}
-      </button>
+      ></button>
     </div>
   </header>
 
@@ -171,42 +165,36 @@
 
                     <div class="kitchen-page__card-actions">
                       <button
-                        type="button"
-                        class="button-ghost"
+                        appIconButton
+                        icon="eye"
+                        [label]="locale.uiText('kitchenViewDetails')"
                         [attr.data-testid]="'kitchen-details-' + order.id"
                         (click)="openDetails(order)"
-                      >
-                        {{ locale.uiText('kitchenViewDetails') }}
-                      </button>
+                      ></button>
 
                       @if (order.orderStatus === OrderStatus.New) {
                         <button
-                          type="button"
-                          class="button-primary"
+                          appIconButton
+                          icon="play"
+                          [showLabel]="true"
+                          [label]="locale.uiText('kitchenStartPreparing')"
+                          [loading]="isUpdating(order.id)"
                           data-testid="kitchen-action-start-preparing"
                           [disabled]="isUpdating(order.id)"
                           (click)="startPreparing(order)"
-                        >
-                          @if (isUpdating(order.id)) {
-                            {{ locale.uiText('kitchenUpdating') }}
-                          } @else {
-                            {{ locale.uiText('kitchenStartPreparing') }}
-                          }
-                        </button>
+                        ></button>
                       } @else if (order.orderStatus === OrderStatus.Preparing) {
                         <button
-                          type="button"
-                          class="button-success"
+                          appIconButton
+                          icon="check"
+                          variant="success"
+                          [showLabel]="true"
+                          [label]="locale.uiText('kitchenMarkReady')"
+                          [loading]="isUpdating(order.id)"
                           data-testid="kitchen-action-mark-ready"
                           [disabled]="isUpdating(order.id)"
                           (click)="markReady(order)"
-                        >
-                          @if (isUpdating(order.id)) {
-                            {{ locale.uiText('kitchenUpdating') }}
-                          } @else {
-                            {{ locale.uiText('kitchenMarkReady') }}
-                          }
-                        </button>
+                        ></button>
                       } @else if (order.orderStatus === OrderStatus.Ready) {
                         <p class="kitchen-page__waiting" data-testid="kitchen-ready-waiting">
                           {{ locale.uiText('kitchenReadyWaiting') }}
@@ -220,18 +208,15 @@
 
             @if (hasMore(column.key)) {
               <button
-                type="button"
-                class="kitchen-page__secondary-btn kitchen-page__load-more"
+                appIconButton
+                icon="chevron-down"
+                [showLabel]="true"
+                [label]="locale.uiText('kitchenLoadMore')"
+                [loading]="columns()[column.key].loadingMore"
                 [attr.data-testid]="'kitchen-load-more-' + column.key"
                 [disabled]="columns()[column.key].loadingMore"
                 (click)="loadMore(column.key)"
-              >
-                @if (columns()[column.key].loadingMore) {
-                  {{ locale.uiText('kitchenLoadingMore') }}
-                } @else {
-                  {{ locale.uiText('kitchenLoadMore') }}
-                }
-              </button>
+              ></button>
             }
           </section>
         }
@@ -408,24 +393,25 @@
       <div orderModalFooter class="kitchen-details__modal-footer">
         @if (order.orderStatus === OrderStatus.New) {
           <button
-            type="button"
-            class="button-primary"
+            appIconButton
+            icon="play"
+            [showLabel]="true"
+            [label]="locale.uiText('kitchenStartPreparing')"
             data-testid="kitchen-modal-start-preparing"
             [disabled]="isUpdating(order.id)"
             (click)="startPreparing(order)"
-          >
-            {{ locale.uiText('kitchenStartPreparing') }}
-          </button>
+          ></button>
         } @else if (order.orderStatus === OrderStatus.Preparing) {
           <button
-            type="button"
-            class="button-success"
+            appIconButton
+            icon="check"
+            variant="success"
+            [showLabel]="true"
+            [label]="locale.uiText('kitchenMarkReady')"
             data-testid="kitchen-modal-mark-ready"
             [disabled]="isUpdating(order.id)"
             (click)="markReady(order)"
-          >
-            {{ locale.uiText('kitchenMarkReady') }}
-          </button>
+          ></button>
         }
       </div>
     }

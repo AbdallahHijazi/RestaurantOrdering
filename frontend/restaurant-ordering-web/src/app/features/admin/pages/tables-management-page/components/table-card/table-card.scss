@@ -42,7 +42,7 @@
   margin: 0;
   overflow: hidden;
   color: var(--tables-text);
-  font-size: 1.075rem;
+  font-size: var(--fs-card);
   font-weight: 850;
   line-height: 1.35;
   text-overflow: ellipsis;
@@ -59,7 +59,7 @@
   border-radius: 0.45rem;
   color: var(--tables-muted);
   background: var(--restaurant-surface-soft);
-  font-size: 0.78rem;
+  font-size: var(--fs-small);
   font-weight: 700;
   line-height: 1.4;
   text-overflow: ellipsis;
@@ -82,7 +82,7 @@
   border-radius: 999px;
   color: var(--tables-green);
   background: var(--tables-green-soft);
-  font-size: 0.7rem;
+  font-size: var(--fs-small);
   font-weight: 850;
   white-space: nowrap;
 }
@@ -142,7 +142,7 @@
   color: var(--restaurant-surface);
   background: color-mix(in srgb, var(--tables-text) 92%, transparent);
   box-shadow: var(--tables-shadow);
-  font-size: 0.78rem;
+  font-size: var(--fs-small);
   font-weight: 850;
 }
 
@@ -159,7 +159,7 @@
   color: var(--restaurant-accent-strong);
   background: transparent;
   font: inherit;
-  font-size: 0.78rem;
+  font-size: var(--fs-small);
   font-weight: 850;
   text-decoration: underline;
   text-underline-offset: 0.2rem;
@@ -191,7 +191,7 @@
   color: var(--restaurant-muted-text);
   background: var(--restaurant-surface-soft);
   font: inherit;
-  font-size: 0.76rem;
+  font-size: var(--fs-small);
   font-weight: 800;
   line-height: 1.25;
   cursor: pointer;

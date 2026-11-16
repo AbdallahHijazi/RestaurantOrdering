@@ -20,6 +20,20 @@ public interface IRestaurantUserManagementService
         Guid currentUserId,
         CancellationToken cancellationToken);
 
+    Task<RestaurantUserDto> UpdateRestaurantStaffUserAsync(
+        Guid restaurantId,
+        Guid userId,
+        string? fullName,
+        string? phoneNumber,
+        CancellationToken cancellationToken);
+
+    Task<RestaurantUserDto> SetRestaurantStaffUserActiveAsync(
+        Guid restaurantId,
+        Guid userId,
+        bool isActive,
+        Guid currentUserId,
+        CancellationToken cancellationToken);
+
     Task<IReadOnlyList<RestaurantUserDto>> ListRestaurantStaffUsersAsync(
         Guid restaurantId,
         CancellationToken cancellationToken);

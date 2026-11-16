@@ -2,8 +2,8 @@
 .staff-management-shell{max-width:none;margin-inline:auto}
 .staff-management-success{margin:0 0 1rem;padding:.75rem 1rem;border-radius:.75rem;background:var(--staff-green-soft);color:var(--staff-green);font-weight:700}
 .staff-management-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-block-end:1.5rem}
-.staff-management-title h1{margin:0;font-family:var(--font-display);font-size:clamp(1.75rem,3vw,2.25rem);font-weight:800;letter-spacing:-.02em}
-.staff-management-title p{margin:.75rem 0 0;color:var(--staff-muted);font-size:clamp(.95rem,1.5vw,1.0625rem);line-height:1.7;max-width:42rem}
+.staff-management-title h1{margin:0;font-family:var(--font-display);font-size: var(--fs-page-title);font-weight:800;letter-spacing:-.02em}
+.staff-management-title p{margin:.75rem 0 0;color:var(--staff-muted);font-size: var(--fs-card);line-height:1.7;max-width:42rem}
 .staff-management-primary,.staff-management-secondary{font:inherit;cursor:pointer;border-radius:.9375rem;transition:transform .24s cubic-bezier(.22,1,.36,1),box-shadow .24s,filter .24s}
 .staff-management-primary{min-height:3.125rem;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding-inline:1.25rem;border:1px solid var(--restaurant-accent-border);color:var(--restaurant-primary-button-text);background-color:var(--restaurant-olive);background-image:var(--restaurant-primary-button-bg);font-weight:800;box-shadow:var(--restaurant-primary-button-shadow)}
 .staff-management-primary svg{width:1.25rem;height:1.25rem;display:block}
@@ -22,13 +22,13 @@
 .staff-management-search input:focus{border-color:var(--staff-terracotta);box-shadow:0 0 0 4px var(--restaurant-accent-soft)}
 .staff-management-filters{display:flex;gap:.625rem;flex-wrap:wrap}
 .staff-management-filter{flex:0 1 auto;min-width:8.75rem}
-.staff-management-summary{display:flex;justify-content:space-between;gap:.75rem;padding:.875rem 1.125rem;border-top:1px solid var(--staff-line);color:var(--staff-muted);background:var(--restaurant-surface-soft);font-size:.8125rem}
+.staff-management-summary{display:flex;justify-content:space-between;gap:.75rem;padding:.875rem 1.125rem;border-top:1px solid var(--staff-line);color:var(--staff-muted);background:var(--restaurant-surface-soft);font-size:var(--fs-secondary)}
 .staff-management-empty{padding:2.625rem 1.25rem;color:var(--staff-muted);text-align:center;border-top:1px dashed var(--restaurant-border);background:var(--restaurant-surface-soft)}
-.staff-management-empty h2{margin:0 0 .5rem;font-size:1.125rem;color:var(--staff-text)}
+.staff-management-empty h2{margin:0 0 .5rem;font-size: var(--fs-card);color:var(--staff-text)}
 .staff-management-empty p{margin:0 0 1rem}
 .staff-management-empty--filtered{border-top:0}
 .staff-management-state{padding:1.5rem 1.35rem;border:1px solid var(--staff-line);border-radius:1.125rem;background:var(--restaurant-surface-soft);box-shadow:var(--staff-shadow)}
-.staff-management-state h2{margin:0 0 .5rem;font-family:var(--font-display);font-size:1.125rem}
+.staff-management-state h2{margin:0 0 .5rem;font-family:var(--font-display);font-size:var(--fs-card)}
 .staff-management-state p{margin:0 0 1rem;color:var(--staff-muted)}
 .staff-management-state--error{border-color:var(--restaurant-danger);background:var(--staff-red-soft)}
 .staff-management-skeleton-toolbar{height:3.25rem;margin:1rem 1.125rem;border-radius:999px;background:var(--restaurant-surface-muted)}
@@ -37,10 +37,10 @@
 .staff-management-modal-form--single{grid-template-columns:1fr}
 .staff-management-field{display:grid;gap:.4375rem}
 .staff-management-field--full{grid-column:1/-1}
-.staff-management-field span{font-size:.8125rem;font-weight:800;color:var(--restaurant-muted-text)}
+.staff-management-field span{font-size: var(--fs-secondary);font-weight:800;color:var(--restaurant-muted-text)}
 .staff-management-field input{height:2.875rem;padding-inline:.75rem;border:1px solid var(--staff-line);border-radius:.75rem;background:var(--restaurant-surface-soft);color:var(--staff-text);outline:none;font:inherit;width:100%}
 .staff-management-field input:focus{border-color:var(--staff-terracotta);box-shadow:0 0 0 4px var(--restaurant-accent-soft)}
 .staff-management-modal-meta{margin:0 0 .5rem;color:var(--staff-muted)}
-.staff-management-modal-error{margin:.5rem 0 0;color:var(--staff-red);font-size:.875rem}
+.staff-management-modal-error{margin:.5rem 0 0;color:var(--staff-red);font-size:var(--fs-secondary)}
 @media (max-width:65.625rem){.staff-management-head{align-items:stretch;flex-direction:column}.staff-management-primary{width:100%}.staff-management-workspace-top{align-items:stretch;flex-direction:column}.staff-management-search{max-width:none}.staff-management-filter{flex:1;min-width:0}.staff-management-modal-form{grid-template-columns:1fr}.staff-management-field--full{grid-column:auto}}
 @media (prefers-reduced-motion:reduce){.staff-management-page *{animation-duration:.01ms!important;transition-duration:.01ms!important}}

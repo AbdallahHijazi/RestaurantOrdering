@@ -22,6 +22,11 @@ export interface UpdateRestaurantStaffRoleRequest {
   role: AssignableStaffRole;
 }
 
+export interface UpdateRestaurantStaffRequest {
+  fullName: string | null;
+  phoneNumber: string | null;
+}
+
 export interface RestaurantStaffRoleUpdateResult {
   id: string;
   restaurantId: string;

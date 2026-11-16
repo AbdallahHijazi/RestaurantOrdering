@@ -11,9 +11,9 @@
   --table-card-logo-size: 3.625rem;
   --table-card-qr-size: 7.875rem;
   --table-card-restaurant-size: 1rem;
-  --table-card-subtitle-size: 0.5625rem;
+  --table-card-subtitle-size: var(--fs-small);
   --table-card-table-size: 1.25rem;
-  --table-card-zone-size: 0.625rem;
+  --table-card-zone-size: var(--fs-small);
   --table-card-inner-padding-block: 0.875rem;
   --table-card-inner-padding-inline: 0.75rem;
 
@@ -276,7 +276,7 @@
 
 .table-qr-card__qr-empty {
   color: var(--table-card-muted);
-  font-size: 0.6875rem;
+  font-size: var(--fs-small);
   font-weight: 700;
 }
 
@@ -288,12 +288,12 @@
 }
 
 .table-qr-card__scan-ar {
-  font-size: 0.5625rem;
+  font-size: var(--fs-small);
   font-weight: 800;
 }
 
 .table-qr-card__scan-en {
-  font-size: 0.5625rem;
+  font-size: var(--fs-small);
   font-weight: 700;
 }
 

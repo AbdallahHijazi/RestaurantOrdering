@@ -85,7 +85,7 @@
 
 .public-menu-hero__monogram {
   font-family: var(--font-display);
-  font-size: 1.85rem;
+  font-size: var(--fs-page-title);
   font-weight: 900;
 }
 
@@ -116,7 +116,7 @@
   margin: 0;
   color: var(--restaurant-text-on-dark);
   font-family: var(--font-display);
-  font-size: clamp(1.65rem, 4.4vw, 2.45rem);
+  font-size: var(--fs-page-title);
   line-height: 1.2;
   font-weight: 900;
   text-shadow: 0 0.35rem 1.5rem color-mix(in srgb, var(--restaurant-olive) 72%, transparent);
@@ -131,7 +131,7 @@
   border-radius: 0.4rem;
   color: var(--restaurant-text-on-dark);
   background: color-mix(in srgb, var(--restaurant-olive) 54%, transparent);
-  font-size: 0.64rem;
+  font-size: var(--fs-small);
   font-weight: 800;
   letter-spacing: 0.08em;
   backdrop-filter: blur(8px);
@@ -142,7 +142,7 @@
   margin: 0;
   overflow: hidden;
   color: var(--restaurant-text-on-dark);
-  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  font-size: var(--fs-body);
   line-height: 1.7;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -168,7 +168,7 @@
   gap: 0.4rem;
   padding-inline: 0.85rem;
   border-radius: 999px;
-  font-size: 0.72rem;
+  font-size: var(--fs-small);
   font-weight: 900;
 }
 

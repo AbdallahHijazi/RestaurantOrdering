@@ -9,7 +9,7 @@
   padding: 0;
   background: var(--restaurant-surface-muted);
   color: var(--restaurant-text);
-  font-size: 1.35rem;
+  font-size: var(--fs-section);
   line-height: 1;
   cursor: pointer;
   transition:
@@ -97,7 +97,7 @@
 .modal-dialog__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: var(--fs-card);
   line-height: 1.3;
   color: var(--restaurant-text);
 }

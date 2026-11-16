@@ -2,6 +2,8 @@
   display: block;
   min-width: 0;
   height: 100%;
+  animation: meal-card-enter var(--restaurant-motion-normal) var(--restaurant-ease-standard) backwards;
+  animation-delay: calc(min(var(--card-index, 0), 11) * 24ms);
 }
 
 .meal-card {
@@ -14,7 +16,15 @@
   border-radius: 1rem;
   background: var(--restaurant-surface);
   box-shadow: var(--restaurant-shadow-xs);
-  transition: transform 0.22s, border-color 0.22s, box-shadow 0.22s;
+  transition:
+    transform var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    border-color var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    background-color var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    box-shadow var(--restaurant-motion-normal) var(--restaurant-ease-standard);
+}
+
+.meal-card > * {
+  transition: opacity var(--restaurant-motion-normal) var(--restaurant-ease-standard);
 }
 
 .meal-card:hover {
@@ -50,7 +60,7 @@
   padding: 1rem;
   color: var(--menu-muted, var(--restaurant-muted-text));
   background: linear-gradient(145deg, var(--restaurant-surface-muted), var(--restaurant-surface-soft));
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
   text-align: center;
 }
 
@@ -63,7 +73,7 @@
   justify-content: center;
   border: 1px solid color-mix(in srgb, var(--restaurant-border) 72%, transparent);
   box-shadow: var(--restaurant-shadow-xs);
-  font-size: 0.68rem;
+  font-size: var(--fs-small);
   font-weight: 800;
   line-height: 1;
 }
@@ -90,9 +100,21 @@
   color: var(--menu-text, var(--restaurant-text));
   background: color-mix(in srgb, var(--restaurant-surface) 92%, transparent);
   box-shadow: var(--restaurant-shadow-xs);
-  font-size: 0.68rem;
+  font-size: var(--fs-small);
   font-weight: 800;
   line-height: 1;
+}
+
+.meal-card__order > :not(.meal-card__code) {
+  animation: meal-card-reveal var(--restaurant-motion-normal) var(--restaurant-ease-standard) backwards;
+}
+
+.meal-card__order > :nth-child(3) {
+  animation-delay: 40ms;
+}
+
+.meal-card__order > :nth-child(4) {
+  animation-delay: 80ms;
 }
 
 .meal-card__drag-handle {
@@ -128,11 +150,22 @@
   transform: none;
 }
 
+/* The dragged card sits in its previewed slot as the drop placeholder: dashed accent frame, dimmed content. */
 .meal-card--dragging {
   z-index: 3;
-  opacity: 0.52;
-  transform: scale(0.97);
-  box-shadow: 0 0 0 2px var(--restaurant-accent-border);
+  border-style: dashed;
+  border-color: var(--restaurant-accent);
+  background: var(--restaurant-accent-soft);
+  box-shadow: none;
+}
+
+.meal-card--dragging > * {
+  opacity: 0.38;
+}
+
+/* Brief confirmation ring after the card landed in its new position. */
+.meal-card--settled {
+  animation: meal-card-settle 700ms var(--restaurant-ease-standard);
 }
 
 .meal-card__availability-badge {
@@ -144,6 +177,9 @@
   border-radius: 999px;
   color: var(--restaurant-success);
   background: color-mix(in srgb, var(--restaurant-success-soft) 92%, transparent);
+  transition:
+    color var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    background-color var(--restaurant-motion-normal) var(--restaurant-ease-standard);
 }
 
 .meal-card__availability-badge.is-unavailable {
@@ -198,7 +234,7 @@
   margin: 0;
   overflow: hidden;
   color: var(--menu-text, var(--restaurant-text));
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   font-weight: 850;
   line-height: 1.45;
   -webkit-box-orient: vertical;
@@ -214,7 +250,7 @@
 
 .meal-card__price strong {
   display: block;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 850;
 }
 
@@ -222,7 +258,7 @@
   display: block;
   margin-top: 0.15rem;
   color: var(--menu-muted, var(--restaurant-muted-text));
-  font-size: 0.72rem;
+  font-size: var(--fs-small);
   font-weight: 600;
   text-decoration: line-through;
 }
@@ -233,80 +269,77 @@
   margin: 0.45rem 0 0;
   overflow: hidden;
   color: var(--menu-muted, var(--restaurant-muted-text));
-  font-size: 0.75rem;
+  font-size: var(--fs-small);
   line-height: 1.7;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
 
+/* View / Edit / Delete: one horizontal group, identical size and gap on every card. Pinned to the card
+   bottom so it lines up across cards whatever the title or description length. */
 .meal-card__actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.45rem;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
   margin-block-start: auto;
   padding-block-start: 0.75rem;
 }
 
-.meal-card__action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  min-width: 0;
-  min-height: 2.35rem;
-  padding: 0.4rem 0.5rem;
-  border: 1px solid var(--menu-line, var(--restaurant-border));
-  border-radius: 0.65rem;
-  color: var(--restaurant-muted-text);
-  background: var(--restaurant-surface-soft);
-  font: inherit;
-  font-size: 0.72rem;
-  font-weight: 800;
-  line-height: 1.2;
-  cursor: pointer;
-}
-
-.meal-card__action svg {
-  width: 0.95rem;
-  height: 0.95rem;
+.meal-card__actions button {
   flex: 0 0 auto;
 }
 
-.meal-card__action--edit {
-  grid-column: 1 / -1;
-  color: var(--restaurant-text-on-accent);
-  border-color: var(--restaurant-accent-border);
-  background: var(--restaurant-accent);
+.meal-card__actions button:active:not(:disabled) {
+  transform: scale(0.94);
 }
 
-.meal-card__action--delete {
-  color: var(--menu-red, var(--restaurant-danger));
-  background: var(--restaurant-danger-soft);
-}
-
-.meal-card__action:focus-visible {
-  outline: 2px solid var(--restaurant-accent-border);
-  outline-offset: 2px;
-}
-
-.meal-card__action:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-@media (max-width: 24rem) {
-  .meal-card__actions {
-    grid-template-columns: minmax(0, 1fr);
+@keyframes meal-card-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--restaurant-motion-distance-md), 0);
   }
 
-  .meal-card__action--edit {
-    grid-column: auto;
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes meal-card-reveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, calc(var(--restaurant-motion-distance-sm) * -1), 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes meal-card-settle {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--restaurant-accent) 45%, transparent);
+  }
+
+  35% {
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--restaurant-accent) 28%, transparent);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 transparent;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  :host,
   .meal-card,
-  .meal-card__media img {
+  .meal-card > *,
+  .meal-card__media img,
+  .meal-card__order > * {
+    animation: none;
     transition: none;
   }
 }

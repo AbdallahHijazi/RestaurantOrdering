@@ -66,7 +66,7 @@
   color: var(--restaurant-text);
   background: var(--restaurant-surface-glass);
   box-shadow: var(--menu-shadow-sm);
-  font-size: 0.75rem;
+  font-size: var(--fs-small);
   font-weight: 800;
   white-space: nowrap;
   backdrop-filter: blur(12px);
@@ -159,7 +159,7 @@
   border-radius: 999px;
   color: var(--restaurant-text-on-accent);
   background: var(--restaurant-accent);
-  font-size: 0.65rem;
+  font-size: var(--fs-small);
   font-weight: 900;
 }
 
@@ -190,7 +190,7 @@
 .menu-page__eyebrow {
   display: inline-block;
   color: var(--restaurant-accent);
-  font-size: 0.68rem;
+  font-size: var(--fs-small);
   font-weight: 900;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -200,7 +200,7 @@
   margin: 0.3rem 0 0;
   color: var(--restaurant-text);
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 4vw, 2.15rem);
+  font-size: var(--fs-page-title);
   line-height: 1.15;
   font-weight: 900;
 }
@@ -209,14 +209,14 @@
   max-width: 42rem;
   margin: 0.4rem 0 0;
   color: var(--menu-muted);
-  font-size: 0.82rem;
+  font-size: var(--fs-secondary);
   line-height: 1.65;
 }
 
 .menu-page__result-meta {
   flex: 0 0 auto;
   color: var(--menu-muted);
-  font-size: 0.72rem;
+  font-size: var(--fs-small);
   font-weight: 800;
   white-space: nowrap;
 }
@@ -260,7 +260,7 @@
   margin: 0;
   color: var(--restaurant-text);
   font-family: var(--font-display);
-  font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+  font-size: var(--fs-section);
   line-height: 1.25;
 }
 
@@ -269,7 +269,7 @@
   margin: 0.2rem 0 0;
   overflow: hidden;
   color: var(--menu-muted);
-  font-size: 0.75rem;
+  font-size: var(--fs-small);
   line-height: 1.45;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -285,7 +285,7 @@
   border-radius: 999px;
   color: var(--restaurant-accent);
   background: var(--restaurant-accent-soft);
-  font-size: 0.68rem;
+  font-size: var(--fs-small);
   font-weight: 900;
 }
 
@@ -321,7 +321,7 @@
 .menu-page__empty-filtered p {
   max-width: 28rem;
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--fs-secondary);
   line-height: 1.7;
 }
 
@@ -342,7 +342,7 @@
   display: block;
   color: var(--restaurant-text);
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: var(--fs-card);
   font-weight: 900;
 }
 
@@ -350,12 +350,12 @@
   display: block;
   margin-top: 0.15rem;
   color: var(--menu-muted);
-  font-size: 0.7rem;
+  font-size: var(--fs-small);
 }
 
 .menu-page__admin-entry {
   color: var(--menu-muted);
-  font-size: 0.72rem;
+  font-size: var(--fs-small);
   font-weight: 800;
   text-decoration: none;
 }
@@ -469,7 +469,7 @@
   .menu-page__table-badge {
     max-width: 8rem;
     padding-inline: 0.55rem;
-    font-size: 0.68rem;
+    font-size: var(--fs-small);
   }
 
   .menu-page__actions {

@@ -2,10 +2,11 @@ import { Component, inject, input, output } from '@angular/core';
 import { LocaleService } from '../../../../../../core/localization/locale';
 import type { RestaurantTable } from '../../../../data-access/restaurant-tables.models';
 import { TablePrintCard } from '../table-print-card/table-print-card';
+import { IconButton } from '../../../../../../shared/ui/icon-button/icon-button';
 
 @Component({
   selector: 'app-table-card',
-  imports: [TablePrintCard],
+  imports: [TablePrintCard, IconButton],
   templateUrl: './table-card.html',
   styleUrl: './table-card.scss',
 })
@@ -24,6 +25,7 @@ export class TableCard {
   readonly print = output<RestaurantTable>();
   readonly downloadQr = output<RestaurantTable>();
   readonly regenerateToken = output<RestaurantTable>();
+  readonly archive = output<RestaurantTable>();
 
   protected zoneLabel(table: RestaurantTable): string {
     return table.zone?.trim() || this.locale.uiText('tablesNoZone');

@@ -7,6 +7,8 @@ public sealed class RestaurantTableDto
     public string? Zone { get; init; }
     public string PublicToken { get; init; } = string.Empty;
     public bool IsActive { get; init; }
+    public bool IsArchived { get; init; }
+    public DateTime? ArchivedAt { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; init; }
 }

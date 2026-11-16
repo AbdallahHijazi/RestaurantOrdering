@@ -40,7 +40,7 @@
 .tables-management-title h1 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.75rem, 3vw, 2.35rem);
+  font-size: var(--fs-page-title);
   font-weight: 850;
   letter-spacing: -0.025em;
   line-height: 1.2;
@@ -50,7 +50,7 @@
   max-width: 42rem;
   margin: 0.5rem 0 0;
   color: var(--tables-muted);
-  font-size: clamp(0.9rem, 1.4vw, 1rem);
+  font-size: var(--fs-body);
   line-height: 1.7;
 }
 
@@ -157,14 +157,14 @@
 .tables-management-stats__content span {
   overflow: hidden;
   color: var(--tables-muted);
-  font-size: 0.78rem;
+  font-size: var(--fs-small);
   font-weight: 750;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .tables-management-stats__content strong {
-  font-size: 1.45rem;
+  font-size: var(--fs-section);
   font-weight: 850;
   line-height: 1;
 }
@@ -255,7 +255,7 @@
   border-radius: 999px;
   color: var(--tables-muted);
   background: var(--restaurant-surface-soft);
-  font-size: 0.8125rem;
+  font-size: var(--fs-secondary);
   white-space: nowrap;
 }
 
@@ -272,7 +272,7 @@
 .tables-management-empty h2 {
   margin: 0 0 0.5rem;
   color: var(--tables-text);
-  font-size: 1.125rem;
+  font-size: var(--fs-card);
 }
 
 .tables-management-empty p {
@@ -289,7 +289,7 @@
 
 .tables-management-state h2 {
   margin: 0 0 0.5rem;
-  font-size: 1.125rem;
+  font-size: var(--fs-card);
 }
 
 .tables-management-state p {
@@ -396,11 +396,11 @@
   }
 
   .tables-management-stats__content span {
-    font-size: 0.7rem;
+    font-size: var(--fs-small);
   }
 
   .tables-management-stats__content strong {
-    font-size: 1.25rem;
+    font-size: var(--fs-section);
   }
 
   .tables-management-filters {

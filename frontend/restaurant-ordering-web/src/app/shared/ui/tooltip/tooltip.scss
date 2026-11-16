@@ -1,0 +1,73 @@
+/* Global (ViewEncapsulation.None): the bubble is mounted on <body>. Central tokens only. */
+.app-tooltip {
+  --app-tooltip-shift: var(--restaurant-motion-distance-sm);
+  --app-tooltip-arrow-x: 50%;
+
+  position: fixed;
+  z-index: var(--z-preview-overlay);
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  max-inline-size: min(18rem, calc(100vw - 1rem));
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  color: var(--restaurant-text-on-accent);
+  background: var(--restaurant-text);
+  box-shadow: var(--restaurant-shadow-md);
+  font-size: var(--fs-secondary);
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: start;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transform: translate3d(0, var(--app-tooltip-shift), 0);
+  transition:
+    opacity var(--restaurant-motion-fast) var(--restaurant-ease-exit),
+    transform var(--restaurant-motion-fast) var(--restaurant-ease-exit),
+    visibility 0s linear var(--restaurant-motion-fast);
+}
+
+.app-tooltip[data-placement='bottom'] {
+  --app-tooltip-shift: calc(var(--restaurant-motion-distance-sm) * -1);
+}
+
+.app-tooltip.is-visible {
+  visibility: visible;
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    transform var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    visibility 0s linear 0s;
+}
+
+.app-tooltip::after {
+  content: '';
+  position: absolute;
+  inset-inline-start: var(--app-tooltip-arrow-x);
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  margin-inline-start: -0.25rem;
+  background: inherit;
+  transform: rotate(45deg);
+}
+
+.app-tooltip[data-placement='top']::after {
+  inset-block-end: -0.25rem;
+}
+
+.app-tooltip[data-placement='bottom']::after {
+  inset-block-start: -0.25rem;
+}
+
+/* A disabled control never receives hover/focus, so its explanation hangs off this focusable wrapper. */
+.app-tooltip-anchor {
+  display: inline-flex;
+  border-radius: var(--radius-md);
+}
+
+.app-tooltip-anchor:focus-visible {
+  outline: 2px solid var(--restaurant-accent-border);
+  outline-offset: 2px;
+}

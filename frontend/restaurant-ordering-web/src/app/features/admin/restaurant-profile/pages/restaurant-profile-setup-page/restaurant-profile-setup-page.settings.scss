@@ -21,14 +21,14 @@
   margin: 0;
   color: var(--profile-text);
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: var(--fs-card);
   font-weight: 750;
 }
 
 .profile-console__panel-heading p {
   margin: 0;
   color: var(--profile-muted);
-  font-size: 0.74rem;
+  font-size: var(--fs-small);
   line-height: 1.65;
 }
 
@@ -42,7 +42,7 @@
   border-radius: 0.65rem;
   color: var(--profile-text);
   background: var(--profile-linen-soft);
-  font-size: 0.8rem;
+  font-size: var(--fs-small);
   font-weight: 700;
 }
 

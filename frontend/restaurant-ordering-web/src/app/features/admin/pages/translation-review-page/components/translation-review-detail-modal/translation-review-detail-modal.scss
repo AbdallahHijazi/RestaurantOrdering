@@ -18,7 +18,7 @@
   border-radius: 999px;
   background: var(--restaurant-accent-soft);
   color: var(--restaurant-text);
-  font-size: 0.78rem;
+  font-size: var(--fs-small);
   font-weight: 700;
 }
 
@@ -47,7 +47,7 @@
 
 .translation-review-detail__section h3 {
   margin: 0 0 0.75rem;
-  font-size: 1rem;
+  font-size: var(--fs-body);
 }
 
 .translation-review-detail__fields {
@@ -58,7 +58,7 @@
 
 .translation-review-detail__fields dt {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: var(--fs-small);
   font-weight: 700;
   color: var(--restaurant-muted-text);
 }
@@ -76,7 +76,7 @@
 .translation-review-detail__form label {
   display: grid;
   gap: 0.35rem;
-  font-size: 0.85rem;
+  font-size: var(--fs-secondary);
   font-weight: 600;
 }
 

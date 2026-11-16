@@ -62,7 +62,7 @@
   color: var(--profile-muted);
   background: transparent;
   font: inherit;
-  font-size: 0.78rem;
+  font-size: var(--fs-small);
   font-weight: 600;
   line-height: 1.2;
   white-space: nowrap;
@@ -126,7 +126,7 @@
 
 .profile-console__field > span {
   color: var(--profile-text);
-  font-size: 0.74rem;
+  font-size: var(--fs-small);
   font-style: normal;
   font-weight: 750;
   line-height: 1.45;
@@ -149,7 +149,7 @@
   color: var(--profile-text);
   background: color-mix(in srgb, var(--profile-linen-soft) 65%, var(--restaurant-surface-white));
   font: inherit;
-  font-size: 0.84rem;
+  font-size: var(--fs-secondary);
   line-height: 1.55;
   transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
 }
@@ -182,7 +182,7 @@
 .profile-console__file-name,
 .profile-console__upload-status,
 .profile-console__hint {
-  font-size: 0.72rem;
+  font-size: var(--fs-small);
   line-height: 1.5;
 }
 
@@ -210,7 +210,7 @@
   padding: 0.55rem 0.9rem;
   border-radius: 0.6rem;
   font: inherit;
-  font-size: 0.74rem;
+  font-size: var(--fs-small);
   font-weight: 750;
   line-height: 1.2;
   cursor: pointer;
@@ -295,7 +295,7 @@
 .profile-console__load-alert {
   margin: 0;
   border-radius: 0.7rem;
-  font-size: 0.78rem;
+  font-size: var(--fs-small);
   line-height: 1.6;
 }
 

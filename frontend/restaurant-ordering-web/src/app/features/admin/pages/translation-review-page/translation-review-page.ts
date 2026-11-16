@@ -36,6 +36,7 @@ import {
   type StatusFilterValue,
   type TranslationReviewFilters,
 } from './translation-review-page.util';
+import { IconButton } from '../../../../shared/ui/icon-button/icon-button';
 
 type PageState = 'loading' | 'ready' | 'error' | 'missing-context';
 
@@ -55,7 +56,7 @@ const STATUS_FILTERS: readonly StatusFilterValue[] = [
 
 @Component({
   selector: 'app-translation-review-page',
-  imports: [FormsModule, OrderModalShell, TranslationReviewDetailModal],
+  imports: [IconButton, FormsModule, OrderModalShell, TranslationReviewDetailModal],
   templateUrl: './translation-review-page.html',
   styleUrl: './translation-review-page.scss',
 })

@@ -6,7 +6,7 @@
 .admin-orders-select__label {
   display: block;
   margin-block-end: 0.12rem;
-  font-size: 0.62rem;
+  font-size: var(--fs-small);
   font-weight: 700;
   color: var(--orders-bluegray, var(--restaurant-muted-text));
 }
@@ -24,7 +24,7 @@
   background: var(--orders-surface, var(--restaurant-surface-soft));
   color: var(--orders-charcoal, var(--restaurant-text));
   font: inherit;
-  font-size: 0.66rem;
+  font-size: var(--fs-small);
   font-weight: 600;
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -94,7 +94,7 @@
   background: transparent;
   color: var(--orders-charcoal, var(--restaurant-text));
   font: inherit;
-  font-size: 0.76rem;
+  font-size: var(--fs-small);
   text-align: start;
   cursor: pointer;
 }

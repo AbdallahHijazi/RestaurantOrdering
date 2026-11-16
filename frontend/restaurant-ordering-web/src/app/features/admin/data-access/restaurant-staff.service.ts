@@ -7,6 +7,7 @@ import type {
   CreateRestaurantStaffRequest,
   RestaurantStaffRoleUpdateResult,
   RestaurantStaffUser,
+  UpdateRestaurantStaffRequest,
   UpdateRestaurantStaffRoleRequest,
 } from './restaurant-staff.models';
 
@@ -44,6 +45,24 @@ export class RestaurantStaffService {
     return this.http.patch<RestaurantStaffRoleUpdateResult>(
       `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/users/${userId}/role`,
       request,
+    );
+  }
+
+  /** Edit display name / phone (role and e-mail are managed separately). */
+  updateStaff(userId: string, request: UpdateRestaurantStaffRequest): Observable<RestaurantStaffUser> {
+    const restaurantId = this.requireRestaurantId();
+    return this.http.patch<RestaurantStaffUser>(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/users/${userId}`,
+      request,
+    );
+  }
+
+  /** Activate / deactivate an account (the record and its history are kept). */
+  setStaffActive(userId: string, isActive: boolean): Observable<RestaurantStaffUser> {
+    const restaurantId = this.requireRestaurantId();
+    return this.http.patch<RestaurantStaffUser>(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/users/${userId}/status`,
+      { isActive },
     );
   }
 

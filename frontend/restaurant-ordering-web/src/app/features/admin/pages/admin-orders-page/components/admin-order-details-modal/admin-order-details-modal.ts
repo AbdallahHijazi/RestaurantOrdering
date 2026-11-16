@@ -12,6 +12,7 @@ import {
   type OrderDetailsItem,
 } from '../../../../../kitchen/data-access/kitchen-orders.models';
 import { buildOrderDetailsTimeline } from './admin-order-details-modal.util';
+import { IconButton } from '../../../../../../shared/ui/icon-button/icon-button';
 
 export interface AdminOrderDetailsAction {
   labelKey:
@@ -24,6 +25,7 @@ export interface AdminOrderDetailsAction {
 }
 
 @Component({
+  imports: [IconButton],
   selector: 'app-admin-order-details-modal',
   templateUrl: './admin-order-details-modal.html',
   styleUrls: [
