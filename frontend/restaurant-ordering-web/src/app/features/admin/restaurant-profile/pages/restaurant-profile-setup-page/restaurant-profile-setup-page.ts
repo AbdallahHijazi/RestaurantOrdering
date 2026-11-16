@@ -30,6 +30,7 @@ import { RestaurantLocaleSettingsPanel } from '../../components/restaurant-local
 import { AdminBrandingService } from '../../../../../core/layouts/admin-layout/admin-branding.service';
 import { RestaurantProfileApiService, type BrandingSaveError } from '../../data-access/restaurant-profile-api';
 import {
+  buildUpdateSettingsRequest,
   createSettingsSnapshot,
   isCurrencyCodeValid,
   mapSettingsDtoToFormPatch,
@@ -88,6 +89,9 @@ const PROFILE_CONTROL_NAMES = [
   'email',
   'city',
 ] as const;
+
+/** The Localization section also persists the time zone (a restaurant setting). */
+const LOCALIZATION_CONTROL_NAMES = [...PROFILE_CONTROL_NAMES, 'timeZone'] as const;
 
 const SETTINGS_CONTROL_NAMES = [
   'currencyCode',
@@ -600,10 +604,16 @@ export class RestaurantProfileSetupPage {
     return this.form.hasError('orderingMethodRequired');
   }
 
-  protected saveRestaurantProfile(): void {
-    this.markControlsTouched(PROFILE_CONTROL_NAMES);
+  /** Localization section: saves the restaurant profile *and* the time zone it displays. */
+  protected saveLocalization(): void {
+    this.saveRestaurantProfile(true);
+  }
 
-    if (!this.canSaveSettings() || !this.isControlGroupValid(PROFILE_CONTROL_NAMES)) {
+  protected saveRestaurantProfile(includeTimeZone = false): void {
+    const controlNames = includeTimeZone ? LOCALIZATION_CONTROL_NAMES : PROFILE_CONTROL_NAMES;
+    this.markControlsTouched(controlNames);
+
+    if (!this.canSaveSettings() || !this.isControlGroupValid(controlNames)) {
       return;
     }
 
@@ -678,6 +688,13 @@ export class RestaurantProfileSetupPage {
             }),
           );
         }),
+        // The time zone is a restaurant *setting* (not part of the restaurant PUT). Only the
+        // Localization section saves it, so identity/contact saves stay independent of settings.
+        switchMap((result) =>
+          includeTimeZone
+            ? this.persistTimeZone(restaurantId, this.buildFormValue().timeZone).pipe(map(() => result))
+            : of(result),
+        ),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
@@ -708,6 +725,31 @@ export class RestaurantProfileSetupPage {
           this.profileSaveNotice.set(this.brandingErrorMessage(error?.type, error?.detail));
         },
       });
+  }
+
+  /**
+   * Saves only the time zone, merged into the *persisted* ordering settings so unrelated settings
+   * (fees, tax, currency, service toggles) that may have unsaved edits in the form are never written.
+   */
+  private persistTimeZone(restaurantId: string, timeZone: string): Observable<unknown> {
+    const nextTimeZone = timeZone.trim();
+
+    return this.profileApi.getSettings(restaurantId).pipe(
+      switchMap((settings) => {
+        if (settings.timeZone === nextTimeZone) {
+          return of(settings);
+        }
+
+        return this.profileApi.updateSettings(
+          restaurantId,
+          buildUpdateSettingsRequest(
+            { ...mapSettingsDtoToFormPatch(settings), timeZone: nextTimeZone },
+            createSettingsSnapshot(settings),
+          ),
+        );
+      }),
+      catchError(() => throwError(() => ({ type: 'timezone-save' satisfies BrandingSaveError }))),
+    );
   }
 
   private ensureLogoUploaded(restaurantId: string): Observable<UploadedMediaFile | null> {
@@ -754,6 +796,8 @@ export class RestaurantProfileSetupPage {
         return this.localeService.uiText('profileCoverUploadFailed');
       case 'profile-content-save':
         return this.profileContentSaveErrorMessage(detail);
+      case 'timezone-save':
+        return this.localeService.uiText('profileTimeZoneSaveFailed');
       default:
         return this.localeService.uiText('adminMenuErrorGeneric');
     }
@@ -928,6 +972,11 @@ export class RestaurantProfileSetupPage {
       whatsAppNumber: restaurant.whatsAppNumber ?? '',
       addressAr: restaurant.addressAr ?? '',
       addressEn: restaurant.addressEn ?? '',
+      // Legacy rows have no stored value yet: keep the form's defaults instead of blanking required fields.
+      ...(restaurant.countryCode ? { countryCode: restaurant.countryCode } : {}),
+      ...(restaurant.phoneCountryCode ? { phoneCountryCode: restaurant.phoneCountryCode } : {}),
+      email: restaurant.email ?? '',
+      city: restaurant.city ?? '',
       ...mapSettingsDtoToFormPatch(settings),
     });
   }

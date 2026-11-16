@@ -28,6 +28,11 @@ public class Order : AuditableEntity, ISoftDelete
     public bool FallbackApplied { get; set; }
     public bool IsDeleted { get; set; }
 
+    /// <summary>Client-supplied key identifying one logical checkout attempt (public orders).</summary>
+    public string? IdempotencyKey { get; set; }
+    /// <summary>SHA-256 hex fingerprint of the request that created the order (replay/mismatch detection).</summary>
+    public string? IdempotencyRequestHash { get; set; }
+
     public Restaurant Restaurant { get; set; } = null!;
     public RestaurantTable? Table { get; set; }
     public Customer? Customer { get; set; }

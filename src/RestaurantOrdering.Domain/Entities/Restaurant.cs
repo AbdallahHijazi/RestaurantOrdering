@@ -15,6 +15,12 @@ public class Restaurant : AuditableEntity, ISoftDelete
     public string AccentColor { get; set; } = "#B8663F";
     public string PhoneNumber { get; set; } = string.Empty;
     public string? WhatsAppNumber { get; set; }
+    /// <summary>ISO 3166-1 alpha-2 country code (upper-case), e.g. "JO".</summary>
+    public string? CountryCode { get; set; }
+    /// <summary>International dialling prefix with leading '+', e.g. "+962".</summary>
+    public string? PhoneCountryCode { get; set; }
+    public string? Email { get; set; }
+    public string? City { get; set; }
     public string? AddressAr { get; set; }
     public string? AddressEn { get; set; }
     public decimal? Latitude { get; set; }

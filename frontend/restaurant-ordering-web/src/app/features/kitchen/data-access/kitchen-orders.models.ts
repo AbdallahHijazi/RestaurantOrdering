@@ -21,10 +21,27 @@ export interface OrderSummary {
   guestPhone: string | null;
   orderType: OrderType;
   orderStatus: OrderStatus;
+  /** Dine-in orders: the table the order belongs to (null for pickup/delivery or legacy rows). */
+  tableId?: string | null;
+  tableName?: string | null;
   totalAmount: number;
   currencyCode: string;
   createdAt: string;
   updatedAt: string | null;
+}
+
+/** GET /admin/restaurants/{id}/dashboard/summary — server-computed aggregates. */
+export interface DashboardSummary {
+  restaurantId: string;
+  currencyCode: string;
+  timeZone: string;
+  dayStartUtc: string;
+  dayEndUtc: string;
+  todayOrders: number;
+  todayCancelledOrders: number;
+  activeOrders: number;
+  todaySales: number;
+  averageOrderValue: number;
 }
 
 export interface OrderDetailsItem {

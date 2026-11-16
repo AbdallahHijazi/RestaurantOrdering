@@ -4,7 +4,7 @@ import { shouldShowFinancialAmount, orderItemDisplayName } from '../../../../../
 import { formatOrderDateTime } from '../../../../../../shared/orders/order-date-time.util';
 import { formatOrderCurrency } from '../../../../../../shared/orders/order-money.util';
 import { getOrderStatusLabel } from '../../../../../../shared/orders/order-status-label.util';
-import { getOrderTypeLabel } from '../../../../../../shared/orders/order-type-label.util';
+import { getOrderTypeLabelWithTable } from '../../../../../../shared/orders/order-type-label.util';
 import {
   OrderStatus,
   OrderType,
@@ -62,8 +62,8 @@ export class AdminOrderDetailsModal {
     return getOrderStatusLabel(status, this.locale.locale());
   }
 
-  protected orderTypeLabel(orderType: OrderType): string {
-    return getOrderTypeLabel(orderType, this.locale.locale());
+  protected orderTypeLabel(orderType: OrderType, tableName?: string | null): string {
+    return getOrderTypeLabelWithTable(orderType, this.locale.locale(), tableName);
   }
 
   protected formatCreatedAt(value: string): string {

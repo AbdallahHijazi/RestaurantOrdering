@@ -17,4 +17,10 @@ public sealed record UpdateRestaurantCommand(
     string? AddressEn,
     decimal? Latitude,
     decimal? Longitude,
-    string AccentColor) : IRequest<RestaurantDto>, IRestaurantScopedRequest;
+    string AccentColor,
+    // Optional contact/locale profile fields. null = "not provided, keep current value";
+    // an empty string clears the optional Email/City values.
+    string? CountryCode = null,
+    string? PhoneCountryCode = null,
+    string? Email = null,
+    string? City = null) : IRequest<RestaurantDto>, IRestaurantScopedRequest;

@@ -8,11 +8,12 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import type { Subscription } from 'rxjs';
 import { LocaleService } from '../../../../core/localization/locale';
 import { OrderModalShell } from '../../../../shared/components/order-modal-shell/order-modal-shell';
 import { formatOrderCurrency } from '../../../../shared/orders/order-money.util';
 import { getOrderStatusLabel } from '../../../../shared/orders/order-status-label.util';
-import { getOrderTypeLabel } from '../../../../shared/orders/order-type-label.util';
+import { getOrderTypeLabelWithTable } from '../../../../shared/orders/order-type-label.util';
 import {
   OrderStatus,
   OrderType,
@@ -35,6 +36,17 @@ import {
   type OrderListFilters,
   type OrderTypeFilter,
 } from './admin-orders-page.util';
+
+const SEARCH_DEBOUNCE_MS = 300;
+
+/** Appends a page to the loaded rows without ever duplicating an order already present. */
+function mergeUniqueOrders(
+  current: readonly OrderSummary[],
+  incoming: readonly OrderSummary[],
+): OrderSummary[] {
+  const seen = new Set(current.map((order) => order.id));
+  return [...current, ...incoming.filter((order) => !seen.has(order.id))];
+}
 
 type PageState = 'loading' | 'ready' | 'error' | 'missing-context';
 type OrderViewMode = 'table' | 'cards';
@@ -77,6 +89,7 @@ export class AdminOrdersPage {
   protected readonly orders = signal<OrderSummary[]>([]);
   protected readonly pageNumber = signal(1);
   protected readonly totalCount = signal(0);
+  private readonly loadingMore = signal(false);
   protected readonly updatingOrderIds = signal<ReadonlySet<string>>(new Set());
   protected readonly viewMode = signal<OrderViewMode>('table');
 
@@ -94,8 +107,17 @@ export class AdminOrdersPage {
     guest: this.guestFilter(),
   }));
 
+  /**
+   * Status, order type and search are applied by the server over the whole dataset (see
+   * `fetchPage`). Only the guest dropdown, which is built from the loaded rows, filters locally.
+   */
   protected readonly filteredOrders = computed(() =>
-    filterOrders(this.orders(), this.listFilters()),
+    filterOrders(this.orders(), {
+      status: 'all',
+      search: '',
+      orderType: 'all',
+      guest: this.guestFilter(),
+    }),
   );
 
   protected readonly guestOptions = computed(() =>
@@ -125,7 +147,15 @@ export class AdminOrdersPage {
     hasActiveFilters(this.listFilters()),
   );
 
+  private listSubscription: Subscription | null = null;
+  private searchDebounceHandle: ReturnType<typeof setTimeout> | null = null;
+
   constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.clearSearchDebounce();
+      this.listSubscription?.unsubscribe();
+    });
+
     this.loadOrders();
   }
 
@@ -154,23 +184,78 @@ export class AdminOrdersPage {
       this.listError.set(null);
     }
 
-    this.ordersService
-      .listOrders(null, nextPage)
+    this.fetchPage(nextPage, resetPage, {
+      next: () => {
+        this.pageState.set('ready');
+        this.refreshing.set(false);
+      },
+      error: (error) => {
+        this.pageState.set('error');
+        this.listError.set(this.mapListError(error));
+        this.refreshing.set(false);
+      },
+    });
+  }
+
+  /**
+   * Requests one page from the server with the active status/type/search filters.
+   * A newer request cancels any in-flight one so slow, stale responses can never overwrite the list.
+   */
+  private fetchPage(
+    pageNumber: number,
+    replace: boolean,
+    callbacks: { next: () => void; error: (error: unknown) => void },
+  ): void {
+    this.listSubscription?.unsubscribe();
+
+    const status = this.activeFilter();
+    const type = this.typeFilter();
+
+    this.listSubscription = this.ordersService
+      .listOrders(status === 'all' ? null : status, pageNumber, undefined, {
+        orderType: type === 'all' ? null : type,
+        searchTerm: this.serverSearchTerm(),
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
-          this.orders.set(resetPage ? result.items : [...this.orders(), ...result.items]);
+          this.orders.update((current) =>
+            replace ? result.items : mergeUniqueOrders(current, result.items),
+          );
           this.pageNumber.set(result.pageNumber);
           this.totalCount.set(result.totalCount);
-          this.pageState.set('ready');
-          this.refreshing.set(false);
+          callbacks.next();
         },
-        error: (error) => {
-          this.pageState.set('error');
-          this.listError.set(this.mapListError(error));
-          this.refreshing.set(false);
-        },
+        error: (error) => callbacks.error(error),
       });
+  }
+
+  /** Order numbers are displayed as "#ABCDEF12", so a leading '#' is not part of the stored value. */
+  private serverSearchTerm(): string | null {
+    const term = this.searchQuery().trim().replace(/^#+/, '').trim();
+    return term.length > 0 ? term : null;
+  }
+
+  /** Re-queries page 1 after a filter changed, keeping the filter controls mounted and focused. */
+  private reloadForFilters(): void {
+    this.clearSearchDebounce();
+    this.feedbackMessage.set(null);
+    this.listError.set(null);
+
+    this.fetchPage(1, true, {
+      next: () => this.pageState.set('ready'),
+      error: (error) => {
+        this.pageState.set('error');
+        this.listError.set(this.mapListError(error));
+      },
+    });
+  }
+
+  private clearSearchDebounce(): void {
+    if (this.searchDebounceHandle !== null) {
+      clearTimeout(this.searchDebounceHandle);
+      this.searchDebounceHandle = null;
+    }
   }
 
   protected refreshOrders(): void {
@@ -190,14 +275,32 @@ export class AdminOrdersPage {
 
     this.feedbackMessage.set(null);
     this.activeFilter.set(filter);
+    this.reloadForFilters();
   }
 
   protected setSearchQuery(value: string): void {
+    if (this.searchQuery() === value) {
+      return;
+    }
+
     this.searchQuery.set(value);
+
+    // Debounce typing; the server searches the complete dataset, not just the loaded rows.
+    this.clearSearchDebounce();
+    this.searchDebounceHandle = setTimeout(() => {
+      this.searchDebounceHandle = null;
+      this.reloadForFilters();
+    }, SEARCH_DEBOUNCE_MS);
   }
 
   protected setTypeFilter(value: string): void {
-    this.typeFilter.set(value === 'all' ? 'all' : (Number(value) as OrderType));
+    const next = value === 'all' ? 'all' : (Number(value) as OrderType);
+    if (this.typeFilter() === next) {
+      return;
+    }
+
+    this.typeFilter.set(next);
+    this.reloadForFilters();
   }
 
   protected typeFilterValue(): string {
@@ -218,36 +321,43 @@ export class AdminOrdersPage {
   }
 
   protected clearFilters(): void {
+    const serverFiltersChanged =
+      this.activeFilter() !== 'all' ||
+      this.searchQuery().length > 0 ||
+      this.typeFilter() !== 'all';
+
     this.activeFilter.set('all');
     this.searchQuery.set('');
     this.typeFilter.set('all');
     this.guestFilter.set('all');
+
+    if (serverFiltersChanged) {
+      this.reloadForFilters();
+    }
   }
 
   protected resultCountLabel(): string {
-    return `${this.locale.uiText('adminOrdersShowing')} ${this.filteredOrders().length} ${this.locale.uiText('adminOrdersOf')} ${this.orders().length} ${this.locale.uiText('adminOrdersOrdersWord')}`;
+    // The total comes from the server (all orders matching the status/type/search filters);
+    // only the local guest filter narrows it down to the loaded rows.
+    const total = this.guestFilter() === 'all' ? this.totalCount() : this.orders().length;
+
+    return `${this.locale.uiText('adminOrdersShowing')} ${this.filteredOrders().length} ${this.locale.uiText('adminOrdersOf')} ${total} ${this.locale.uiText('adminOrdersOrdersWord')}`;
   }
 
   protected loadMore(): void {
-    if (this.pageState() !== 'ready' || !this.hasMore()) {
+    if (this.pageState() !== 'ready' || !this.hasMore() || this.loadingMore()) {
       return;
     }
 
-    const nextPage = this.pageNumber() + 1;
+    this.loadingMore.set(true);
 
-    this.ordersService
-      .listOrders(null, nextPage)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (result) => {
-          this.orders.update((current) => [...current, ...result.items]);
-          this.pageNumber.set(result.pageNumber);
-          this.totalCount.set(result.totalCount);
-        },
-        error: () => {
-          this.feedbackMessage.set(this.locale.uiText('adminOrdersLoadMoreError'));
-        },
-      });
+    this.fetchPage(this.pageNumber() + 1, false, {
+      next: () => this.loadingMore.set(false),
+      error: () => {
+        this.loadingMore.set(false);
+        this.feedbackMessage.set(this.locale.uiText('adminOrdersLoadMoreError'));
+      },
+    });
   }
 
   protected filterLabel(filter: StatusFilter): string {
@@ -271,8 +381,8 @@ export class AdminOrdersPage {
     return getOrderStatusLabel(status, this.locale.locale());
   }
 
-  protected orderTypeLabel(orderType: OrderType): string {
-    return getOrderTypeLabel(orderType, this.locale.locale());
+  protected orderTypeLabel(orderType: OrderType, tableName?: string | null): string {
+    return getOrderTypeLabelWithTable(orderType, this.locale.locale(), tableName);
   }
 
   protected guestDisplayName(order: OrderSummary): string {
@@ -307,6 +417,8 @@ export class AdminOrdersPage {
       guestPhone: details.guestPhone,
       orderType: details.orderType,
       orderStatus: details.orderStatus,
+      tableId: details.tableId,
+      tableName: details.tableName,
       totalAmount: details.totalAmount,
       currencyCode: details.currencyCode,
       createdAt: details.createdAt,
@@ -423,9 +535,19 @@ export class AdminOrdersPage {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
+          const filter = this.activeFilter();
+          const leavesFilter = filter !== 'all' && updated.orderStatus !== filter;
+
           this.orders.update((current) =>
-            current.map((item) => (item.id === updated.id ? updated : item)),
+            leavesFilter
+              ? current.filter((item) => item.id !== updated.id)
+              : current.map((item) => (item.id === updated.id ? updated : item)),
           );
+
+          if (leavesFilter) {
+            this.totalCount.update((count) => Math.max(0, count - 1));
+          }
+
           this.setUpdating(order.id, false);
           this.feedbackMessage.set(this.locale.uiText('adminOrdersStatusUpdateSuccess'));
 

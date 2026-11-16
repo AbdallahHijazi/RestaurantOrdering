@@ -49,7 +49,8 @@ public sealed class PublicOrdersController : ControllerBase
                     item.Quantity,
                     item.Notes))
                 .ToList()
-                ?? []);
+                ?? [],
+            request.IdempotencyKey ?? Request.Headers["Idempotency-Key"].FirstOrDefault());
 
         var result = await _sender.Send(command, cancellationToken);
 

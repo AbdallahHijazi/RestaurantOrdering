@@ -46,6 +46,29 @@ public sealed class CreatePublicOrderCommandHandler
             throw new NotFoundException("Restaurant", normalizedSlug);
         }
 
+        // Idempotency: a replay of the same logical request (same key + same payload) returns the
+        // originally created order instead of creating another one.
+        var idempotencyKey = string.IsNullOrWhiteSpace(request.IdempotencyKey)
+            ? null
+            : request.IdempotencyKey.Trim();
+        string? requestHash = null;
+
+        if (idempotencyKey is not null)
+        {
+            requestHash = PublicOrderRequestFingerprint.Compute(request);
+
+            var replay = await TryReplayAsync(
+                restaurant.Id,
+                idempotencyKey,
+                requestHash,
+                cancellationToken);
+
+            if (replay is not null)
+            {
+                return replay;
+            }
+        }
+
         var settings = await _context.RestaurantSettings
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.RestaurantId == restaurant.Id, cancellationToken);
@@ -214,15 +237,69 @@ public sealed class CreatePublicOrderCommandHandler
             ResolvedLocale = menuLocale.ResolvedLocale,
             FallbackApplied = menuLocale.FallbackApplied,
             IsDeleted = false,
+            IdempotencyKey = idempotencyKey,
+            IdempotencyRequestHash = requestHash,
             CreatedAt = utcNow,
             OrderItems = orderItems
         };
 
         _context.Orders.Add(order);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException) when (idempotencyKey is not null)
+        {
+            // A concurrent request with the same key won the race (unique index on
+            // RestaurantId + IdempotencyKey). Return that order, or reject a mismatching payload.
+            var replay = await TryReplayAsync(
+                restaurant.Id,
+                idempotencyKey,
+                requestHash!,
+                cancellationToken);
 
-        return new PublicOrderConfirmationDto
+            if (replay is not null)
+            {
+                return replay;
+            }
+
+            throw;
+        }
+
+        return ToConfirmation(order);
+    }
+
+    private async Task<PublicOrderConfirmationDto?> TryReplayAsync(
+        Guid restaurantId,
+        string idempotencyKey,
+        string requestHash,
+        CancellationToken cancellationToken)
+    {
+        var existing = await _context.Orders
+            .AsNoTracking()
+            .IgnoreQueryFilters()
+            .Include(o => o.OrderItems)
+            .FirstOrDefaultAsync(
+                o => o.RestaurantId == restaurantId && o.IdempotencyKey == idempotencyKey,
+                cancellationToken);
+
+        if (existing is null)
+        {
+            return null;
+        }
+
+        if (!string.Equals(existing.IdempotencyRequestHash, requestHash, StringComparison.Ordinal))
+        {
+            throw new ConflictException(
+                "The idempotency key was already used with a different order request.");
+        }
+
+        return ToConfirmation(existing);
+    }
+
+    private static PublicOrderConfirmationDto ToConfirmation(Order order) =>
+        new()
         {
             OrderId = order.Id,
             OrderNumber = order.OrderNumber,
@@ -235,12 +312,12 @@ public sealed class CreatePublicOrderCommandHandler
             TotalAmount = order.TotalAmount,
             CurrencyCode = order.CurrencyCode,
             CreatedAt = order.CreatedAt,
-            Items = orderItems
+            // Fresh orders keep the requested line order; replayed orders are read back from the database.
+            Items = order.OrderItems
                 .Select(item => OrderItemDisplayProjection.ToConfirmationItemDto(item, order.ResolvedLocale))
                 .ToList()
                 .AsReadOnly()
         };
-    }
 
     private static string? TrimToOptional(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();

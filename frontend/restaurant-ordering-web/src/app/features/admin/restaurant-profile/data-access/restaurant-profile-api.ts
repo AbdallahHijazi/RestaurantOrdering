@@ -58,6 +58,7 @@ export type BrandingSaveError =
   | 'cover-upload'
   | 'profile-content-save'
   | 'profile-save'
+  | 'timezone-save'
   | 'profile-reload';
 
 export interface UpdateProfileContentApiRequest {
@@ -320,6 +321,11 @@ export class RestaurantProfileApiService {
       latitude: null,
       longitude: null,
       accentColor: form.primaryAccentColor.trim(),
+      countryCode: form.countryCode.trim().toUpperCase(),
+      phoneCountryCode: form.phoneCountryCode.trim(),
+      // Empty string clears the optional values on the server (null would mean "unchanged").
+      email: form.email.trim(),
+      city: form.city.trim(),
     };
   }
 

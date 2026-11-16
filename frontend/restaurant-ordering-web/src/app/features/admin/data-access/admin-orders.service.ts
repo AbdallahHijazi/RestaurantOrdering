@@ -4,14 +4,22 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../core/config/api-config';
 import { AuthService } from '../../../core/auth/auth.service';
 import type {
+  DashboardSummary,
   GetOrdersResult,
   OrderDetails,
   OrderStatus,
   OrderSummary,
+  OrderType,
   UpdateOrderStatusRequest,
 } from '../../kitchen/data-access/kitchen-orders.models';
 
 export const ADMIN_ORDERS_PAGE_SIZE = 20;
+
+/** Optional server-side filters; applied to the whole dataset, not just loaded rows. */
+export interface AdminOrderListFilters {
+  searchTerm?: string | null;
+  orderType?: OrderType | null;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -28,6 +36,7 @@ export class AdminOrdersService {
     status: OrderStatus | null,
     pageNumber = 1,
     pageSize = ADMIN_ORDERS_PAGE_SIZE,
+    filters: AdminOrderListFilters = {},
   ): Observable<GetOrdersResult> {
     const restaurantId = this.requireRestaurantId();
     let params = new HttpParams()
@@ -38,9 +47,26 @@ export class AdminOrdersService {
       params = params.set('status', String(status));
     }
 
+    if (filters.orderType !== null && filters.orderType !== undefined) {
+      params = params.set('orderType', String(filters.orderType));
+    }
+
+    const searchTerm = filters.searchTerm?.trim();
+    if (searchTerm) {
+      params = params.set('searchTerm', searchTerm);
+    }
+
     return this.http.get<GetOrdersResult>(
       `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/orders`,
       { params },
+    );
+  }
+
+  /** Server-side aggregates for the dashboard cards (not derived from a paginated subset). */
+  getDashboardSummary(): Observable<DashboardSummary> {
+    const restaurantId = this.requireRestaurantId();
+    return this.http.get<DashboardSummary>(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${restaurantId}/dashboard/summary`,
     );
   }
 

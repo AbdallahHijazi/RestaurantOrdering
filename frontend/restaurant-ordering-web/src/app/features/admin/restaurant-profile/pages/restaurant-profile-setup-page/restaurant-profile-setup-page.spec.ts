@@ -669,6 +669,173 @@ describe('RestaurantProfileSetupPage', () => {
     expect(fixture.componentInstance.form.pristine).toBe(true);
     expect(fixture.nativeElement.textContent).toContain('Unsaved changes were reverted');
   });
+
+  // ───────────────────────── BUG-006: profile fields are really persisted ─────────────────────────
+
+  const RESTAURANT_URL = `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}`;
+  const SETTINGS_URL = `${RESTAURANT_URL}/settings`;
+  const SETTINGS_DTO = {
+    id: 's',
+    restaurantId: RESTAURANT_ID,
+    currencyCode: 'SAR',
+    timeZone: 'Asia/Riyadh',
+    taxRate: 15,
+    deliveryFee: 12,
+    minimumOrderAmount: 25,
+    isDeliveryEnabled: true,
+    isPickupEnabled: false,
+    workingHoursJson: '{"sat":"10-22"}',
+  };
+  const SAVED_RESTAURANT = {
+    id: RESTAURANT_ID,
+    ownerId: 'o',
+    slug: 'restaurant-a',
+    nameAr: 'مطعم',
+    phoneNumber: '+966500000000',
+    countryCode: 'JO',
+    phoneCountryCode: '+962',
+    email: 'info@example.test',
+    city: 'Amman',
+    isActive: true,
+  };
+
+  function clickSave(testId: string): void {
+    (fixture.nativeElement.querySelector(`[data-testid="${testId}"]`) as HTMLButtonElement).click();
+    fixture.detectChanges();
+  }
+
+  function flushContentAndRestaurantPut(): { restaurantPutBody: Record<string, unknown> } {
+    httpMock
+      .expectOne(`${RESTAURANT_URL}/catalog/profile-content`)
+      .flush({ ...SAVED_RESTAURANT });
+    fixture.detectChanges();
+    const put = httpMock.expectOne((req) => req.url === RESTAURANT_URL && req.method === 'PUT');
+    const restaurantPutBody = put.request.body as Record<string, unknown>;
+    put.flush({ ...SAVED_RESTAURANT });
+    fixture.detectChanges();
+    return { restaurantPutBody };
+  }
+
+  function flushReload(restaurant: Record<string, unknown> = SAVED_RESTAURANT, settings = SETTINGS_DTO): void {
+    httpMock.expectOne((req) => req.url === RESTAURANT_URL && req.method === 'GET').flush(restaurant);
+    httpMock.expectOne((req) => req.url === SETTINGS_URL && req.method === 'GET').flush(settings);
+    flushPendingPreviewLocaleSettings();
+    fixture.detectChanges();
+  }
+
+  it('sends country, phone code, email and city with the restaurant save and shows what the server stored (BUG-006)', () => {
+    flushLoadedSettings();
+    const controls = fixture.componentInstance.form.controls;
+    controls.countryCode.setValue('jo');
+    controls.phoneCountryCode.setValue('+962');
+    controls.email.setValue('info@example.test');
+    controls.city.setValue('Amman');
+    fixture.componentInstance.form.markAsDirty();
+
+    clickSave('profile-save-identity');
+    const { restaurantPutBody } = flushContentAndRestaurantPut();
+
+    expect(restaurantPutBody).toMatchObject({
+      countryCode: 'JO',
+      phoneCountryCode: '+962',
+      email: 'info@example.test',
+      city: 'Amman',
+    });
+
+    // reload returns the persisted values — the form shows exactly them
+    flushReload({ ...SAVED_RESTAURANT, countryCode: 'JO', city: 'Amman' });
+    expect(controls.countryCode.value).toBe('JO');
+    expect(controls.phoneCountryCode.value).toBe('+962');
+    expect(controls.email.value).toBe('info@example.test');
+    expect(controls.city.value).toBe('Amman');
+  });
+
+  it('sends an empty string (not null) so a cleared email or city is really cleared (BUG-006)', () => {
+    flushLoadedSettings();
+    const controls = fixture.componentInstance.form.controls;
+    controls.email.setValue('');
+    controls.city.setValue('');
+    fixture.componentInstance.form.markAsDirty();
+
+    selectTab('contact');
+    clickSave('profile-save-contact');
+    const { restaurantPutBody } = flushContentAndRestaurantPut();
+
+    expect(restaurantPutBody['email']).toBe('');
+    expect(restaurantPutBody['city']).toBe('');
+    flushReload({ ...SAVED_RESTAURANT, email: null, city: null });
+    expect(controls.email.value).toBe('');
+  });
+
+  it('localization save also persists a changed time zone without touching other settings (BUG-006)', () => {
+    flushLoadedSettings();
+    selectTab('localization');
+    const controls = fixture.componentInstance.form.controls;
+    controls.timeZone.setValue('Asia/Amman');
+    controls.taxRate.setValue(99); // unsaved edit from another tab: must NOT be written
+    fixture.componentInstance.form.markAsDirty();
+
+    clickSave('profile-save-localization');
+    flushContentAndRestaurantPut();
+
+    httpMock.expectOne((req) => req.url === SETTINGS_URL && req.method === 'GET').flush(SETTINGS_DTO);
+    const put = httpMock.expectOne((req) => req.url === SETTINGS_URL && req.method === 'PUT');
+    expect(put.request.body.timeZone).toBe('Asia/Amman');
+    expect(put.request.body.taxRate).toBe(15);
+    expect(put.request.body.deliveryFee).toBe(12);
+    expect(put.request.body.currencyCode).toBe('SAR');
+    expect(put.request.body.workingHoursJson).toBe('{"sat":"10-22"}');
+    put.flush({ ...SETTINGS_DTO, timeZone: 'Asia/Amman' });
+    fixture.detectChanges();
+
+    flushReload(SAVED_RESTAURANT, { ...SETTINGS_DTO, timeZone: 'Asia/Amman' });
+    expect(controls.timeZone.value).toBe('Asia/Amman');
+    expect(fixture.componentInstance['profileSaveNotice']()).toContain(
+      'Restaurant profile saved successfully',
+    );
+  });
+
+  it('localization save does not write settings when the time zone is unchanged (BUG-006)', () => {
+    flushLoadedSettings();
+    selectTab('localization');
+
+    clickSave('profile-save-localization');
+    flushContentAndRestaurantPut();
+
+    httpMock.expectOne((req) => req.url === SETTINGS_URL && req.method === 'GET').flush(SETTINGS_DTO);
+    httpMock.expectNone((req) => req.url === SETTINGS_URL && req.method === 'PUT');
+    flushReload();
+  });
+
+  it('tells the user when the time zone itself could not be saved instead of failing silently (BUG-006)', () => {
+    flushLoadedSettings();
+    selectTab('localization');
+    fixture.componentInstance.form.controls.timeZone.setValue('Mars/Olympus');
+
+    clickSave('profile-save-localization');
+    flushContentAndRestaurantPut();
+
+    httpMock.expectOne((req) => req.url === SETTINGS_URL && req.method === 'GET').flush(SETTINGS_DTO);
+    httpMock
+      .expectOne((req) => req.url === SETTINGS_URL && req.method === 'PUT')
+      .flush({ title: 'invalid' }, { status: 400, statusText: 'Bad Request' });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance['profileSaveNotice']()).toContain('time zone could not be saved');
+    expect(fixture.componentInstance['profileSaveNotice']()).not.toContain(
+      'Restaurant profile saved successfully',
+    );
+  });
+
+  it('identity save stays independent from ordering settings (no settings request)', () => {
+    flushLoadedSettings();
+
+    clickSave('profile-save-identity');
+    flushContentAndRestaurantPut();
+
+    httpMock.expectNone((req) => req.url === SETTINGS_URL && req.method === 'PUT');
+    flushReload();
+  });
 });
 
 describe('RestaurantProfileSetupPage primary-locale identity (7A.19.1)', () => {

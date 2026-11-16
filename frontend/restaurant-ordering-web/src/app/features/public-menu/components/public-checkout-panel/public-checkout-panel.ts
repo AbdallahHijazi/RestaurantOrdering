@@ -26,6 +26,19 @@ import {
   type PublicRestaurantOrderSettings,
 } from '../../models/public-menu.models';
 import { estimateOrderTotals } from '../../utils/order-estimate.util';
+import { isValidCustomerPhone } from '../../../../shared/utils/customer-phone.util';
+
+/** Unique, URL-safe key for one checkout attempt (8-64 chars; letters, digits, '-', '_'). */
+function createIdempotencyKey(): string {
+  const cryptoApi = typeof globalThis.crypto !== 'undefined' ? globalThis.crypto : null;
+
+  if (cryptoApi && typeof cryptoApi.randomUUID === 'function') {
+    return cryptoApi.randomUUID();
+  }
+
+  const random = Math.random().toString(36).slice(2, 12);
+  return `chk-${Date.now().toString(36)}-${random}`;
+}
 
 @Component({
   selector: 'app-public-checkout-panel',
@@ -60,6 +73,8 @@ export class PublicCheckoutPanel {
   protected readonly orderType = signal<PublicOrderType>(ORDER_TYPE_PICKUP);
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+
+  private checkoutAttempt: { fingerprint: string; key: string } | null = null;
 
   protected readonly isPreviewMode = computed(() => isDemoMenuSlug(this.slug()));
 
@@ -205,6 +220,7 @@ export class PublicCheckoutPanel {
     this.ordersApi.createOrder(this.slug(), request).subscribe({
       next: (confirmation) => {
         this.submitting.set(false);
+        this.checkoutAttempt = null;
         this.cart.clearCart();
         this.orderPlaced.emit(confirmation);
       },
@@ -223,7 +239,7 @@ export class PublicCheckoutPanel {
     const type = this.orderType();
     const tableToken = type === ORDER_TYPE_DINE_IN ? this.cart.tableToken() : null;
 
-    return {
+    const request: CreatePublicOrderApiRequest = {
       guestName: this.guestName().trim(),
       guestPhone: this.guestPhone().trim(),
       orderType: type,
@@ -239,6 +255,24 @@ export class PublicCheckoutPanel {
         notes: line.notes?.trim() || null,
       })),
     };
+
+    return { ...request, idempotencyKey: this.idempotencyKeyFor(request) };
+  }
+
+  /**
+   * One key per logical checkout attempt. A retry of the very same request (e.g. after a network
+   * failure whose outcome is unknown) reuses the key, so the server returns the original order
+   * instead of creating a second one. Any change to the request starts a new attempt (new key),
+   * and so does a new order after a successful one.
+   */
+  private idempotencyKeyFor(request: CreatePublicOrderApiRequest): string {
+    const fingerprint = JSON.stringify(request);
+
+    if (this.checkoutAttempt?.fingerprint !== fingerprint) {
+      this.checkoutAttempt = { fingerprint, key: createIdempotencyKey() };
+    }
+
+    return this.checkoutAttempt.key;
   }
 
   private validateClient(): boolean {
@@ -259,6 +293,11 @@ export class PublicCheckoutPanel {
 
     if (!this.guestPhone().trim()) {
       this.errorMessage.set(this.ui().publicCheckoutGuestPhone);
+      return false;
+    }
+
+    if (!isValidCustomerPhone(this.guestPhone())) {
+      this.errorMessage.set(this.ui().publicCheckoutGuestPhoneInvalid);
       return false;
     }
 

@@ -43,7 +43,15 @@ public sealed class GetPublicRestaurantBySlugQueryHandler
         translations.TryGetValue("ar", out var arTranslation);
         translations.TryGetValue("en", out var enTranslation);
 
+        var (logoUrl, coverImageUrl) = await RestaurantBrandingMediaResolver.ResolveUrlsAsync(
+            _context,
+            restaurant.LogoFileId,
+            restaurant.CoverImageFileId,
+            cancellationToken);
+
         return restaurant.ToPublicDto(
+            logoUrl: logoUrl,
+            coverImageUrl: coverImageUrl,
             arTranslation: arTranslation,
             enTranslation: enTranslation);
     }

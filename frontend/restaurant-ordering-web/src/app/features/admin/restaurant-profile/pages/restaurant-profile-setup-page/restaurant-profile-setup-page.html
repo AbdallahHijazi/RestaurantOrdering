@@ -391,7 +391,7 @@
             class="profile-console__btn profile-console__btn--primary profile-console__btn--panel-save premium-btn"
             data-testid="profile-save-localization"
             [disabled]="!canSaveSettings() || savingProfile()"
-            (click)="saveRestaurantProfile()"
+            (click)="saveLocalization()"
           >
             @if (savingProfile()) {
               <span class="profile-console__spinner" aria-hidden="true"></span>

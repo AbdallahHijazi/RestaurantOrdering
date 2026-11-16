@@ -12,6 +12,8 @@ public class OrderDetailsDto
     public string? GuestPhone { get; init; }
     public OrderType OrderType { get; init; }
     public OrderStatus OrderStatus { get; init; }
+    public Guid? TableId { get; init; }
+    public string? TableName { get; init; }
     public string? DeliveryAddress { get; init; }
     public decimal? DeliveryLatitude { get; init; }
     public decimal? DeliveryLongitude { get; init; }

@@ -1,4 +1,5 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, type HttpParams } from '@angular/common/http';
+import { vi } from 'vitest';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { API_BASE_URL } from '../../../../core/config/api-config';
@@ -63,6 +64,22 @@ describe('AdminOrdersPage', () => {
     fixture.detectChanges();
   }
 
+  function expectListRequest(predicate: (params: HttpParams) => boolean) {
+    return httpMock.expectOne(
+      (request) =>
+        request.url === `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders` &&
+        request.method === 'GET' &&
+        predicate(request.params),
+    );
+  }
+
+  function typeInSearch(value: string): void {
+    const search = root().querySelector<HTMLInputElement>('[data-testid="admin-orders-search"]')!;
+    search.value = value;
+    search.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+  }
+
   it('does not render page-level top bar or layout chrome', () => {
     fixture.detectChanges();
     flushList([]);
@@ -87,7 +104,7 @@ describe('AdminOrdersPage', () => {
     expect(root().querySelector('[data-testid="admin-orders-filter-1"]')).toBeTruthy();
   });
 
-  it('filters orders locally without extra API calls when changing status pill', () => {
+  it('asks the server for the selected status instead of filtering only the loaded rows (BUG-005)', () => {
     fixture.detectChanges();
     flushList([
       createSummary('order-new', OrderStatus.New, 'A-100'),
@@ -97,29 +114,149 @@ describe('AdminOrdersPage', () => {
     root().querySelector<HTMLButtonElement>('[data-testid="admin-orders-filter-4"]')?.click();
     fixture.detectChanges();
 
-    expect(root().querySelector('[data-testid="admin-order-card-order-done"]')).toBeTruthy();
-    expect(root().querySelector('[data-testid="admin-order-card-order-new"]')).toBeNull();
-    httpMock.expectNone(
-      (request) =>
-        request.url === `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders` &&
-        request.method === 'GET',
-    );
+    const req = expectListRequest((params) => params.get('status') === String(OrderStatus.Completed));
+    req.flush(resultFor([createSummary('order-done', OrderStatus.Completed, 'A-101')]));
+    fixture.detectChanges();
+
+    expect(root().querySelector('[data-testid="admin-order-row-order-done"]')).toBeTruthy();
+    expect(root().querySelector('[data-testid="admin-order-row-order-new"]')).toBeNull();
   });
 
-  it('searches by order number and guest name locally', () => {
+  it('searches the whole dataset on the server (debounced), not just the loaded rows (BUG-005)', () => {
+    vi.useFakeTimers();
+    try {
+      fixture.detectChanges();
+      flushList([
+        createSummary('order-new', OrderStatus.New, 'ORD-100', OrderType.Pickup, 'Ali Guest'),
+      ]);
+
+      typeInSearch('ORD-OLD-777');
+      httpMock.expectNone((r) => r.params.get('searchTerm') === 'ORD-OLD-777');
+
+      vi.advanceTimersByTime(300);
+      const req = expectListRequest((params) => params.get('searchTerm') === 'ORD-OLD-777');
+      expect(req.request.params.get('pageNumber')).toBe('1');
+      req.flush(
+        resultFor([createSummary('order-old', OrderStatus.Completed, 'ORD-OLD-777', OrderType.Pickup, 'Old Guest')]),
+      );
+      fixture.detectChanges();
+
+      expect(root().querySelector('[data-testid="admin-order-row-order-old"]')).toBeTruthy();
+      expect(root().querySelector('[data-testid="admin-order-row-order-new"]')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('ignores a leading # when searching by the displayed order number', () => {
+    vi.useFakeTimers();
+    try {
+      fixture.detectChanges();
+      flushList([createSummary('order-new', OrderStatus.New, 'ORD-100')]);
+
+      typeInSearch('#7F29134F');
+      vi.advanceTimersByTime(300);
+
+      const req = expectListRequest((params) => params.get('searchTerm') === '7F29134F');
+      req.flush(resultFor([]));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('shows the authoritative server total in the counter, not the number of loaded rows (BUG-005)', () => {
+    fixture.detectChanges();
+    const items = Array.from({ length: 20 }, (_, index) =>
+      createSummary(`order-${index}`, OrderStatus.New, `A-${index}`),
+    );
+    const req = httpMock.expectOne(
+      (request) => request.url === `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders`,
+    );
+    req.flush({ items, totalCount: 23, pageNumber: 1, pageSize: 20 });
+    fixture.detectChanges();
+
+    const counter = root().querySelector('[data-testid="admin-orders-result-count"]')!.textContent!;
+    expect(counter).toContain('20');
+    expect(counter).toContain('23');
+    expect(root().querySelector('[data-testid="admin-orders-load-more"]')).toBeTruthy();
+  });
+
+  it('loads further pages with the active search and never duplicates a row (BUG-005)', () => {
+    vi.useFakeTimers();
+    try {
+      fixture.detectChanges();
+      flushList([]);
+      // switch to an active search that has more than one page
+      typeInSearch('ali');
+      vi.advanceTimersByTime(300);
+      const first = expectListRequest((params) => params.get('searchTerm') === 'ali');
+      first.flush({
+        items: [createSummary('order-1', OrderStatus.New, 'A-1'), createSummary('order-2', OrderStatus.New, 'A-2')],
+        totalCount: 3,
+        pageNumber: 1,
+        pageSize: 20,
+      });
+      fixture.detectChanges();
+
+      root().querySelector<HTMLButtonElement>('[data-testid="admin-orders-load-more"]')?.click();
+      const second = expectListRequest(
+        (params) => params.get('searchTerm') === 'ali' && params.get('pageNumber') === '2',
+      );
+      second.flush({
+        // order-2 is returned again (data shifted while paging): it must not be listed twice
+        items: [createSummary('order-2', OrderStatus.New, 'A-2'), createSummary('order-3', OrderStatus.New, 'A-3')],
+        totalCount: 3,
+        pageNumber: 2,
+        pageSize: 20,
+      });
+      fixture.detectChanges();
+
+      const rows = root().querySelectorAll('[data-testid^="admin-order-row-"]');
+      expect(Array.from(rows).map((row) => row.getAttribute('data-testid'))).toEqual([
+        'admin-order-row-order-1',
+        'admin-order-row-order-2',
+        'admin-order-row-order-3',
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('a stale slow response can never overwrite the result of a newer search', () => {
+    vi.useFakeTimers();
+    try {
+      fixture.detectChanges();
+      flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
+
+      typeInSearch('first');
+      vi.advanceTimersByTime(300);
+      const stale = httpMock.expectOne((r) => r.params.get('searchTerm') === 'first');
+
+      typeInSearch('second');
+      vi.advanceTimersByTime(300);
+      const fresh = expectListRequest((params) => params.get('searchTerm') === 'second');
+
+      expect(stale.cancelled).toBe(true);
+      fresh.flush(resultFor([createSummary('order-second', OrderStatus.New, 'A-2')]));
+      fixture.detectChanges();
+
+      expect(root().querySelector('[data-testid="admin-order-row-order-second"]')).toBeTruthy();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('shows the table of dine-in orders next to the order type (BUG-004)', () => {
     fixture.detectChanges();
     flushList([
-      createSummary('order-new', OrderStatus.New, 'ORD-100', OrderType.Pickup, 'Ali Guest'),
-      createSummary('order-sara', OrderStatus.New, 'ORD-200', OrderType.Pickup, 'Sara Ahmed'),
+      { ...createSummary('order-dine', OrderStatus.New, 'A-300', OrderType.DineIn), tableId: 't1', tableName: 'T-12' },
+      createSummary('order-pickup', OrderStatus.New, 'A-301', OrderType.Pickup),
     ]);
 
-    const search = root().querySelector<HTMLInputElement>('[data-testid="admin-orders-search"]')!;
-    search.value = 'sara';
-    search.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-
-    expect(root().querySelector('[data-testid="admin-order-card-order-sara"]')).toBeTruthy();
-    expect(root().querySelector('[data-testid="admin-order-card-order-new"]')).toBeNull();
+    const dine = root().querySelector('[data-testid="admin-order-row-order-dine"]')!.textContent!;
+    const pickup = root().querySelector('[data-testid="admin-order-row-order-pickup"]')!.textContent!;
+    expect(dine).toContain('T-12');
+    expect(pickup).not.toContain('T-12');
   });
 
   it('renders additional filters toolbar with visible icon and aligned controls', () => {
@@ -185,13 +322,27 @@ describe('AdminOrdersPage', () => {
     root().querySelector<HTMLButtonElement>('[data-option-index="2"]')?.click();
     fixture.detectChanges();
 
-    expect(root().querySelector('[data-testid="admin-order-card-order-pickup"]')).toBeTruthy();
-    expect(root().querySelector('[data-testid="admin-order-card-order-new"]')).toBeNull();
+    // the order-type filter is applied by the server over the whole dataset
+    expectListRequest((params) => params.get('orderType') === String(OrderType.Pickup)).flush(
+      resultFor([createSummary('order-pickup', OrderStatus.New, 'A-101', OrderType.Pickup, 'Sara Ahmed')]),
+    );
+    fixture.detectChanges();
+
+    expect(root().querySelector('[data-testid="admin-order-row-order-pickup"]')).toBeTruthy();
+    expect(root().querySelector('[data-testid="admin-order-row-order-new"]')).toBeNull();
 
     root().querySelector<HTMLButtonElement>('[data-testid="admin-orders-clear-filters"]')?.click();
     fixture.detectChanges();
 
-    expect(root().querySelector('[data-testid="admin-order-card-order-new"]')).toBeTruthy();
+    expectListRequest((params) => !params.has('orderType') && !params.has('searchTerm')).flush(
+      resultFor([
+        createSummary('order-new', OrderStatus.New, 'A-100', OrderType.Delivery, 'Ali Guest'),
+        createSummary('order-pickup', OrderStatus.New, 'A-101', OrderType.Pickup, 'Sara Ahmed'),
+      ]),
+    );
+    fixture.detectChanges();
+
+    expect(root().querySelector('[data-testid="admin-order-row-order-new"]')).toBeTruthy();
     expect((root().querySelector<HTMLInputElement>('[data-testid="admin-orders-search"]'))!.value).toBe('');
   });
 
@@ -238,17 +389,24 @@ describe('AdminOrdersPage', () => {
     expect(document.body.querySelector('[data-testid="admin-order-details-modal"]')).toBeTruthy();
   });
 
-  it('shows filtered empty state when search has no matches', () => {
-    fixture.detectChanges();
-    flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
+  it('shows filtered empty state when the server finds no match for the search', () => {
+    vi.useFakeTimers();
+    try {
+      fixture.detectChanges();
+      flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
 
-    const search = root().querySelector<HTMLInputElement>('[data-testid="admin-orders-search"]')!;
-    search.value = 'missing-guest';
-    search.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
+      typeInSearch('missing-guest');
+      vi.advanceTimersByTime(300);
+      expectListRequest((params) => params.get('searchTerm') === 'missing-guest').flush(resultFor([]));
+      fixture.detectChanges();
 
-    expect(root().querySelector('[data-testid="admin-orders-filtered-empty"]')).toBeTruthy();
-    expect(root().querySelector('[data-testid="admin-orders-empty"]')).toBeNull();
+      expect(root().querySelector('[data-testid="admin-orders-filtered-empty"]')).toBeTruthy();
+      expect(root().querySelector('[data-testid="admin-orders-empty"]')).toBeNull();
+      // the search box stays mounted so the user can keep typing / clear it
+      expect(root().querySelector('[data-testid="admin-orders-search"]')).toBeTruthy();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('shows API empty state when there are no orders', () => {

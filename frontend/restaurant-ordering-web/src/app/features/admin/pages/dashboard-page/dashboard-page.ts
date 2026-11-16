@@ -1,5 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
 import { ApplicationRoles } from '../../../../core/auth/application-roles';
@@ -11,16 +11,23 @@ import { AdminOrdersService } from '../../data-access/admin-orders.service';
 import {
   OrderStatus,
   OrderType,
+  type DashboardSummary,
   type OrderSummary,
 } from '../../../kitchen/data-access/kitchen-orders.models';
 
+import { formatOrderDateTime } from '../../../../shared/orders/order-date-time.util';
 import { getOrderStatusLabel } from '../../../../shared/orders/order-status-label.util';
 import { getOrderTypeLabel } from '../../../../shared/orders/order-type-label.util';
 import { formatOrderCurrency } from '../../../../shared/orders/order-money.util';
 
+/** Number of rows shown in the "recent orders" table (statistics never derive from these rows). */
+const RECENT_ORDERS_COUNT = 5;
+
+type LoadState = 'loading' | 'ready' | 'error';
+
 @Component({
   selector: 'app-dashboard-page',
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
 })
@@ -29,12 +36,26 @@ export class DashboardPage {
   protected readonly authService = inject(AuthService);
 
   private readonly ordersService = inject(AdminOrdersService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly OrderStatus = OrderStatus;
 
+  /** Latest orders for the table only. */
   protected readonly orders = signal<OrderSummary[]>([]);
 
-  protected readonly loading = signal(true);
+  /** Authoritative aggregates computed by the server over the full dataset. */
+  protected readonly summary = signal<DashboardSummary | null>(null);
+
+  protected readonly statsState = signal<LoadState>('loading');
+  protected readonly ordersState = signal<LoadState>('loading');
+
+  protected readonly loading = computed(
+    () => this.statsState() === 'loading' || this.ordersState() === 'loading',
+  );
+
+  protected readonly hasError = computed(
+    () => this.statsState() === 'error' || this.ordersState() === 'error',
+  );
 
   protected readonly isOwner = computed(() =>
     this.authService.hasAnyRole(ApplicationRoles.RestaurantOwner),
@@ -54,77 +75,105 @@ export class DashboardPage {
     return role ?? '—';
   });
 
-  protected readonly todayOrders = computed(() => this.orders().length);
+  /** A statistic is `null` while loading or after a failure so it is never shown as a real zero. */
+  protected readonly todayOrders = computed(() => this.summary()?.todayOrders ?? null);
+  protected readonly activeOrders = computed(() => this.summary()?.activeOrders ?? null);
+  protected readonly todaySales = computed(() => this.summary()?.todaySales ?? null);
+  protected readonly averageOrder = computed(() => this.summary()?.averageOrderValue ?? null);
+  protected readonly currencyCode = computed(() => this.summary()?.currencyCode ?? null);
 
-  protected readonly activeOrders = computed(() =>
-    this.orders().filter(
-      (order) =>
-        order.orderStatus === OrderStatus.New ||
-        order.orderStatus === OrderStatus.Preparing ||
-        order.orderStatus === OrderStatus.Ready,
-    ).length,
-  );
-
-  protected readonly todaySales = computed(() =>
-    this.orders().reduce(
-      (total, order) => total + order.totalAmount,
-      0,
-    ),
-  );
-
-  protected readonly averageOrder = computed(() => {
-    const orders = this.orders();
-
-    if (!orders.length) {
-      return 0;
-    }
-
-    return this.todaySales() / orders.length;
-  });
-
+  private statsRequestActive = false;
+  private ordersRequestActive = false;
 
   constructor() {
-    this.loadOrders();
+    this.load();
   }
 
-
-  private loadOrders(): void {
-    this.ordersService.listOrders(null, 1, 5).subscribe({
-      next: (result) => {
-        this.orders.set(result.items);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.orders.set([]);
-        this.loading.set(false);
-      },
-    });
+  protected refresh(): void {
+    this.load();
   }
 
+  private load(): void {
+    this.loadSummary();
+    this.loadRecentOrders();
+  }
+
+  private loadSummary(): void {
+    if (this.statsRequestActive) {
+      return;
+    }
+
+    this.statsRequestActive = true;
+    this.statsState.set('loading');
+
+    this.ordersService
+      .getDashboardSummary()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (summary) => {
+          this.statsRequestActive = false;
+          this.summary.set(summary);
+          this.statsState.set('ready');
+        },
+        error: () => {
+          this.statsRequestActive = false;
+          // Never present a technical failure as a legitimate zero-sales day.
+          this.summary.set(null);
+          this.statsState.set('error');
+        },
+      });
+  }
+
+  private loadRecentOrders(): void {
+    if (this.ordersRequestActive) {
+      return;
+    }
+
+    this.ordersRequestActive = true;
+    this.ordersState.set('loading');
+
+    this.ordersService
+      .listOrders(null, 1, RECENT_ORDERS_COUNT)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => {
+          this.ordersRequestActive = false;
+          this.orders.set(result.items);
+          this.ordersState.set('ready');
+        },
+        error: () => {
+          this.ordersRequestActive = false;
+          this.orders.set([]);
+          this.ordersState.set('error');
+        },
+      });
+  }
 
   protected statusLabel(status: OrderStatus): string {
-    return getOrderStatusLabel(
-      status,
-      this.localeService.contentLocale() === 'ar' ? 'ar' : 'en',
-    );
+    return getOrderStatusLabel(status, this.localeService.locale());
   }
-
 
   protected typeLabel(type: OrderType): string {
-    return getOrderTypeLabel(
-      type,
-      this.localeService.contentLocale() === 'ar' ? 'ar' : 'en',
-    );
+    return getOrderTypeLabel(type, this.localeService.locale());
   }
 
+  protected formatMoney(amount: number | null, currency: string | null): string {
+    if (amount === null || currency === null) {
+      return '—';
+    }
 
-  protected money(amount: number, currency: string): string {
     return formatOrderCurrency(amount, currency);
   }
 
+  protected formatCount(value: number | null): string {
+    return value === null ? '—' : String(value);
+  }
 
-  protected refresh(): void {
-    this.loading.set(true);
-    this.loadOrders();
+  protected formatTime(value: string): string {
+    return formatOrderDateTime(value);
+  }
+
+  protected money(amount: number, currency: string): string {
+    return formatOrderCurrency(amount, currency);
   }
 }

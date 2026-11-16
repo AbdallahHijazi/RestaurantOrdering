@@ -24,6 +24,7 @@ public sealed class GetOrderByIdQueryHandler
         var order = await _context.Orders
             .AsNoTracking()
             .Include(o => o.OrderItems)
+            .Include(o => o.Table)
             .SingleOrDefaultAsync(
                 o => o.RestaurantId == request.RestaurantId && o.Id == request.OrderId,
                 cancellationToken);
@@ -43,6 +44,8 @@ public sealed class GetOrderByIdQueryHandler
             GuestPhone = order.GuestPhone,
             OrderType = order.OrderType,
             OrderStatus = order.OrderStatus,
+            TableId = order.TableId,
+            TableName = order.Table?.Name,
             DeliveryAddress = order.DeliveryAddress,
             DeliveryLatitude = order.DeliveryLatitude,
             DeliveryLongitude = order.DeliveryLongitude,

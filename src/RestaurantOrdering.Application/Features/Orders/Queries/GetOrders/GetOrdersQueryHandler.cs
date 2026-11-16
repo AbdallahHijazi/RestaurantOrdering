@@ -70,6 +70,8 @@ public sealed class GetOrdersQueryHandler
                 GuestPhone = order.GuestPhone,
                 OrderType = order.OrderType,
                 OrderStatus = order.OrderStatus,
+                TableId = order.TableId,
+                TableName = order.Table != null ? order.Table.Name : null,
                 TotalAmount = order.TotalAmount,
                 CurrencyCode = order.CurrencyCode,
                 CreatedAt = order.CreatedAt,

@@ -88,6 +88,11 @@ export interface UpdateRestaurantApiRequest {
   latitude?: number | null;
   longitude?: number | null;
   accentColor: string;
+  /** Optional on the wire: omitted = keep stored value; empty string clears Email/City. */
+  countryCode?: string | null;
+  phoneCountryCode?: string | null;
+  email?: string | null;
+  city?: string | null;
 }
 
 /** Backend contract: GET/PUT settings */
@@ -130,6 +135,10 @@ export interface RestaurantApiDto {
   accentColor?: string;
   phoneNumber: string;
   whatsAppNumber?: string | null;
+  countryCode?: string | null;
+  phoneCountryCode?: string | null;
+  email?: string | null;
+  city?: string | null;
   addressAr?: string | null;
   addressEn?: string | null;
   latitude?: number | null;

@@ -62,6 +62,16 @@ public sealed class UpdateOrderStatusCommandHandler
 
         await _context.SaveChangesAsync(cancellationToken);
 
+        string? tableName = null;
+        if (order.TableId.HasValue)
+        {
+            tableName = await _context.RestaurantTables
+                .AsNoTracking()
+                .Where(t => t.Id == order.TableId.Value)
+                .Select(t => t.Name)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
         return new OrderSummaryDto
         {
             Id = order.Id,
@@ -72,6 +82,8 @@ public sealed class UpdateOrderStatusCommandHandler
             GuestPhone = order.GuestPhone,
             OrderType = order.OrderType,
             OrderStatus = order.OrderStatus,
+            TableId = order.TableId,
+            TableName = tableName,
             TotalAmount = order.TotalAmount,
             CurrencyCode = order.CurrencyCode,
             CreatedAt = order.CreatedAt,

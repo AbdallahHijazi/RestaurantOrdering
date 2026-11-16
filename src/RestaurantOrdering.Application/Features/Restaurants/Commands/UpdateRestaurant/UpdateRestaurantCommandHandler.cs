@@ -82,6 +82,28 @@ public sealed class UpdateRestaurantCommandHandler
         restaurant.Latitude = request.Latitude;
         restaurant.Longitude = request.Longitude;
         restaurant.AccentColor = RestaurantAccentColor.Normalize(request.AccentColor);
+
+        // null = not supplied (older clients): keep the stored value instead of erasing it.
+        if (request.CountryCode is not null)
+        {
+            restaurant.CountryCode = RestaurantContactNormalizer.NormalizeCountryCode(request.CountryCode);
+        }
+
+        if (request.PhoneCountryCode is not null)
+        {
+            restaurant.PhoneCountryCode = RestaurantContactNormalizer.NormalizePhoneCountryCode(request.PhoneCountryCode);
+        }
+
+        if (request.Email is not null)
+        {
+            restaurant.Email = RestaurantContactNormalizer.NormalizeOptionalText(request.Email);
+        }
+
+        if (request.City is not null)
+        {
+            restaurant.City = RestaurantContactNormalizer.NormalizeOptionalText(request.City);
+        }
+
         restaurant.UpdatedAt = _dateTimeService.UtcNow;
 
         if (restaurant.ContentVersion > contentVersionBefore)

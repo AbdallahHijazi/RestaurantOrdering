@@ -33,6 +33,18 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
         builder.Property(r => r.WhatsAppNumber)
             .HasMaxLength(20);
 
+        builder.Property(r => r.CountryCode)
+            .HasMaxLength(2);
+
+        builder.Property(r => r.PhoneCountryCode)
+            .HasMaxLength(8);
+
+        builder.Property(r => r.Email)
+            .HasMaxLength(254);
+
+        builder.Property(r => r.City)
+            .HasMaxLength(100);
+
         builder.Property(r => r.AddressAr)
             .HasMaxLength(300);
 

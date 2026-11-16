@@ -225,7 +225,7 @@
       }
 
       @case ('ready') {
-        @if (orders().length === 0) {
+        @if (orders().length === 0 && !filtersActive()) {
           <section class="orders-management-page__state orders-management-page__state--empty" data-testid="admin-orders-empty">
             <span class="orders-management-page__state-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" focusable="false">
@@ -282,7 +282,7 @@
                             <path fill="currentColor" d="M6 2h12l4 5v13a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm10 2H8v4h8V4Zm-8 6v8h12v-8H6Z" />
                           </svg>
                         }
-                        <span>{{ orderTypeLabel(order.orderType) }}</span>
+                        <span>{{ orderTypeLabel(order.orderType, order.tableName) }}</span>
                       </span>
                     </td>
                     <td>
@@ -349,7 +349,7 @@
                             <path fill="currentColor" d="M6 2h12l4 5v13a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm10 2H8v4h8V4Zm-8 6v8h12v-8H6Z" />
                           </svg>
                         }
-                        {{ orderTypeLabel(order.orderType) }}
+                        {{ orderTypeLabel(order.orderType, order.tableName) }}
                       </span>
                       <time class="orders-management-page__card-time" [attr.datetime]="order.createdAt">
                         {{ formatOrderTime(order.createdAt) }}

@@ -97,7 +97,7 @@
                     />
                   </svg>
                 }
-                {{ orderTypeLabel(order.orderType) }}
+                {{ orderTypeLabel(order.orderType, order.tableName) }}
               </span>
             </div>
             <div>
@@ -116,6 +116,14 @@
                 {{ formatCreatedAt(order.createdAt) }}
               </span>
             </div>
+            @if (order.tableName?.trim()) {
+              <div>
+                <span class="order-details-modal__info-label">
+                  {{ locale.uiText('adminOrdersTableLabel') }}
+                </span>
+                <span data-testid="admin-order-details-table">{{ order.tableName }}</span>
+              </div>
+            }
             @if (order.guestPhone?.trim()) {
               <div>
                 <span class="order-details-modal__info-label">
@@ -376,7 +384,7 @@
     <dl class="order-invoice-print-area__meta">
       <div>
         <dt>{{ locale.uiText('adminOrdersColType') }}</dt>
-        <dd>{{ orderTypeLabel(order.orderType) }}</dd>
+        <dd>{{ orderTypeLabel(order.orderType, order.tableName) }}</dd>
       </div>
 
       <div>

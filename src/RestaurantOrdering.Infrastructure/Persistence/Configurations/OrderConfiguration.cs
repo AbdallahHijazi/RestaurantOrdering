@@ -74,8 +74,19 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasPrecision(10, 2)
             .IsRequired();
 
+        builder.Property(o => o.IdempotencyKey)
+            .HasMaxLength(64);
+
+        builder.Property(o => o.IdempotencyRequestHash)
+            .HasMaxLength(64);
+
         builder.HasIndex(o => new { o.RestaurantId, o.OrderNumber })
             .IsUnique();
+
+        // One order per (restaurant, idempotency key); orders without a key are unconstrained.
+        builder.HasIndex(o => new { o.RestaurantId, o.IdempotencyKey })
+            .IsUnique()
+            .HasFilter("[IdempotencyKey] IS NOT NULL");
 
         builder.HasIndex(o => new { o.RestaurantId, o.CreatedAt });
 

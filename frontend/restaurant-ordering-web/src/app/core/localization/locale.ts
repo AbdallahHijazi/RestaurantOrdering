@@ -344,6 +344,7 @@ export type UiTextKey =
   | 'profileInvalidAccentColor'
   | 'profileUnsavedBrandingPreview'
   | 'profileReloadFailed'
+  | 'profileTimeZoneSaveFailed'
   | 'profileSaveOrderingSettings'
   | 'profileRestaurantSaved'
   | 'profileValidationNonNegative'
@@ -424,6 +425,38 @@ export type UiTextKey =
   | 'adminDashboardOrdersDescription'
   | 'adminDashboardStaffTitle'
   | 'adminDashboardStaffDescription'
+  | 'adminDashboardRefresh'
+  | 'adminDashboardStatsAria'
+  | 'adminDashboardStatTodayOrders'
+  | 'adminDashboardStatActiveOrders'
+  | 'adminDashboardStatTodaySales'
+  | 'adminDashboardStatAverageOrder'
+  | 'adminDashboardRecentOrders'
+  | 'adminDashboardViewAllOrders'
+  | 'adminDashboardOrdersLoading'
+  | 'adminDashboardOrdersEmptyTitle'
+  | 'adminDashboardOrdersEmptyHint'
+  | 'adminDashboardColOrderNumber'
+  | 'adminDashboardColType'
+  | 'adminDashboardColTime'
+  | 'adminDashboardColCustomer'
+  | 'adminDashboardColTotal'
+  | 'adminDashboardColStatus'
+  | 'adminDashboardColAction'
+  | 'adminDashboardOrderDetails'
+  | 'adminDashboardQuickActions'
+  | 'adminDashboardQuickAddItem'
+  | 'adminDashboardQuickOrders'
+  | 'adminDashboardQuickTables'
+  | 'adminDashboardQuickStaff'
+  | 'adminDashboardActivityTitle'
+  | 'adminDashboardActivityRange'
+  | 'adminDashboardActivityPlaceholder'
+  | 'adminDashboardLoadError'
+  | 'adminDashboardOrdersLoadError'
+  | 'adminDashboardRetry'
+  | 'adminOrdersTableLabel'
+  | 'kitchenFieldTable'
   | 'staffPageTitle'
   | 'staffPageLead'
   | 'staffAddMember'
@@ -817,6 +850,7 @@ export type UiTextKey =
   | 'publicCheckoutDineInRequiresQr'
   | 'publicCheckoutGuestName'
   | 'publicCheckoutGuestPhone'
+  | 'publicCheckoutGuestPhoneInvalid'
   | 'publicCheckoutDeliveryAddress'
   | 'publicCheckoutOrderNotes'
   | 'publicCheckoutEstimatedTax'
@@ -1081,6 +1115,7 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     profileInvalidAccentColor: 'لون Accent غير صالح. استخدم صيغة مثل #9C3D2E.',
     profileUnsavedBrandingPreview: 'معاينة الهوية غير محفوظة — اضغط حفظ ملف المطعم للاحتفاظ بالتغييرات.',
     profileReloadFailed: 'تم الحفظ لكن تعذر إعادة تحميل الملف. حاول تحديث الصفحة.',
+    profileTimeZoneSaveFailed: 'تم حفظ ملف المطعم لكن تعذّر حفظ المنطقة الزمنية. تأكد أنها معرّف صحيح مثل Asia/Amman.',
     profileSaveOrderingSettings: 'حفظ إعدادات التوصيل والطلبات',
     profileRestaurantSaved: 'تم حفظ ملف المطعم بنجاح.',
     profileValidationNonNegative: 'يجب أن تكون القيمة صفرًا أو أكثر.',
@@ -1104,7 +1139,7 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     publicMenuEmpty: 'لا توجد وجبات متاحة حالياً.',
     closePreview: 'إغلاق',
     closePreviewAria: 'إغلاق المعاينة',
-    loginBrand: 'Restaurant Admin',
+    loginBrand: 'إدارة المطعم',
     loginTitle: 'مرحبًا بعودتك',
     loginDescription: 'سجّل الدخول لإدارة ملف المطعم والقائمة والإعدادات.',
     loginEmailLabel: 'البريد الإلكتروني',
@@ -1166,6 +1201,38 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminDashboardOrdersDescription: 'تابع الطلبات وحدّث حالتها من صفحة إدارة الطلبات.',
     adminDashboardStaffTitle: 'الموظفون',
     adminDashboardStaffDescription: 'ستظهر إدارة الموظفين هنا لاحقًا.',
+    adminDashboardRefresh: 'تحديث',
+    adminDashboardStatsAria: 'إحصائيات لوحة التحكم',
+    adminDashboardStatTodayOrders: 'طلبات اليوم',
+    adminDashboardStatActiveOrders: 'قيد التنفيذ',
+    adminDashboardStatTodaySales: 'مبيعات اليوم',
+    adminDashboardStatAverageOrder: 'متوسط الطلب',
+    adminDashboardRecentOrders: 'الطلبات الحديثة',
+    adminDashboardViewAllOrders: 'عرض جميع الطلبات',
+    adminDashboardOrdersLoading: 'جاري تحميل الطلبات...',
+    adminDashboardOrdersEmptyTitle: 'لا توجد طلبات حديثة',
+    adminDashboardOrdersEmptyHint: 'ستظهر الطلبات الجديدة هنا عند وصولها.',
+    adminDashboardColOrderNumber: 'رقم الطلب',
+    adminDashboardColType: 'النوع',
+    adminDashboardColTime: 'الوقت',
+    adminDashboardColCustomer: 'العميل',
+    adminDashboardColTotal: 'الإجمالي',
+    adminDashboardColStatus: 'الحالة',
+    adminDashboardColAction: 'الإجراء',
+    adminDashboardOrderDetails: 'تفاصيل',
+    adminDashboardQuickActions: 'إجراءات سريعة',
+    adminDashboardQuickAddItem: 'إضافة طبق / صنف جديد',
+    adminDashboardQuickOrders: 'إدارة الطلبات',
+    adminDashboardQuickTables: 'إدارة الطاولات',
+    adminDashboardQuickStaff: 'إدارة الموظفين',
+    adminDashboardActivityTitle: 'نشاط الطلبات',
+    adminDashboardActivityRange: 'آخر 7 أيام',
+    adminDashboardActivityPlaceholder: 'سيتم عرض نشاط الطلبات هنا',
+    adminDashboardLoadError: 'تعذّر تحميل إحصائيات لوحة التحكم. الأرقام غير متاحة حاليًا، حاول مرة أخرى.',
+    adminDashboardOrdersLoadError: 'تعذّر تحميل الطلبات الحديثة.',
+    adminDashboardRetry: 'إعادة المحاولة',
+    adminOrdersTableLabel: 'الطاولة',
+    kitchenFieldTable: 'الطاولة',
     staffPageTitle: 'إدارة الموظفين',
     staffPageLead: 'اعرض موظفي المطعم، وأضف حسابات جديدة، وحدّث أدوارهم بسهولة.',
     staffAddMember: 'إضافة موظف',
@@ -1560,6 +1627,7 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     publicCheckoutDineInRequiresQr: 'امسح رمز QR الموجود على الطاولة للطلب داخل المطعم',
     publicCheckoutGuestName: 'الاسم الكامل',
     publicCheckoutGuestPhone: 'رقم الهاتف',
+    publicCheckoutGuestPhoneInvalid: 'أدخل رقم هاتف صحيحًا (من 7 إلى 15 رقمًا، ويمكن أن يبدأ بـ +).',
     publicCheckoutGuestNamePlaceholder: 'مثال: أحمد محمد',
     publicCheckoutGuestPhonePlaceholder: '+966 5X XXX XXXX',
     publicCheckoutDeliveryAddress: 'عنوان التوصيل',
@@ -1834,6 +1902,7 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     profileUnsavedBrandingPreview:
       'Branding preview is unsaved — click Save restaurant profile to keep your changes.',
     profileReloadFailed: 'Saved, but the profile could not be reloaded. Try refreshing the page.',
+    profileTimeZoneSaveFailed: 'The restaurant profile was saved, but the time zone could not be saved. Make sure it is a valid identifier such as Asia/Amman.',
     profileSaveOrderingSettings: 'Save delivery and ordering settings',
     profileRestaurantSaved: 'Restaurant profile saved successfully.',
     profileValidationNonNegative: 'Value must be zero or greater.',
@@ -1920,6 +1989,38 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminDashboardOrdersDescription: 'Track orders and update their status from the orders management page.',
     adminDashboardStaffTitle: 'Staff',
     adminDashboardStaffDescription: 'Staff management will appear here in a later step.',
+    adminDashboardRefresh: 'Refresh',
+    adminDashboardStatsAria: 'Dashboard statistics',
+    adminDashboardStatTodayOrders: "Today's orders",
+    adminDashboardStatActiveOrders: 'In progress',
+    adminDashboardStatTodaySales: "Today's sales",
+    adminDashboardStatAverageOrder: 'Average order',
+    adminDashboardRecentOrders: 'Recent orders',
+    adminDashboardViewAllOrders: 'View all orders',
+    adminDashboardOrdersLoading: 'Loading orders…',
+    adminDashboardOrdersEmptyTitle: 'No recent orders',
+    adminDashboardOrdersEmptyHint: 'New orders will appear here as they arrive.',
+    adminDashboardColOrderNumber: 'Order no.',
+    adminDashboardColType: 'Type',
+    adminDashboardColTime: 'Time',
+    adminDashboardColCustomer: 'Customer',
+    adminDashboardColTotal: 'Total',
+    adminDashboardColStatus: 'Status',
+    adminDashboardColAction: 'Action',
+    adminDashboardOrderDetails: 'Details',
+    adminDashboardQuickActions: 'Quick actions',
+    adminDashboardQuickAddItem: 'Add a new dish / item',
+    adminDashboardQuickOrders: 'Manage orders',
+    adminDashboardQuickTables: 'Manage tables',
+    adminDashboardQuickStaff: 'Manage staff',
+    adminDashboardActivityTitle: 'Order activity',
+    adminDashboardActivityRange: 'Last 7 days',
+    adminDashboardActivityPlaceholder: 'Order activity will be shown here',
+    adminDashboardLoadError: 'Could not load the dashboard statistics. The figures are unavailable right now, please try again.',
+    adminDashboardOrdersLoadError: 'Could not load recent orders.',
+    adminDashboardRetry: 'Try again',
+    adminOrdersTableLabel: 'Table',
+    kitchenFieldTable: 'Table',
     staffPageTitle: 'Employees Management',
     staffPageLead: 'View restaurant employees, create new accounts, and update their roles with ease.',
     staffAddMember: 'Add Employee',
@@ -2318,6 +2419,7 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     publicCheckoutDineInRequiresQr: 'Scan the QR code on your table to place a dine-in order',
     publicCheckoutGuestName: 'Full name',
     publicCheckoutGuestPhone: 'Phone number',
+    publicCheckoutGuestPhoneInvalid: 'Enter a valid phone number (7 to 15 digits, may start with +).',
     publicCheckoutGuestNamePlaceholder: 'e.g. Ahmed Mohamed',
     publicCheckoutGuestPhonePlaceholder: '+966 5X XXX XXXX',
     publicCheckoutDeliveryAddress: 'Delivery address',

@@ -22,3 +22,17 @@ export function getOrderTypeLabel(
   const key = Number(orderType) as OrderType;
   return TYPE_LABELS[locale][key] ?? String(orderType);
 }
+
+/**
+ * Order type label that also names the table for dine-in orders ("Dine in · T1").
+ * Pickup/delivery orders and legacy dine-in rows without a table keep the plain label.
+ */
+export function getOrderTypeLabelWithTable(
+  orderType: OrderType | number,
+  locale: OrderLabelLocale,
+  tableName?: string | null,
+): string {
+  const label = getOrderTypeLabel(orderType, locale);
+  const table = tableName?.trim();
+  return Number(orderType) === OrderType.DineIn && table ? `${label} · ${table}` : label;
+}

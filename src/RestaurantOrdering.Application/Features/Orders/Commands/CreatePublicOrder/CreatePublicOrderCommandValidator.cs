@@ -23,7 +23,19 @@ public sealed class CreatePublicOrderCommandValidator : AbstractValidator<Create
             .NotEmpty()
             .Must(phone => !string.IsNullOrWhiteSpace(phone))
             .WithMessage("Guest phone is required.")
-            .MaximumLength(20);
+            .MaximumLength(CustomerPhoneValidation.MaxLength)
+            .Must(CustomerPhoneValidation.IsValid)
+            .WithMessage(
+                "Guest phone must be a valid phone number with " +
+                $"{CustomerPhoneValidation.MinDigits} to {CustomerPhoneValidation.MaxDigits} digits " +
+                "(an optional leading '+' and the separators space, '-', '.', '(' and ')' are allowed).");
+
+        RuleFor(x => x.IdempotencyKey)
+            .MinimumLength(8)
+            .MaximumLength(64)
+            .Matches(@"^[A-Za-z0-9_\-:.]+$")
+            .WithMessage("Idempotency key may only contain letters, digits, '_', '-', ':' and '.'.")
+            .When(x => !string.IsNullOrWhiteSpace(x.IdempotencyKey));
 
         RuleFor(x => x.OrderType)
             .IsInEnum();

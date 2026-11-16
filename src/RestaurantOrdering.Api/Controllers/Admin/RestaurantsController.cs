@@ -54,7 +54,11 @@ public sealed class RestaurantsController : ControllerBase
             request.AddressEn,
             request.Latitude,
             request.Longitude,
-            request.AccentColor);
+            request.AccentColor,
+            request.CountryCode,
+            request.PhoneCountryCode,
+            request.Email,
+            request.City);
 
         var result = await _sender.Send(command, cancellationToken);
         return Ok(result);

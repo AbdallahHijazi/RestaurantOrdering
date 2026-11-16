@@ -15,4 +15,5 @@ public sealed record CreatePublicOrderCommand(
     decimal? DeliveryLongitude,
     string? Notes,
     string? Locale,
-    IReadOnlyList<CreatePublicOrderItemRequest> Items) : IRequest<PublicOrderConfirmationDto>;
+    IReadOnlyList<CreatePublicOrderItemRequest> Items,
+    string? IdempotencyKey = null) : IRequest<PublicOrderConfirmationDto>;

@@ -205,6 +205,7 @@ describe('Public order flow', () => {
       deliveryLongitude: null,
       notes: null,
       locale: 'ar',
+      idempotencyKey: expect.any(String),
       items: [
         {
           menuItemId: item.id,
@@ -213,6 +214,7 @@ describe('Public order flow', () => {
         },
       ],
     });
+    expect((request.idempotencyKey ?? '').length).toBeGreaterThanOrEqual(8);
 
     ordersApi.createOrder('restaurant-a', request).subscribe();
     const req = httpMock.expectOne(

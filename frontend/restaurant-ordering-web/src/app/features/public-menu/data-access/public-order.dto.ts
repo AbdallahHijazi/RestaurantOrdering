@@ -11,6 +11,8 @@ export interface CreatePublicOrderApiRequest {
   deliveryLongitude?: number | null;
   notes?: string | null;
   locale?: string | null;
+  /** One key per logical checkout attempt; retries of the same attempt reuse it (server de-duplicates). */
+  idempotencyKey?: string | null;
   items: CreatePublicOrderItemApiRequest[];
 }
 

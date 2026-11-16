@@ -35,15 +35,34 @@
         />
       </svg>
 
-      <span>تحديث</span>
+      <span>{{ localeService.uiText('adminDashboardRefresh') }}</span>
     </button>
   </header>
+
+
+  <!-- Load failure: never shown as zero statistics -->
+  @if (statsState() === 'error') {
+    <div class="admin-dashboard__alert" role="alert" data-testid="dashboard-stats-error">
+      <span>{{ localeService.uiText('adminDashboardLoadError') }}</span>
+
+      <button
+        type="button"
+        class="dashboard-button"
+        data-testid="dashboard-stats-retry"
+        [disabled]="loading()"
+        (click)="refresh()"
+      >
+        {{ localeService.uiText('adminDashboardRetry') }}
+      </button>
+    </div>
+  }
 
 
   <!-- Statistics -->
   <section
     class="admin-dashboard__stats"
-    aria-label="إحصائيات لوحة التحكم"
+    [attr.aria-label]="localeService.uiText('adminDashboardStatsAria')"
+    [attr.aria-busy]="statsState() === 'loading'"
   >
 
     <article class="stat-card">
@@ -57,8 +76,8 @@
       </div>
 
       <div class="stat-card__body">
-        <span>طلبات اليوم</span>
-        <strong>{{ todayOrders() }}</strong>
+        <span>{{ localeService.uiText('adminDashboardStatTodayOrders') }}</span>
+        <strong data-testid="dashboard-stat-today-orders">{{ formatCount(todayOrders()) }}</strong>
       </div>
     </article>
 
@@ -74,8 +93,8 @@
       </div>
 
       <div class="stat-card__body">
-        <span>قيد التنفيذ</span>
-        <strong>{{ activeOrders() }}</strong>
+        <span>{{ localeService.uiText('adminDashboardStatActiveOrders') }}</span>
+        <strong data-testid="dashboard-stat-active-orders">{{ formatCount(activeOrders()) }}</strong>
       </div>
     </article>
 
@@ -91,8 +110,8 @@
       </div>
 
       <div class="stat-card__body">
-        <span>مبيعات اليوم</span>
-        <strong>{{ money(todaySales(), 'USD') }}</strong>
+        <span>{{ localeService.uiText('adminDashboardStatTodaySales') }}</span>
+        <strong data-testid="dashboard-stat-today-sales">{{ formatMoney(todaySales(), currencyCode()) }}</strong>
       </div>
     </article>
 
@@ -108,8 +127,8 @@
       </div>
 
       <div class="stat-card__body">
-        <span>متوسط الطلب</span>
-        <strong>{{ money(averageOrder(), 'USD') }}</strong>
+        <span>{{ localeService.uiText('adminDashboardStatAverageOrder') }}</span>
+        <strong data-testid="dashboard-stat-average-order">{{ formatMoney(averageOrder(), currencyCode()) }}</strong>
       </div>
     </article>
 
@@ -126,30 +145,45 @@
         <div class="orders-card__title">
           <span class="orders-card__indicator" aria-hidden="true"></span>
 
-          <h3>الطلبات الحديثة</h3>
+          <h3>{{ localeService.uiText('adminDashboardRecentOrders') }}</h3>
         </div>
 
         <a
           routerLink="/admin/orders"
           class="orders-card__all-link"
         >
-          عرض جميع الطلبات
+          {{ localeService.uiText('adminDashboardViewAllOrders') }}
           <span aria-hidden="true">←</span>
         </a>
       </header>
 
 
-      @if (loading()) {
+      @if (ordersState() === 'loading') {
 
         <div class="orders-card__loading">
-          جاري تحميل الطلبات...
+          {{ localeService.uiText('adminDashboardOrdersLoading') }}
+        </div>
+
+      } @else if (ordersState() === 'error') {
+
+        <div class="orders-card__empty" role="alert" data-testid="dashboard-orders-error">
+          <strong>{{ localeService.uiText('adminDashboardOrdersLoadError') }}</strong>
+
+          <button
+            type="button"
+            class="dashboard-button"
+            data-testid="dashboard-orders-retry"
+            (click)="refresh()"
+          >
+            {{ localeService.uiText('adminDashboardRetry') }}
+          </button>
         </div>
 
       } @else if (!orders().length) {
 
         <div class="orders-card__empty">
-          <strong>لا توجد طلبات حديثة</strong>
-          <span>ستظهر الطلبات الجديدة هنا عند وصولها.</span>
+          <strong>{{ localeService.uiText('adminDashboardOrdersEmptyTitle') }}</strong>
+          <span>{{ localeService.uiText('adminDashboardOrdersEmptyHint') }}</span>
         </div>
 
       } @else {
@@ -160,13 +194,13 @@
 
             <thead>
               <tr>
-                <th scope="col">رقم الطلب</th>
-                <th scope="col">النوع</th>
-                <th scope="col">الوقت</th>
-                <th scope="col">العميل</th>
-                <th scope="col">الإجمالي</th>
-                <th scope="col">الحالة</th>
-                <th scope="col">الإجراء</th>
+                <th scope="col">{{ localeService.uiText('adminDashboardColOrderNumber') }}</th>
+                <th scope="col">{{ localeService.uiText('adminDashboardColType') }}</th>
+                <th scope="col">{{ localeService.uiText('adminDashboardColTime') }}</th>
+                <th scope="col">{{ localeService.uiText('adminDashboardColCustomer') }}</th>
+                <th scope="col">{{ localeService.uiText('adminDashboardColTotal') }}</th>
+                <th scope="col">{{ localeService.uiText('adminDashboardColStatus') }}</th>
+                <th scope="col">{{ localeService.uiText('adminDashboardColAction') }}</th>
               </tr>
             </thead>
 
@@ -198,7 +232,7 @@
 
                   <td>
                     <span class="orders-table__time">
-                      {{ order.createdAt | date:'short' }}
+                      {{ formatTime(order.createdAt) }}
                     </span>
                   </td>
 
@@ -236,7 +270,7 @@
                       routerLink="/admin/orders"
                       class="orders-table__details"
                     >
-                      تفاصيل
+                      {{ localeService.uiText('adminDashboardOrderDetails') }}
                     </a>
                   </td>
 
@@ -259,7 +293,7 @@
     <aside class="quick-actions">
 
       <header class="quick-actions__header">
-        <h3>إجراءات سريعة</h3>
+        <h3>{{ localeService.uiText('adminDashboardQuickActions') }}</h3>
 
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path
@@ -274,7 +308,7 @@
         routerLink="/admin/menu"
         class="quick-actions__primary"
       >
-        <span>إضافة طبق / صنف جديد</span>
+        <span>{{ localeService.uiText('adminDashboardQuickAddItem') }}</span>
 
         <span aria-hidden="true">＋</span>
       </a>
@@ -284,7 +318,7 @@
         routerLink="/admin/orders"
         class="quick-actions__link"
       >
-        <span>إدارة الطلبات</span>
+        <span>{{ localeService.uiText('adminDashboardQuickOrders') }}</span>
         <span aria-hidden="true">‹</span>
       </a>
 
@@ -293,7 +327,7 @@
         routerLink="/admin/tables"
         class="quick-actions__link"
       >
-        <span>إدارة الطاولات</span>
+        <span>{{ localeService.uiText('adminDashboardQuickTables') }}</span>
         <span aria-hidden="true">‹</span>
       </a>
 
@@ -302,7 +336,7 @@
         routerLink="/admin/staff"
         class="quick-actions__link"
       >
-        <span>إدارة الموظفين</span>
+        <span>{{ localeService.uiText('adminDashboardQuickStaff') }}</span>
         <span aria-hidden="true">‹</span>
       </a>
 
@@ -316,14 +350,14 @@
 
     <header class="activity-card__header">
       <div>
-        <h3>نشاط الطلبات</h3>
-        <p>آخر 7 أيام</p>
+        <h3>{{ localeService.uiText('adminDashboardActivityTitle') }}</h3>
+        <p>{{ localeService.uiText('adminDashboardActivityRange') }}</p>
       </div>
     </header>
 
     <div class="activity-card__chart">
       <div class="activity-card__placeholder">
-        سيتم عرض نشاط الطلبات هنا
+        {{ localeService.uiText('adminDashboardActivityPlaceholder') }}
       </div>
     </div>
 

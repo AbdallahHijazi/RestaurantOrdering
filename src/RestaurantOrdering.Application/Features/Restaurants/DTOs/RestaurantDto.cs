@@ -18,6 +18,10 @@ public class RestaurantDto
     public string AccentColor { get; init; } = RestaurantAccentColor.Default;
     public string PhoneNumber { get; init; } = string.Empty;
     public string? WhatsAppNumber { get; init; }
+    public string? CountryCode { get; init; }
+    public string? PhoneCountryCode { get; init; }
+    public string? Email { get; init; }
+    public string? City { get; init; }
     public string? AddressAr { get; init; }
     public string? AddressEn { get; init; }
     public decimal? Latitude { get; init; }

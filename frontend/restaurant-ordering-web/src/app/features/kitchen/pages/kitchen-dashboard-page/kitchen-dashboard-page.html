@@ -11,9 +11,13 @@
     </div>
 
     <div class="kitchen-page__actions">
+      <!--
+        No [restaurantId]: that input makes the switcher call the administration endpoint
+        /admin/restaurants/{id}/locales, which kitchen accounts may not read (it answers 403).
+        The switcher then offers the built-in languages without any extra request.
+      -->
       <app-language-switcher
         class="kitchen-page__language"
-        [restaurantId]="restaurantId()"
         [ariaLabel]="locale.uiText('adminLanguageGroup')"
       />
 
@@ -142,7 +146,7 @@
                         class="order-type-chip"
                         [class.order-type-chip--delivery]="order.orderType === OrderType.Delivery"
                       >
-                        {{ orderTypeLabel(order.orderType) }}
+                        {{ orderTypeLabel(order.orderType, order.tableName) }}
                       </span>
                     </div>
 
@@ -279,10 +283,16 @@
                 class="order-type-chip"
                 [class.order-type-chip--delivery]="details.orderType === OrderType.Delivery"
               >
-                {{ orderTypeLabel(details.orderType) }}
+                {{ orderTypeLabel(details.orderType, details.tableName) }}
               </span>
             </dd>
           </div>
+          @if (details.tableName?.trim()) {
+            <div>
+              <dt>{{ locale.uiText('kitchenFieldTable') }}</dt>
+              <dd data-testid="kitchen-details-table">{{ details.tableName }}</dd>
+            </div>
+          }
           <div>
             <dt>{{ locale.uiText('kitchenFieldCreatedAt') }}</dt>
             <dd>

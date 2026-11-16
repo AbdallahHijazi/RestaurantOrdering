@@ -31,6 +31,10 @@ public static class RestaurantMappings
         AccentColor = restaurant.AccentColor,
         PhoneNumber = restaurant.PhoneNumber,
         WhatsAppNumber = restaurant.WhatsAppNumber,
+        CountryCode = restaurant.CountryCode,
+        PhoneCountryCode = restaurant.PhoneCountryCode,
+        Email = restaurant.Email,
+        City = restaurant.City,
         AddressAr = PublishedTranslationDualRead.ResolveOptional(
             arTranslation?.Address, arTranslation?.PublishedSourceVersion, restaurant.ContentVersion, restaurant.AddressAr),
         AddressEn = PublishedTranslationDualRead.ResolveOptional(

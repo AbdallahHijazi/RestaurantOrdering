@@ -17,7 +17,7 @@ import { shouldShowFinancialAmount, orderItemDisplayName } from '../../../../sha
 import { formatOrderDateTime } from '../../../../shared/orders/order-date-time.util';
 import { formatOrderCurrency } from '../../../../shared/orders/order-money.util';
 import { getOrderStatusLabel } from '../../../../shared/orders/order-status-label.util';
-import { getOrderTypeLabel } from '../../../../shared/orders/order-type-label.util';
+import { getOrderTypeLabelWithTable } from '../../../../shared/orders/order-type-label.util';
 import {
   KITCHEN_BOARD_STATUSES,
   KITCHEN_ORDERS_PAGE_SIZE,
@@ -58,7 +58,6 @@ export class KitchenDashboardPage {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly locale = inject(LocaleService);
-  protected readonly restaurantId = computed(() => this.authService.restaurantId());
   protected readonly boardColumns = KITCHEN_BOARD_STATUSES;
   protected readonly OrderStatus = OrderStatus;
   protected readonly OrderType = OrderType;
@@ -223,8 +222,8 @@ export class KitchenDashboardPage {
     return this.itemCountByOrderId().get(order.id) ?? null;
   }
 
-  protected orderTypeLabel(orderType: OrderType): string {
-    return getOrderTypeLabel(orderType, this.locale.locale());
+  protected orderTypeLabel(orderType: OrderType, tableName?: string | null): string {
+    return getOrderTypeLabelWithTable(orderType, this.locale.locale(), tableName);
   }
 
   protected statusLabel(status: OrderStatus): string {
