@@ -10,6 +10,10 @@
   --checkout-danger: var(--restaurant-danger);
   --checkout-shadow: var(--restaurant-shadow-md);
   --checkout-radius: var(--restaurant-radius-xl, 1.25rem);
+  /* Interactive controls sit on a brighter surface than the panel so they read as editable. */
+  --checkout-field-bg: var(--restaurant-surface-elevated);
+  --checkout-field-border: var(--restaurant-border-strong);
+  --checkout-disabled-bg: var(--restaurant-surface-muted);
 
   position: fixed;
   inset: 0;
@@ -133,18 +137,18 @@
 }
 
 .public-checkout__label {
-  color: var(--checkout-muted);
+  color: var(--checkout-text);
   font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .public-checkout__field input,
 .public-checkout__field textarea {
   width: 100%;
-  border: 1px solid var(--checkout-border);
+  border: 1.5px solid var(--checkout-field-border);
   border-radius: 0.75rem;
-  background: var(--checkout-surface-soft);
+  background: var(--checkout-field-bg);
   color: var(--checkout-text);
   font: inherit;
   outline: none;
@@ -167,14 +171,30 @@
 
 .public-checkout__field input::placeholder,
 .public-checkout__field textarea::placeholder {
-  color: var(--restaurant-subtle-text);
+  color: var(--restaurant-muted-text);
+  opacity: 0.8;
+}
+
+.public-checkout__field input:hover:not(:disabled):not(:focus),
+.public-checkout__field textarea:hover:not(:disabled):not(:focus) {
+  border-color: color-mix(in srgb, var(--checkout-accent) 55%, var(--checkout-field-border));
 }
 
 .public-checkout__field input:focus,
 .public-checkout__field textarea:focus {
   border-color: var(--checkout-accent);
-  background: var(--checkout-surface);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--checkout-accent) 12%, transparent);
+  background: var(--checkout-field-bg);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--checkout-accent) 22%, transparent);
+}
+
+.public-checkout__field input:disabled,
+.public-checkout__field textarea:disabled {
+  border-style: dashed;
+  border-color: var(--checkout-border);
+  background: var(--checkout-disabled-bg);
+  color: var(--checkout-muted);
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .public-checkout__grid {
@@ -199,10 +219,10 @@
   gap: 0.75rem;
   min-height: 7.25rem;
   padding: 1.125rem 0.75rem;
-  border: 2px solid var(--checkout-border);
+  border: 2px solid var(--checkout-field-border);
   border-radius: 1rem;
-  background: var(--checkout-surface-soft);
-  color: var(--checkout-muted);
+  background: var(--checkout-field-bg);
+  color: var(--checkout-text);
   font: inherit;
   text-align: center;
   cursor: pointer;
@@ -221,7 +241,8 @@
 }
 
 .public-checkout__type-card:hover:not(:disabled):not(.public-checkout__type-card--active) {
-  background: var(--restaurant-surface-muted);
+  border-color: color-mix(in srgb, var(--checkout-accent) 55%, var(--checkout-field-border));
+  background: var(--checkout-field-bg);
   transform: translateY(-2px);
 }
 
@@ -233,18 +254,28 @@
 .public-checkout__type-card--active {
   border-color: var(--checkout-accent);
   color: var(--checkout-accent);
-  background: color-mix(in srgb, var(--checkout-accent) 5%, var(--checkout-surface));
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--checkout-accent) 8%, transparent);
+  background: color-mix(in srgb, var(--checkout-accent) 12%, var(--checkout-field-bg));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--checkout-accent) 22%, transparent);
 }
 
+.public-checkout__type-card--active strong {
+  font-weight: 800;
+}
+
+/* Genuinely unavailable option: flat, dashed, dimmed - clearly not interactive. */
 .public-checkout__type-card:disabled {
-  opacity: 0.55;
+  border-style: dashed;
+  border-color: var(--checkout-border);
+  background: var(--checkout-disabled-bg);
+  color: var(--checkout-muted);
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .public-checkout__type-helper {
   margin: 0.625rem 0 0;
-  color: var(--checkout-muted);
+  color: var(--checkout-text);
+  opacity: 0.8;
   font-size: 0.75rem;
   line-height: 1.6;
 }
@@ -286,8 +317,9 @@
   height: 1.25rem;
   display: grid;
   place-items: center;
-  border: 2px solid var(--checkout-border);
+  border: 2px solid var(--checkout-field-border);
   border-radius: 50%;
+  background: var(--checkout-field-bg);
 }
 
 .public-checkout__type-card--active .public-checkout__type-radio {
@@ -424,7 +456,7 @@
 
 .public-checkout__secondary {
   flex: 1 1 12rem;
-  border: 1px solid var(--checkout-border);
+  border: 1.5px solid var(--checkout-field-border);
   color: var(--checkout-text);
   background: var(--checkout-surface);
 }

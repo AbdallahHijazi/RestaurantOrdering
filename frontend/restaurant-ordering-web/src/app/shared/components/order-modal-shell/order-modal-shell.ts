@@ -24,7 +24,7 @@ export class ModalShell implements OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private triggerElement: HTMLElement | null = null;
-  private detachFromBody: (() => void) | null = null;
+  private detachFromBody: ((destroy?: boolean) => void) | null = null;
 
   readonly open = input(false);
   readonly title = input.required<string>();
@@ -59,14 +59,10 @@ export class ModalShell implements OnDestroy {
         queueMicrotask(() => this.triggerElement?.focus?.());
       }
 
-      onCleanup(() => {
-        document.body.classList.remove('order-modal-scroll-lock');
-        this.detachFromBody?.();
-        this.detachFromBody = null;
-        if (this.elementRef.nativeElement.parentNode === document.body) {
-          this.elementRef.nativeElement.remove();
-        }
-      });
+      // Only drop the scroll lock here. Restoring/removing the host is handled by the branches above
+      // (open -> closed) and by ngOnDestroy; doing it in a cleanup would run after Angular has
+      // already removed the node on teardown and re-insert a dead ghost overlay.
+      onCleanup(() => document.body.classList.remove('order-modal-scroll-lock'));
     });
   }
 
@@ -91,7 +87,7 @@ export class ModalShell implements OnDestroy {
 
   ngOnDestroy(): void {
     document.body.classList.remove('order-modal-scroll-lock');
-    this.detachFromBody?.();
+    this.detachFromBody?.(true);
     this.detachFromBody = null;
     if (this.elementRef.nativeElement.parentNode === document.body) {
       this.elementRef.nativeElement.remove();

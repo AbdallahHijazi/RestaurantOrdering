@@ -22,6 +22,61 @@ class HostComponent {
   readonly open = signal(false);
 }
 
+@Component({
+  imports: [OrderModalShell],
+  template: `
+    @if (mounted()) {
+      <app-order-modal-shell
+        [open]="open()"
+        title="Mounted modal"
+        closeLabel="Close"
+        testId="mounted-order-modal"
+        (closed)="open.set(false)"
+      >
+        <p>Body</p>
+      </app-order-modal-shell>
+    }
+  `,
+})
+class ConditionalHostComponent {
+  readonly mounted = signal(true);
+  readonly open = signal(true);
+}
+
+describe('OrderModalShell teardown', () => {
+  afterEach(() => {
+    document.body.classList.remove('order-modal-scroll-lock');
+    document.querySelectorAll('app-modal-shell, app-order-modal-shell').forEach((node) => node.remove());
+  });
+
+  it('leaves no ghost overlay when its view is destroyed while open', async () => {
+    const fixture = TestBed.createComponent(ConditionalHostComponent);
+    fixture.detectChanges();
+    expect(document.body.querySelector('[data-testid="mounted-order-modal"]')).toBeTruthy();
+
+    // Same tick: close and tear the @if view down (what the order confirmation used to do).
+    fixture.componentInstance.open.set(false);
+    fixture.componentInstance.mounted.set(false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(document.querySelector('app-order-modal-shell')).toBeNull();
+    expect(document.querySelector('[data-testid="order-modal-backdrop"]')).toBeNull();
+    expect(document.body.classList.contains('order-modal-scroll-lock')).toBe(false);
+  });
+
+  it('leaves no ghost overlay when destroyed while still open', async () => {
+    const fixture = TestBed.createComponent(ConditionalHostComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.mounted.set(false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(document.querySelector('app-order-modal-shell')).toBeNull();
+  });
+});
+
 describe('OrderModalShell', () => {
   let fixture: ComponentFixture<HostComponent>;
 

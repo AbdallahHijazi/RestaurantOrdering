@@ -396,11 +396,8 @@ export class MenuPage implements OnDestroy {
     this.confirmationOpen.set(false);
     this.syncBodyScrollLock();
     this.restoreFocus();
-    queueMicrotask(() => {
-      if (!this.confirmationOpen()) {
-        this.orderConfirmation.set(null);
-      }
-    });
+    // The confirmation DTO is intentionally kept: tearing the modal's view down in the same tick
+    // as closing it is what used to leave a ghost overlay behind. The next order replaces it.
   }
 
   protected returnToMenuFromConfirmation(): void {

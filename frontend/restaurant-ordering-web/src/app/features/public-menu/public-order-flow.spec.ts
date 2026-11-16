@@ -376,6 +376,66 @@ describe('Public order flow', () => {
     expect(cart.isEmpty()).toBe(true);
   });
 
+  it('resets checkout form state after a successful order', async () => {
+    const fixture = TestBed.createComponent(PublicCheckoutPanel);
+    fixture.componentRef.setInput('open', true);
+    fixture.componentRef.setInput('slug', 'restaurant-a');
+    fixture.componentRef.setInput('orderSettings', settings);
+    fixture.detectChanges();
+
+    const placed = vi.fn();
+    fixture.componentInstance.orderPlaced.subscribe(placed);
+    fixture.componentInstance['guestName'].set('Guest');
+    fixture.componentInstance['guestPhone'].set('+966500000000');
+    fixture.componentInstance['orderNotes'].set('no onions');
+    fixture.componentInstance['deliveryAddress'].set('Street 1');
+    fixture.componentInstance['submit']();
+
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/orders`)
+      .flush({
+        orderId: '22222222-2222-2222-2222-222222222222',
+        orderNumber: 'ORD-77',
+        orderType: ORDER_TYPE_PICKUP,
+        orderStatus: 1,
+        subtotal: 28,
+        discountAmount: 0,
+        taxAmount: 0,
+        deliveryFee: 0,
+        totalAmount: 28,
+        currencyCode: 'SAR',
+        createdAt: '2026-06-04T12:00:00Z',
+        items: [],
+      });
+
+    expect(placed).toHaveBeenCalledTimes(1);
+    expect(placed.mock.calls[0]![0].orderNumber).toBe('ORD-77');
+    expect(fixture.componentInstance['guestName']()).toBe('');
+    expect(fixture.componentInstance['guestPhone']()).toBe('');
+    expect(fixture.componentInstance['orderNotes']()).toBe('');
+    expect(fixture.componentInstance['deliveryAddress']()).toBe('');
+    expect(fixture.componentInstance['errorMessage']()).toBeNull();
+  });
+
+  it('never creates a second order while the first request is in flight', () => {
+    const fixture = TestBed.createComponent(PublicCheckoutPanel);
+    fixture.componentRef.setInput('open', true);
+    fixture.componentRef.setInput('slug', 'restaurant-a');
+    fixture.componentRef.setInput('orderSettings', settings);
+    fixture.detectChanges();
+
+    fixture.componentInstance['guestName'].set('Guest');
+    fixture.componentInstance['guestPhone'].set('+966500000000');
+    fixture.componentInstance['submit']();
+    fixture.componentInstance['submit']();
+
+    const requests = httpMock.match(
+      `${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/orders`,
+    );
+    expect(requests.length).toBe(1);
+    requests[0]!.flush({}, { status: 500, statusText: 'Server Error' });
+  });
+
   it('renders confirmation from API response', async () => {
     const fixture = TestBed.createComponent(PublicOrderConfirmation);
     fixture.componentRef.setInput('open', true);

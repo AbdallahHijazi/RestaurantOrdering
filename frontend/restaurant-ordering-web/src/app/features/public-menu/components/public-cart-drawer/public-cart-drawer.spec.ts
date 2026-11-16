@@ -42,6 +42,18 @@ describe('PublicCartDrawer', () => {
     );
   });
 
+  it('presents as a centered modal, not an edge-attached drawer', () => {
+    const backdrop = fixture.nativeElement.querySelector('.public-cart-drawer') as HTMLElement;
+    const panel = fixture.nativeElement.querySelector('.public-cart-drawer__panel') as HTMLElement;
+    const backdropStyle = getComputedStyle(backdrop);
+    const panelStyle = getComputedStyle(panel);
+
+    expect(backdropStyle.alignItems).toBe('center');
+    expect(backdropStyle.justifyContent).toBe('center');
+    expect(panelStyle.maxHeight).not.toBe('none');
+    expect(panelStyle.borderRadius).not.toBe('0px');
+  });
+
   it('closes drawer on close button', () => {
     const closed = vi.fn();
     fixture.componentInstance.closed.subscribe(closed);
@@ -110,10 +122,11 @@ describe('PublicCartDrawer', () => {
     expect(checkout).toHaveBeenCalled();
   });
 
-  it('uses drawer width and mobile rules in stylesheet', () => {
+  it('uses centered modal sizing and mobile rules in stylesheet', () => {
     const css = readFileSync(resolve(__dirname, 'public-cart-drawer.scss'), 'utf8');
-    expect(css).toContain('min(31.25rem, 100vw)');
-    expect(css).toContain('100dvh');
+    expect(css).toContain('min(34rem, calc(100vw - 2rem))');
+    expect(css).toContain('max-height: calc(100dvh - 2rem)');
+    expect(css).not.toContain('justify-content: flex-end');
     expect(css).toContain('--cart-accent: var(--restaurant-accent)');
     expect(css).not.toContain('tailwind');
     expect(css).not.toContain('material-symbols');

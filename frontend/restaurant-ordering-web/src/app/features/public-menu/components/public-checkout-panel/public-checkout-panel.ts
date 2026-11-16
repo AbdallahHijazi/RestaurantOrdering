@@ -202,6 +202,11 @@ export class PublicCheckoutPanel {
   }
 
   protected submit(): void {
+    // Enter-key / double-click safety: a request is already in flight, never start a second order.
+    if (this.submitting()) {
+      return;
+    }
+
     this.errorMessage.set(null);
     this.syncDefaultOrderType();
 
@@ -222,6 +227,7 @@ export class PublicCheckoutPanel {
         this.submitting.set(false);
         this.checkoutAttempt = null;
         this.cart.clearCart();
+        this.resetForm();
         this.orderPlaced.emit(confirmation);
       },
       error: (failure: PublicOrderSubmitFailure) => {
@@ -233,6 +239,17 @@ export class PublicCheckoutPanel {
         }
       },
     });
+  }
+
+  /** Clears the temporary checkout state so the next order never shows the previous customer's data. */
+  private resetForm(): void {
+    this.guestName.set('');
+    this.guestPhone.set('');
+    this.deliveryAddress.set('');
+    this.orderNotes.set('');
+    this.errorMessage.set(null);
+    this.orderType.set(ORDER_TYPE_PICKUP);
+    this.syncDefaultOrderType();
   }
 
   protected buildRequest(): CreatePublicOrderApiRequest {
