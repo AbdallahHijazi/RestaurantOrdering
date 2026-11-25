@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { LocaleService } from '../../../../core/localization/locale';
 import { PublicCartService } from '../../data-access/public-cart.service';
-import { cartLineDisplayName, type PublicCartLineItem } from '../../models/public-cart.models';
+import { cartLineDisplayName, cartLineKey, type PublicCartLineItem } from '../../models/public-cart.models';
 import type { PublicRestaurantOrderSettings } from '../../models/public-menu.models';
 import { displayUnitPrice, estimateOrderTotals } from '../../utils/order-estimate.util';
 import { ORDER_TYPE_PICKUP } from '../../models/public-menu.models';
@@ -73,19 +73,8 @@ export class PublicCartDrawer {
     );
   }
 
-  private menuItemFromLine(line: PublicCartLineItem) {
-    return {
-      id: line.menuItemId,
-      categoryId: '',
-      name: line.name ?? null,
-      nameAr: line.nameAr,
-      nameEn: line.nameEn,
-      resolvedLocale: line.resolvedLocale ?? null,
-      price: line.price,
-      discountPrice: line.discountPrice,
-      imageUrl: line.imageUrl,
-      isAvailable: true,
-    };
+  protected lineKey(line: PublicCartLineItem): string {
+    return cartLineKey(line.menuItemId, line.menuItemSizeId);
   }
 
   protected formatMoney(amount: number): string {
@@ -119,21 +108,21 @@ export class PublicCartDrawer {
   }
 
   protected increment(lineId: string): void {
-    const line = this.cart.cartItems().find((item) => item.menuItemId === lineId);
+    const line = this.cart.cartItems().find((item) => this.lineKey(item) === lineId);
     if (!line) {
       return;
     }
 
-    this.cart.setQuantity(this.menuItemFromLine(line), line.quantity + 1);
+    this.cart.setStoredLineQuantity(line, line.quantity + 1);
   }
 
   protected decrement(lineId: string): void {
-    const line = this.cart.cartItems().find((item) => item.menuItemId === lineId);
+    const line = this.cart.cartItems().find((item) => this.lineKey(item) === lineId);
     if (!line) {
       return;
     }
 
-    this.cart.setQuantity(this.menuItemFromLine(line), line.quantity - 1);
+    this.cart.setStoredLineQuantity(line, line.quantity - 1);
   }
 
   protected remove(lineId: string): void {

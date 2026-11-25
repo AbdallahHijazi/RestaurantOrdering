@@ -1,4 +1,5 @@
 using MediatR;
+using RestaurantOrdering.Domain.Entities;
 using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Application.Features.MenuItems.DTOs;
 
@@ -14,5 +15,7 @@ public sealed record CreateCatalogMenuItemCommand(
     Guid? ImageFileId,
     int DisplayOrder,
     bool IsAvailable,
-    bool IsActive)
+    bool IsActive,
+    bool? UsesSizes = null,
+    IReadOnlyList<MenuItemSize>? Sizes = null)
     : IRequest<MenuItemDto>, IRestaurantDashboardScopedRequest;

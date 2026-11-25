@@ -27,6 +27,8 @@ public static class MenuItemMappings
             arTranslation?.Description, arTranslation?.PublishedSourceVersion, menuItem.ContentVersion, menuItem.DescriptionAr),
         DescriptionEn = PublishedTranslationDualRead.ResolveOptional(
             enTranslation?.Description, enTranslation?.PublishedSourceVersion, menuItem.ContentVersion, menuItem.DescriptionEn),
+        UsesSizes = menuItem.UsesSizes,
+        Sizes = menuItem.Sizes,
         Price = menuItem.Price,
         DiscountPrice = menuItem.DiscountPrice,
         DisplayOrder = menuItem.DisplayOrder,

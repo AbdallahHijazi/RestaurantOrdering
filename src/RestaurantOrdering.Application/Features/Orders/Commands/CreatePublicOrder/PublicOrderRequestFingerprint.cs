@@ -28,11 +28,15 @@ public static class PublicOrderRequestFingerprint
         Append(command.Notes);
         Append(command.Locale?.Trim().ToLowerInvariant());
 
-        foreach (var item in command.Items.OrderBy(i => i.MenuItemId))
+        foreach (var item in command.Items.OrderBy(i => i.MenuItemId).ThenBy(i => i.MenuItemSizeId))
         {
             Append(item.MenuItemId.ToString("N"));
             Append(item.Quantity.ToString(inv));
             Append(item.Notes);
+            if (item.MenuItemSizeId is { } sizeId)
+            {
+                Append(sizeId.ToString("N"));
+            }
             builder.Append('\u001e');
         }
 

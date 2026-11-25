@@ -75,3 +75,52 @@
   color: var(--restaurant-text);
   background: var(--menu-red, var(--restaurant-danger));
 }
+
+.item-pricing {
+  min-inline-size: 0;
+  display: grid;
+  gap: 0.625rem;
+  padding: 0.625rem;
+  border: 1px solid var(--restaurant-border, currentColor);
+  border-radius: 0.75rem;
+}
+
+.item-pricing__choices,
+.item-pricing__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.item-pricing__choices label,
+.item-pricing__actions button {
+  min-block-size: 44px;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--restaurant-border, currentColor);
+  border-radius: 0.5rem;
+}
+
+.menu-management-form .item-pricing__choices label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.375rem;
+  cursor: pointer;
+}
+
+.item-pricing__choices label:has(:checked) {
+  border-color: currentColor;
+  font-weight: 700;
+}
+
+.item-pricing__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr));
+  align-items: end;
+  gap: 0.5rem;
+}
+
+.item-pricing__row input:not([type='checkbox']) {
+  min-inline-size: 0;
+  inline-size: 100%;
+}

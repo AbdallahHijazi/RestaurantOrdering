@@ -37,16 +37,40 @@
       }
     </div>
 
-    @if (displayDescription()) {
-      <p class="public-menu-card__description">{{ displayDescription() }}</p>
-    } @else {
-      <span class="public-menu-card__description-spacer" aria-hidden="true"></span>
+    <p class="public-menu-card__description">{{ displayDescription() }}</p>
+
+    @if (item().usesSizes) {
+      <fieldset class="public-menu-card__sizes" [attr.aria-label]="ui().sizeChoose">
+        <div class="public-menu-card__chips">
+          @for (size of item().sizes; track size.id) {
+            <label class="public-menu-card__chip">
+              <input class="visually-hidden" type="radio" [name]="'meal-size-' + item().id"
+                [checked]="selectedSize()?.id === size.id"
+                [disabled]="!item().isAvailable || !size.isAvailable"
+                (change)="selectedSizeId.set(size.id)" />
+              <bdi class="public-menu-card__chip-face">{{ size.name }}</bdi>
+              @if (!size.isAvailable) {
+                <span class="visually-hidden">{{ ui().publicMenuItemUnavailable }}</span>
+              }
+            </label>
+          }
+        </div>
+      </fieldset>
     }
 
     <div class="public-menu-card__foot">
       <div class="public-menu-card__price-wrap">
-        <div class="public-menu-card__price-stack">
-          @if (displaySalePrice(); as salePrice) {
+        <div class="public-menu-card__price-stack" aria-live="polite">
+          @if (item().usesSizes) {
+            @if (startingPrice() !== null) {
+              <strong class="public-menu-card__price">
+                <span class="public-menu-card__from" [class.public-menu-card__from--reserved]="selectedSize()">
+                  {{ ui().sizeFrom }}
+                </span>
+                <bdi dir="ltr">{{ displayPrice() }}</bdi>
+              </strong>
+            }
+          } @else if (displaySalePrice(); as salePrice) {
             <strong class="public-menu-card__price"><bdi dir="ltr">{{ salePrice }}</bdi></strong>
             <span class="public-menu-card__price public-menu-card__price--original">
               <bdi dir="ltr">{{ displayPrice() }}</bdi>
@@ -60,53 +84,55 @@
         </span>
       </div>
 
-      @if (quantity() > 0) {
-        <div class="public-menu-card__quantity" role="group" [attr.aria-label]="displayName()">
+      <div class="public-menu-card__actions">
+        @if (displayedQuantity() > 0) {
+          <div class="public-menu-card__quantity" role="group" [attr.aria-label]="displayName()">
+            <button
+              type="button"
+              class="public-menu-card__qty-btn"
+              [attr.aria-label]="ui().publicCartDecrease"
+              (click)="decrement()"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M6 12h12" />
+              </svg>
+            </button>
+            <span aria-live="polite">{{ displayedQuantity() }}</span>
+            <button
+              type="button"
+              class="public-menu-card__qty-btn public-menu-card__qty-btn--add"
+              [attr.aria-label]="ui().publicCartIncrease"
+              (click)="increment()"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 6v12M6 12h12" />
+              </svg>
+            </button>
+          </div>
+        } @else {
           <button
             type="button"
-            class="public-menu-card__qty-btn"
-            [attr.aria-label]="ui().publicCartDecrease"
-            (click)="decrement()"
+            class="public-menu-card__add"
+            [class.public-menu-card__add--added]="justAdded()"
+            [disabled]="!item().isAvailable || (!!item().usesSizes && !selectedSize())"
+            data-testid="public-menu-add-to-cart"
+            [attr.aria-live]="justAdded() ? 'polite' : null"
+            (click)="addItem()"
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M6 12h12" />
-            </svg>
+            @if (justAdded()) {
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="m6 12 4 4 8-9" />
+              </svg>
+              <span>{{ ui().publicMenuAddedCheck }}</span>
+            } @else {
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              <span >{{ ui().publicMenuAddToCart }}</span>
+            }
           </button>
-          <span aria-live="polite">{{ quantity() }}</span>
-          <button
-            type="button"
-            class="public-menu-card__qty-btn public-menu-card__qty-btn--add"
-            [attr.aria-label]="ui().publicCartIncrease"
-            (click)="increment()"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M12 6v12M6 12h12" />
-            </svg>
-          </button>
-        </div>
-      } @else {
-        <button
-          type="button"
-          class="public-menu-card__add"
-          [class.public-menu-card__add--added]="justAdded()"
-          [disabled]="!item().isAvailable"
-          data-testid="public-menu-add-to-cart"
-          [attr.aria-live]="justAdded() ? 'polite' : null"
-          (click)="addItem()"
-        >
-          @if (justAdded()) {
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="m6 12 4 4 8-9" />
-            </svg>
-            <span class="visually-hidden">{{ ui().publicMenuAddedCheck }}</span>
-          } @else {
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            <span class="visually-hidden">{{ ui().publicMenuAddToCart }}</span>
-          }
-        </button>
-      }
+        }
+      </div>
     </div>
   </div>
 </article>

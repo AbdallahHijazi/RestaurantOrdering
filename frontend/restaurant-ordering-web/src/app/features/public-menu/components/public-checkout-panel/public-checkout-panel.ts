@@ -1,3 +1,4 @@
+import { cartLineDisplayName, cartLineKey, type PublicCartLineItem } from '../../models/public-cart.models';
 import {
   Component,
   HostListener,
@@ -143,6 +144,14 @@ export class PublicCheckoutPanel {
     }
   }
 
+  protected readonly cartLineKey = cartLineKey;
+
+  protected sizedLineName(line: PublicCartLineItem): string {
+    return cartLineDisplayName(line,
+      (locale, resolved, names, fallback) => this.localeService.pickResolvedTextForLocale(locale, resolved, names, fallback),
+      this.contentLocale());
+  }
+
   protected formatMoney(amount: number): string {
     return this.localeService.formatCurrency(
       amount,
@@ -269,6 +278,7 @@ export class PublicCheckoutPanel {
       locale: this.contentLocale().trim().toLowerCase() || null,
       items: this.cart.cartItems().map((line) => ({
         menuItemId: line.menuItemId,
+        ...(line.menuItemSizeId ? { menuItemSizeId: line.menuItemSizeId } : {}),
         quantity: line.quantity,
         notes: line.notes?.trim() || null,
       })),

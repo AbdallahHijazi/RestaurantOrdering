@@ -69,6 +69,7 @@ export function mapPublicMenuApiDto(dto: PublicMenuApiDto): PublicMenuPageData {
         descriptionAr: item.descriptionAr,
         descriptionEn: item.descriptionEn,
         description: item.description,
+        ...(item.usesSizes ? { usesSizes: true, sizes: item.sizes } : {}),
         price: item.price,
         discountPrice: item.discountPrice,
         imageUrl: resolveApiAssetUrl(item.imageUrl ?? null),

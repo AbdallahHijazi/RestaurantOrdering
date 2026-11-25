@@ -87,7 +87,9 @@ public sealed class AdminCatalogController : ControllerBase
             request.ImageFileId,
             request.DisplayOrder,
             request.IsAvailable,
-            request.IsActive);
+            request.IsActive,
+            request.UsesSizes,
+            request.Sizes);
 
         var result = await _sender.Send(command, cancellationToken);
         return StatusCode(StatusCodes.Status201Created, result);
@@ -114,7 +116,9 @@ public sealed class AdminCatalogController : ControllerBase
             request.ImageFileId,
             request.DisplayOrder,
             request.IsAvailable,
-            request.IsActive);
+            request.IsActive,
+            request.UsesSizes,
+            request.Sizes);
 
         var result = await _sender.Send(command, cancellationToken);
         return Ok(result);

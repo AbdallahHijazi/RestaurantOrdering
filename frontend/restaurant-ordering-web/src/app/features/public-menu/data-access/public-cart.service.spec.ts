@@ -61,6 +61,36 @@ describe('PublicCartService', () => {
     expect(service.quantityFor('item-a')).toBe(2);
   });
 
+  it('keeps sizes separate, merges the same size, and restores size lines from storage', () => {
+    service.initForRestaurant('cafe-a');
+    const sized = {
+      ...sampleItem, usesSizes: true,
+      sizes: [
+        { id: 'small', name: 'Small', price: 10, isAvailable: true, displayOrder: 1 },
+        { id: 'large', name: 'Large', price: 30, isAvailable: true, displayOrder: 2 },
+        { id: 'family', name: 'Family', price: 40, isAvailable: false, displayOrder: 3 },
+      ],
+    };
+    expect(service.addMenuItem(sized)).toBe(false);
+    expect(service.addMenuItem(sized, 'missing')).toBe(false);
+    expect(service.addMenuItem(sized, 'family')).toBe(false);
+    expect(service.addMenuItem(sized, 'small')).toBe(true);
+    expect(service.addMenuItem(sized, 'large', 2)).toBe(true);
+    expect(service.addMenuItem(sized, 'small', 3)).toBe(true);
+
+    service.initForRestaurant('cafe-b');
+    service.initForRestaurant('cafe-a');
+    expect(service.cartItems()).toMatchObject([
+      { menuItemSizeId: 'small', sizeName: 'Small', quantity: 4, price: 10, discountPrice: null },
+      { menuItemSizeId: 'large', sizeName: 'Large', quantity: 2, price: 30, discountPrice: null },
+    ]);
+    service.setStoredLineQuantity(service.cartItems()[1]!, 1);
+    expect(service.quantityFor(sized.id, 'large')).toBe(1);
+    expect(service.quantityFor(sized.id, 'small')).toBe(4);
+    service.removeItem('item-a:large');
+    expect(service.cartItems()).toHaveLength(1);
+  });
+
   it('does not allow quantity above 99', () => {
     service.initForRestaurant('cafe-a');
     service.setQuantity(sampleItem, 99);

@@ -19,6 +19,7 @@ export interface CreatePublicOrderApiRequest {
 /** Backend: CreatePublicOrderItemRequest */
 export interface CreatePublicOrderItemApiRequest {
   menuItemId: string;
+  menuItemSizeId?: string;
   quantity: number;
   notes?: string | null;
 }
@@ -42,6 +43,8 @@ export interface PublicOrderConfirmationApiDto {
 /** Backend: PublicOrderConfirmationItemDto */
 export interface PublicOrderConfirmationItemApiDto {
   menuItemId?: string | null;
+  menuItemSizeId?: string | null;
+  sizeName?: string | null;
   itemNameAr: string;
   itemNameEn?: string | null;
   displayedItemName?: string;

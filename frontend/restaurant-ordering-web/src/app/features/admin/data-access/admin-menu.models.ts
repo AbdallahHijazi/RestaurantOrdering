@@ -1,3 +1,5 @@
+import type { MenuItemSize } from '../../../shared/models/menu-item-size';
+
 /** Backend contract: CategoryDto */
 export interface AdminCategory {
   id: string;
@@ -37,6 +39,8 @@ export interface SaveCatalogCategoryRequest {
 
 /** Backend contract: MenuItemDto */
 export interface AdminMenuItem {
+  usesSizes?: boolean;
+  sizes?: readonly MenuItemSize[] | null;
   id: string;
   restaurantId: string;
   categoryId: string;
@@ -76,6 +80,8 @@ export interface SaveMenuItemRequest {
 
 /** Backend contract: CreateCatalogMenuItemRequest / UpdateCatalogMenuItemRequest */
 export interface SaveCatalogMenuItemRequest {
+  usesSizes?: boolean;
+  sizes?: readonly (Omit<MenuItemSize, 'id'> & { id?: string | null })[];
   categoryId: string;
   name: string;
   description?: string | null;

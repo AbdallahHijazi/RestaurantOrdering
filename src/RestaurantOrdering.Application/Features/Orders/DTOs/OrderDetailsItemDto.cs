@@ -3,6 +3,8 @@ namespace RestaurantOrdering.Application.Features.Orders.DTOs;
 public class OrderDetailsItemDto
 {
     public Guid Id { get; init; }
+    public Guid? MenuItemSizeId { get; init; }
+    public string? SizeName { get; init; }
     public Guid? MenuItemId { get; init; }
     public string ItemNameAr { get; init; } = string.Empty;
     public string? ItemNameEn { get; init; }

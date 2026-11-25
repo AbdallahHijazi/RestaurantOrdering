@@ -29,8 +29,8 @@ function addFirstItem(fixture: ComponentFixture<MenuPage>): void {
   fixture.detectChanges();
 }
 
-function createActivatedRoute(slug: string | null): ActivatedRoute {
-  const emptyQuery = convertToParamMap({});
+function createActivatedRoute(slug: string | null, lang?: string): ActivatedRoute {
+  const emptyQuery = convertToParamMap(lang ? { lang } : {});
   const childSnapshot = { paramMap: convertToParamMap({}), queryParamMap: emptyQuery };
   const parentSnapshot = {
     paramMap: convertToParamMap(slug ? { slug } : {}),
@@ -86,13 +86,13 @@ describe('MenuPage', () => {
     sessionStorage.clear();
   });
 
-  async function createPage(slug: string | null): Promise<ComponentFixture<MenuPage>> {
+  async function createPage(slug: string | null, lang?: string): Promise<ComponentFixture<MenuPage>> {
     await TestBed.configureTestingModule({
       imports: [MenuPage],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: ActivatedRoute, useValue: createActivatedRoute(slug) },
+        { provide: ActivatedRoute, useValue: createActivatedRoute(slug, lang) },
       ],
     }).compileComponents();
 
@@ -106,6 +106,88 @@ describe('MenuPage', () => {
     await fixture.whenStable();
     fixture.detectChanges();
   }
+
+  it.each(['ar', 'en'] as const)('keeps each selected size synchronized with the cart in %s', async (lang) => {
+    const fixture = await createPage('sized-cafe', lang);
+    const request = expectMenuRequest(httpMock, 'sized-cafe', lang);
+    request.flush({
+      id: 'cafe', slug: 'sized-cafe', nameAr: 'مطعم', nameEn: 'Cafe', currencyCode: 'SAR',
+      resolvedLocale: lang, direction: lang === 'en' ? 'ltr' : 'rtl',
+      categories: [{
+        id: 'category', nameAr: 'وجبات', nameEn: 'Meals', displayOrder: 1,
+        items: [{
+          id: 'sized-item', categoryId: 'category', nameAr: 'طبق', nameEn: 'Dish',
+          price: 100, displayOrder: 1, usesSizes: true,
+          sizes: [
+            { id: 'sold-out', name: 'Small', price: 1, isAvailable: false, displayOrder: 1 },
+            { id: 'regular', name: 'Regular', price: 10, isAvailable: true, displayOrder: 2 },
+            { id: 'family', name: 'Family', price: 30, isAvailable: true, displayOrder: 3 },
+          ],
+        }],
+      }],
+    });
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const displayedPrice = root.querySelector('.public-menu-card__price')!.textContent;
+    const locale = TestBed.inject(LocaleService);
+    expect(displayedPrice).toContain(locale.uiText('sizeFrom'));
+    expect(displayedPrice).toContain(locale.formatCurrency(10, 'SAR', 'SA'));
+    const card = root.querySelector<HTMLElement>('[data-testid="public-menu-item-card"]')!;
+    expect(root.querySelector('[dir]')?.getAttribute('dir')).toBe(lang === 'en' ? 'ltr' : 'rtl');
+    const options = card.querySelectorAll<HTMLInputElement>('input[type=radio]');
+    const addButton = () => card.querySelector<HTMLButtonElement>('[data-testid="public-menu-add-to-cart"]');
+    const displayedQuantity = () => card.querySelector('.public-menu-card__quantity > span')?.textContent?.trim();
+    const adjust = (button: 'increase' | 'decrease') => {
+      const selector = button === 'increase'
+        ? '.public-menu-card__qty-btn--add'
+        : '.public-menu-card__qty-btn:not(.public-menu-card__qty-btn--add)';
+      card.querySelector<HTMLButtonElement>(selector)!.click();
+      fixture.detectChanges();
+    };
+    const cart = TestBed.inject(PublicCartService);
+    expect(options).toHaveLength(3);
+    expect(options[0]?.disabled).toBe(true);
+    expect(addButton()?.disabled).toBe(true);
+    options[2]!.click();
+    fixture.detectChanges();
+    expect(cart.cartItems()).toHaveLength(0);
+    expect(card.querySelector('.public-menu-card__price')?.textContent).toContain(locale.formatCurrency(30));
+    addButton()!.click();
+    fixture.detectChanges();
+    expect(addButton()).toBeNull();
+    expect(displayedQuantity()).toBe('1');
+    adjust('increase');
+    expect(displayedQuantity()).toBe('2');
+
+    options[1]!.click();
+    fixture.detectChanges();
+    expect(displayedQuantity()).toBeUndefined();
+    addButton()!.click();
+    fixture.detectChanges();
+    expect(displayedQuantity()).toBe('1');
+    expect(cart.cartItems()).toMatchObject([
+      { menuItemId: 'sized-item', menuItemSizeId: 'family', quantity: 2, price: 30 },
+      { menuItemId: 'sized-item', menuItemSizeId: 'regular', quantity: 1, price: 10 },
+    ]);
+    options[2]!.click();
+    fixture.detectChanges();
+    expect(displayedQuantity()).toBe('2');
+    adjust('decrease');
+    expect(displayedQuantity()).toBe('1');
+    expect(cart.quantityFor('sized-item', 'regular')).toBe(1);
+
+    const family = cart.cartItems().find((line) => line.menuItemSizeId === 'family')!;
+    cart.setStoredLineQuantity(family, 3);
+    fixture.detectChanges();
+    expect(displayedQuantity()).toBe('3');
+
+    adjust('decrease');
+    adjust('decrease');
+    adjust('decrease');
+    expect(addButton()?.disabled).toBe(false);
+    expect(cart.cartItems().map((line) => line.menuItemSizeId)).toEqual(['regular']);
+    expect(document.body.querySelector('[data-testid="public-size-dialog"]')).toBeNull();
+  }, 15_000);
 
   it('shows staff login link to /login', async () => {
     const fixture = await createPage('demo');

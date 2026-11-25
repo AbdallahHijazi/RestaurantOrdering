@@ -581,8 +581,14 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("RestaurantId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Sizes")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("UsesSizes")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -875,6 +881,9 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("MenuItemId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("MenuItemSizeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Notes")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -884,6 +893,10 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("SizeName")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<decimal>("TotalPrice")
                         .HasPrecision(10, 2)

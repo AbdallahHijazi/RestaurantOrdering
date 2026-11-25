@@ -62,6 +62,8 @@ type ModalKind = 'category' | 'item' | 'deleteCategory' | 'deleteItem' | null;
 type AvailabilityFilter = 'all' | 'available' | 'unavailable';
 
 
+import type { MenuItemSize } from '../../../../shared/models/menu-item-size';
+
 @Component({
   selector: 'app-menu-management-page',
   imports: [
@@ -171,11 +173,16 @@ export class MenuManagementPage {
     );
   });
 
+  protected readonly itemSizes = this.fb.array<ReturnType<MenuManagementPage['sizeRow']>>([]);
+  protected readonly sizeValidationVisible = signal(false);
+
   protected readonly itemForm = this.fb.group(
     {
       categoryId: ['', [Validators.required]],
       name: ['', [Validators.required, Validators.maxLength(200)]],
       description: ['', [Validators.maxLength(1000)]],
+      usesSizes: [false],
+      confirmSinglePrice: [false],
       price: [0, [Validators.required, Validators.min(0)]],
       discountPrice: [null as number | null],
       displayOrder: [0, [Validators.required, Validators.min(0)]],
@@ -811,7 +818,62 @@ export class MenuManagementPage {
     this.modalKind.set('deleteCategory');
   }
 
+  private sizeRow(displayOrder: number, size?: MenuItemSize) {
+    return this.fb.group({
+      id: [size?.id ?? null as string | null],
+      name: [size?.name ?? ''],
+      price: [size?.price ?? null as number | null],
+      isAvailable: [size?.isAvailable ?? true],
+      displayOrder: [displayOrder],
+    });
+  }
+
+  protected addSize(name = ''): void {
+    const nextOrder = Math.max(0, ...this.itemSizes.getRawValue().map((size) => size.displayOrder)) + 1;
+    const row = this.sizeRow(nextOrder);
+    row.controls.name.setValue(name);
+    this.itemSizes.push(row);
+    this.itemForm.markAsDirty();
+  }
+
+  protected removeSize(index: number): void {
+    this.itemSizes.removeAt(index);
+    this.itemForm.markAsDirty();
+  }
+
+  protected applySizePreset(key: 'standard' | 'family'): void {
+    if (this.itemSizes.length) return;
+    this.locale.uiText(key === 'standard' ? 'sizePresetStandard' : 'sizePresetFamily')
+      .split(' / ').forEach((name) => this.addSize(name));
+  }
+
+  protected sizeValidationError(): string | null {
+    const raw = this.itemForm.getRawValue();
+    if (!raw.usesSizes) {
+      return this.editingItem()?.usesSizes && !raw.confirmSinglePrice
+        ? this.locale.uiText('sizeConfirmConversion') : null;
+    }
+
+    const sizes = this.itemSizes.getRawValue();
+    if (sizes.length < 2) return this.locale.uiText('sizeMinimum');
+    const names = new Set<string>();
+    for (const size of sizes) {
+      const name = size.name.trim().normalize('NFKC').toUpperCase();
+      if (!name || size.name.trim().length > 150 || names.has(name) ||
+          size.price === null || !Number.isFinite(size.price) || size.price < 0 ||
+          size.price > 99_999_999.99 || Number(size.price.toFixed(2)) !== size.price ||
+          !Number.isInteger(size.displayOrder) || size.displayOrder < 0 || size.displayOrder > 2147483647) {
+        return this.locale.uiText('sizeInvalid');
+      }
+      names.add(name);
+    }
+    return raw.isAvailable && raw.isActive && !sizes.some((size) => size.isAvailable)
+      ? this.locale.uiText('sizeAvailabilityRequired') : null;
+  }
+
   protected openCreateItem(): void {
+    this.itemSizes.clear();
+    this.sizeValidationVisible.set(false);
     this.resetModalState();
     const selected = this.selectedCategoryId();
     this.editingItem.set(null);
@@ -835,6 +897,9 @@ export class MenuManagementPage {
   }
 
   protected openEditItem(item: AdminMenuItem): void {
+    this.itemSizes.clear();
+    this.sizeValidationVisible.set(false);
+    for (const size of item.sizes ?? []) this.itemSizes.push(this.sizeRow(size.displayOrder, size));
     this.resetModalState();
     this.editingItem.set(item);
     this.resetItemFormState();
@@ -861,6 +926,7 @@ export class MenuManagementPage {
       categoryId: item.categoryId,
       name: resolved.content.name,
       description: resolved.content.description,
+      usesSizes: item.usesSizes ?? false,
       price: item.price,
       discountPrice: item.discountPrice ?? null,
       displayOrder: item.displayOrder,
@@ -981,7 +1047,11 @@ export class MenuManagementPage {
     }
 
     this.itemForm.markAllAsTouched();
-    if (this.itemForm.invalid || this.imageValidationError()) {
+    this.sizeValidationVisible.set(true);
+    if ((!this.itemForm.controls.usesSizes.value && this.itemForm.invalid) ||
+        this.itemForm.controls.name.invalid || this.itemForm.controls.categoryId.invalid ||
+        this.itemForm.controls.description.invalid || this.itemForm.controls.displayOrder.invalid ||
+        this.sizeValidationError() || this.imageValidationError()) {
       return;
     }
 
@@ -1366,8 +1436,12 @@ export class MenuManagementPage {
       imageFileId,
       name: raw.name.trim(),
       description: raw.description.trim() || null,
-      price: raw.price,
-      discountPrice: raw.discountPrice,
+      ...(raw.usesSizes || this.editingItem()?.usesSizes ? { usesSizes: raw.usesSizes } : {}),
+      sizes: raw.usesSizes
+        ? this.itemSizes.getRawValue().map((size) => ({ ...size, price: size.price! }))
+        : undefined,
+      price: raw.usesSizes ? (this.editingItem()?.price ?? 0) : raw.price,
+      discountPrice: raw.usesSizes ? (this.editingItem()?.discountPrice ?? null) : raw.discountPrice,
       displayOrder: raw.displayOrder,
       isAvailable: raw.isAvailable,
       isActive: raw.isActive,

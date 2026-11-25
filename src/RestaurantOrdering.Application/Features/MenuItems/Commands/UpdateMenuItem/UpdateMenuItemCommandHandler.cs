@@ -91,6 +91,7 @@ public sealed class UpdateMenuItemCommandHandler
         menuItem.DisplayOrder = request.DisplayOrder;
         menuItem.IsAvailable = request.IsAvailable;
         menuItem.IsActive = request.IsActive;
+        MenuItemSizeConfiguration.Apply(menuItem, null, null, request.IsAvailable && request.IsActive);
         menuItem.UpdatedAt = _dateTimeService.UtcNow;
 
         if (menuItem.ContentVersion > contentVersionBefore)

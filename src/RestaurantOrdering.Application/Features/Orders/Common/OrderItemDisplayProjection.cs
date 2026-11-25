@@ -28,6 +28,12 @@ public static class OrderItemDisplayProjection
         return "—";
     }
 
+    private static string ResolveOrderItemName(OrderItem item)
+    {
+        var name = ResolveDisplayedItemName(item.DisplayedItemName, item.ItemNameAr, item.ItemNameEn);
+        return item.SizeName is null ? name : $"{name} — {item.SizeName}";
+    }
+
     public static string ResolveDisplayedLocale(string? displayedLocale, string? orderResolvedLocale)
     {
         if (!string.IsNullOrWhiteSpace(displayedLocale))
@@ -48,12 +54,11 @@ public static class OrderItemDisplayProjection
         {
             Id = item.Id,
             MenuItemId = item.MenuItemId,
+            MenuItemSizeId = item.MenuItemSizeId,
+            SizeName = item.SizeName,
             ItemNameAr = item.ItemNameAr,
             ItemNameEn = item.ItemNameEn,
-            DisplayedItemName = ResolveDisplayedItemName(
-                item.DisplayedItemName,
-                item.ItemNameAr,
-                item.ItemNameEn),
+            DisplayedItemName = ResolveOrderItemName(item),
             DisplayedLocale = ResolveDisplayedLocale(item.DisplayedLocale, orderResolvedLocale),
             UnitPrice = item.UnitPrice,
             Quantity = item.Quantity,
@@ -67,12 +72,11 @@ public static class OrderItemDisplayProjection
         new()
         {
             MenuItemId = item.MenuItemId,
+            MenuItemSizeId = item.MenuItemSizeId,
+            SizeName = item.SizeName,
             ItemNameAr = item.ItemNameAr,
             ItemNameEn = item.ItemNameEn,
-            DisplayedItemName = ResolveDisplayedItemName(
-                item.DisplayedItemName,
-                item.ItemNameAr,
-                item.ItemNameEn),
+            DisplayedItemName = ResolveOrderItemName(item),
             DisplayedLocale = ResolveDisplayedLocale(item.DisplayedLocale, orderResolvedLocale),
             UnitPrice = item.UnitPrice,
             Quantity = item.Quantity,

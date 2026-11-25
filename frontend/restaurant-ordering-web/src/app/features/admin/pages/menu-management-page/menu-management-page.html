@@ -489,16 +489,67 @@
             {{ locale.uiText('adminMenuFormDescription') }}
             <textarea rows="2" formControlName="description" data-testid="menu-item-description"></textarea>
           </label>
-          <label>
-            {{ locale.uiText('adminMenuFormPrice') }}
-            <input type="number" min="0" step="0.01" formControlName="price" />
-          </label>
-          <label>
-            {{ locale.uiText('adminMenuFormDiscountPrice') }}
-            <input type="number" min="0" step="0.01" formControlName="discountPrice" />
-          </label>
-          @if (itemForm.hasError('discountGreaterThanPrice')) {
-            <p class="menu-management-field-error">{{ locale.uiText('adminMenuDiscountInvalid') }}</p>
+          <fieldset class="item-pricing">
+            <legend>{{ locale.uiText('sizePricing') }}</legend>
+            <div class="item-pricing__choices">
+              <label><input type="radio" formControlName="usesSizes" [value]="false" /> {{ locale.uiText('sizeSingle') }}</label>
+              <label><input type="radio" formControlName="usesSizes" [value]="true" /> {{ locale.uiText('sizeMultiple') }}</label>
+            </div>
+          </fieldset>
+          @if (itemForm.controls.usesSizes.value) {
+            <fieldset class="item-pricing">
+              <legend>{{ locale.uiText('sizeMultiple') }}</legend>
+              @for (row of itemSizes.controls; track row; let index = $index) {
+                <div class="item-pricing__row" [formGroup]="row">
+                  <label>
+                    {{ locale.uiText('adminMenuFormName') }}
+                    <input dir="auto" type="text" maxlength="150" formControlName="name" />
+                  </label>
+                  <label>
+                    {{ locale.uiText('adminMenuFormPrice') }}
+                    <input type="number" min="0" step="0.01" formControlName="price" />
+                  </label>
+                  <label>
+                    {{ locale.uiText('adminMenuFormDisplayOrder') }}
+                    <input type="number" min="0" step="1" formControlName="displayOrder" />
+                  </label>
+                  <label class="menu-management-checkbox">
+                    <input type="checkbox" formControlName="isAvailable" />
+                    {{ locale.uiText('adminMenuFormIsAvailable') }}
+                  </label>
+                  <button type="button" appIconButton icon="x" variant="danger"
+                    [label]="locale.uiText('sizeRemove')" (click)="removeSize(index)"></button>
+                </div>
+              }
+              <div class="item-pricing__actions">
+                <button type="button" appIconButton icon="plus" [label]="locale.uiText('sizeAdd')" (click)="addSize()"></button>
+                @if (!itemSizes.length) {
+                  <button type="button" (click)="applySizePreset('standard')">{{ locale.uiText('sizePresetStandard') }}</button>
+                  <button type="button" (click)="applySizePreset('family')">{{ locale.uiText('sizePresetFamily') }}</button>
+                }
+              </div>
+            </fieldset>
+          } @else {
+            @if (editingItem()?.usesSizes) {
+              <label class="menu-management-checkbox">
+                <input type="checkbox" formControlName="confirmSinglePrice" />
+                {{ locale.uiText('sizeConfirmConversion') }}
+              </label>
+            }
+            <label>
+              {{ locale.uiText('adminMenuFormPrice') }}
+              <input type="number" min="0" step="0.01" formControlName="price" />
+            </label>
+            <label>
+              {{ locale.uiText('adminMenuFormDiscountPrice') }}
+              <input type="number" min="0" step="0.01" formControlName="discountPrice" />
+            </label>
+            @if (itemForm.hasError('discountGreaterThanPrice')) {
+              <p class="menu-management-field-error">{{ locale.uiText('adminMenuDiscountInvalid') }}</p>
+            }
+          }
+          @if (sizeValidationVisible() && sizeValidationError(); as error) {
+            <p class="menu-management-field-error" role="alert">{{ error }}</p>
           }
           <label>
             {{ locale.uiText('adminMenuFormDisplayOrder') }}

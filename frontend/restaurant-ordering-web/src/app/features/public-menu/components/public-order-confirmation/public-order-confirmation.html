@@ -27,6 +27,11 @@
           <bdi class="identifier-ltr" dir="ltr">{{ order.orderNumber }}</bdi>
         </strong>
       </div>
+      @for (line of order.items; track $index) {
+        @if (line.sizeName) {
+          <p class="public-confirmation__size-line"><bdi>{{ lineName(line) }}</bdi> × {{ line.quantity }}</p>
+        }
+      }
     </div>
 
     <div orderModalFooter class="public-confirmation__footer">

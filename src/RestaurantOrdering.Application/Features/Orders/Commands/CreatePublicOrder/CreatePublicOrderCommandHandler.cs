@@ -145,7 +145,8 @@ public sealed class CreatePublicOrderCommandHandler
                 item.RestaurantId == restaurant.Id &&
                 !item.IsDeleted &&
                 item.IsActive &&
-                item.IsAvailable)
+                item.IsAvailable && (!item.UsesSizes || _context.Categories.Any(category =>
+                    category.Id == item.CategoryId && category.RestaurantId == restaurant.Id && category.IsActive)))
             .ToListAsync(cancellationToken);
 
         var menuItemsById = menuItems.ToDictionary(item => item.Id);
@@ -178,13 +179,24 @@ public sealed class CreatePublicOrderCommandHandler
                 menuItem.DescriptionAr,
                 menuItem.DescriptionEn);
 
-            var unitPrice = menuItem.DiscountPrice ?? menuItem.Price;
+            var size = menuItem.UsesSizes && requestItem.MenuItemSizeId.HasValue
+                ? menuItem.Sizes?.SingleOrDefault(option => option.Id == requestItem.MenuItemSizeId && option.IsAvailable)
+                : null;
+
+            if ((menuItem.UsesSizes && size is null) || (!menuItem.UsesSizes && requestItem.MenuItemSizeId.HasValue))
+            {
+                throw new ConflictException("Select an available size for this menu item.");
+            }
+
+            var unitPrice = size?.Price ?? menuItem.DiscountPrice ?? menuItem.Price;
             var totalPrice = unitPrice * requestItem.Quantity;
             subtotal += totalPrice;
 
             orderItems.Add(new OrderItem
             {
                 MenuItemId = requestItem.MenuItemId,
+                MenuItemSizeId = size?.Id,
+                SizeName = size?.Name,
                 ItemNameAr = menuItem.NameAr,
                 ItemNameEn = menuItem.NameEn,
                 DisplayedItemName = localizedItem.Name,

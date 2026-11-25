@@ -103,6 +103,20 @@ describe('PublicCheckoutPanel', () => {
     expect(fixture.nativeElement.querySelector('[name="deliveryAddress"]')).toBeTruthy();
   });
 
+  it('shows the selected size in the summary and sends its ID with the quantity', () => {
+    cart.clearCart();
+    cart.addMenuItem({ ...item, usesSizes: true, sizes: [
+      { id: 'family-size', name: 'Family', price: 30, isAvailable: true, displayOrder: 1 },
+    ] }, 'family-size', 2);
+    fixture.detectChanges();
+
+    const summary = fixture.nativeElement.querySelector('[data-testid="public-checkout-summary"]');
+    expect(summary.textContent).toContain('Family');
+    expect(fixture.componentInstance['buildRequest']().items).toEqual([
+      { menuItemId: item.id, menuItemSizeId: 'family-size', quantity: 2, notes: null },
+    ]);
+  });
+
   it('includes locale in submit payload', () => {
     fixture.componentRef.setInput('contentLocale', 'fr');
     fixture.detectChanges();

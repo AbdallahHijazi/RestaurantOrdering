@@ -93,6 +93,7 @@ public sealed class UpdateCatalogMenuItemCommandHandler
         menuItem.DisplayOrder = request.DisplayOrder;
         menuItem.IsAvailable = request.IsAvailable;
         menuItem.IsActive = request.IsActive;
+        MenuItemSizeConfiguration.Apply(menuItem, request.UsesSizes, request.Sizes, request.IsAvailable && request.IsActive);
         menuItem.UpdatedAt = _dateTimeService.UtcNow;
 
         if (contentChanged)

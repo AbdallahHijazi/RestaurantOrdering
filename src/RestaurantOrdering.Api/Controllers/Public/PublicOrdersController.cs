@@ -47,7 +47,8 @@ public sealed class PublicOrdersController : ControllerBase
                 .Select(item => new ApplicationCreatePublicOrderItemRequest(
                     item.MenuItemId,
                     item.Quantity,
-                    item.Notes))
+                    item.Notes,
+                    item.MenuItemSizeId))
                 .ToList()
                 ?? [],
             request.IdempotencyKey ?? Request.Headers["Idempotency-Key"].FirstOrDefault());

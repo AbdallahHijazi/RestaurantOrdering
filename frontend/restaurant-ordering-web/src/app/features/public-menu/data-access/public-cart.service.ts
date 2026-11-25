@@ -1,5 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
-import type { PublicCartLineItem, PublicCartSnapshot } from '../models/public-cart.models';
+import { cartLineKey, type PublicCartLineItem, type PublicCartSnapshot } from '../models/public-cart.models';
+import type { MenuItemSize } from '../../../shared/models/menu-item-size';
 import type { PublicMenuItem } from '../models/public-menu.models';
 import { ORDER_TYPE_DINE_IN } from '../models/public-menu.models';
 import type { ResolvedPublicTable } from './public-tables.models';
@@ -20,6 +21,8 @@ function isValidLine(raw: unknown): raw is PublicCartLineItem {
   return (
     typeof line.menuItemId === 'string' &&
     line.menuItemId.length > 0 &&
+    (line.menuItemSizeId == null || (typeof line.menuItemSizeId === 'string' &&
+      line.menuItemSizeId.length > 0 && typeof line.sizeName === 'string')) &&
     (typeof line.nameAr === 'string' || typeof line.name === 'string') &&
     typeof line.price === 'number' &&
     Number.isFinite(line.price) &&
@@ -59,32 +62,21 @@ export interface PublicTableSession {
   zone: string | null;
 }
 
-function createCartLineFromItem(item: PublicMenuItem, quantity: number): PublicCartLineItem {
+function createCartLineFromItem(
+  item: PublicMenuItem, quantity: number, size?: MenuItemSize,
+): PublicCartLineItem {
   return {
     menuItemId: item.id,
+    ...(size ? { menuItemSizeId: size.id, sizeName: size.name } : {}),
     name: item.name ?? null,
     nameAr: item.nameAr || item.name || '',
     nameEn: item.nameEn,
     resolvedLocale: item.resolvedLocale ?? null,
     imageUrl: item.imageUrl,
-    price: item.price,
-    discountPrice: item.discountPrice,
+    price: size?.price ?? item.price,
+    discountPrice: size ? null : item.discountPrice,
     quantity,
     notes: null,
-  };
-}
-
-function mergeCartLineWithItem(line: PublicCartLineItem, item: PublicMenuItem, quantity: number): PublicCartLineItem {
-  return {
-    ...line,
-    name: item.name ?? line.name ?? null,
-    nameAr: item.nameAr || item.name || '',
-    nameEn: item.nameEn,
-    resolvedLocale: item.resolvedLocale ?? line.resolvedLocale ?? null,
-    imageUrl: item.imageUrl,
-    price: item.price,
-    discountPrice: item.discountPrice,
-    quantity,
   };
 }
 
@@ -138,50 +130,54 @@ export class PublicCartService {
     return this.tableSession()?.token ?? null;
   }
 
-  quantityFor(menuItemId: string): number {
-    return this.items().find((line) => line.menuItemId === menuItemId)?.quantity ?? 0;
+  quantityFor(menuItemId: string, menuItemSizeId?: string): number {
+    const key = cartLineKey(menuItemId, menuItemSizeId);
+    return this.items().find((line) => cartLineKey(line.menuItemId, line.menuItemSizeId) === key)?.quantity ?? 0;
   }
 
-  addMenuItem(item: PublicMenuItem): boolean {
-    if (!item.isAvailable) {
-      return false;
-    }
-
-    const existing = this.items().find((line) => line.menuItemId === item.id);
-    if (existing) {
-      return this.setQuantity(item, Math.min(PUBLIC_CART_MAX_QUANTITY, existing.quantity + 1));
-    }
-
-    this.items.update((lines) => [...lines, createCartLineFromItem(item, PUBLIC_CART_MIN_QUANTITY)]);
-    this.persist();
-    return true;
+  addMenuItem(item: PublicMenuItem, sizeId?: string, quantity = PUBLIC_CART_MIN_QUANTITY): boolean {
+    return this.setQuantity(item, this.quantityFor(item.id, sizeId) + quantity, sizeId);
   }
 
-  setQuantity(item: PublicMenuItem, quantity: number): boolean {
-    if (!item.isAvailable && quantity > 0) {
-      return false;
-    }
-
+  setQuantity(item: PublicMenuItem, quantity: number, sizeId?: string): boolean {
     if (quantity <= 0) {
-      this.removeItem(item.id);
+      this.removeItem(cartLineKey(item.id, sizeId));
       return true;
     }
 
-    const clamped = Math.min(PUBLIC_CART_MAX_QUANTITY, Math.max(PUBLIC_CART_MIN_QUANTITY, quantity));
-    const existingIndex = this.items().findIndex((line) => line.menuItemId === item.id);
-
-    if (existingIndex === -1) {
-      this.items.update((lines) => [...lines, createCartLineFromItem(item, clamped)]);
-    } else {
-      this.items.update((lines) =>
-        lines.map((line, index) =>
-          index === existingIndex ? mergeCartLineWithItem(line, item, clamped) : line,
-        ),
-      );
+    const size = item.usesSizes && sizeId
+      ? item.sizes?.find((option) => option.id === sizeId && option.isAvailable)
+      : undefined;
+    if (!item.isAvailable || (item.usesSizes ? !size : !!sizeId)) {
+      return false;
     }
 
-    this.persist();
+    this.setLineQuantity(createCartLineFromItem(item, quantity, size), quantity);
     return true;
+  }
+
+  setStoredLineQuantity(line: PublicCartLineItem, quantity: number): void {
+    this.setLineQuantity(line, quantity);
+  }
+
+  private setLineQuantity(line: PublicCartLineItem, quantity: number): void {
+    const key = cartLineKey(line.menuItemId, line.menuItemSizeId);
+    if (quantity <= 0) {
+      this.removeItem(key);
+      return;
+    }
+
+    const clamped = Math.min(PUBLIC_CART_MAX_QUANTITY, Math.max(PUBLIC_CART_MIN_QUANTITY, quantity));
+    this.items.update((lines) => {
+      const index = lines.findIndex((existing) => cartLineKey(existing.menuItemId, existing.menuItemSizeId) === key);
+      if (index < 0) return [...lines, { ...line, quantity: clamped }];
+
+      return lines.map((existing, current) => current === index
+        ? { ...line, quantity: clamped, notes: existing.notes, name: line.name ?? existing.name ?? null,
+            resolvedLocale: line.resolvedLocale ?? existing.resolvedLocale ?? null }
+        : existing);
+    });
+    this.persist();
   }
 
   incrementItem(item: PublicMenuItem): boolean {
@@ -203,8 +199,8 @@ export class PublicCartService {
     this.setQuantity(item, current - 1);
   }
 
-  removeItem(menuItemId: string): void {
-    const next = this.items().filter((line) => line.menuItemId !== menuItemId);
+  removeItem(key: string): void {
+    const next = this.items().filter((line) => cartLineKey(line.menuItemId, line.menuItemSizeId) !== key);
     if (next.length === this.items().length) {
       return;
     }
@@ -213,11 +209,11 @@ export class PublicCartService {
     this.persist();
   }
 
-  updateItemNotes(menuItemId: string, notes: string | null): void {
+  updateItemNotes(key: string, notes: string | null): void {
     const trimmed = notes?.trim() ? notes.trim() : null;
     this.items.update((lines) =>
       lines.map((line) =>
-        line.menuItemId === menuItemId ? { ...line, notes: trimmed } : line,
+        cartLineKey(line.menuItemId, line.menuItemSizeId) === key ? { ...line, notes: trimmed } : line,
       ),
     );
     this.persist();

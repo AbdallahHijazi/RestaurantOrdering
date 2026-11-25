@@ -120,6 +120,45 @@ describe('MenuManagementPage', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="menu-meals-count"]')?.textContent).toContain('1');
   });
 
+  it('keeps size presets editable and discards changes on close', () => {
+    const page = fixture.componentInstance;
+    page['openCreateItem']();
+    fixture.detectChanges();
+    expect(document.body.querySelector('input[formcontrolname="price"]')).toBeTruthy();
+
+    page['itemForm'].controls.usesSizes.setValue(true);
+    page['applySizePreset']('standard');
+    fixture.detectChanges();
+    expect(page['itemSizes'].length).toBe(3);
+    expect(page['itemSizes'].at(0).controls.price.value).toBeNull();
+    page['itemSizes'].at(0).controls.name.setValue('Custom');
+    page['applySizePreset']('family');
+    expect(page['itemSizes'].at(0).controls.name.value).toBe('Custom');
+    page['dismissModal']();
+    page['openCreateItem']();
+    expect(page['itemSizes'].length).toBe(0);
+    expect(page['itemForm'].controls.usesSizes.value).toBe(false);
+  });
+
+  it('requires explicit confirmation when converting a saved multiple-size item', () => {
+    const page = fixture.componentInstance;
+    page['openEditItem']({
+      ...sampleItem(),
+      usesSizes: true,
+      sizes: [
+        { id: 'small', name: 'Small', price: 10, isAvailable: true, displayOrder: 1 },
+        { id: 'family', name: 'Family', price: 25, isAvailable: false, displayOrder: 2 },
+      ],
+    });
+    const controls = page['itemForm'].controls;
+    controls.usesSizes.setValue(false);
+    expect(page['sizeValidationError']()).toBe(TestBed.inject(LocaleService).uiText('sizeConfirmConversion'));
+    controls.confirmSinglePrice.setValue(true);
+    expect(page['sizeValidationError']()).toBeNull();
+    controls.usesSizes.setValue(true);
+    expect(page['itemSizes'].getRawValue().map(size => size.id)).toEqual(['small', 'family']);
+  });
+
   it('opens add category modal with dynamic name field and primary language notice', () => {
     fixture.nativeElement.querySelector('[data-testid="menu-add-category-button"]').click();
     fixture.detectChanges();

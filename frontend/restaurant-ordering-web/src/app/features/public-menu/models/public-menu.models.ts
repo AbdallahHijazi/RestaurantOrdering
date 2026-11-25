@@ -1,3 +1,5 @@
+import type { MenuItemSize } from '../../../shared/models/menu-item-size';
+
 import type {
   AdminUiLocale,
   ContentLocale,
@@ -43,6 +45,8 @@ export interface PublicMenuCategory {
 }
 
 export interface PublicMenuItem {
+  usesSizes?: boolean;
+  sizes?: readonly MenuItemSize[] | null;
   id: string;
   categoryId: string;
   nameAr: string;

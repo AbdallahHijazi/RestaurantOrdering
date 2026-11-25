@@ -166,8 +166,11 @@
                           [countryCode]="data.restaurant.countryCode"
                           [imageFallback]="imageFallback"
                           [quantity]="itemQuantity(item.id)"
+                          [sizeQuantityFor]="itemQuantity"
                           (added)="onItemAdded($event)"
+                          (sizeAdded)="onItemAdded($event.item, $event.sizeId)"
                           (quantityChange)="onItemQuantityChange(item, $event)"
+                          (sizeQuantityChange)="onItemQuantityChange(item, $event.quantity, $event.sizeId)"
                         />
                       }
                     </div>
@@ -180,21 +183,17 @@
       </div>
     </main>
 
-    <footer class="menu-page__footer">
-      <div class="menu-page__container menu-page__footer-inner">
-        <div class="menu-page__footer-brand">
-          <strong>{{ restaurantName() }}</strong>
-          @if (restaurantAddress(); as address) {
-            <span>{{ address }}</span>
-          }
-          <span>{{ ui().publicMenuFooterCopy }}</span>
-        </div>
-
-        <a routerLink="/login" class="menu-page__admin-entry">
-          {{ ui().publicStaffLogin }}
-        </a>
-      </div>
-    </footer>
+    <app-public-menu-footer
+      [name]="restaurantName()"
+      [description]="restaurantDescription()"
+      [logoUrl]="data.restaurant.logoUrl ?? null"
+      [address]="restaurantAddress()"
+      [phone]="data.restaurant.phoneNumber ?? null"
+      [whatsApp]="data.restaurant.whatsAppNumber ?? null"
+      [categories]="footerCategories()"
+      (browseMenu)="scrollToMenu()"
+      (categorySelected)="onFooterCategory($event)"
+    />
 
     <app-public-menu-floating-cart
       [visible]="floatingCartVisible()"

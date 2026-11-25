@@ -207,6 +207,14 @@
             </div>
 
             <section class="public-checkout__summary" data-testid="public-checkout-summary">
+              @for (line of cart.cartItems(); track cartLineKey(line.menuItemId, line.menuItemSizeId)) {
+                @if (line.sizeName) {
+                  <div class="public-checkout__summary-row">
+                    <span><bdi>{{ sizedLineName(line) }}</bdi> ? {{ line.quantity }}</span>
+                    <strong><bdi dir="ltr">{{ formatMoney(line.price * line.quantity) }}</bdi></strong>
+                  </div>
+                }
+              }
               <div class="public-checkout__summary-row">
                 <span>{{ ui().publicCartSubtotal }}</span>
                 <strong>

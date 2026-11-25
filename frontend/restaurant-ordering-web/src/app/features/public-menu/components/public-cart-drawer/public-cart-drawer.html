@@ -88,8 +88,8 @@
           </div>
         } @else {
           <div class="public-cart-drawer__items" data-testid="public-cart-drawer-items">
-            @for (line of cart.cartItems(); track line.menuItemId) {
-              <article class="public-cart-drawer__line" [attr.data-testid]="'public-cart-line-' + line.menuItemId">
+            @for (line of cart.cartItems(); track lineKey(line)) {
+              <article class="public-cart-drawer__line" [attr.data-testid]="'public-cart-line-' + lineKey(line)">
                 <div class="public-cart-drawer__thumb">
                   <img
                     [src]="imageSrc(line)"
@@ -125,7 +125,7 @@
                         class="public-cart-drawer__qty-btn"
                         data-testid="public-cart-decrease"
                         [attr.aria-label]="ui().publicCartDecrease"
-                        (click)="decrement(line.menuItemId)"
+                        (click)="decrement(lineKey(line))"
                       >
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                           <path d="M6 12h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
@@ -137,7 +137,7 @@
                         class="public-cart-drawer__qty-btn"
                         data-testid="public-cart-increase"
                         [attr.aria-label]="ui().publicCartIncrease"
-                        (click)="increment(line.menuItemId)"
+                        (click)="increment(lineKey(line))"
                       >
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                           <path
@@ -157,7 +157,7 @@
                       size="sm"
                       [label]="ui().publicCartRemove"
                       data-testid="public-cart-remove"
-                      (click)="remove(line.menuItemId)"
+                      (click)="remove(lineKey(line))"
                     ></button>
                   </div>
                 </div>

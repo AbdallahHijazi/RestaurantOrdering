@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using RestaurantOrdering.Domain.Entities;
 
@@ -20,6 +22,15 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
 
         builder.Property(m => m.DescriptionEn)
             .HasMaxLength(500);
+
+        builder.Property(m => m.Sizes)
+            .HasConversion(
+                sizes => JsonSerializer.Serialize(sizes, (JsonSerializerOptions?)null),
+                json => JsonSerializer.Deserialize<MenuItemSize[]>(json, (JsonSerializerOptions?)null),
+                new ValueComparer<IReadOnlyList<MenuItemSize>?>(
+                    (left, right) => left == right || (left != null && right != null && left.SequenceEqual(right)),
+                    sizes => sizes == null ? 0 : sizes.Aggregate(0, (hash, size) => HashCode.Combine(hash, size)),
+                    sizes => sizes == null ? null : sizes.ToArray()));
 
         builder.Property(m => m.Price)
             .HasPrecision(10, 2)

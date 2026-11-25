@@ -20,11 +20,14 @@ export class MenuItemCard {
   readonly currencyCode = input('SAR');
   readonly countryCode = input('SA');
   readonly quantity = input(0);
+  readonly sizeQuantityFor = input<(itemId: string, sizeId: string) => number>();
   readonly imageFallback = input<string | null>(null);
   readonly displayLocale = input<ContentLocale | null>(null);
 
   readonly added = output<PublicMenuItem>();
+  readonly sizeAdded = output<{ item: PublicMenuItem; sizeId: string }>();
   readonly quantityChange = output<number>();
+  readonly sizeQuantityChange = output<{ sizeId: string; quantity: number }>();
 
   protected readonly localeService = inject(LocaleService);
   private readonly directionService = inject(DirectionService);
@@ -71,9 +74,27 @@ export class MenuItemCard {
     );
   });
 
+  protected readonly selectedSizeId = signal<string | null>(null);
+  protected readonly selectedSize = computed(() =>
+    this.item().sizes?.find((size) => size.id === this.selectedSizeId() && size.isAvailable),
+  );
+
+  protected readonly displayedQuantity = computed(() => {
+    const item = this.item();
+    if (!item.usesSizes) return this.quantity();
+
+    const size = this.selectedSize();
+    return size ? (this.sizeQuantityFor()?.(item.id, size.id) ?? 0) : 0;
+  });
+
+  protected readonly startingPrice = computed(() => {
+    const options = this.item().sizes?.filter((size) => size.isAvailable) ?? [];
+    return options.length ? Math.min(...options.map((size) => size.price)) : null;
+  });
+
   protected readonly displayPrice = computed(() =>
     this.localeService.formatCurrency(
-      this.item().price,
+      this.item().usesSizes ? (this.selectedSize()?.price ?? this.startingPrice() ?? 0) : this.item().price,
       this.currencyCode(),
       this.countryCode(),
     ),
@@ -81,7 +102,7 @@ export class MenuItemCard {
 
   protected readonly displaySalePrice = computed(() => {
     const item = this.item();
-    if (!hasValidDiscount(item.price, item.discountPrice)) {
+    if (item.usesSizes || !hasValidDiscount(item.price, item.discountPrice)) {
       return null;
     }
 
@@ -109,17 +130,35 @@ export class MenuItemCard {
       return;
     }
 
+    if (this.item().usesSizes) {
+      const size = this.selectedSize();
+      if (!size) return;
+      this.sizeAdded.emit({ item: this.item(), sizeId: size.id });
+      return;
+    }
+
     this.added.emit(this.item());
     this.justAdded.set(true);
     window.setTimeout(() => this.justAdded.set(false), 1200);
   }
 
   protected increment(): void {
-    const next = Math.min(PUBLIC_CART_MAX_QUANTITY, this.quantity() + 1);
-    this.quantityChange.emit(next);
+    this.changeQuantity(Math.min(PUBLIC_CART_MAX_QUANTITY, this.displayedQuantity() + 1));
   }
 
   protected decrement(): void {
-    this.quantityChange.emit(Math.max(0, this.quantity() - 1));
+    this.changeQuantity(Math.max(0, this.displayedQuantity() - 1));
+  }
+
+  private changeQuantity(quantity: number): void {
+    if (!this.item().usesSizes) {
+      this.quantityChange.emit(quantity);
+      return;
+    }
+
+    const size = this.selectedSize();
+    if (size) {
+      this.sizeQuantityChange.emit({ sizeId: size.id, quantity });
+    }
   }
 }

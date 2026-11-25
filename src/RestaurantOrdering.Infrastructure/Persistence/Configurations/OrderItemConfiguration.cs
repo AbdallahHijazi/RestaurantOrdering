@@ -8,6 +8,8 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
 {
     public void Configure(EntityTypeBuilder<OrderItem> builder)
     {
+        builder.Property(oi => oi.SizeName).HasMaxLength(150);
+
         builder.Property(oi => oi.ItemNameAr)
             .HasMaxLength(150)
             .IsRequired();

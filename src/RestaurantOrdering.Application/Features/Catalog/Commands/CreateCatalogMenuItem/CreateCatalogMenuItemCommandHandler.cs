@@ -88,6 +88,8 @@ public sealed class CreateCatalogMenuItemCommandHandler
 
         PrimaryLocaleLegacySync.ApplyMenuItem(menuItem, defaultLocale, name, description);
 
+        MenuItemSizeConfiguration.Apply(menuItem, request.UsesSizes, request.Sizes, request.IsAvailable && request.IsActive);
+
         _context.MenuItems.Add(menuItem);
         await _publishedTranslationWriter.UpsertMenuItemPrimaryLocaleTranslationAsync(
             menuItem,

@@ -29,6 +29,10 @@ import { PublicCartDrawer } from '../../components/public-cart-drawer/public-car
 import { PublicCheckoutPanel } from '../../components/public-checkout-panel/public-checkout-panel';
 import { PublicOrderConfirmation } from '../../components/public-order-confirmation/public-order-confirmation';
 import { PublicMenuFloatingCart } from '../../components/public-menu-floating-cart/public-menu-floating-cart';
+import {
+  PublicMenuFooter,
+  type PublicFooterCategory,
+} from '../../components/public-menu-footer/public-menu-footer';
 import { PublicMenuToast } from '../../components/public-menu-toast/public-menu-toast';
 import { PublicCartService } from '../../data-access/public-cart.service';
 import {
@@ -38,10 +42,10 @@ import {
 import type { PublicOrderConfirmationApiDto } from '../../data-access/public-order.dto';
 import { PublicTablesApiService } from '../../data-access/public-tables-api.service';
 import { MOCK_IMAGE_FALLBACK } from '../../data-access/public-menu-mock.data';
-import type {
-  PublicMenuCategory,
-  PublicMenuItem,
-  PublicMenuPageData,
+import {
+  type PublicMenuCategory,
+  type PublicMenuItem,
+  type PublicMenuPageData,
 } from '../../models/public-menu.models';
 import { PUBLIC_MENU_ALL_CATEGORIES_ID } from '../../public-menu.constants';
 import { readRouteParam } from './route-param.util';
@@ -70,6 +74,7 @@ interface PublicMenuSection {
     PublicOrderConfirmation,
     PublicMenuFloatingCart,
     PublicMenuToast,
+    PublicMenuFooter,
   ],
   templateUrl: './menu-page.html',
   styleUrl: './menu-page.scss',
@@ -154,6 +159,45 @@ export class MenuPage implements OnDestroy {
       { ar: restaurant.addressAr, en: restaurant.addressEn },
       '',
     );
+  });
+
+  protected readonly restaurantDescription = computed(() => {
+    const restaurant = this.menuData()?.restaurant;
+    if (!restaurant) {
+      return null;
+    }
+
+    return (
+      this.localeService.pickResolvedTextForLocale(
+        this.contentLocale(),
+        restaurant.description,
+        { ar: restaurant.descriptionAr, en: restaurant.descriptionEn },
+        '',
+      ) || null
+    );
+  });
+
+  /** Real categories (display order, localized) offered as footer shortcuts; capped to keep the footer compact. */
+  protected readonly footerCategories = computed<PublicFooterCategory[]>(() => {
+    const data = this.menuData();
+    if (!data) {
+      return [];
+    }
+
+    const withItems = new Set(data.items.map((item) => item.categoryId));
+    return [...data.categories]
+      .filter((category) => withItems.has(category.id))
+      .sort((first, second) => first.displayOrder - second.displayOrder)
+      .slice(0, 6)
+      .map((category) => ({
+        id: category.id,
+        title: this.localeService.pickResolvedTextForLocale(
+          this.contentLocale(),
+          category.name,
+          { ar: category.nameAr, en: category.nameEn },
+          category.nameAr,
+        ),
+      }));
   });
 
   protected readonly ui = this.localeService.ui;
@@ -331,12 +375,18 @@ export class MenuPage implements OnDestroy {
     this.searchQuery.set(value);
   }
 
+  protected onFooterCategory(categoryId: string): void {
+    this.selectCategory(categoryId);
+    // Wait for the filtered sections to render before scrolling to them.
+    queueMicrotask(() => this.scrollToMenu());
+  }
+
   protected scrollToMenu(): void {
     this.menuSection()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  protected onItemAdded(item: PublicMenuItem): void {
-    if (!this.cart.addMenuItem(item)) {
+  protected onItemAdded(item: PublicMenuItem, sizeId?: string): void {
+    if (!(sizeId ? this.cart.addMenuItem(item, sizeId) : this.cart.addMenuItem(item))) {
       return;
     }
 
@@ -350,12 +400,11 @@ export class MenuPage implements OnDestroy {
     this.showFloatingCartTemporarily();
   }
 
-  protected itemQuantity(itemId: string): number {
-    return this.cart.quantityFor(itemId);
-  }
+  protected readonly itemQuantity = (itemId: string, sizeId?: string): number =>
+    this.cart.quantityFor(itemId, sizeId);
 
-  protected onItemQuantityChange(item: PublicMenuItem, quantity: number): void {
-    if (this.cart.setQuantity(item, quantity) && quantity > 0) {
+  protected onItemQuantityChange(item: PublicMenuItem, quantity: number, sizeId?: string): void {
+    if (this.cart.setQuantity(item, quantity, sizeId) && quantity > 0) {
       this.showFloatingCartTemporarily();
     }
   }

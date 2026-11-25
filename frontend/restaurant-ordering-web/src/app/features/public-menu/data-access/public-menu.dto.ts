@@ -1,3 +1,5 @@
+import type { MenuItemSize } from '../../../shared/models/menu-item-size';
+
 /** Backend contract: GET /api/v1/public/restaurants/{slug}/menu */
 export interface PublicMenuApiDto {
   id: string;
@@ -57,6 +59,8 @@ export interface PublicMenuCategoryApiDto {
 }
 
 export interface PublicMenuItemApiDto {
+  usesSizes?: boolean;
+  sizes?: readonly MenuItemSize[] | null;
   id: string;
   categoryId: string;
   imageFileId?: string | null;

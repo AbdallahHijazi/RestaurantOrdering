@@ -959,6 +959,20 @@ export type UiTextKey =
   | 'publicMenuChefChoice'
   | 'publicMenuAvailable'
   | 'publicMenuItemUnavailable'
+  | 'sizePricing'
+  | 'sizeSingle'
+  | 'sizeMultiple'
+  | 'sizeAdd'
+  | 'sizeRemove'
+  | 'sizePresetStandard'
+  | 'sizePresetFamily'
+  | 'sizeConfirmConversion'
+  | 'sizeMinimum'
+  | 'sizeInvalid'
+  | 'sizeAvailabilityRequired'
+  | 'sizeChoose'
+  | 'sizeFrom'
+  | 'sizeQuantity'
   | 'publicMenuAddToCart'
   | 'publicMenuAddedCheck'
   | 'publicMenuCartReady'
@@ -968,6 +982,14 @@ export type UiTextKey =
   | 'publicMenuConfirmOrder'
   | 'publicMenuCancel'
   | 'publicMenuFooterCopy'
+  | 'publicFooterBrowseMenu'
+  | 'publicFooterExplore'
+  | 'publicFooterCategories'
+  | 'publicFooterContact'
+  | 'publicFooterAddress'
+  | 'publicFooterPhone'
+  | 'publicFooterWhatsApp'
+  | 'publicFooterRights'
   | 'publicMenuToastAdded'
   | 'languageArabic'
   | 'languageEnglish';
@@ -1794,6 +1816,20 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     publicMenuChefChoice: 'اختيار الشيف',
     publicMenuAvailable: 'متاح الآن',
     publicMenuItemUnavailable: 'غير متاح',
+    sizePricing: 'طريقة تسعير الوجبة',
+    sizeSingle: 'سعر واحد',
+    sizeMultiple: 'أحجام متعددة',
+    sizeAdd: 'إضافة حجم',
+    sizeRemove: 'إزالة الحجم',
+    sizePresetStandard: 'صغير / وسط / كبير',
+    sizePresetFamily: 'عادي / دبل / عائلي',
+    sizeConfirmConversion: 'أؤكد البيع بسعر واحد مع الاحتفاظ بإعدادات الأحجام.',
+    sizeMinimum: 'أضف حجمين على الأقل.',
+    sizeInvalid: 'أدخل أسماء فريدة وأسعارًا بمنزلتين عشريتين كحد أقصى وترتيبًا صحيحًا لكل حجم.',
+    sizeAvailabilityRequired: 'أتح حجمًا واحدًا على الأقل للبيع.',
+    sizeChoose: 'اختر الحجم',
+    sizeFrom: 'ابتداءً من',
+    sizeQuantity: 'الكمية',
     publicMenuAddToCart: 'إضافة إلى السلة',
     publicMenuAddedCheck: 'تمت الإضافة ✓',
     publicMenuCartReady: 'سلتك جاهزة',
@@ -1803,6 +1839,14 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     publicMenuConfirmOrder: 'تأكيد الطلب',
     publicMenuCancel: 'إلغاء',
     publicMenuFooterCopy: '© تجربة طعام مصممة بذوق راقٍ.',
+    publicFooterBrowseMenu: 'تصفّح القائمة',
+    publicFooterExplore: 'استكشف',
+    publicFooterCategories: 'التصنيفات',
+    publicFooterContact: 'تواصل معنا',
+    publicFooterAddress: 'العنوان',
+    publicFooterPhone: 'الهاتف',
+    publicFooterWhatsApp: 'واتساب',
+    publicFooterRights: 'جميع الحقوق محفوظة',
     publicMenuToastAdded: 'تمت الإضافة إلى السلة',
     languageArabic: 'العربية',
     languageEnglish: 'EN',
@@ -2636,6 +2680,20 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     publicMenuChefChoice: "Chef's choice",
     publicMenuAvailable: 'Available now',
     publicMenuItemUnavailable: 'Unavailable',
+    sizePricing: 'Item pricing',
+    sizeSingle: 'Single price',
+    sizeMultiple: 'Multiple sizes',
+    sizeAdd: 'Add size',
+    sizeRemove: 'Remove size',
+    sizePresetStandard: 'Small / Medium / Large',
+    sizePresetFamily: 'Regular / Double / Family',
+    sizeConfirmConversion: 'Confirm single-price sales and retain the saved sizes.',
+    sizeMinimum: 'Add at least two sizes.',
+    sizeInvalid: 'Enter unique names, nonnegative prices with up to two decimal places, and valid display orders.',
+    sizeAvailabilityRequired: 'Make at least one size available for sale.',
+    sizeChoose: 'Choose a size',
+    sizeFrom: 'From',
+    sizeQuantity: 'Quantity',
     publicMenuAddToCart: 'Add to cart',
     publicMenuAddedCheck: 'Added ✓',
     publicMenuCartReady: 'Your cart is ready',
@@ -2645,6 +2703,14 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     publicMenuConfirmOrder: 'Confirm order',
     publicMenuCancel: 'Cancel',
     publicMenuFooterCopy: '© A thoughtfully designed dining experience.',
+    publicFooterBrowseMenu: 'Browse the menu',
+    publicFooterExplore: 'Explore',
+    publicFooterCategories: 'Categories',
+    publicFooterContact: 'Contact us',
+    publicFooterAddress: 'Address',
+    publicFooterPhone: 'Phone',
+    publicFooterWhatsApp: 'WhatsApp',
+    publicFooterRights: 'All rights reserved',
     publicMenuToastAdded: 'Added to cart',
     languageArabic: 'العربية',
     languageEnglish: 'EN',

@@ -1,3 +1,5 @@
+using RestaurantOrdering.Domain.Entities;
+
 namespace RestaurantOrdering.Application.Features.PublicMenu.DTOs;
 
 public class PublicMenuItemDto
@@ -10,6 +12,8 @@ public class PublicMenuItemDto
     public string? NameEn { get; init; }
     public string? DescriptionAr { get; init; }
     public string? DescriptionEn { get; init; }
+    public bool UsesSizes { get; init; }
+    public IReadOnlyList<MenuItemSize>? Sizes { get; init; }
     public decimal Price { get; init; }
     public decimal? DiscountPrice { get; init; }
     public int DisplayOrder { get; init; }

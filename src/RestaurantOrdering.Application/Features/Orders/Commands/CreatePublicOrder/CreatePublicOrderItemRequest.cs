@@ -3,4 +3,5 @@ namespace RestaurantOrdering.Application.Features.Orders.Commands.CreatePublicOr
 public sealed record CreatePublicOrderItemRequest(
     Guid MenuItemId,
     int Quantity,
-    string? Notes);
+    string? Notes,
+    Guid? MenuItemSizeId = null);

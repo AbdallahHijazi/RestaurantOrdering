@@ -26,6 +26,8 @@ public static class MenuItemDtoProjections
             NameEn = item.NameEn,
             DescriptionAr = item.DescriptionAr,
             DescriptionEn = item.DescriptionEn,
+            UsesSizes = item.UsesSizes,
+            Sizes = item.Sizes,
             Price = item.Price,
             DiscountPrice = item.DiscountPrice,
             DisplayOrder = item.DisplayOrder,

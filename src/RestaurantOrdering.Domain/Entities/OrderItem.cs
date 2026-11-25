@@ -5,6 +5,8 @@ namespace RestaurantOrdering.Domain.Entities;
 public class OrderItem : AuditableEntity
 {
     public Guid OrderId { get; set; }
+    public Guid? MenuItemSizeId { get; set; }
+    public string? SizeName { get; set; }
     public Guid? MenuItemId { get; set; }
     public string ItemNameAr { get; set; } = string.Empty;
     public string? ItemNameEn { get; set; }

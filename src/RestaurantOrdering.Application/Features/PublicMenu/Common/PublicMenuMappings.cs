@@ -47,6 +47,8 @@ public static class PublicMenuMappings
                 enTranslation?.PublishedSourceVersion,
                 menuItem.ContentVersion,
                 menuItem.DescriptionEn),
+            UsesSizes = menuItem.UsesSizes,
+            Sizes = menuItem.UsesSizes ? menuItem.Sizes : null,
             Price = menuItem.Price,
             DiscountPrice = menuItem.DiscountPrice,
             DisplayOrder = menuItem.DisplayOrder,

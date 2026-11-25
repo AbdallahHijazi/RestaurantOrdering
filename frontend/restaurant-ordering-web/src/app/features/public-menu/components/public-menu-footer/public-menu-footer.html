@@ -1,0 +1,94 @@
+<footer class="public-footer" data-testid="public-menu-footer">
+  <div class="public-footer__container">
+    <div class="public-footer__grid">
+      <section class="public-footer__brand" data-testid="public-footer-brand">
+        <div class="public-footer__identity">
+          @if (logoUrl() && !logoBroken()) {
+            <img class="public-footer__logo" [src]="logoUrl()" [alt]="name()" (error)="logoBroken.set(true)" />
+          } @else {
+            <span class="public-footer__logo public-footer__logo--initial" aria-hidden="true">{{ initial() }}</span>
+          }
+          <strong class="public-footer__name">{{ name() }}</strong>
+        </div>
+        @if (cleanDescription(); as description) {
+          <p class="public-footer__description">{{ description }}</p>
+        }
+      </section>
+
+      <nav class="public-footer__column public-footer__column--links" [attr.aria-label]="ui().publicFooterExplore" data-testid="public-footer-links">
+        <h2 class="public-footer__heading">{{ ui().publicFooterExplore }}</h2>
+        <ul class="public-footer__list">
+          <li>
+            <a class="public-footer__link" href="#" data-testid="public-footer-browse" (click)="onBrowse($event)">
+              {{ ui().publicFooterBrowseMenu }}
+            </a>
+          </li>
+        </ul>
+        @if (categories().length) {
+          <h3 class="public-footer__subheading">{{ ui().publicFooterCategories }}</h3>
+          <ul class="public-footer__list public-footer__list--inline">
+            @for (category of categories(); track category.id) {
+              <li>
+                <a
+                  class="public-footer__link"
+                  href="#"
+                  [attr.data-testid]="'public-footer-category-' + category.id"
+                  (click)="onCategory($event, category.id)"
+                >
+                  {{ category.title }}
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </nav>
+
+      @if (hasContact()) {
+        <section class="public-footer__column" data-testid="public-footer-contact">
+          <h2 class="public-footer__heading">{{ ui().publicFooterContact }}</h2>
+          <ul class="public-footer__list">
+            @if (cleanAddress(); as address) {
+              <li class="public-footer__contact">
+                <app-icon name="map-pin" />
+                <span>{{ address }}</span>
+              </li>
+            }
+            @if (cleanPhone(); as phone) {
+              <li>
+                <a class="public-footer__link public-footer__contact" [href]="phoneHref()" data-testid="public-footer-phone">
+                  <app-icon name="phone" />
+                  <bdi dir="ltr">{{ phone }}</bdi>
+                </a>
+              </li>
+            }
+            @if (cleanWhatsApp(); as whatsApp) {
+              <li>
+                <a
+                  class="public-footer__link public-footer__contact"
+                  [href]="whatsAppHref()"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [attr.aria-label]="ui().publicFooterWhatsApp + ': ' + whatsApp"
+                  data-testid="public-footer-whatsapp"
+                >
+                  <app-icon name="message" />
+                  <span>{{ ui().publicFooterWhatsApp }}</span>
+                  <bdi dir="ltr" class="public-footer__muted">{{ whatsApp }}</bdi>
+                </a>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    </div>
+
+    <div class="public-footer__bar">
+      <p class="public-footer__copy">
+        © {{ year }} <bdi>{{ name() }}</bdi> · {{ ui().publicFooterRights }}
+      </p>
+      <a routerLink="/login" class="public-footer__admin" data-testid="public-footer-admin">
+        {{ ui().publicStaffLogin }}
+      </a>
+    </div>
+  </div>
+</footer>
