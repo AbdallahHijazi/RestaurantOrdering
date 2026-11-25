@@ -207,10 +207,12 @@ describe('RestaurantLocaleSettingsPanel', () => {
     );
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('[data-testid="locale-settings-save-error"]')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('[data-testid="locale-settings-missing-counts"]')?.textContent).toContain(
-      'Restaurant: 1',
-    );
+    // Shown as the shared floating toast; the missing-translation counts are part of its message.
+    const toast = fixture.nativeElement.querySelector('[data-testid="locale-settings-save-error"]') as HTMLElement;
+    expect(toast.tagName.toLowerCase()).toBe('app-floating-notification-pill');
+    expect(toast.querySelector('.floating-notification-pill--error')).toBeTruthy();
+    expect(toast.textContent).toContain('Restaurant: 1');
+    expect(fixture.nativeElement.querySelector('.locale-settings__alert:not(.locale-settings__alert--info)')).toBeNull();
   });
 
   it('renders read-only state when canManageLocales is false', () => {

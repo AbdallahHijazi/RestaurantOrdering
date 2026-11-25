@@ -28,6 +28,10 @@ import { AuthService } from '../../../../../core/auth/auth.service';
 import { RestaurantLivePreview } from '../../components/restaurant-live-preview/restaurant-live-preview';
 import { RestaurantLocaleSettingsPanel } from '../../components/restaurant-locale-settings-panel/restaurant-locale-settings-panel';
 import { AdminBrandingService } from '../../../../../core/layouts/admin-layout/admin-branding.service';
+import {
+  FloatingNotificationPill,
+  type FloatingNotificationTone,
+} from '../../../../../shared/ui/floating-notification-pill/floating-notification-pill';
 import { RestaurantProfileApiService, type BrandingSaveError } from '../../data-access/restaurant-profile-api';
 import {
   buildUpdateSettingsRequest,
@@ -110,9 +114,17 @@ function orderingMethodsValidator(control: AbstractControl): ValidationErrors | 
   return pickup || delivery ? null : { orderingMethodRequired: true };
 }
 
+import { ErrorState } from '../../../../../shared/ui/error-state/error-state';
+
 @Component({
   selector: 'app-restaurant-profile-setup-page',
-  imports: [IconButton, ReactiveFormsModule, RestaurantLivePreview, RestaurantLocaleSettingsPanel],
+  imports: [ErrorState, 
+    IconButton,
+    ReactiveFormsModule,
+    RestaurantLivePreview,
+    RestaurantLocaleSettingsPanel,
+    FloatingNotificationPill,
+  ],
   templateUrl: './restaurant-profile-setup-page.html',
   styleUrls: [
     './restaurant-profile-setup-page.scss',
@@ -141,6 +153,31 @@ export class RestaurantProfileSetupPage {
   protected readonly logoFileName = signal<string | null>(null);
   protected readonly coverFileName = signal<string | null>(null);
   protected readonly linkCopyNotice = signal<string | null>(null);
+  /** Tone of each notice (the messages themselves stay in the signals above). */
+  protected readonly profileNoticeTone = signal<FloatingNotificationTone>('success');
+  protected readonly settingsNoticeTone = signal<FloatingNotificationTone>('success');
+  protected readonly linkNoticeTone = signal<FloatingNotificationTone>('success');
+
+  /**
+   * ONE floating toast for every page-level notice (profile save, ordering settings, link copy), so two
+   * of them can never be on screen at once or overlap. Priority: profile > settings > link copy.
+   */
+  protected readonly activeToast = computed<{
+    source: 'profile' | 'settings' | 'link';
+    message: string;
+    tone: FloatingNotificationTone;
+  } | null>(() => {
+    const profile = this.profileSaveNotice();
+    if (profile) {
+      return { source: 'profile', message: profile, tone: this.profileNoticeTone() };
+    }
+    const settings = this.settingsSaveNotice();
+    if (settings) {
+      return { source: 'settings', message: settings, tone: this.settingsNoticeTone() };
+    }
+    const link = this.linkCopyNotice();
+    return link ? { source: 'link', message: link, tone: this.linkNoticeTone() } : null;
+  });
   protected readonly logoPreviewUrl = signal<string | null>(null);
   protected readonly coverPreviewUrl = signal<string | null>(null);
   private readonly pendingLogoFile = signal<File | null>(null);
@@ -225,6 +262,35 @@ export class RestaurantProfileSetupPage {
   );
 
   protected readonly workspaceTabs = WORKSPACE_TABS;
+
+  protected dismissToast(): void {
+    switch (this.activeToast()?.source) {
+      case 'profile':
+        this.profileSaveNotice.set(null);
+        break;
+      case 'settings':
+        this.settingsSaveNotice.set(null);
+        break;
+      case 'link':
+        this.linkCopyNotice.set(null);
+        break;
+    }
+  }
+
+  private notifyProfile(message: string, tone: FloatingNotificationTone): void {
+    this.profileNoticeTone.set(tone);
+    this.profileSaveNotice.set(message);
+  }
+
+  private notifySettings(message: string, tone: FloatingNotificationTone): void {
+    this.settingsNoticeTone.set(tone);
+    this.settingsSaveNotice.set(message);
+  }
+
+  private notifyLink(message: string, tone: FloatingNotificationTone): void {
+    this.linkNoticeTone.set(tone);
+    this.linkCopyNotice.set(message);
+  }
 
   protected workspaceTabLabel(tab: WorkspaceTab): string {
     switch (tab) {
@@ -497,9 +563,9 @@ export class RestaurantProfileSetupPage {
         }
       }
 
-      this.linkCopyNotice.set(this.localeService.uiText('profileLinkCopied'));
+      this.notifyLink(this.localeService.uiText('profileLinkCopied'), 'success');
     } catch {
-      this.linkCopyNotice.set(this.localeService.uiText('profileLinkCopyFailed'));
+      this.notifyLink(this.localeService.uiText('profileLinkCopyFailed'), 'error');
     }
   }
 
@@ -551,7 +617,7 @@ export class RestaurantProfileSetupPage {
     this.pendingCoverFile.set(null);
     this.uploadedLogoMedia.set(null);
     this.uploadedCoverMedia.set(null);
-    this.profileSaveNotice.set(this.localeService.uiText('profileChangesCancelled'));
+    this.notifyProfile(this.localeService.uiText('profileChangesCancelled'), 'warning');
     this.linkCopyNotice.set(null);
     this.form.markAsPristine();
     this.form.markAsUntouched();
@@ -626,7 +692,7 @@ export class RestaurantProfileSetupPage {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
-            this.profileSaveNotice.set(this.localeService.uiText('demoSaveNotice'));
+            this.notifyProfile(this.localeService.uiText('demoSaveNotice'), 'warning');
           },
         });
       return;
@@ -717,13 +783,13 @@ export class RestaurantProfileSetupPage {
           this.uploadedLogoMedia.set(null);
           this.uploadedCoverMedia.set(null);
           this.captureProfileSnapshot();
-          this.profileSaveNotice.set(this.localeService.uiText('profileRestaurantSaved'));
+          this.notifyProfile(this.localeService.uiText('profileRestaurantSaved'), 'success');
           this.reloadProfileAfterSave(payload.slug);
         },
         error: (error: { type?: BrandingSaveError; detail?: string | null }) => {
           this.savingProfile.set(false);
           this.profileSavePhase.set('idle');
-          this.profileSaveNotice.set(this.brandingErrorMessage(error?.type, error?.detail));
+          this.notifyProfile(this.brandingErrorMessage(error?.type, error?.detail), 'error');
         },
       });
   }
@@ -879,7 +945,7 @@ export class RestaurantProfileSetupPage {
           this.captureProfileSnapshot();
         },
         error: () => {
-          this.profileSaveNotice.set(this.localeService.uiText('profileReloadFailed'));
+          this.notifyProfile(this.localeService.uiText('profileReloadFailed'), 'error');
         },
       });
   }
@@ -909,15 +975,16 @@ export class RestaurantProfileSetupPage {
       .subscribe({
         next: (result) => {
           this.savingSettings.set(false);
-          this.settingsSaveNotice.set(
+          this.notifySettings(
             result.mode === 'api'
               ? this.localeService.uiText('profileSettingsSaved')
               : this.localeService.uiText('demoSaveNotice'),
+            result.mode === 'api' ? 'success' : 'warning',
           );
         },
         error: () => {
           this.savingSettings.set(false);
-          this.settingsSaveNotice.set(this.localeService.uiText('adminMenuErrorGeneric'));
+          this.notifySettings(this.localeService.uiText('adminMenuErrorGeneric'), 'error');
         },
       });
   }
@@ -1186,10 +1253,11 @@ export class RestaurantProfileSetupPage {
 
     const validation = validateImageFile(file);
     if (!validation.valid) {
-      this.profileSaveNotice.set(
+      this.notifyProfile(
         validation.reason === 'size'
           ? this.localeService.uiText('profileImageTooLarge')
           : this.localeService.uiText('profileUnsupportedImageType'),
+        'error',
       );
       input.value = '';
       return;
@@ -1197,7 +1265,7 @@ export class RestaurantProfileSetupPage {
 
     const previewUrl = createImagePreviewUrl(file);
     if (!previewUrl) {
-      this.profileSaveNotice.set(this.localeService.uiText('profileUnsupportedImageType'));
+      this.notifyProfile(this.localeService.uiText('profileUnsupportedImageType'), 'error');
       input.value = '';
       return;
     }

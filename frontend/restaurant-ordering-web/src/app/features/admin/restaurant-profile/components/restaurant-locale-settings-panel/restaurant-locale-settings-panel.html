@@ -7,12 +7,13 @@
   }
 
   @if (loadState() === 'error') {
-    <div class="locale-settings__alert" role="alert" data-testid="locale-settings-load-error">
-      <p>{{ localeService.uiText('profileLocaleLoadError') }}</p>
-      <button type="button" class="profile-console__btn profile-console__btn--secondary" (click)="retryLoad()">
-        {{ localeService.uiText('profileLocaleRetry') }}
-      </button>
-    </div>
+    <app-error-state
+      [compact]="true"
+      data-testid="locale-settings-load-error"
+      [title]="localeService.uiText('profileLocaleLoadError')"
+      [retryLabel]="localeService.uiText('profileLocaleRetry')"
+      (retry)="retryLoad()"
+    />
   }
 
   @if (loadState() === 'ready' && !settings()) {
@@ -133,19 +134,24 @@
         </div>
       </div>
 
+      <!-- Shared compact floating toasts (fixed position: they never push the form around). -->
       @if (errorNotice()) {
-        <div class="locale-settings__alert" role="alert" data-testid="locale-settings-save-error">
-          <p>{{ errorNotice() }}</p>
-          @if (missingCountsMessage(); as countsMessage) {
-            <p data-testid="locale-settings-missing-counts">{{ countsMessage }}</p>
-          }
-        </div>
+        <app-floating-notification-pill
+          data-testid="locale-settings-save-error"
+          tone="error"
+          [message]="errorToastMessage()"
+          [closeLabel]="localeService.uiText('notificationClose')"
+          (dismissed)="errorNotice.set(null)"
+        />
       }
 
       @if (saveNotice()) {
-        <p class="profile-console__notice" role="status" data-testid="locale-settings-save-success">
-          {{ saveNotice() }}
-        </p>
+        <app-floating-notification-pill
+          data-testid="locale-settings-save-success"
+          [message]="saveNotice()!"
+          [closeLabel]="localeService.uiText('notificationClose')"
+          (dismissed)="saveNotice.set(null)"
+        />
       }
 
       <div class="locale-settings__actions">

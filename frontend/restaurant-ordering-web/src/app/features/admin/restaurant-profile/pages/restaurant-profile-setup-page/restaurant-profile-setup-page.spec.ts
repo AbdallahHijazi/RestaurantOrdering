@@ -840,6 +840,34 @@ describe('RestaurantProfileSetupPage', () => {
     httpMock.expectNone((req) => req.url === SETTINGS_URL && req.method === 'PUT');
     flushReload();
   });
+  it('shows every page-level notice as ONE shared floating toast, with tone, and no inline banner', () => {
+    flushLoadedSettings();
+    const page = fixture.componentInstance as unknown as {
+      notifyProfile(message: string, tone: 'success' | 'error' | 'warning'): void;
+      notifyLink(message: string, tone: 'success' | 'error' | 'warning'): void;
+      notifySettings(message: string, tone: 'success' | 'error' | 'warning'): void;
+    };
+
+    page.notifyProfile('Saved', 'success');
+    page.notifySettings('Settings error', 'error');
+    page.notifyLink('Copied', 'success');
+    fixture.detectChanges();
+
+    // Three notices at once -> still a single pill (profile > settings > link), never overlapping ones.
+    const pills = fixture.nativeElement.querySelectorAll('app-floating-notification-pill');
+    expect(pills).toHaveLength(1);
+    expect(pills[0].textContent).toContain('Saved');
+    expect(pills[0].querySelector('.floating-notification-pill--error')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.profile-console__notice, .profile-console__copy-notice')).toBeNull();
+
+    // Manual dismissal reveals the next pending notice.
+    pills[0].querySelector('.floating-notification-pill__close').click();
+    fixture.detectChanges();
+    const next = fixture.nativeElement.querySelector('app-floating-notification-pill');
+    expect(next.textContent).toContain('Settings error');
+    expect(next.querySelector('.floating-notification-pill--error')).toBeTruthy();
+  });
+
 });
 
 describe('RestaurantProfileSetupPage primary-locale identity (7A.19.1)', () => {
@@ -1032,4 +1060,5 @@ describe('RestaurantProfileSetupPage primary-locale identity (7A.19.1)', () => {
     expect(fixture.componentInstance.form.controls.addressAr).toBeTruthy();
     expect(fixture.componentInstance.form.controls.addressEn).toBeTruthy();
   });
+
 });

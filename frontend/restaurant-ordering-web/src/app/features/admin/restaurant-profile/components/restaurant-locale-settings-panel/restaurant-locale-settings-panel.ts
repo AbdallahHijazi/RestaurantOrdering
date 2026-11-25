@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { FloatingNotificationPill } from '../../../../../shared/ui/floating-notification-pill/floating-notification-pill';
 import { Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -28,9 +29,11 @@ import { IconButton } from '../../../../../shared/ui/icon-button/icon-button';
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error';
 
+import { ErrorState } from '../../../../../shared/ui/error-state/error-state';
+
 @Component({
   selector: 'app-restaurant-locale-settings-panel',
-  imports: [IconButton, FormsModule],
+  imports: [ErrorState, IconButton, FormsModule, FloatingNotificationPill],
   templateUrl: './restaurant-locale-settings-panel.html',
   styleUrl: './restaurant-locale-settings-panel.scss',
 })
@@ -258,6 +261,11 @@ export class RestaurantLocaleSettingsPanel {
       case 'AutoPublish':
         return this.localeService.uiText('profileTranslationModeAutoPublishDesc');
     }
+  }
+
+  /** The error text plus the missing-translation counts, as one toast message (nothing is dropped). */
+  protected errorToastMessage(): string {
+    return [this.errorNotice(), this.missingCountsMessage()].filter(Boolean).join(' ');
   }
 
   protected missingCountsMessage(): string | null {

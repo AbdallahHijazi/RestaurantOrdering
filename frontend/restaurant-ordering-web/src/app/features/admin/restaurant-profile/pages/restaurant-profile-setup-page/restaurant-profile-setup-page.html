@@ -25,13 +25,23 @@
     </nav>
   </div>
 
+  @if (activeToast(); as toast) {
+    <app-floating-notification-pill
+      data-testid="profile-toast"
+      [message]="toast.message"
+      [tone]="toast.tone"
+      [closeLabel]="localeService.uiText('notificationClose')"
+      (dismissed)="dismissToast()"
+    />
+  }
+
   @if (settingsLoadFailed()) {
-    <div class="profile-console__load-alert" role="alert">
-      <p>{{ localeService.uiText('profileSettingsLoadError') }}</p>
-      <button type="button" class="profile-console__btn profile-console__btn--secondary" (click)="retryLoadSettings()">
-        {{ localeService.uiText('profileSettingsRetry') }}
-      </button>
-    </div>
+    <app-error-state
+      [compact]="true"
+      [title]="localeService.uiText('profileSettingsLoadError')"
+      [retryLabel]="localeService.uiText('profileSettingsRetry')"
+      (retry)="retryLoadSettings()"
+    />
   }
 
   <div class="profile-console__workspace">
@@ -153,9 +163,6 @@
                   @if (form.controls.slug.invalid && form.controls.slug.touched) {
                     <small class="profile-console__error">{{ localeService.uiText('profileSlugValidation') }}</small>
                   }
-                  @if (linkCopyNotice()) {
-                    <small class="profile-console__copy-notice" role="status">{{ linkCopyNotice() }}</small>
-                  }
                 </div>
               </section>
 
@@ -274,9 +281,6 @@
               </aside>
             </details>
 
-            @if (profileSaveNotice()) {
-              <p class="profile-console__notice" role="status">{{ profileSaveNotice() }}</p>
-            }
           </section>
 
           <aside
@@ -558,10 +562,6 @@
             <p class="profile-console__alert" role="alert">
               {{ localeService.uiText('profileOrderingMethodRequired') }}
             </p>
-          }
-
-          @if (settingsSaveNotice()) {
-            <p class="profile-console__notice" role="status">{{ settingsSaveNotice() }}</p>
           }
 
           <button
