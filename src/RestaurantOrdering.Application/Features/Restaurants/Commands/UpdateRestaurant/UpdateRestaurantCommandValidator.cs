@@ -38,6 +38,24 @@ public sealed class UpdateRestaurantCommandValidator : AbstractValidator<UpdateR
         RuleFor(x => x.WhatsAppNumber)
             .MaximumLength(20);
 
+        RuleFor(x => x.CountryCode)
+            .Must(code => RestaurantContactNormalizer.CountryCodePattern.IsMatch(code!.Trim()))
+            .WithMessage("Country code must be a two-letter ISO 3166-1 code such as JO.")
+            .When(x => x.CountryCode is not null);
+
+        RuleFor(x => x.PhoneCountryCode)
+            .Must(code => RestaurantContactNormalizer.PhoneCountryCodePattern.IsMatch(code!.Trim()))
+            .WithMessage("Phone country code must look like +962 (1 to 4 digits).")
+            .When(x => x.PhoneCountryCode is not null);
+
+        RuleFor(x => x.Email)
+            .MaximumLength(254)
+            .EmailAddress()
+            .When(x => !string.IsNullOrWhiteSpace(x.Email));
+
+        RuleFor(x => x.City)
+            .MaximumLength(100);
+
         RuleFor(x => x.AddressAr)
             .MaximumLength(300);
 
@@ -51,6 +69,11 @@ public sealed class UpdateRestaurantCommandValidator : AbstractValidator<UpdateR
         RuleFor(x => x.Longitude)
             .InclusiveBetween(-180m, 180m)
             .When(x => x.Longitude.HasValue);
+
+        RuleFor(x => x.AccentColor)
+            .NotEmpty()
+            .Must(RestaurantAccentColor.IsValid)
+            .WithMessage("Accent color must be a valid hex color such as #B8663F.");
     }
 
     private static readonly System.Text.RegularExpressions.Regex SlugPatternRegex =

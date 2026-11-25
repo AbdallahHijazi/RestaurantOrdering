@@ -1,0 +1,158 @@
+<div class="staff-roster">
+  <div class="staff-roster__desktop" data-testid="staff-table">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">{{ locale.uiText('staffColName') }}</th>
+          <th scope="col">{{ locale.uiText('staffColEmail') }}</th>
+          <th scope="col">{{ locale.uiText('staffColPhone') }}</th>
+          <th scope="col">{{ locale.uiText('staffColRole') }}</th>
+          <th scope="col">{{ locale.uiText('staffColStatus') }}</th>
+          <th scope="col">{{ locale.uiText('staffColActions') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (member of employees(); track member.id) {
+          <tr [attr.data-testid]="'staff-row-' + member.id">
+            <td>
+              <div class="staff-roster__employee">
+                <span
+                  class="staff-roster__avatar"
+                  [class.staff-roster__avatar--terra]="avatarVariant(member) === 'terra'"
+                  aria-hidden="true"
+                >
+                  {{ avatarInitials(member) }}
+                </span>
+                <div>
+                  <strong class="staff-roster__name">{{ displayName(member) }}</strong>
+                  <small>{{ locale.uiText('staffAccountLabel') }}</small>
+                </div>
+              </div>
+            </td>
+            <td><span class="staff-roster__ltr">{{ member.email }}</span></td>
+            <td><span class="staff-roster__ltr">{{ member.phoneNumber || '—' }}</span></td>
+            <td>
+              <span class="staff-roster__badge staff-roster__badge--role">
+                {{ roleLabel(member.role) }}
+              </span>
+            </td>
+            <td>
+              <span
+                class="staff-roster__badge staff-roster__badge--status"
+                [class.staff-roster__badge--status-inactive]="!member.isActive"
+              >
+                @if (member.isActive) {
+                  <span class="staff-roster__dot" aria-hidden="true"></span>
+                }
+                {{ statusLabel(member.isActive) }}
+              </span>
+            </td>
+            <td>
+              <div class="staff-roster__actions">
+                <button
+                  appIconButton
+                  size="sm"
+                  icon="edit"
+                  [label]="locale.uiText('actionEdit')"
+                  [attr.data-testid]="'staff-edit-' + member.id"
+                  (click)="editMember.emit(member)"
+                ></button>
+                <button
+                  appIconButton
+                  size="sm"
+                  icon="shield"
+                  [label]="locale.uiText('staffChangeRole')"
+                  [attr.data-testid]="'staff-change-role-' + member.id"
+                  (click)="onChangeRole(member)"
+                ></button>
+                <button
+                  appIconButton
+                  size="sm"
+                  [icon]="member.isActive ? 'user-x' : 'user-check'"
+                  [variant]="member.isActive ? 'danger' : 'success'"
+                  [label]="locale.uiText(member.isActive ? 'actionDeactivate' : 'actionActivate')"
+                  [attr.data-testid]="'staff-toggle-status-' + member.id"
+                  (click)="toggleStatus.emit(member)"
+                ></button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="staff-roster__mobile" data-testid="staff-cards">
+    @for (member of employees(); track member.id) {
+      <article class="staff-roster__card" [attr.data-testid]="'staff-card-' + member.id">
+        <div class="staff-roster__card-top">
+          <div class="staff-roster__employee">
+            <span
+              class="staff-roster__avatar"
+              [class.staff-roster__avatar--terra]="avatarVariant(member) === 'terra'"
+              aria-hidden="true"
+            >
+              {{ avatarInitials(member) }}
+            </span>
+            <div>
+              <strong class="staff-roster__name">{{ displayName(member) }}</strong>
+              <small>{{ locale.uiText('staffAccountLabel') }}</small>
+            </div>
+          </div>
+          <span
+            class="staff-roster__badge staff-roster__badge--status"
+            [class.staff-roster__badge--status-inactive]="!member.isActive"
+          >
+            @if (member.isActive) {
+              <span class="staff-roster__dot" aria-hidden="true"></span>
+            }
+            {{ statusLabel(member.isActive) }}
+          </span>
+        </div>
+        <div class="staff-roster__card-meta">
+          <span>
+            <b>{{ locale.uiText('staffColEmail') }}:</b>
+            <span class="staff-roster__ltr">{{ member.email }}</span>
+          </span>
+          <span>
+            <b>{{ locale.uiText('staffColPhone') }}:</b>
+            <span class="staff-roster__ltr">{{ member.phoneNumber || '—' }}</span>
+          </span>
+          <span>
+            <b>{{ locale.uiText('staffColRole') }}:</b>
+            {{ roleLabel(member.role) }}
+          </span>
+        </div>
+        <div class="staff-roster__card-actions">
+<div class="staff-roster__actions">
+            <button
+              appIconButton
+              size="sm"
+              icon="edit"
+              [label]="locale.uiText('actionEdit')"
+              [attr.data-testid]="'staff-edit-card-' + member.id"
+              (click)="editMember.emit(member)"
+            ></button>
+            <button
+              appIconButton
+              size="sm"
+              icon="shield"
+              [label]="locale.uiText('staffChangeRole')"
+              [attr.data-testid]="'staff-change-role-card-' + member.id"
+              (click)="onChangeRole(member)"
+            ></button>
+            <button
+              appIconButton
+              size="sm"
+              [icon]="member.isActive ? 'user-x' : 'user-check'"
+              [variant]="member.isActive ? 'danger' : 'success'"
+              [label]="locale.uiText(member.isActive ? 'actionDeactivate' : 'actionActivate')"
+              [attr.data-testid]="'staff-toggle-status-card-' + member.id"
+              (click)="toggleStatus.emit(member)"
+            ></button>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+</div>

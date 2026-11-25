@@ -13,4 +13,11 @@ public sealed class UpdateRestaurantRequest
     public string? AddressEn { get; init; }
     public decimal? Latitude { get; init; }
     public decimal? Longitude { get; init; }
+    public string AccentColor { get; init; } = "#B8663F";
+
+    // Optional: omitted (null) keeps the stored value; "" clears Email/City.
+    public string? CountryCode { get; init; }
+    public string? PhoneCountryCode { get; init; }
+    public string? Email { get; init; }
+    public string? City { get; init; }
 }

@@ -7,10 +7,18 @@ public sealed class CreatePublicOrderRequest
     public string GuestName { get; init; } = string.Empty;
     public string GuestPhone { get; init; } = string.Empty;
     public OrderType OrderType { get; init; }
+    public string? TableToken { get; init; }
     public string? DeliveryAddress { get; init; }
     public decimal? DeliveryLatitude { get; init; }
     public decimal? DeliveryLongitude { get; init; }
     public string? Notes { get; init; }
+    public string? Locale { get; init; }
+
+    /// <summary>
+    /// Optional client-generated key (one per logical checkout attempt). Resending the same key with the
+    /// same payload returns the original order; the "Idempotency-Key" header is accepted as an alternative.
+    /// </summary>
+    public string? IdempotencyKey { get; init; }
     public IReadOnlyList<CreatePublicOrderItemRequest> Items { get; init; } =
         Array.Empty<CreatePublicOrderItemRequest>();
 }

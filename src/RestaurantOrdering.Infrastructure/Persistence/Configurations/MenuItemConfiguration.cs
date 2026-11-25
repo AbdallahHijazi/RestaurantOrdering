@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using RestaurantOrdering.Domain.Entities;
 
@@ -21,12 +23,32 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
         builder.Property(m => m.DescriptionEn)
             .HasMaxLength(500);
 
+        builder.Property(m => m.Discount).HasConversion(
+            rule => JsonSerializer.Serialize(rule, (JsonSerializerOptions?)null),
+            json => JsonSerializer.Deserialize<MenuDiscount>(json, (JsonSerializerOptions?)null));
+        builder.Property(m => m.UniformDiscount).HasConversion(
+            rule => JsonSerializer.Serialize(rule, (JsonSerializerOptions?)null),
+            json => JsonSerializer.Deserialize<MenuDiscount>(json, (JsonSerializerOptions?)null));
+
+        builder.Property(m => m.Sizes)
+            .HasConversion(
+                sizes => JsonSerializer.Serialize(sizes, (JsonSerializerOptions?)null),
+                json => JsonSerializer.Deserialize<MenuItemSize[]>(json, (JsonSerializerOptions?)null),
+                new ValueComparer<IReadOnlyList<MenuItemSize>?>(
+                    (left, right) => left == right || (left != null && right != null && left.SequenceEqual(right)),
+                    sizes => sizes == null ? 0 : sizes.Aggregate(0, (hash, size) => HashCode.Combine(hash, size)),
+                    sizes => sizes == null ? null : sizes.ToArray()));
+
         builder.Property(m => m.Price)
             .HasPrecision(10, 2)
             .IsRequired();
 
         builder.Property(m => m.DiscountPrice)
             .HasPrecision(10, 2);
+
+        builder.Property(m => m.ContentVersion)
+            .IsRequired()
+            .HasDefaultValue(1);
 
         builder.HasIndex(m => new { m.RestaurantId, m.CategoryId, m.IsActive, m.IsDeleted });
 
@@ -53,13 +75,15 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
 
         builder.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_MenuItems_Price", "[Price] >= 0");
+            t.HasCheckConstraint("CK_MenuItems_Price", "\"Price\" >= 0");
             t.HasCheckConstraint(
                 "CK_MenuItems_DiscountPrice",
-                "[DiscountPrice] IS NULL OR [DiscountPrice] >= 0");
+                "\"DiscountPrice\" IS NULL OR \"DiscountPrice\" >= 0");
             t.HasCheckConstraint(
                 "CK_MenuItems_DiscountPrice_NotGreaterThanPrice",
-                "[DiscountPrice] IS NULL OR [DiscountPrice] <= [Price]");
+                "\"DiscountPrice\" IS NULL OR \"DiscountPrice\" <= \"Price\"");
+            t.HasCheckConstraint("CK_MenuItems_ContentVersion", "\"ContentVersion\" >= 1");
         });
     }
 }
+

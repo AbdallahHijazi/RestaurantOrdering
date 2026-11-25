@@ -1,4 +1,5 @@
 using MediatR;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Application.Features.RestaurantSettings.DTOs;
 
 namespace RestaurantOrdering.Application.Features.RestaurantSettings.Commands.UpdateRestaurantSettings;
@@ -12,4 +13,4 @@ public sealed record UpdateRestaurantSettingsCommand(
     decimal MinimumOrderAmount,
     bool IsDeliveryEnabled,
     bool IsPickupEnabled,
-    string? WorkingHoursJson) : IRequest<RestaurantSettingsDto>;
+    string? WorkingHoursJson) : IRequest<RestaurantSettingsDto>, IRestaurantScopedRequest;

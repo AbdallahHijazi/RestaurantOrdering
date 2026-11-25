@@ -12,6 +12,8 @@ public class OrderSummaryDto
     public string? GuestPhone { get; init; }
     public OrderType OrderType { get; init; }
     public OrderStatus OrderStatus { get; init; }
+    public Guid? TableId { get; init; }
+    public string? TableName { get; init; }
     public decimal TotalAmount { get; init; }
     public string CurrencyCode { get; init; } = string.Empty;
     public DateTime CreatedAt { get; init; }

@@ -33,6 +33,18 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
         builder.Property(r => r.WhatsAppNumber)
             .HasMaxLength(20);
 
+        builder.Property(r => r.CountryCode)
+            .HasMaxLength(2);
+
+        builder.Property(r => r.PhoneCountryCode)
+            .HasMaxLength(8);
+
+        builder.Property(r => r.Email)
+            .HasMaxLength(254);
+
+        builder.Property(r => r.City)
+            .HasMaxLength(100);
+
         builder.Property(r => r.AddressAr)
             .HasMaxLength(300);
 
@@ -44,6 +56,15 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
 
         builder.Property(r => r.Longitude)
             .HasPrecision(11, 8);
+
+        builder.Property(r => r.AccentColor)
+            .HasMaxLength(7)
+            .IsRequired()
+            .HasDefaultValue("#B8663F");
+
+        builder.Property(r => r.ContentVersion)
+            .IsRequired()
+            .HasDefaultValue(1);
 
         builder.HasIndex(r => r.Slug)
             .IsUnique();
@@ -60,6 +81,19 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
             .HasForeignKey(r => r.LogoFileId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(r => r.CoverImageFile)
+            .WithMany()
+            .HasForeignKey(r => r.CoverImageFileId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(r => r.CoverImageFileId);
+
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_Restaurants_ContentVersion", "\"ContentVersion\" >= 1");
+        });
+
         builder.HasQueryFilter(r => !r.IsDeleted);
     }
 }
+

@@ -1,3 +1,5 @@
+using RestaurantOrdering.Domain.Entities;
+
 namespace RestaurantOrdering.Application.Features.MenuItems.DTOs;
 
 public class MenuItemDto
@@ -6,10 +8,18 @@ public class MenuItemDto
     public Guid RestaurantId { get; init; }
     public Guid CategoryId { get; init; }
     public Guid? ImageFileId { get; init; }
+    public string? ImageUrl { get; init; }
     public string NameAr { get; init; } = string.Empty;
     public string? NameEn { get; init; }
     public string? DescriptionAr { get; init; }
     public string? DescriptionEn { get; init; }
+    public bool UsesSizes { get; init; }
+    public IReadOnlyList<MenuItemSize>? Sizes { get; init; }
+    public MenuPrice? Pricing { get; init; }
+    public IReadOnlyDictionary<Guid, MenuPrice>? SizePrices { get; init; }
+    public MenuDiscount? Discount { get; init; }
+    public SizeDiscountMode SizeDiscountMode { get; init; }
+    public MenuDiscount? UniformDiscount { get; init; }
     public decimal Price { get; init; }
     public decimal? DiscountPrice { get; init; }
     public int DisplayOrder { get; init; }
@@ -17,4 +27,8 @@ public class MenuItemDto
     public bool IsActive { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; init; }
+    public string? PrimaryName { get; init; }
+    public string? PrimaryDescription { get; init; }
+    public string? PrimaryLocale { get; init; }
+    public bool PrimaryFallbackApplied { get; init; }
 }

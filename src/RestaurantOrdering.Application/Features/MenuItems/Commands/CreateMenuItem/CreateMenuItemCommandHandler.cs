@@ -13,19 +13,26 @@ public sealed class CreateMenuItemCommandHandler
 {
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTimeService;
+    private readonly IPublishedTranslationWriter _publishedTranslationWriter;
 
     public CreateMenuItemCommandHandler(
         IApplicationDbContext context,
-        IDateTimeService dateTimeService)
+        IDateTimeService dateTimeService,
+        IPublishedTranslationWriter publishedTranslationWriter)
     {
         _context = context;
         _dateTimeService = dateTimeService;
+        _publishedTranslationWriter = publishedTranslationWriter;
     }
 
     public async Task<MenuItemDto> Handle(
         CreateMenuItemCommand request,
         CancellationToken cancellationToken)
     {
+        await _publishedTranslationWriter.EnsureLegacyBilingualWriteSupportedAsync(
+            request.RestaurantId,
+            cancellationToken);
+
         var restaurantExists = await _context.Restaurants
             .AnyAsync(r => r.Id == request.RestaurantId, cancellationToken);
 
@@ -75,10 +82,19 @@ public sealed class CreateMenuItemCommandHandler
             CreatedAt = _dateTimeService.UtcNow
         };
 
+        MenuDiscountConfiguration.Validate(menuItem);
         _context.MenuItems.Add(menuItem);
+        await _publishedTranslationWriter.UpsertMenuItemPublishedTranslationsAsync(
+            menuItem,
+            isManualEdit: false,
+            cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return menuItem.ToDto();
+        return await MenuItemDtoProjections.GetProjectedDtoByIdAsync(
+            _context,
+            menuItem.Id,
+            menuItem.RestaurantId,
+            cancellationToken);
     }
 }

@@ -1,0 +1,124 @@
+<article
+  class="meal-card"
+  [class.meal-card--reordering]="reorderMode()"
+  [class.meal-card--dragging]="dragging()"
+  [class.meal-card--settled]="settled()"
+  [attr.data-testid]="'menu-item-' + item().id"
+>
+  <div class="meal-card__media">
+    @if (imageSrc(); as src) {
+      <img
+        [src]="src"
+        [alt]="displayItemName(item())"
+        (error)="imageError.emit(item().id)"
+      />
+    } @else {
+      <div class="meal-card__fallback" aria-hidden="true">
+        {{ locale.uiText('adminMenuImageFallbackAlt') }}
+      </div>
+    }
+    <div class="meal-card__order">
+      <span class="meal-card__code">#{{ item().displayOrder }}</span>
+      @if (reorderMode()) {
+        <button
+          type="button"
+          class="meal-card__drag-handle"
+          [attr.aria-label]="locale.uiText('adminMenuReorderItems') + ': ' + displayItemName(item())"
+          (pointerdown)="beginPointerReorder($event)"
+          (click)="$event.preventDefault(); $event.stopPropagation()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M9 4h2v2H9V4Zm4 0h2v2h-2V4ZM9 8h2v2H9V8Zm4 0h2v2h-2V8Zm-4 4h2v2H9v-2Zm4 0h2v2h-2v-2Zm-4 4h2v2H9v-2Zm4 0h2v2h-2v-2Z" />
+          </svg>
+        </button>
+        <button
+          appIconButton
+          size="sm"
+          icon="arrow-up"
+          [tooltip]="true"
+          [label]="locale.uiText('actionMoveUp') + ': ' + displayItemName(item())"
+          [attr.data-testid]="'menu-move-up-' + item().id"
+          [disabled]="!canMoveUp()"
+          (click)="moveUp.emit(item())"
+        ></button>
+        <button
+          appIconButton
+          size="sm"
+          icon="arrow-down"
+          [tooltip]="true"
+          [label]="locale.uiText('actionMoveDown') + ': ' + displayItemName(item())"
+          [attr.data-testid]="'menu-move-down-' + item().id"
+          [disabled]="!canMoveDown()"
+          (click)="moveDown.emit(item())"
+        ></button>
+      }
+    </div>
+    <span class="meal-card__availability-badge" [class.is-unavailable]="!item().isAvailable">
+      <span class="meal-card__status-dot"></span>
+      {{ availabilityLabel(item()) }}
+    </span>
+    <span class="meal-card__badge">{{ categoryName() }}</span>
+  </div>
+
+  <div class="meal-card__body">
+    <div class="meal-card__info">
+      <div>
+        <h3 class="meal-card__name">{{ displayItemName(item()) }}</h3>
+      </div>
+      <div class="meal-card__price">
+        @if (item().usesSizes) {
+          @let starting = startingPrice(item());
+          @if (starting !== null) {
+            <strong>{{ locale.uiText('sizeFrom') }} {{ starting | number: '1.2-2' }}</strong>
+          }
+        } @else if (hasMeaningfulDiscount(item())) {
+          <strong>{{ item().discountPrice | number: '1.2-2' }}</strong>
+          <span class="meal-card__price-original">{{ item().price | number: '1.2-2' }}</span>
+        } @else {
+          <strong>{{ item().price | number: '1.2-2' }}</strong>
+        }
+      </div>
+    </div>
+
+    @if (displayItemDescription(item()); as description) {
+      <p class="meal-card__description">{{ description }}</p>
+    }
+
+    <!-- One compact horizontal group: View (availability) / Edit / Delete, same size and gap on every card. -->
+    <div class="meal-card__actions" role="group" [attr.aria-label]="displayItemName(item())">
+      <button
+        appIconButton
+        size="sm"
+        [icon]="item().isAvailable ? 'eye' : 'eye-off'"
+        [tooltip]="true"
+        [label]="locale.uiText('adminMenuToggleAvailable')"
+        [loading]="availabilityBusy()"
+        [attr.data-testid]="'menu-toggle-availability-' + item().id"
+        [disabled]="reorderMode() || availabilityBusy()"
+        (click)="toggleAvailability.emit(item())"
+      ></button>
+      <button
+        appIconButton
+        size="sm"
+        variant="primary"
+        icon="pencil"
+        [tooltip]="true"
+        [label]="locale.uiText('adminMenuEdit')"
+        [attr.data-testid]="'menu-edit-item-' + item().id"
+        [disabled]="reorderMode()"
+        (click)="editItem.emit(item())"
+      ></button>
+      <button
+        appIconButton
+        size="sm"
+        variant="danger"
+        icon="trash"
+        [tooltip]="true"
+        [label]="locale.uiText('adminMenuDelete')"
+        [attr.data-testid]="'menu-delete-item-' + item().id"
+        [disabled]="reorderMode()"
+        (click)="deleteItem.emit(item())"
+      ></button>
+    </div>
+  </div>
+</article>

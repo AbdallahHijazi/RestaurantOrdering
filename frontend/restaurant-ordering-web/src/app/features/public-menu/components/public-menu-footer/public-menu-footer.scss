@@ -1,0 +1,207 @@
+.public-footer {
+  border-top: 1px solid var(--restaurant-border);
+  background: var(--restaurant-surface-soft);
+  color: var(--restaurant-text);
+}
+
+/* Same gutter as the rest of the public menu, so the footer lines up with the page above it. */
+.public-footer__container {
+  width: calc(100% - 2 * var(--layout-gutter));
+  margin-inline: auto;
+  padding-block: clamp(1.5rem, 3vw, 2.5rem) 0;
+}
+
+.public-footer__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem clamp(1.5rem, 4vw, 4rem);
+  padding-block-end: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.public-footer__brand {
+  flex: 2 1 18rem;
+  min-width: 0;
+}
+
+.public-footer__column {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+/* The links column carries the category shortcuts, so it gets more room (they wrap inline, not one per row). */
+.public-footer__column--links {
+  flex: 2 1 18rem;
+}
+
+.public-footer__identity {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.public-footer__logo {
+  inline-size: 3rem;
+  block-size: 3rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--restaurant-border-strong);
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--restaurant-surface);
+}
+
+.public-footer__logo--initial {
+  display: inline-grid;
+  place-items: center;
+  color: var(--restaurant-text-on-accent);
+  background: var(--restaurant-accent);
+  font-family: var(--font-display);
+  font-size: var(--fs-card);
+  font-weight: 800;
+}
+
+.public-footer__name {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-section);
+  font-weight: 800;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.public-footer__description {
+  max-inline-size: 34rem;
+  margin: 0.75rem 0 0;
+  color: var(--restaurant-muted-text);
+  font-size: var(--fs-secondary);
+  line-height: 1.75;
+}
+
+.public-footer__heading {
+  margin: 0 0 0.75rem;
+  color: var(--restaurant-accent-strong);
+  font-size: var(--fs-secondary);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.public-footer__subheading {
+  margin: 1rem 0 0.5rem;
+  color: var(--restaurant-muted-text);
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+
+.public-footer__list.public-footer__list--inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 1.25rem;
+}
+
+.public-footer__list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.public-footer__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-block-size: 1.75rem;
+  color: var(--restaurant-text);
+  font-size: var(--fs-secondary);
+  font-weight: 600;
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0 1px;
+  transition:
+    color var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    background-size var(--restaurant-motion-normal) var(--restaurant-ease-standard);
+}
+
+.public-footer__link:hover,
+.public-footer__link:focus-visible {
+  color: var(--restaurant-accent-strong);
+  background-size: 100% 1px;
+}
+
+.public-footer__link:focus-visible,
+.public-footer__admin:focus-visible {
+  outline: 2px solid var(--restaurant-accent);
+  outline-offset: 3px;
+  border-radius: 0.25rem;
+}
+
+.public-footer__contact {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  color: var(--restaurant-text);
+  font-size: var(--fs-secondary);
+  line-height: 1.6;
+}
+
+.public-footer__link.public-footer__contact {
+  display: inline-flex;
+  align-items: center;
+}
+
+.public-footer__contact app-icon {
+  margin-block-start: 0.125rem;
+  color: var(--restaurant-accent);
+}
+
+.public-footer__muted {
+  color: var(--restaurant-muted-text);
+  font-weight: 500;
+}
+
+.public-footer__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding-block: 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--restaurant-border);
+}
+
+.public-footer__copy {
+  margin: 0;
+  color: var(--restaurant-muted-text);
+  font-size: var(--fs-small);
+}
+
+.public-footer__admin {
+  color: var(--restaurant-muted-text);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  text-decoration: none;
+  transition: color var(--restaurant-motion-normal) var(--restaurant-ease-standard);
+}
+
+.public-footer__admin:hover {
+  color: var(--restaurant-accent-strong);
+}
+
+@media (max-width: 40rem) {
+  .public-footer__grid {
+    gap: 1.25rem;
+  }
+
+  .public-footer__bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-footer__link,
+  .public-footer__admin {
+    transition-duration: 0.01ms !important;
+  }
+}

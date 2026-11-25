@@ -1,0 +1,206 @@
+.table-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 0.75rem;
+  height: 100%;
+  padding: 0.875rem;
+  overflow: hidden;
+  border: 1px solid var(--tables-line);
+  border-radius: 1.125rem;
+  background: var(--restaurant-surface);
+  box-shadow: var(--restaurant-shadow-xs);
+  transition:
+    transform var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    border-color var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    box-shadow var(--restaurant-motion-normal) var(--restaurant-ease-standard);
+}
+
+.table-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--restaurant-accent) 26%, var(--tables-line));
+  box-shadow: var(--tables-shadow);
+}
+
+.table-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.table-card__title {
+  min-width: 0;
+}
+
+.table-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.table-card__title h2 {
+  margin: 0;
+  overflow: hidden;
+  color: var(--tables-text);
+  font-size: var(--fs-card);
+  font-weight: 850;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-card__zone {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 10rem;
+  padding: 0.2rem 0.5rem;
+  overflow: hidden;
+  border-radius: 0.45rem;
+  color: var(--tables-muted);
+  background: var(--restaurant-surface-soft);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-card__zone svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex: 0 0 auto;
+  color: var(--restaurant-accent);
+}
+
+.table-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 1.625rem;
+  padding-inline: 0.625rem;
+  border-radius: 999px;
+  color: var(--tables-green);
+  background: var(--tables-green-soft);
+  font-size: var(--fs-small);
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.table-card__badge::before {
+  content: '';
+  width: 0.375rem;
+  height: 0.375rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.table-card__badge--inactive {
+  color: var(--tables-red);
+  background: var(--tables-red-soft);
+}
+
+.table-card__preview {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  padding: 0.5rem;
+  overflow: hidden;
+  border: 1px dashed color-mix(in srgb, var(--restaurant-border) 82%, transparent);
+  border-radius: 0.925rem;
+  background: color-mix(in srgb, var(--restaurant-print-surface) 86%, var(--restaurant-surface-soft));
+}
+
+.table-card__preview--inactive app-table-print-card {
+  opacity: 0.42;
+  filter: grayscale(0.55);
+}
+
+.table-card__inactive-overlay {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.625rem;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--restaurant-surface) 64%, transparent);
+  backdrop-filter: blur(1px);
+  text-align: center;
+}
+
+.table-card__inactive-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.625rem;
+  color: var(--restaurant-surface);
+  background: color-mix(in srgb, var(--tables-text) 92%, transparent);
+  box-shadow: var(--tables-shadow);
+  font-size: var(--fs-small);
+  font-weight: 850;
+}
+
+.table-card__inactive-label svg {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+/* Compact toolbar: primary group, status toggle, then the destructive group pushed to the end. */
+.table-card__actions {
+  align-self: end;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.table-card__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.table-card__group--end {
+  margin-inline-start: auto;
+}
+
+.table-card__divider {
+  inline-size: 1px;
+  block-size: 1.25rem;
+  background: var(--tables-line);
+}
+
+.table-card__actions button:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+/* Narrow phones: 6 x 44px touch targets must still share one row (299px of content width at 390px),
+   so tighten gaps and drop the decorative divider instead of shrinking the targets. */
+@media (max-width: 30rem) {
+  .table-card__actions,
+  .table-card__group {
+    gap: 0.25rem;
+  }
+
+  .table-card__divider {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .table-card,
+  .table-card__actions button {
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,97 @@
+<div class="profile-console" data-testid="profile-console" [attr.dir]="localeService.direction()">
+  <header class="profile-console__header profile-console__header--compact" data-testid="profile-console-header">
+    <div
+      class="profile-console__header-start"
+      data-testid="profile-console-header-start"
+    >
+      <div class="profile-console__language-switcher" data-testid="profile-console-language-switcher">
+        <app-language-switcher
+          [restaurantId]="restaurantId()"
+          [ariaLabel]="adminLanguageAriaLabel()"
+        />
+      </div>
+
+      <button
+        appIconButton
+        icon="logout"
+        variant="ghost"
+        [label]="localeService.uiText('adminLogout')"
+        data-testid="profile-console-logout"
+        (click)="logout()"
+      ></button>
+    </div>
+
+    <nav
+      class="profile-console__nav profile-console__header-nav"
+      data-testid="profile-console-nav"
+      [attr.aria-label]="localeService.uiText('adminNavLabel')"
+    >
+      <a
+        routerLink="/admin/dashboard"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        data-testid="profile-console-nav-dashboard"
+      >
+        {{ localeService.uiText('adminNavDashboard') }}
+      </a>
+      @if (isOwner()) {
+        <a
+          routerLink="/admin/restaurant-profile"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          data-testid="profile-console-nav-profile"
+        >
+          {{ localeService.uiText('adminNavRestaurantProfile') }}
+        </a>
+      }
+      <a routerLink="/admin/orders" routerLinkActive="is-active" data-testid="profile-console-nav-orders">
+        {{ localeService.uiText('adminNavOrders') }}
+      </a>
+      <a routerLink="/admin/menu" routerLinkActive="is-active" data-testid="profile-console-nav-menu">
+        {{ localeService.uiText('adminNavMenu') }}
+      </a>
+      @if (isOwner()) {
+        <a
+          routerLink="/admin/translation-review"
+          routerLinkActive="is-active"
+          data-testid="profile-console-nav-translation-review"
+        >
+          {{ localeService.uiText('adminNavTranslationReview') }}
+        </a>
+        <a routerLink="/admin/staff" routerLinkActive="is-active" data-testid="profile-console-nav-staff">
+          {{ localeService.uiText('adminNavStaff') }}
+        </a>
+        <a routerLink="/admin/tables" routerLinkActive="is-active" data-testid="profile-console-nav-tables">
+          {{ localeService.uiText('adminNavTables') }}
+        </a>
+      }
+    </nav>
+
+    <div class="profile-console__header-end" data-testid="profile-console-header-end">
+      <div class="profile-console__brand">
+        @if (brandAvatarUrl(); as avatarUrl) {
+          <img
+            class="profile-console__brand-avatar"
+            data-testid="profile-console-brand-avatar"
+            [src]="avatarUrl"
+            [alt]="branding.restaurantName()"
+            (error)="onAvatarError()"
+          />
+        } @else {
+          <span class="profile-console__brand-fallback" data-testid="profile-console-brand-fallback" aria-hidden="true">
+            {{ brandInitial() }}
+          </span>
+        }
+        <span class="profile-console__brand-title">{{ localeService.uiText('adminConsoleTitle') }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div
+    class="profile-console__shell"
+    [class.profile-console__shell--scrollable]="!isProfileRoute()"
+  >
+    <router-outlet />
+  </div>
+</div>
+

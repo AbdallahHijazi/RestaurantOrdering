@@ -1,9 +1,11 @@
 using MediatR;
+using RestaurantOrdering.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using RestaurantOrdering.Application.Common.Exceptions;
 using RestaurantOrdering.Application.Common.Interfaces;
 using RestaurantOrdering.Application.Features.MenuItems.Common;
 using RestaurantOrdering.Application.Features.MenuItems.DTOs;
+using RestaurantOrdering.Application.Common.Localization;
 
 namespace RestaurantOrdering.Application.Features.MenuItems.Commands.UpdateMenuItem;
 
@@ -12,19 +14,26 @@ public sealed class UpdateMenuItemCommandHandler
 {
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTimeService;
+    private readonly IPublishedTranslationWriter _publishedTranslationWriter;
 
     public UpdateMenuItemCommandHandler(
         IApplicationDbContext context,
-        IDateTimeService dateTimeService)
+        IDateTimeService dateTimeService,
+        IPublishedTranslationWriter publishedTranslationWriter)
     {
         _context = context;
         _dateTimeService = dateTimeService;
+        _publishedTranslationWriter = publishedTranslationWriter;
     }
 
     public async Task<MenuItemDto> Handle(
         UpdateMenuItemCommand request,
         CancellationToken cancellationToken)
     {
+        await _publishedTranslationWriter.EnsureLegacyBilingualWriteSupportedAsync(
+            request.RestaurantId,
+            cancellationToken);
+
         var menuItem = await _context.MenuItems
             .FirstOrDefaultAsync(
                 item => item.Id == request.MenuItemId && item.RestaurantId == request.RestaurantId,
@@ -60,19 +69,49 @@ public sealed class UpdateMenuItemCommandHandler
 
         menuItem.CategoryId = request.CategoryId;
         menuItem.ImageFileId = request.ImageFileId;
-        menuItem.NameAr = request.NameAr.Trim();
-        menuItem.NameEn = request.NameEn?.Trim();
-        menuItem.DescriptionAr = request.DescriptionAr?.Trim();
-        menuItem.DescriptionEn = request.DescriptionEn?.Trim();
+
+        var nameAr = request.NameAr.Trim();
+        var nameEn = request.NameEn?.Trim();
+        var descriptionAr = request.DescriptionAr?.Trim();
+        var descriptionEn = request.DescriptionEn?.Trim();
+        var contentVersionBefore = menuItem.ContentVersion;
+
+        TranslatableContentVersion.BumpMenuItemIfTranslatableContentChanged(
+            menuItem,
+            nameAr,
+            nameEn,
+            descriptionAr,
+            descriptionEn);
+
+        menuItem.NameAr = nameAr;
+        menuItem.NameEn = nameEn;
+        menuItem.DescriptionAr = descriptionAr;
+        menuItem.DescriptionEn = descriptionEn;
+        var discount = !menuItem.UsesSizes && menuItem.Discount is not null &&
+            request.DiscountPrice == MenuPricing.ForItem(menuItem).FinalPrice ? menuItem.Discount : null;
         menuItem.Price = request.Price;
         menuItem.DiscountPrice = request.DiscountPrice;
+        MenuDiscountConfiguration.Apply(menuItem, discount, null, null);
         menuItem.DisplayOrder = request.DisplayOrder;
         menuItem.IsAvailable = request.IsAvailable;
         menuItem.IsActive = request.IsActive;
+        MenuItemSizeConfiguration.Apply(menuItem, null, null, request.IsAvailable && request.IsActive);
         menuItem.UpdatedAt = _dateTimeService.UtcNow;
+
+        if (menuItem.ContentVersion > contentVersionBefore)
+        {
+            await _publishedTranslationWriter.UpsertMenuItemPublishedTranslationsAsync(
+                menuItem,
+                isManualEdit: true,
+                cancellationToken);
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return menuItem.ToDto();
+        return await MenuItemDtoProjections.GetProjectedDtoByIdAsync(
+            _context,
+            menuItem.Id,
+            menuItem.RestaurantId,
+            cancellationToken);
     }
 }

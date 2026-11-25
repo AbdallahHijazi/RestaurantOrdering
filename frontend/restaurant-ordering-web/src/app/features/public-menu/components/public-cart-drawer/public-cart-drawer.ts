@@ -1,0 +1,145 @@
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { LocaleService } from '../../../../core/localization/locale';
+import { PublicCartService } from '../../data-access/public-cart.service';
+import { cartLineDisplayName, cartLineKey, type PublicCartLineItem } from '../../models/public-cart.models';
+import type { PublicRestaurantOrderSettings } from '../../models/public-menu.models';
+import { displayUnitPrice, estimateItemSavings, estimateOrderTotals } from '../../utils/order-estimate.util';
+import { ORDER_TYPE_PICKUP } from '../../models/public-menu.models';
+import { MOCK_IMAGE_FALLBACK } from '../../data-access/public-menu-mock.data';
+import { IconButton } from '../../../../shared/ui/icon-button/icon-button';
+
+@Component({
+  imports: [IconButton],
+  selector: 'app-public-cart-drawer',
+  templateUrl: './public-cart-drawer.html',
+  styleUrl: './public-cart-drawer.scss',
+})
+export class PublicCartDrawer {
+  readonly open = input(false);
+  readonly orderSettings = input.required<PublicRestaurantOrderSettings>();
+  readonly countryCode = input('SA');
+  readonly contentLocale = input<string>('ar');
+  readonly imageFallback = input(MOCK_IMAGE_FALLBACK);
+
+  readonly closed = output<void>();
+  readonly continueCheckout = output<void>();
+
+  private readonly panelRef = viewChild<ElementRef<HTMLElement>>('panel');
+  protected readonly cart = inject(PublicCartService);
+  protected readonly localeService = inject(LocaleService);
+  protected readonly ui = this.localeService.ui;
+  private readonly brokenImages = signal<Record<string, true>>({});
+
+  protected readonly itemSavings = computed(() => estimateItemSavings(this.cart.cartItems()));
+
+  protected readonly estimate = computed(() =>
+    estimateOrderTotals(this.cart.cartItems(), this.orderSettings(), ORDER_TYPE_PICKUP),
+  );
+
+  protected readonly subtitle = computed(() =>
+    this.ui().publicCartSubtitle.replace('{count}', String(this.cart.itemCount())),
+  );
+
+  constructor() {
+    effect(() => {
+      if (this.open()) {
+        queueMicrotask(() => this.panelRef()?.nativeElement.focus());
+      }
+    });
+  }
+
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    if (this.open()) {
+      this.closed.emit();
+    }
+  }
+
+  protected lineName(line: PublicCartLineItem): string {
+    return cartLineDisplayName(
+      line,
+      (locale, resolved, legacy, fallback) =>
+        this.localeService.pickResolvedTextForLocale(locale, resolved, legacy, fallback),
+      this.contentLocale(),
+    );
+  }
+
+  protected lineKey(line: PublicCartLineItem): string {
+    return cartLineKey(line.menuItemId, line.menuItemSizeId);
+  }
+
+  protected formatMoney(amount: number): string {
+    return this.localeService.formatCurrency(
+      amount,
+      this.orderSettings().currencyCode,
+      this.countryCode(),
+    );
+  }
+
+  protected unitPrice(line: Parameters<typeof displayUnitPrice>[0]): number {
+    return displayUnitPrice(line);
+  }
+
+  protected imageSrc(line: { menuItemId: string; imageUrl?: string | null }): string {
+    if (this.brokenImages()[line.menuItemId]) {
+      return this.imageFallback();
+    }
+
+    return line.imageUrl?.trim() || this.imageFallback();
+  }
+
+  protected onImageError(lineId: string): void {
+    this.brokenImages.update((current) => ({ ...current, [lineId]: true }));
+  }
+
+  protected onBackdropClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.closed.emit();
+    }
+  }
+
+  protected increment(lineId: string): void {
+    const line = this.cart.cartItems().find((item) => this.lineKey(item) === lineId);
+    if (!line) {
+      return;
+    }
+
+    this.cart.setStoredLineQuantity(line, line.quantity + 1);
+  }
+
+  protected decrement(lineId: string): void {
+    const line = this.cart.cartItems().find((item) => this.lineKey(item) === lineId);
+    if (!line) {
+      return;
+    }
+
+    this.cart.setStoredLineQuantity(line, line.quantity - 1);
+  }
+
+  protected remove(lineId: string): void {
+    this.cart.removeItem(lineId);
+  }
+
+  protected clearCart(): void {
+    if (!window.confirm(this.ui().publicCartClearConfirm)) {
+      return;
+    }
+
+    this.cart.clearCart();
+  }
+
+  protected exploreMenu(): void {
+    this.closed.emit();
+  }
+}

@@ -1,0 +1,68 @@
+<section class="public-menu-hero" aria-labelledby="public-menu-hero-title">
+  <div class="public-menu-hero__media">
+    @if (coverSrc(); as src) {
+      <img [src]="src" [alt]="displayName()" (error)="onCoverError()" />
+    } @else {
+      <div class="public-menu-hero__fallback" aria-hidden="true"></div>
+    }
+    <div class="public-menu-hero__overlay" aria-hidden="true"></div>
+  </div>
+
+  <div class="public-menu-hero__content">
+    <div class="public-menu-hero__inner menu-page__brand">
+      <div class="public-menu-hero__logo-wrap">
+        @if (restaurant().logoUrl && !logoFailed()) {
+          <img
+            class="public-menu-hero__logo"
+            [src]="restaurant().logoUrl"
+            [alt]="displayName()"
+            (error)="onLogoError()"
+          />
+        } @else {
+          <span class="public-menu-hero__monogram" aria-hidden="true">
+            {{ brandInitial() }}
+          </span>
+        }
+        @if (restaurant().isOpen != null) {
+          <span
+            class="public-menu-hero__status-dot"
+            [class.public-menu-hero__status-dot--closed]="restaurant().isOpen === false"
+            aria-hidden="true"
+          ></span>
+        }
+      </div>
+
+      <div class="public-menu-hero__identity">
+        <h1 id="public-menu-hero-title" class="public-menu-hero__title">
+          {{ displayName() }}
+        </h1>
+        @if (secondaryName()) {
+          <span class="public-menu-hero__secondary-name">{{ secondaryName() }}</span>
+        }
+      </div>
+
+      @if (displayDescription()) {
+        <p class="public-menu-hero__lead">{{ displayDescription() }}</p>
+      }
+
+      <div class="public-menu-hero__actions">
+        @if (statusLabel(); as status) {
+          <span
+            class="public-menu-hero__hours"
+            [class.public-menu-hero__hours--closed]="restaurant().isOpen === false"
+          >
+            <span class="public-menu-hero__hours-dot" aria-hidden="true"></span>
+            <span>{{ status }}</span>
+          </span>
+        }
+
+        <button type="button" class="public-menu-hero__cta" (click)="exploreMenu.emit()">
+          <span>{{ ctaLabel() }}</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m7 10 5 5 5-5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,144 @@
+<article
+  class="public-menu-card"
+  [class.public-menu-card--unavailable]="!item().isAvailable"
+  data-testid="public-menu-item-card"
+>
+  <div class="public-menu-card__media">
+    @if (imageSrc(); as src) {
+      <img [src]="src" [alt]="displayName()" loading="lazy" (error)="onImageError()" />
+    } @else {
+      <div class="public-menu-card__placeholder" aria-hidden="true"></div>
+    }
+
+    @if (item().isPopular || item().isVegetarian || !item().isAvailable) {
+      <div class="public-menu-card__badges">
+        @if (item().isPopular) {
+          <span class="public-menu-card__badge">{{ ui().publicMenuChefChoice }}</span>
+        }
+        @if (item().isVegetarian) {
+          <span class="public-menu-card__badge public-menu-card__badge--vegetarian">
+            {{ labels().vegetarian }}
+          </span>
+        }
+        @if (!item().isAvailable) {
+          <span class="public-menu-card__badge public-menu-card__badge--unavailable">
+            {{ ui().publicMenuItemUnavailable }}
+          </span>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="public-menu-card__body">
+    <div class="public-menu-card__title-group">
+      <h3>{{ displayName() }}</h3>
+      @if (secondaryName()) {
+        <span class="public-menu-card__subtitle">{{ secondaryName() }}</span>
+      }
+    </div>
+
+    <p class="public-menu-card__description">{{ displayDescription() }}</p>
+
+    @if (item().usesSizes) {
+      <fieldset class="public-menu-card__sizes" [attr.aria-label]="ui().sizeChoose">
+        <div class="public-menu-card__chips">
+          @for (size of item().sizes; track size.id) {
+            <label class="public-menu-card__chip">
+              <input class="visually-hidden" type="radio" [name]="'meal-size-' + item().id"
+                [checked]="selectedSize()?.id === size.id"
+                [disabled]="!item().isAvailable || !size.isAvailable"
+                (change)="selectedSizeId.set(size.id)" />
+              <bdi class="public-menu-card__chip-face">{{ size.name }}</bdi>
+              @if (!size.isAvailable) {
+                <span class="visually-hidden">{{ ui().publicMenuItemUnavailable }}</span>
+              }
+            </label>
+          }
+        </div>
+      </fieldset>
+    }
+
+    <div class="public-menu-card__foot">
+      <div class="public-menu-card__price-wrap">
+        <div class="public-menu-card__price-stack" aria-live="polite">
+          @if (item().usesSizes) {
+            @if (startingPrice() !== null) {
+              <strong class="public-menu-card__price">
+                <span class="public-menu-card__from"
+                  [class.public-menu-card__from--reserved]="selectedSize() && !displaySalePrice()"
+                  [attr.aria-hidden]="selectedSize() && !displaySalePrice() ? true : null">
+                  @if (displaySalePrice()) {
+                    <del class="public-menu-card__price--original"><bdi dir="ltr">{{ displayPrice() }}</bdi></del>
+                  } @else {
+                    {{ ui().sizeFrom }}
+                  }
+                </span>
+                <bdi dir="ltr">{{ displaySalePrice() ?? displayPrice() }}</bdi>
+              </strong>
+            }
+          } @else if (displaySalePrice(); as salePrice) {
+            <strong class="public-menu-card__price"><bdi dir="ltr">{{ salePrice }}</bdi></strong>
+            <span class="public-menu-card__price public-menu-card__price--original">
+              <bdi dir="ltr">{{ displayPrice() }}</bdi>
+            </span>
+          } @else {
+            <strong class="public-menu-card__price"><bdi dir="ltr">{{ displayPrice() }}</bdi></strong>
+          }
+        </div>
+        <span class="public-menu-card__tag" [class.public-menu-card__tag--off]="!item().isAvailable">
+          {{ item().isAvailable ? ui().publicMenuAvailable : ui().publicMenuItemUnavailable }}
+        </span>
+      </div>
+
+      <div class="public-menu-card__actions">
+        @if (displayedQuantity() > 0) {
+          <div class="public-menu-card__quantity" role="group" [attr.aria-label]="displayName()">
+            <button
+              type="button"
+              class="public-menu-card__qty-btn"
+              [attr.aria-label]="ui().publicCartDecrease"
+              (click)="decrement()"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M6 12h12" />
+              </svg>
+            </button>
+            <span aria-live="polite">{{ displayedQuantity() }}</span>
+            <button
+              type="button"
+              class="public-menu-card__qty-btn public-menu-card__qty-btn--add"
+              [attr.aria-label]="ui().publicCartIncrease"
+              (click)="increment()"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 6v12M6 12h12" />
+              </svg>
+            </button>
+          </div>
+        } @else {
+          <button
+            type="button"
+            class="public-menu-card__add"
+            [class.public-menu-card__add--added]="justAdded()"
+            [disabled]="!item().isAvailable || (!!item().usesSizes && !selectedSize())"
+            data-testid="public-menu-add-to-cart"
+            [attr.aria-live]="justAdded() ? 'polite' : null"
+            (click)="addItem()"
+          >
+            @if (justAdded()) {
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="m6 12 4 4 8-9" />
+              </svg>
+              <span>{{ ui().publicMenuAddedCheck }}</span>
+            } @else {
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              <span >{{ ui().publicMenuAddToCart }}</span>
+            }
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</article>

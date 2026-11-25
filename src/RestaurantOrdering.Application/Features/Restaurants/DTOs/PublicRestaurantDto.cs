@@ -9,6 +9,9 @@ public class PublicRestaurantDto
     public string? DescriptionAr { get; init; }
     public string? DescriptionEn { get; init; }
     public Guid? LogoFileId { get; init; }
+    public string? LogoUrl { get; init; }
+    public string? CoverImageUrl { get; init; }
+    public string AccentColor { get; init; } = "#B8663F";
     public string PhoneNumber { get; init; } = string.Empty;
     public string? WhatsAppNumber { get; init; }
     public string? AddressAr { get; init; }

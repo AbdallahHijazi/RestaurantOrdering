@@ -1,0 +1,13 @@
+@import '../../styles/modal-shell.scss';
+
+:host {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal-backdrop);
+  pointer-events: none;
+}
+
+:host.modal-shell-host--open {
+  pointer-events: auto;
+}

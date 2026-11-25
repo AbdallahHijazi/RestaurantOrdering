@@ -1,0 +1,37 @@
+import type { ApplicationRole } from './application-roles';
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  expiresAtUtc: string;
+  userId: string;
+  restaurantId: string | null;
+}
+
+export interface AuthSession {
+  accessToken: string;
+  expiresAtUtc: string;
+  userId: string;
+  restaurantId: string | null;
+  role: ApplicationRole;
+}
+
+export type LoginErrorCode =
+  | 'invalid-credentials'
+  | 'too-many-requests'
+  | 'network'
+  | 'unsupported-role';
+
+export class LoginError extends Error {
+  readonly code: LoginErrorCode;
+
+  constructor(code: LoginErrorCode) {
+    super(code);
+    this.name = 'LoginError';
+    this.code = code;
+  }
+}

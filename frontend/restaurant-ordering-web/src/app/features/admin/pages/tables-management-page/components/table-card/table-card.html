@@ -1,0 +1,143 @@
+<article class="table-card" [attr.data-testid]="'table-card-' + table().id">
+  <div class="table-card__head">
+    <div class="table-card__title">
+      <div class="table-card__title-row">
+        <h2>{{ table().name }}</h2>
+        <span class="table-card__zone">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z" />
+          </svg>
+          {{ zoneLabel(table()) }}
+        </span>
+      </div>
+    </div>
+    <span
+      class="table-card__badge"
+      [class.table-card__badge--inactive]="!table().isActive || table().isArchived"
+      [attr.data-testid]="'table-status-' + table().id"
+    >
+      {{
+        table().isArchived
+          ? locale.uiText('tablesStatusArchived')
+          : table().isActive
+            ? locale.uiText('tablesStatusActive')
+            : locale.uiText('tablesStatusInactive')
+      }}
+    </span>
+  </div>
+
+  <div
+    class="table-card__preview"
+    [class.table-card__preview--inactive]="!table().isActive"
+    [attr.data-testid]="'table-qr-' + table().id"
+  >
+    <app-table-print-card
+      variant="preview"
+      [table]="table()"
+      [restaurantName]="restaurantName()"
+      [restaurantLogoUrl]="restaurantLogoUrl()"
+      [brandInitial]="brandInitial()"
+      [qrSvg]="qrSvg() ?? ''"
+      [qrLoading]="qrLoading()"
+    />
+    @if (!table().isActive && !table().isArchived) {
+      <div class="table-card__inactive-overlay" [attr.data-testid]="'table-inactive-overlay-' + table().id">
+        <span class="table-card__inactive-label">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M7 10V7a5 5 0 0 1 10 0v3h1a2 2 0 0 1 2 2v8H4v-8a2 2 0 0 1 2-2h1Zm2 0h6V7a3 3 0 0 0-6 0v3Zm2 4v3h2v-3h-2Z" />
+          </svg>
+          {{ locale.uiText('tablesOrderTemporarilyDisabled') }}
+        </span>
+        <button
+          appIconButton
+          size="sm"
+          icon="power"
+          variant="primary"
+          [showLabel]="true"
+          [label]="locale.uiText('tablesReactivateNow')"
+          [attr.data-testid]="'table-reactivate-' + table().id"
+          (click)="toggleStatus.emit(table())"
+        ></button>
+      </div>
+    }
+  </div>
+
+  <!--
+    One compact toolbar: [edit · print · download] [activate/deactivate] ...... [regenerate · archive].
+    Same six actions as before; the two destructive ones are grouped at the end and styled as danger.
+  -->
+  <div
+    class="table-card__actions"
+    role="toolbar"
+    [attr.aria-label]="table().name"
+  >
+    @if (!table().isArchived) {
+      <div class="table-card__group" role="group">
+        <button
+          appIconButton
+          size="sm"
+          variant="primary"
+          icon="pencil"
+          [tooltip]="true"
+          [label]="locale.uiText('tablesActionEdit')"
+          [attr.data-testid]="'table-edit-' + table().id"
+          (click)="edit.emit(table())"
+        ></button>
+        <button
+          appIconButton
+          size="sm"
+          icon="print"
+          [tooltip]="true"
+          [label]="locale.uiText('tablesActionPrint')"
+          [attr.data-testid]="'table-print-' + table().id"
+          (click)="print.emit(table())"
+        ></button>
+        <button
+          appIconButton
+          size="sm"
+          icon="download"
+          [tooltip]="true"
+          [label]="locale.uiText('tablesActionDownloadQr')"
+          [attr.data-testid]="'table-download-qr-' + table().id"
+          (click)="downloadQr.emit(table())"
+        ></button>
+      </div>
+      <span class="table-card__divider" aria-hidden="true"></span>
+      <div class="table-card__group" role="group">
+        <button
+          appIconButton
+          size="sm"
+          icon="power"
+          [tooltip]="true"
+          [label]="table().isActive ? locale.uiText('tablesActionDeactivate') : locale.uiText('tablesActionActivate')"
+          [attr.data-testid]="'table-toggle-status-' + table().id"
+          (click)="toggleStatus.emit(table())"
+        ></button>
+      </div>
+    }
+    <div class="table-card__group table-card__group--end" role="group">
+      @if (!table().isArchived) {
+        <button
+          appIconButton
+          size="sm"
+          variant="danger"
+          icon="refresh"
+          [tooltip]="true"
+          [label]="locale.uiText('tablesActionRegenerateToken')"
+          [attr.data-testid]="'table-regenerate-' + table().id"
+          (click)="regenerateToken.emit(table())"
+        ></button>
+      }
+      <button
+        appIconButton
+        size="sm"
+        [variant]="table().isArchived ? 'primary' : 'danger'"
+        [icon]="table().isArchived ? 'restore' : 'archive'"
+        [tooltip]="true"
+        [label]="table().isArchived ? locale.uiText('actionRestore') : locale.uiText('actionArchive')"
+        [attr.data-testid]="'table-archive-' + table().id"
+        (click)="archive.emit(table())"
+      ></button>
+    </div>
+  </div>
+</article>

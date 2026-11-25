@@ -1,5 +1,7 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Api.Contracts.Admin.Orders;
 using RestaurantOrdering.Application.Features.Orders.Commands.UpdateOrderStatus;
 using RestaurantOrdering.Application.Features.Orders.DTOs;
@@ -10,6 +12,7 @@ using RestaurantOrdering.Domain.Enums;
 namespace RestaurantOrdering.Api.Controllers.Admin;
 
 [ApiController]
+[Authorize(Policy = ApplicationPolicies.KitchenDashboardAccess)]
 [Route("api/v1/admin/restaurants/{restaurantId:guid}/orders")]
 public sealed class OrdersController : ControllerBase
 {

@@ -9,8 +9,11 @@ public sealed record CreatePublicOrderCommand(
     string GuestName,
     string GuestPhone,
     OrderType OrderType,
+    string? TableToken,
     string? DeliveryAddress,
     decimal? DeliveryLatitude,
     decimal? DeliveryLongitude,
     string? Notes,
-    IReadOnlyList<CreatePublicOrderItemRequest> Items) : IRequest<PublicOrderConfirmationDto>;
+    string? Locale,
+    IReadOnlyList<CreatePublicOrderItemRequest> Items,
+    string? IdempotencyKey = null) : IRequest<PublicOrderConfirmationDto>;

@@ -1,0 +1,545 @@
+@import '@fontsource/playfair-display/400.css';
+@import '@fontsource/playfair-display/500.css';
+@import '@fontsource/playfair-display/600.css';
+@import '@fontsource/playfair-display/700.css';
+@import '@fontsource/playfair-display/800.css';
+@import '@fontsource/playfair-display/900.css';
+/* Arabic display/body face (referenced by --restaurant-font-*-ar below). */
+@import '@fontsource/amiri/400.css';
+@import '@fontsource/amiri/700.css';
+
+:root {
+  /* Strict three-color palette */
+  --restaurant-ivory: #f8f3ea;
+  --restaurant-sage: #d2a58c;
+  --restaurant-olive: #9c3d2e;
+  --restaurant-palette-ivory: var(--restaurant-ivory);
+  --restaurant-palette-sage: var(--restaurant-sage);
+  --restaurant-palette-olive: var(--restaurant-olive);
+  /* Ink: text colour (dark warm brown). Brand colour (olive slot) is for accents/buttons, not body text. */
+  --restaurant-ink: #3b2a25;
+  --restaurant-palette-ink: var(--restaurant-ink);
+
+  /* Z-index */
+  --z-admin-header: 100;
+  --z-modal-backdrop: 1300;
+  --z-modal-dialog: 1301;
+  --z-preview-overlay: 1400;
+
+  /* Typography */
+  --restaurant-font-display-en: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --restaurant-font-display-ar: 'Amiri', Georgia, serif;
+  --restaurant-font-body-en: Arial, Helvetica, sans-serif;
+  --restaurant-font-body-ar: 'Amiri', Georgia, serif;
+  --restaurant-font-display: var(--restaurant-font-display-en);
+  --restaurant-font-body: var(--restaurant-font-body-en);
+  --restaurant-font-ar: var(--restaurant-font-body-ar);
+  --restaurant-font-en: var(--restaurant-font-body-en);
+  --restaurant-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* Receipt / thermal-printer output: plain system faces that print reliably. */
+  --restaurant-font-print: Arial, Tahoma, sans-serif;
+  --restaurant-font-print-alt: Tahoma, Arial, sans-serif;
+  --font-display: var(--restaurant-font-display);
+  --font-body: var(--restaurant-font-body);
+
+  /* Core backgrounds */
+  --restaurant-background: var(--restaurant-palette-ivory);
+  --restaurant-background-soft: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 10%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-background-deep: color-mix(
+    in srgb,
+    var(--restaurant-palette-olive) 8%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-background-menu: var(--restaurant-background);
+  --restaurant-background-orders: var(--restaurant-background-soft);
+
+  /* Surfaces */
+  --restaurant-surface: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 14%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-surface-soft: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 20%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-surface-elevated: var(--restaurant-palette-ivory);
+  --restaurant-surface-muted: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 28%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-surface-white: var(--restaurant-palette-ivory);
+  --restaurant-surface-glass: color-mix(in srgb, var(--restaurant-palette-ivory) 92%, transparent);
+  --restaurant-alternate-surface: var(--restaurant-surface-soft);
+
+  /* Accent scale (legacy aliases → olive / sage) */
+  --restaurant-gold-dark: color-mix(in srgb, var(--restaurant-olive) 86%, var(--restaurant-sage));
+  --restaurant-gold-deep: var(--restaurant-olive);
+  --restaurant-gold-base: var(--restaurant-olive);
+  --restaurant-gold-light: var(--restaurant-sage);
+  --restaurant-gold-champagne: var(--restaurant-ivory);
+
+  /* Accent (flat) */
+  --restaurant-accent: var(--restaurant-olive);
+  --restaurant-accent-strong: color-mix(in srgb, var(--restaurant-olive) 86%, var(--restaurant-sage));
+  --restaurant-accent-deep: color-mix(in srgb, var(--restaurant-olive) 92%, var(--restaurant-sage));
+  --restaurant-accent-soft: color-mix(in srgb, var(--restaurant-sage) 32%, transparent);
+  --restaurant-accent-border: color-mix(in srgb, var(--restaurant-olive) 42%, transparent);
+  --restaurant-champagne: var(--restaurant-ivory);
+
+  /* Primary buttons (olive + sage only — no ivory shine through text) */
+  --restaurant-primary-button-bg: linear-gradient(
+    135deg,
+    var(--restaurant-olive) 0%,
+    color-mix(in srgb, var(--restaurant-olive) 74%, var(--restaurant-sage)) 100%
+  );
+  --restaurant-primary-button-bg-hover: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--restaurant-olive) 86%, var(--restaurant-sage)) 0%,
+    color-mix(in srgb, var(--restaurant-olive) 78%, var(--restaurant-sage)) 100%
+  );
+  --restaurant-primary-button-bg-active: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--restaurant-olive) 92%, var(--restaurant-sage)) 0%,
+    color-mix(in srgb, var(--restaurant-olive) 88%, var(--restaurant-sage)) 100%
+  );
+  --restaurant-primary-button-bg-soft: linear-gradient(
+    135deg,
+    var(--restaurant-olive) 0%,
+    color-mix(in srgb, var(--restaurant-olive) 68%, var(--restaurant-sage)) 100%
+  );
+  --restaurant-primary-button-text: var(--restaurant-ivory);
+  --restaurant-primary-button-highlight: color-mix(in srgb, var(--restaurant-sage) 34%, transparent);
+  --restaurant-primary-button-shadow: 0 10px 24px color-mix(in srgb, var(--restaurant-palette-olive) 18%, transparent);
+  --restaurant-primary-button-shadow-hover: 0 12px 28px color-mix(in srgb, var(--restaurant-palette-olive) 22%, transparent);
+
+  /* Card hover + focus (palette-only) */
+  --restaurant-card-hover-border: color-mix(in srgb, var(--restaurant-olive) 42%, transparent);
+  --restaurant-card-hover-shadow: 0 18px 42px color-mix(in srgb, var(--restaurant-palette-olive) 16%, transparent);
+  --restaurant-focus-ring: color-mix(in srgb, var(--restaurant-olive) 54%, transparent);
+
+  /* Legacy gradient aliases (mapped to readable primary buttons) */
+  --restaurant-gold-metallic: var(--restaurant-primary-button-bg);
+  --restaurant-gold-metallic-soft: var(--restaurant-primary-button-bg-soft);
+  --restaurant-gold-metallic-shadow: var(--restaurant-primary-button-shadow);
+  --restaurant-gold-metallic-shadow-hover: var(--restaurant-primary-button-shadow-hover);
+  --restaurant-gold-shine: linear-gradient(
+    90deg,
+    var(--restaurant-olive) 0%,
+    var(--restaurant-sage) 32%,
+    color-mix(in srgb, var(--restaurant-sage) 72%, var(--restaurant-ivory)) 50%,
+    var(--restaurant-sage) 68%,
+    var(--restaurant-olive) 100%
+  );
+
+  /* Text */
+  --restaurant-text: var(--restaurant-palette-ink);
+  --restaurant-text-soft: color-mix(in srgb, var(--restaurant-palette-ink) 80%, var(--restaurant-palette-ivory));
+  --restaurant-muted-text: color-mix(in srgb, var(--restaurant-palette-ink) 62%, var(--restaurant-palette-ivory));
+  --restaurant-subtle-text: color-mix(in srgb, var(--restaurant-palette-ink) 46%, var(--restaurant-palette-ivory));
+  --restaurant-text-on-gold: var(--restaurant-palette-ivory);
+  --restaurant-text-on-accent: var(--restaurant-palette-ivory);
+  --restaurant-text-on-dark: var(--restaurant-palette-ivory);
+
+  /* Borders */
+  --restaurant-border: color-mix(in srgb, var(--restaurant-palette-ink) 14%, transparent);
+  --restaurant-border-strong: color-mix(in srgb, var(--restaurant-palette-ink) 30%, transparent);
+  --restaurant-border-soft: color-mix(in srgb, var(--restaurant-palette-sage) 22%, transparent);
+  --restaurant-border-menu: var(--restaurant-border);
+  --restaurant-border-menu-strong: var(--restaurant-border-strong);
+  --restaurant-border-admin: var(--restaurant-border);
+  --restaurant-border-orders: var(--restaurant-border);
+  --restaurant-border-slate: var(--restaurant-border-soft);
+
+  /* Footer */
+  --restaurant-footer: var(--restaurant-background-deep);
+  --restaurant-footer-text: var(--restaurant-text);
+
+  /* Semantic colors (palette-only) */
+  --restaurant-success: var(--restaurant-palette-sage);
+  --restaurant-success-soft: color-mix(in srgb, var(--restaurant-palette-sage) 20%, transparent);
+  --restaurant-danger: var(--restaurant-palette-olive);
+  --restaurant-danger-soft: color-mix(in srgb, var(--restaurant-palette-olive) 14%, transparent);
+  --restaurant-danger-medium: color-mix(
+    in srgb,
+    var(--restaurant-palette-olive) 82%,
+    var(--restaurant-palette-sage)
+  );
+  --restaurant-danger-menu: var(--restaurant-danger);
+  --restaurant-danger-admin: var(--restaurant-danger);
+  --restaurant-danger-surface: color-mix(in srgb, var(--restaurant-palette-olive) 10%, transparent);
+  --restaurant-warning: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 52%,
+    var(--restaurant-palette-olive)
+  );
+  --restaurant-warning-soft: color-mix(in srgb, var(--restaurant-palette-sage) 18%, transparent);
+  --restaurant-info: var(--restaurant-palette-sage);
+  --restaurant-info-soft: color-mix(in srgb, var(--restaurant-palette-sage) 16%, transparent);
+  --restaurant-sage-menu: var(--restaurant-sage);
+  --restaurant-sage-soft: color-mix(in srgb, var(--restaurant-palette-sage) 18%, transparent);
+  --restaurant-sage-soft-menu: var(--restaurant-sage-soft);
+  --restaurant-amber: var(--restaurant-warning);
+  --restaurant-amber-soft: var(--restaurant-warning-soft);
+
+  /* Admin console palette */
+  --restaurant-console-accent: var(--restaurant-accent);
+  --restaurant-console-accent-soft: var(--restaurant-accent-soft);
+  --restaurant-console-text: var(--restaurant-text);
+  --restaurant-console-charcoal: var(--restaurant-surface-elevated);
+  --restaurant-console-muted: var(--restaurant-muted-text);
+  --restaurant-console-stat-muted: var(--restaurant-subtle-text);
+  --restaurant-console-border: var(--restaurant-border);
+  --restaurant-console-outline: var(--restaurant-border-strong);
+  --restaurant-console-surface: var(--restaurant-background);
+  --restaurant-console-surface-elevated: var(--restaurant-surface);
+  --restaurant-console-surface-muted: var(--restaurant-surface-muted);
+  --restaurant-console-surface-panel: var(--restaurant-surface-soft);
+  --restaurant-console-text-on-dark: var(--restaurant-text-on-dark);
+  --restaurant-console-text-on-dark-muted: var(--restaurant-text-soft);
+  --restaurant-console-shadow: var(--restaurant-shadow-sm);
+  --restaurant-console-backdrop: color-mix(in srgb, var(--restaurant-palette-ink) 42%, transparent);
+
+  /* Kitchen functional status colors */
+  --restaurant-kitchen-new: var(--restaurant-palette-sage);
+  --restaurant-kitchen-new-text: var(--restaurant-palette-ink);
+  --restaurant-kitchen-indicator: var(--restaurant-surface-muted);
+  --restaurant-kitchen-delivery: color-mix(in srgb, var(--restaurant-palette-sage) 24%, transparent);
+  --restaurant-kitchen-delivery-text: var(--restaurant-text);
+
+  /* Live preview status */
+  --restaurant-preview-sync-border: color-mix(in srgb, var(--restaurant-palette-sage) 38%, transparent);
+  --restaurant-preview-sync-bg: color-mix(in srgb, var(--restaurant-palette-sage) 14%, transparent);
+  --restaurant-preview-sync-text: var(--restaurant-palette-sage);
+  --restaurant-preview-unsaved-border: color-mix(
+    in srgb,
+    var(--restaurant-palette-olive) 32%,
+    transparent
+  );
+  --restaurant-preview-unsaved-bg: color-mix(in srgb, var(--restaurant-palette-sage) 12%, transparent);
+  --restaurant-preview-unsaved-text: var(--restaurant-palette-olive);
+  --restaurant-preview-dot-live: var(--restaurant-palette-sage);
+  --restaurant-preview-dot-unsaved: var(--restaurant-palette-olive);
+  --restaurant-preview-canvas-bg: var(--restaurant-background-soft);
+  --restaurant-preview-frame-border: var(--restaurant-border);
+  --restaurant-preview-muted: var(--restaurant-muted-text);
+  --restaurant-preview-device-chrome: var(--restaurant-surface-elevated);
+
+  /* Shadow ink: base colour for every soft drop-shadow (kept dark for depth, tinted by the palette). */
+  --restaurant-shadow-ink: color-mix(in srgb, var(--restaurant-palette-ink) 80%, black);
+
+  /* Order status chips (dashboard) */
+  --restaurant-status-new-bg: color-mix(in srgb, var(--restaurant-palette-sage) 12%, var(--restaurant-palette-ivory));
+  --restaurant-status-new-text: var(--restaurant-text-soft);
+  --restaurant-status-preparing-bg: color-mix(in srgb, var(--restaurant-palette-sage) 22%, var(--restaurant-palette-ivory));
+  --restaurant-status-preparing-text: var(--restaurant-text-soft);
+  --restaurant-status-ready-bg: color-mix(in srgb, var(--restaurant-palette-sage) 32%, var(--restaurant-palette-ivory));
+  --restaurant-status-ready-text: var(--restaurant-text);
+  --restaurant-status-completed-bg: color-mix(in srgb, var(--restaurant-palette-olive) 16%, var(--restaurant-palette-ivory));
+  --restaurant-status-completed-text: var(--restaurant-text);
+  --restaurant-status-cancelled-bg: color-mix(in srgb, var(--restaurant-palette-olive) 7%, var(--restaurant-palette-ivory));
+  --restaurant-status-cancelled-text: var(--restaurant-muted-text);
+
+  /* Receipt printing is deliberately pure black on white (thermal printers). */
+  --receipt-ink: #000;
+  --receipt-paper: #fff;
+
+  /* Print-safe palette */
+  --restaurant-print-surface: var(--restaurant-palette-ivory);
+  --restaurant-print-surface-soft: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 8%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-print-text: var(--restaurant-palette-ink);
+  --restaurant-print-muted: color-mix(
+    in srgb,
+    var(--restaurant-palette-olive) 55%,
+    var(--restaurant-palette-sage)
+  );
+  --restaurant-print-border: color-mix(
+    in srgb,
+    var(--restaurant-palette-sage) 72%,
+    var(--restaurant-palette-olive)
+  );
+
+  /* Dark surfaces (remapped to olive-tinted ivory) */
+  --restaurant-dark: color-mix(
+    in srgb,
+    var(--restaurant-palette-olive) 12%,
+    var(--restaurant-palette-ivory)
+  );
+  --restaurant-dark-deep: color-mix(
+    in srgb,
+    var(--restaurant-palette-olive) 18%,
+    var(--restaurant-palette-ivory)
+  );
+
+  /* Neutral scale */
+  --restaurant-neutral-950: var(--restaurant-dark-deep);
+  --restaurant-neutral-900: var(--restaurant-dark);
+  --restaurant-neutral-800: var(--restaurant-surface);
+  --restaurant-neutral-700: var(--restaurant-muted-text);
+  --restaurant-neutral-500: var(--restaurant-subtle-text);
+  --restaurant-neutral-300: var(--restaurant-border);
+  --restaurant-neutral-100: var(--restaurant-surface-soft);
+
+  /* Fluid layout system.
+     --layout-gutter is the ONE side margin of every page shell. It grows with the viewport (about 2.2vw), so desktop
+     pages use roughly 95% of the width while phones keep a comfortable edge and 4K keeps a sane one.
+     Main containers have NO max-width; only forms (--layout-form-max), readable text and dialogs keep caps. */
+  --layout-gutter: clamp(1.1rem, 2.2vw, 3.5rem);
+  --layout-form-max: min(72vw, 90rem);
+
+  /* Radius */
+  --restaurant-radius-xs: 8px;
+  --restaurant-radius-sm: 10px;
+  --restaurant-radius-md: 14px;
+  --restaurant-radius-lg: 18px;
+  --restaurant-radius-xl: 24px;
+  --restaurant-radius-pill: 999px;
+  --radius-sm: var(--restaurant-radius-sm);
+  --radius-md: var(--restaurant-radius-md);
+  --radius-lg: var(--restaurant-radius-lg);
+
+  /* Shadows */
+  --restaurant-shadow-xs: 0 4px 12px color-mix(in srgb, var(--restaurant-palette-ink) 10%, transparent);
+  --restaurant-shadow-sm: 0 10px 26px color-mix(in srgb, var(--restaurant-palette-ink) 14%, transparent);
+  --restaurant-shadow-md: 0 18px 48px color-mix(in srgb, var(--restaurant-palette-ink) 18%, transparent);
+  --restaurant-shadow-lg: 0 28px 84px color-mix(in srgb, var(--restaurant-palette-ink) 22%, transparent);
+  --shadow-soft: var(--restaurant-shadow-sm);
+  --restaurant-shadow-menu-sm: var(--restaurant-shadow-xs);
+  --restaurant-shadow-menu-md: var(--restaurant-shadow-sm);
+  --restaurant-shadow-admin-sm: var(--restaurant-shadow-xs);
+  --restaurant-shadow-admin-md: var(--restaurant-shadow-sm);
+  --restaurant-overlay-backdrop: color-mix(in srgb, var(--restaurant-palette-ink) 55%, transparent);
+
+  /* Motion */
+  --restaurant-motion-fast: 160ms;
+  --restaurant-motion-normal: 240ms;
+  --restaurant-motion-slow: 340ms;
+  --restaurant-ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --restaurant-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --restaurant-motion-distance-sm: 0.25rem;
+  --restaurant-motion-distance-md: 0.5rem;
+  --transition-base: var(--restaurant-motion-normal) var(--restaurant-ease-standard);
+}
+
+html[dir='rtl'] {
+  --restaurant-font-display: var(--restaurant-font-display-ar);
+  --restaurant-font-body: var(--restaurant-font-body-ar);
+}
+
+html[dir='ltr'] {
+  --restaurant-font-display: var(--restaurant-font-display-en);
+  --restaurant-font-body: var(--restaurant-font-body-en);
+}
+
+/* ---------------------------------------------------------------------------
+   Unified design tokens (UX-003 / UX-008): typography, controls and icons.
+   Components must use these instead of ad-hoc font sizes / control heights.
+   --------------------------------------------------------------------------- */
+:root {
+  /* Typography scale (desktop) */
+  --fs-page-title: 1.75rem; /* 28px */
+  --fs-section: 1.375rem; /* 22px */
+  --fs-card: 1.125rem; /* 18px */
+  --fs-body: 1rem; /* 16px */
+  --fs-secondary: 0.875rem; /* 14px */
+  --fs-label: 0.875rem; /* 14px */
+  --fs-small: 0.75rem; /* 12px — the minimum font size anywhere in the UI */
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  --lh-tight: 1.25;
+  --lh-heading: 1.3;
+  --lh-body: 1.5;
+
+  /* Controls: 44-48px standard, 36px compact (promoted to 44px on touch / small screens). */
+  --btn-size-sm: 2.25rem;
+  --btn-size-md: 2.75rem;
+  --btn-size-lg: 3rem;
+  --touch-target-min: 2.75rem;
+
+  /* Icons */
+  --icon-size-sm: 1rem;
+  --icon-size-md: 1.25rem;
+  --icon-size-lg: 1.5rem;
+  --icon-stroke: 1.9;
+}
+
+@media (max-width: 767.98px) {
+  :root {
+    --fs-page-title: 1.5rem; /* 24px */
+    --fs-section: 1.25rem; /* 20px */
+    --fs-body: 0.9375rem; /* 15px */
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Ultra-wide / 4K: grow rem-based UI gently (1rem at <=2200px up to 1.375rem at 3840px) so density stays intentional.
+     Not a zoom/transform: layout, typography and spacing simply scale with the viewport. */
+  font-size: clamp(1rem, calc(1rem + (100vw - 2200px) * 0.00366), 1.375rem);
+}
+
+html[dir='rtl'] body {
+  font-family: var(--restaurant-font-body-ar);
+}
+
+html[dir='ltr'] body {
+  font-family: var(--restaurant-font-body-en);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-size: var(--fs-body);
+  color: var(--restaurant-text);
+  background: var(--restaurant-background);
+  line-height: 1.5;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+@import './app/shared/styles/app-buttons.scss';
+@import './app/shared/styles/modal-shell.scss';
+@import './app/shared/styles/order-ltr.scss';
+@import './app/shared/styles/order-details.scss';
+
+/* UX-002 / UX-008: compact desktop controls never go below the 36px compact size. */
+.public-menu-card__add,
+.public-menu-hero__cta,
+.public-menu-filter__pill,
+.orders-management-page__status-pill,
+.admin-orders-select__trigger,
+.staff-select__trigger,
+.tables-select__trigger,
+.menu-management-category-pill,
+.profile-console__tab,
+.profile-console__btn,
+.profile-console__cover-action,
+.orders-table__details,
+.orders-card__all-link,
+.quick-actions__link,
+.menu-page__admin-entry,
+.menu-page__staff-login,
+[data-testid^='profile-console-nav-'],
+[data-testid$='-search-input'],
+[data-testid='admin-orders-search'] {
+  /* beats component-level fixed minimums so the compact size is a real floor */
+  min-block-size: var(--btn-size-sm) !important;
+}
+
+.orders-table__details,
+.orders-card__all-link,
+.menu-page__admin-entry,
+.menu-page__staff-login,
+[data-testid^='profile-console-nav-'] {
+  display: inline-flex !important;
+  align-items: center;
+}
+
+/* UX-002: on touch devices and small screens every interactive control is at least 44x44px. */
+@media (pointer: coarse), (max-width: 767.98px) {
+  button,
+  select,
+  summary,
+  [role='button'],
+  [role='tab'],
+  [data-testid^='profile-console-nav-'],
+  .orders-table__details,
+  .orders-card__all-link,
+  .quick-actions__link,
+  .menu-page__admin-entry,
+  .menu-page__staff-login,
+  input:not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='range']):not([type='file']) {
+    min-block-size: var(--touch-target-min) !important;
+  }
+
+  button:not(.app-icon-btn):not([class*='__spinner']),
+  [role='button'],
+  [role='tab'] {
+    min-inline-size: var(--touch-target-min) !important;
+  }
+
+  /* Links styled as controls (navigation, chips, "view all"): stretch to a 44px hit area. */
+  a[class]:not([class*='card']):not([class*='brand']):not([class*='logo']) {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--touch-target-min);
+  }
+
+  /* The compact desktop floor above must not win on touch / small screens. */
+  .public-menu-card__add,
+  .public-menu-hero__cta,
+  .public-menu-filter__pill,
+  .orders-management-page__status-pill,
+  .admin-orders-select__trigger,
+  .staff-select__trigger,
+  .tables-select__trigger,
+  .menu-management-category-pill,
+  .profile-console__tab,
+  .profile-console__btn,
+  .profile-console__cover-action,
+  .orders-table__details,
+  .orders-card__all-link,
+  .quick-actions__link,
+  .menu-page__admin-entry,
+  .menu-page__staff-login,
+  [data-testid^='profile-console-nav-'],
+  [data-testid$='-search-input'],
+  [data-testid='admin-orders-search'] {
+    min-block-size: var(--touch-target-min) !important;
+  }
+
+  input[type='checkbox'],
+  input[type='radio'] {
+    inline-size: 1.375rem;
+    block-size: 1.375rem;
+  }
+}
+
+body.order-modal-scroll-lock {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

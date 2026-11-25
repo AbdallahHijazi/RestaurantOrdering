@@ -1,0 +1,50 @@
+<section class="staff-stats" [class.staff-stats--loading]="loading()" data-testid="staff-stats">
+  @if (loading()) {
+    @for (card of [1, 2, 3]; track card) {
+      <div class="staff-stats__card staff-stats__card--skeleton"></div>
+    }
+  } @else {
+    <article class="staff-stats__card">
+      <div class="staff-stats__content">
+        <span>{{ locale.uiText('staffStatTotal') }}</span>
+        <strong data-testid="staff-stat-total">{{ total() }}</strong>
+      </div>
+      <div class="staff-stats__icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            fill="currentColor"
+            d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3Zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z"
+          />
+        </svg>
+      </div>
+    </article>
+    <article class="staff-stats__card">
+      <div class="staff-stats__content">
+        <span>{{ locale.uiText('staffStatActive') }}</span>
+        <strong data-testid="staff-stat-active">{{ active() }}</strong>
+      </div>
+      <div class="staff-stats__icon staff-stats__icon--terra">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            fill="currentColor"
+            d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4Zm-2 16-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8Z"
+          />
+        </svg>
+      </div>
+    </article>
+    <article class="staff-stats__card">
+      <div class="staff-stats__content">
+        <span>{{ locale.uiText('staffStatRoles') }}</span>
+        <strong data-testid="staff-stat-roles">{{ roles() }}</strong>
+      </div>
+      <div class="staff-stats__icon staff-stats__icon--amber">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            fill="currentColor"
+            d="M14 12h4v2h-4v-2Zm-6 0h4v2H8v-2Zm-2-6h12v2H6V6Zm0 12h12v2H6v-2Z"
+          />
+        </svg>
+      </div>
+    </article>
+  }
+</section>

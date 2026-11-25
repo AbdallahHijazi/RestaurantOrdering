@@ -19,7 +19,9 @@ public sealed class UpdateRestaurantSettingsCommandValidator
 
         RuleFor(x => x.TimeZone)
             .NotEmpty()
-            .MaximumLength(100);
+            .MaximumLength(100)
+            .Must(BeKnownTimeZone)
+            .WithMessage("Time zone must be a valid time-zone identifier such as Asia/Amman or UTC.");
 
         RuleFor(x => x.TaxRate)
             .InclusiveBetween(0m, 100m);
@@ -34,4 +36,8 @@ public sealed class UpdateRestaurantSettingsCommandValidator
             .MaximumLength(8000)
             .When(x => x.WorkingHoursJson is not null);
     }
+
+    private static bool BeKnownTimeZone(string? timeZone) =>
+        !string.IsNullOrWhiteSpace(timeZone) &&
+        TimeZoneInfo.TryFindSystemTimeZoneById(timeZone.Trim(), out _);
 }

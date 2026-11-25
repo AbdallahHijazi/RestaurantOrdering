@@ -1,4 +1,5 @@
 using MediatR;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Application.Features.Orders.DTOs;
 using RestaurantOrdering.Domain.Enums;
 
@@ -7,4 +8,4 @@ namespace RestaurantOrdering.Application.Features.Orders.Commands.UpdateOrderSta
 public sealed record UpdateOrderStatusCommand(
     Guid RestaurantId,
     Guid OrderId,
-    OrderStatus NewStatus) : IRequest<OrderSummaryDto>;
+    OrderStatus NewStatus) : IRequest<OrderSummaryDto>, IRestaurantDashboardScopedRequest;

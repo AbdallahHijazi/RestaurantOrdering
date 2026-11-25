@@ -4,11 +4,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using RestaurantOrdering.Application.Common.Interfaces;
+using RestaurantOrdering.Application.Common.Translation;
+using RestaurantOrdering.Infrastructure.Authentication;
 using RestaurantOrdering.Infrastructure.Files;
 using RestaurantOrdering.Infrastructure.Identity;
 using RestaurantOrdering.Infrastructure.Persistence;
 using RestaurantOrdering.Infrastructure.Persistence.Seed;
 using RestaurantOrdering.Infrastructure.Services;
+using RestaurantOrdering.Infrastructure.Translation;
 
 namespace RestaurantOrdering.Infrastructure;
 
@@ -21,14 +24,25 @@ public static class DependencyInjection
     {
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-
         services.AddScoped<IApplicationDbContext>(provider =>
             provider.GetRequiredService<ApplicationDbContext>());
 
         services
-            .AddIdentityCore<ApplicationUser>()
+            .AddIdentityCore<ApplicationUser>(options =>
+            {
+                options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+            })
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
+
+        services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
+        services.AddScoped<IRestaurantOwnerRegistrationService, RestaurantOwnerRegistrationService>();
+        services.AddScoped<IRestaurantUserManagementService, RestaurantUserManagementService>();
+        services.AddScoped<IUserDashboardAccessReader, UserDashboardAccessReader>();
+        services.AddScoped<IRestaurantPermissionService, RestaurantPermissionService>();
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
         services.AddScoped<IDateTimeService, DateTimeService>();
         services.AddScoped<IFileStorageService>(provider =>
@@ -36,6 +50,7 @@ public static class DependencyInjection
                 provider.GetRequiredService<IOptions<FileStorageOptions>>(),
                 contentRootPath));
         services.AddScoped<DevelopmentDataSeeder>();
+        services.AddScoped<ApplicationRoleInitializer>();
 
         services.AddOptions<FileStorageOptions>()
             .Configure(options =>
@@ -78,6 +93,127 @@ public static class DependencyInjection
                 "FileStorage:AllowedExtensions must contain at least one value.")
             .ValidateOnStart();
 
+        services.AddOptions<JwtOptions>()
+            .Configure(options =>
+            {
+                var section = configuration.GetSection(JwtOptions.SectionName);
+                options.Issuer = section[nameof(JwtOptions.Issuer)] ?? string.Empty;
+                options.Audience = section[nameof(JwtOptions.Audience)] ?? string.Empty;
+                options.SigningKey = section[nameof(JwtOptions.SigningKey)] ?? string.Empty;
+                options.AccessTokenLifetimeMinutes =
+                    int.TryParse(section[nameof(JwtOptions.AccessTokenLifetimeMinutes)], out var lifetimeMinutes)
+                        ? lifetimeMinutes
+                        : 0;
+            })
+            .Validate(
+                options => !string.IsNullOrWhiteSpace(options.Issuer),
+                "Jwt:Issuer is required.")
+            .Validate(
+                options => !string.IsNullOrWhiteSpace(options.Audience),
+                "Jwt:Audience is required.")
+            .Validate(
+                options => !string.IsNullOrWhiteSpace(options.SigningKey),
+                "Jwt:SigningKey is required.")
+            .Validate(
+                options => JwtSigningKeyHelper.TryGetSigningKeyBytes(options.SigningKey, out _),
+                "Jwt:SigningKey must be at least 32 bytes.")
+            .Validate(
+                options => options.AccessTokenLifetimeMinutes > 0 && options.AccessTokenLifetimeMinutes <= 1440,
+                "Jwt:AccessTokenLifetimeMinutes must be between 1 and 1440.")
+            .ValidateOnStart();
+
+        services.AddOptions<TranslationProviderOptions>()
+            .Configure(options =>
+            {
+                var section = configuration.GetSection(TranslationProviderOptions.SectionName);
+                options.Provider = section[nameof(TranslationProviderOptions.Provider)]
+                    ?? TranslationProviderNames.NoOp;
+            })
+            .ValidateOnStart();
+
+        services.AddOptions<AzureTranslatorOptions>()
+            .Configure(options =>
+            {
+                var section = configuration.GetSection(AzureTranslatorOptions.SectionName);
+                options.Endpoint = section[nameof(AzureTranslatorOptions.Endpoint)] ?? string.Empty;
+                options.Region = section[nameof(AzureTranslatorOptions.Region)] ?? string.Empty;
+                options.TimeoutSeconds = int.TryParse(
+                    section[nameof(AzureTranslatorOptions.TimeoutSeconds)],
+                    out var timeoutSeconds)
+                    ? timeoutSeconds
+                    : 30;
+                options.SubscriptionKey = configuration["TranslationProvider:AzureTranslator:SubscriptionKey"]
+                    ?? string.Empty;
+            })
+            .ValidateOnStart();
+
+        services.AddSingleton<IValidateOptions<TranslationProviderOptions>, TranslationProviderOptionsValidator>();
+        services.AddSingleton<IValidateOptions<AzureTranslatorOptions>, AzureTranslatorOptionsValidator>();
+
+        RegisterTranslationProvider(services);
+
+        services.AddOptions<TranslationWorkerOptions>()
+            .Configure(options =>
+            {
+                var section = configuration.GetSection(TranslationWorkerOptions.SectionName);
+                options.Enabled = bool.TryParse(section[nameof(TranslationWorkerOptions.Enabled)], out var enabled)
+                    && enabled;
+                options.PollingIntervalSeconds = int.TryParse(
+                    section[nameof(TranslationWorkerOptions.PollingIntervalSeconds)],
+                    out var pollingIntervalSeconds)
+                    ? pollingIntervalSeconds
+                    : 10;
+                options.BatchSize = int.TryParse(
+                    section[nameof(TranslationWorkerOptions.BatchSize)],
+                    out var batchSize)
+                    ? batchSize
+                    : 10;
+                options.LeaseDurationSeconds = int.TryParse(
+                    section[nameof(TranslationWorkerOptions.LeaseDurationSeconds)],
+                    out var leaseDurationSeconds)
+                    ? leaseDurationSeconds
+                    : 120;
+            })
+            .Validate(
+                options => options.PollingIntervalSeconds >= 1,
+                "TranslationWorker:PollingIntervalSeconds must be at least 1.")
+            .Validate(
+                options => options.BatchSize >= 1,
+                "TranslationWorker:BatchSize must be at least 1.")
+            .Validate(
+                options => options.LeaseDurationSeconds >= 1,
+                "TranslationWorker:LeaseDurationSeconds must be at least 1.")
+            .ValidateOnStart();
+
+        services.AddSingleton<ITranslationJobWorkerIdentity, TranslationJobWorkerIdentity>();
+        services.AddScoped<ITranslationJobClaimService, TranslationJobClaimService>();
+        services.AddScoped<ITranslationJobWorkerExecutor, TranslationJobWorkerExecutor>();
+        services.AddHostedService<TranslationJobWorker>();
+
         return services;
+    }
+
+    private static void RegisterTranslationProvider(IServiceCollection services)
+    {
+        services.AddHttpClient(AzureTranslatorProvider.HttpClientName, (serviceProvider, client) =>
+        {
+            var azureOptions = serviceProvider.GetRequiredService<IOptions<AzureTranslatorOptions>>().Value;
+            client.BaseAddress = new Uri(azureOptions.Endpoint.TrimEnd('/') + "/");
+            client.Timeout = TimeSpan.FromSeconds(azureOptions.TimeoutSeconds);
+        });
+
+        services.AddScoped<NoOpTranslationProvider>();
+        services.AddScoped<AzureTranslatorProvider>();
+        services.AddScoped<ITranslationProvider>(serviceProvider =>
+        {
+            var providerOptions = serviceProvider.GetRequiredService<IOptions<TranslationProviderOptions>>().Value;
+
+            return string.Equals(
+                providerOptions.Provider,
+                TranslationProviderNames.AzureTranslator,
+                StringComparison.OrdinalIgnoreCase)
+                ? serviceProvider.GetRequiredService<AzureTranslatorProvider>()
+                : serviceProvider.GetRequiredService<NoOpTranslationProvider>();
+        });
     }
 }

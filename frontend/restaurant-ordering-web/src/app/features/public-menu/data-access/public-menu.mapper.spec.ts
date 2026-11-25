@@ -1,0 +1,55 @@
+import { describe, expect, it } from 'vitest';
+import { mapPublicMenuApiDto } from './public-menu.mapper';
+import type { PublicMenuApiDto } from './public-menu.dto';
+
+describe('mapPublicMenuApiDto', () => {
+  it('maps currency tax delivery minimum and service flags', () => {
+    const dto: PublicMenuApiDto = {
+      id: '11111111-1111-1111-1111-111111111111',
+      slug: 'restaurant-a',
+      nameAr: 'مطعم',
+      phoneNumber: '+966500000000',
+      currencyCode: 'SAR',
+      taxRate: 15,
+      deliveryFee: 12.5,
+      minimumOrderAmount: 50,
+      isDeliveryEnabled: true,
+      isPickupEnabled: false,
+      categories: [],
+    };
+
+    const mapped = mapPublicMenuApiDto(dto);
+
+    expect(mapped.orderSettings).toEqual({
+      currencyCode: 'SAR',
+      taxRate: 15,
+      deliveryFee: 12.5,
+      minimumOrderAmount: 50,
+      isDeliveryEnabled: true,
+      isPickupEnabled: false,
+    });
+    expect(mapped.restaurant.currencyCode).toBe('SAR');
+    expect(mapped.locale.resolvedLocale).toBe('ar');
+    expect(mapped.supportedLocales).toEqual([]);
+  });
+
+  it('maps the restaurant supported locales delivered with the public menu', () => {
+    const dto: PublicMenuApiDto = {
+      id: '11111111-1111-1111-1111-111111111111',
+      slug: 'restaurant-a',
+      nameAr: 'مطعم',
+      phoneNumber: '+966500000000',
+      supportedLocales: [
+        { code: 'AR', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl', isDefault: true },
+        { code: 'tr', displayName: 'Turkish', nativeName: 'Türkçe', direction: 'ltr' },
+        { code: '  ' },
+      ],
+      categories: [],
+    };
+
+    expect(mapPublicMenuApiDto(dto).supportedLocales).toEqual([
+      { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+      { code: 'tr', displayName: 'Turkish', nativeName: 'Türkçe', direction: 'ltr' },
+    ]);
+  });
+});

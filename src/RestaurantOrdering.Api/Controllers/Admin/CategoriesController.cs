@@ -1,5 +1,7 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RestaurantOrdering.Application.Common.Security;
 using RestaurantOrdering.Api.Contracts.Admin.Categories;
 using RestaurantOrdering.Application.Features.Categories.Commands.CreateCategory;
 using RestaurantOrdering.Application.Features.Categories.Commands.DeleteCategory;
@@ -11,6 +13,7 @@ using RestaurantOrdering.Application.Features.Categories.Queries.GetCategoryById
 namespace RestaurantOrdering.Api.Controllers.Admin;
 
 [ApiController]
+[Authorize(Policy = ApplicationPolicies.RestaurantDashboardAccess)]
 [Route("api/v1/admin/restaurants/{restaurantId:guid}/categories")]
 public sealed class CategoriesController : ControllerBase
 {

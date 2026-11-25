@@ -9,6 +9,9 @@ public class PublicMenuDto
     public string? DescriptionAr { get; init; }
     public string? DescriptionEn { get; init; }
     public Guid? LogoFileId { get; init; }
+    public string? LogoUrl { get; init; }
+    public string? CoverImageUrl { get; init; }
+    public string AccentColor { get; init; } = "#B8663F";
     public string PhoneNumber { get; init; } = string.Empty;
     public string? WhatsAppNumber { get; init; }
     public string? AddressAr { get; init; }
@@ -21,5 +24,13 @@ public class PublicMenuDto
     public decimal? MinimumOrderAmount { get; init; }
     public bool? IsDeliveryEnabled { get; init; }
     public bool? IsPickupEnabled { get; init; }
+    public string? RequestedLocale { get; init; }
+    public string ResolvedLocale { get; init; } = "ar";
+    public bool FallbackApplied { get; init; }
+    public string Direction { get; init; } = "ltr";
+    public string Name { get; init; } = string.Empty;
+    public string? Description { get; init; }
+    public string? Address { get; init; }
+    public IReadOnlyList<PublicMenuLocaleDto> SupportedLocales { get; init; } = Array.Empty<PublicMenuLocaleDto>();
     public IReadOnlyList<PublicMenuCategoryDto> Categories { get; init; } = Array.Empty<PublicMenuCategoryDto>();
 }

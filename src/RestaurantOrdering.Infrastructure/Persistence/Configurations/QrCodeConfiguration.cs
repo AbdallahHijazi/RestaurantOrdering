@@ -32,7 +32,8 @@ public class QrCodeConfiguration : IEntityTypeConfiguration<QrCode>
 
         builder.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_QrCodes_QrType", "[QrType] IN (1, 2)");
+            t.HasCheckConstraint("CK_QrCodes_QrType", "\"QrType\" IN (1, 2)");
         });
     }
 }
+
