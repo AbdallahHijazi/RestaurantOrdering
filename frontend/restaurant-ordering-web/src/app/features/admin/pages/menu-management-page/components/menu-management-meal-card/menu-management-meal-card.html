@@ -66,7 +66,12 @@
         <h3 class="meal-card__name">{{ displayItemName(item()) }}</h3>
       </div>
       <div class="meal-card__price">
-        @if (hasMeaningfulDiscount(item())) {
+        @if (item().usesSizes) {
+          @let starting = startingPrice(item());
+          @if (starting !== null) {
+            <strong>{{ locale.uiText('sizeFrom') }} {{ starting | number: '1.2-2' }}</strong>
+          }
+        } @else if (hasMeaningfulDiscount(item())) {
           <strong>{{ item().discountPrice | number: '1.2-2' }}</strong>
           <span class="meal-card__price-original">{{ item().price | number: '1.2-2' }}</span>
         } @else {

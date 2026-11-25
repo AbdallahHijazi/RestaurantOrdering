@@ -6,6 +6,7 @@ using RestaurantOrdering.Application.Common.Localization;
 using RestaurantOrdering.Application.Features.MenuItems.Common;
 using RestaurantOrdering.Application.Features.MenuItems.DTOs;
 using RestaurantOrdering.Domain.Enums;
+using RestaurantOrdering.Domain.Entities;
 
 namespace RestaurantOrdering.Application.Features.Catalog.Commands.UpdateCatalogMenuItem;
 
@@ -88,12 +89,30 @@ public sealed class UpdateCatalogMenuItemCommandHandler
         menuItem.CategoryId = request.CategoryId;
         menuItem.ImageFileId = request.ImageFileId;
         PrimaryLocaleLegacySync.ApplyMenuItem(menuItem, defaultLocale, name, description);
+        var discount = request.Discount;
+        if (discount is null && !menuItem.UsesSizes && request.UsesSizes != true &&
+            menuItem.Discount is not null && request.DiscountPrice == MenuPricing.ForItem(menuItem).FinalPrice)
+        {
+            // Legacy clients can send the projected sale price back unchanged when editing other fields.
+            discount = menuItem.Discount;
+        }
+
+        var sizes = request.Sizes;
+        if (!request.SizeDiscountMode.HasValue && sizes is not null && menuItem.Sizes is not null)
+        {
+            var savedSizes = menuItem.Sizes.ToDictionary(size => size.Id!.Value);
+            sizes = sizes.Select(size => size is { Id: Guid id, Discount: null } && savedSizes.TryGetValue(id, out var saved)
+                ? size with { Discount = saved.Discount }
+                : size).ToArray();
+        }
+
         menuItem.Price = request.Price;
         menuItem.DiscountPrice = request.DiscountPrice;
         menuItem.DisplayOrder = request.DisplayOrder;
         menuItem.IsAvailable = request.IsAvailable;
         menuItem.IsActive = request.IsActive;
-        MenuItemSizeConfiguration.Apply(menuItem, request.UsesSizes, request.Sizes, request.IsAvailable && request.IsActive);
+        MenuItemSizeConfiguration.Apply(menuItem, request.UsesSizes, sizes, request.IsAvailable && request.IsActive);
+        MenuDiscountConfiguration.Apply(menuItem, discount, request.SizeDiscountMode, request.UniformDiscount);
         menuItem.UpdatedAt = _dateTimeService.UtcNow;
 
         if (contentChanged)

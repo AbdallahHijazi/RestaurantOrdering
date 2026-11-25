@@ -40,3 +40,8 @@ export function estimateOrderTotals(
 
   return { subtotal, estimatedTax, deliveryFee, estimatedTotal };
 }
+
+export function estimateItemSavings(lines: readonly EstimatableLine[]): number {
+  return roundMoney(lines.reduce((sum, line) =>
+    sum + Math.max(0, line.price - displayUnitPrice(line)) * line.quantity, 0));
+}

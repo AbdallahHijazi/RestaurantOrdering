@@ -26,6 +26,10 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
             .HasDefaultValue("ar")
             .IsRequired();
 
+        builder.Property(oi => oi.BaseUnitPrice).HasPrecision(10, 2);
+        builder.Property(oi => oi.UnitDiscountAmount).HasPrecision(10, 2);
+        builder.Property(oi => oi.AppliedDiscountValue).HasPrecision(10, 2);
+
         builder.Property(oi => oi.UnitPrice)
             .HasPrecision(10, 2)
             .IsRequired();

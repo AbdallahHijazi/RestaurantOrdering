@@ -82,6 +82,7 @@ public sealed class CreateMenuItemCommandHandler
             CreatedAt = _dateTimeService.UtcNow
         };
 
+        MenuDiscountConfiguration.Validate(menuItem);
         _context.MenuItems.Add(menuItem);
         await _publishedTranslationWriter.UpsertMenuItemPublishedTranslationsAsync(
             menuItem,

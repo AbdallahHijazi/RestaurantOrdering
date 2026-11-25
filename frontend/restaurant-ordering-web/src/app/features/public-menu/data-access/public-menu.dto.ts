@@ -1,4 +1,4 @@
-import type { MenuItemSize } from '../../../shared/models/menu-item-size';
+import type { MenuItemSize, MenuPrice } from '../../../shared/models/menu-item-size';
 
 /** Backend contract: GET /api/v1/public/restaurants/{slug}/menu */
 export interface PublicMenuApiDto {
@@ -70,6 +70,8 @@ export interface PublicMenuItemApiDto {
   descriptionEn?: string | null;
   price: number;
   discountPrice?: number | null;
+  pricing?: MenuPrice | null;
+  sizePrices?: Record<string, MenuPrice> | null;
   displayOrder: number;
   imageUrl?: string | null;
   name?: string | null;

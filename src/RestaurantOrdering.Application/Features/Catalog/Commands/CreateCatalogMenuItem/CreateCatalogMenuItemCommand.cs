@@ -17,5 +17,8 @@ public sealed record CreateCatalogMenuItemCommand(
     bool IsAvailable,
     bool IsActive,
     bool? UsesSizes = null,
-    IReadOnlyList<MenuItemSize>? Sizes = null)
+    IReadOnlyList<MenuItemSize>? Sizes = null,
+    MenuDiscount? Discount = null,
+    SizeDiscountMode? SizeDiscountMode = null,
+    MenuDiscount? UniformDiscount = null)
     : IRequest<MenuItemDto>, IRestaurantDashboardScopedRequest;

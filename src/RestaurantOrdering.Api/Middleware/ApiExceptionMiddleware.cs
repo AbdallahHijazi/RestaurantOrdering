@@ -62,6 +62,17 @@ public sealed class ApiExceptionMiddleware
             Instance = context.Request.Path
         };
 
+        if (exception is OrderPricesChangedException changed)
+        {
+            problemDetails.Extensions["updatedPrices"] = changed.Prices.Select(price => new
+            {
+                menuItemId = price.MenuItemId,
+                menuItemSizeId = price.MenuItemSizeId,
+                basePrice = price.BasePrice,
+                finalPrice = price.FinalPrice
+            });
+        }
+
         problemDetails.Extensions["traceId"] = context.TraceIdentifier;
 
         if (errors is not null)

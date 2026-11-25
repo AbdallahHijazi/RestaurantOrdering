@@ -6,6 +6,7 @@ import { isDemoMenuSlug } from './public-menu-api';
 import type {
   CreatePublicOrderApiRequest,
   PublicOrderConfirmationApiDto,
+  UpdatedOrderPrice,
 } from './public-order.dto';
 
 export type PublicOrderSubmitError =
@@ -20,6 +21,7 @@ export type PublicOrderSubmitError =
 export interface PublicOrderSubmitFailure {
   type: PublicOrderSubmitError;
   message: string;
+  updatedPrices?: UpdatedOrderPrice[];
 }
 
 @Injectable({
@@ -73,7 +75,7 @@ export class PublicOrdersApiService {
       case 404:
         return { type: 'not-found', message: detail };
       case 409:
-        return { type: 'conflict', message: detail };
+        return { type: 'conflict', message: detail, updatedPrices: readUpdatedPrices(error.error?.updatedPrices) };
       case 429:
         return { type: 'too-many-requests', message: detail };
       default:
@@ -100,4 +102,15 @@ export class PublicOrdersApiService {
 
     return '';
   }
+}
+
+function readUpdatedPrices(raw: unknown): UpdatedOrderPrice[] | undefined {
+  if (!Array.isArray(raw) || !raw.length || !raw.every((price) => price &&
+      typeof price.menuItemId === 'string' &&
+      (price.menuItemSizeId === null || typeof price.menuItemSizeId === 'string') &&
+      Number.isFinite(price.basePrice) && Number.isFinite(price.finalPrice) &&
+      price.finalPrice >= 0 && price.finalPrice <= price.basePrice)) {
+    return undefined;
+  }
+  return raw;
 }

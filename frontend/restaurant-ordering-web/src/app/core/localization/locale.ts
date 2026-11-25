@@ -963,6 +963,19 @@ export type UiTextKey =
   | 'publicMenuChefChoice'
   | 'publicMenuAvailable'
   | 'publicMenuItemUnavailable'
+  | 'menuDiscount'
+  | 'menuDiscountNone'
+  | 'menuDiscountPercentage'
+  | 'menuDiscountFixed'
+  | 'menuDiscountSale'
+  | 'menuDiscountUniform'
+  | 'menuDiscountIndividual'
+  | 'menuDiscountValue'
+  | 'menuDiscountPercentValue'
+  | 'menuDiscountInvalid'
+  | 'menuDiscountPreview'
+  | 'menuItemSavings'
+  | 'menuPricesChanged'
   | 'sizePricing'
   | 'sizeSingle'
   | 'sizeMultiple'
@@ -1824,6 +1837,19 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     publicMenuChefChoice: 'اختيار الشيف',
     publicMenuAvailable: 'متاح الآن',
     publicMenuItemUnavailable: 'غير متاح',
+    menuDiscount: "الخصم",
+    menuDiscountNone: "بدون خصم",
+    menuDiscountPercentage: "نسبة مئوية",
+    menuDiscountFixed: "مبلغ يُخصم",
+    menuDiscountSale: "سعر البيع النهائي",
+    menuDiscountUniform: "خصم موحّد لكل الأحجام",
+    menuDiscountIndividual: "خصم لكل حجم",
+    menuDiscountValue: "قيمة الخصم",
+    menuDiscountPercentValue: "النسبة المئوية (%)",
+    menuDiscountInvalid: "أدخل سعرًا وخصمًا صالحين بمنزلتين عشريتين على الأكثر. يجب ألا يتجاوز الخصم السعر أو ١٠٠٪.",
+    menuDiscountPreview: "الأصلي {base} · الخصم {discount} · النهائي {final}",
+    menuItemSavings: "وفّرت على الأصناف",
+    menuPricesChanged: "تغيّرت أسعار بعض الأصناف. راجع الإجمالي المحدّث ثم اضغط لتأكيد الطلب.",
     sizePricing: 'طريقة تسعير الوجبة',
     sizeSingle: 'سعر واحد',
     sizeMultiple: 'أحجام متعددة',
@@ -2692,6 +2718,19 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     publicMenuChefChoice: "Chef's choice",
     publicMenuAvailable: 'Available now',
     publicMenuItemUnavailable: 'Unavailable',
+    menuDiscount: "Discount",
+    menuDiscountNone: "No discount",
+    menuDiscountPercentage: "Percentage",
+    menuDiscountFixed: "Fixed deduction",
+    menuDiscountSale: "Final sale price",
+    menuDiscountUniform: "Uniform discount for all sizes",
+    menuDiscountIndividual: "Individual size discounts",
+    menuDiscountValue: "Discount value",
+    menuDiscountPercentValue: "Percentage (%)",
+    menuDiscountInvalid: "Enter a valid price and discount with up to two decimal places. Discounts must stay within the base price or 100%.",
+    menuDiscountPreview: "Base {base} · Savings {discount} · Final {final}",
+    menuItemSavings: "Item savings",
+    menuPricesChanged: "Some item prices changed. Review the updated total, then confirm the order again.",
     sizePricing: 'Item pricing',
     sizeSingle: 'Single price',
     sizeMultiple: 'Multiple sizes',

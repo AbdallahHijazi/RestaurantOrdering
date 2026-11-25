@@ -64,10 +64,16 @@
           @if (item().usesSizes) {
             @if (startingPrice() !== null) {
               <strong class="public-menu-card__price">
-                <span class="public-menu-card__from" [class.public-menu-card__from--reserved]="selectedSize()">
-                  {{ ui().sizeFrom }}
+                <span class="public-menu-card__from"
+                  [class.public-menu-card__from--reserved]="selectedSize() && !displaySalePrice()"
+                  [attr.aria-hidden]="selectedSize() && !displaySalePrice() ? true : null">
+                  @if (displaySalePrice()) {
+                    <del class="public-menu-card__price--original"><bdi dir="ltr">{{ displayPrice() }}</bdi></del>
+                  } @else {
+                    {{ ui().sizeFrom }}
+                  }
                 </span>
-                <bdi dir="ltr">{{ displayPrice() }}</bdi>
+                <bdi dir="ltr">{{ displaySalePrice() ?? displayPrice() }}</bdi>
               </strong>
             }
           } @else if (displaySalePrice(); as salePrice) {

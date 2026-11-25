@@ -175,6 +175,12 @@
               <bdi dir="ltr">{{ formatMoney(estimate().subtotal) }}</bdi>
             </strong>
           </div>
+          @if (itemSavings() > 0) {
+            <div class="public-cart-drawer__summary-row">
+              <span>{{ ui().menuItemSavings }}</span>
+              <strong><bdi dir="ltr">{{ formatMoney(itemSavings()) }}</bdi></strong>
+            </div>
+          }
           <div class="public-cart-drawer__summary-row public-cart-drawer__summary-row--total">
             <span>{{ ui().publicCheckoutEstimatedTotal }}</span>
             <strong>

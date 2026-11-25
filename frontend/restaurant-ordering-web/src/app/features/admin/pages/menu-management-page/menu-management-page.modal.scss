@@ -124,3 +124,18 @@
   min-inline-size: 0;
   inline-size: 100%;
 }
+
+.item-pricing__discount {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1rem;
+
+  > label {
+    flex: 1 1 9rem;
+  }
+}
+
+.item-pricing__preview {
+  display: block;
+  margin-block: .4rem;
+}

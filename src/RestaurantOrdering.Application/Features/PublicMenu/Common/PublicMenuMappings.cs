@@ -21,6 +21,7 @@ public static class PublicMenuMappings
             ResolvedLocale: "ar",
             FallbackApplied: false);
 
+        var pricing = menuItem.UsesSizes ? null : MenuPricing.ForItem(menuItem);
         return new PublicMenuItemDto
         {
             Id = menuItem.Id,
@@ -50,7 +51,9 @@ public static class PublicMenuMappings
             UsesSizes = menuItem.UsesSizes,
             Sizes = menuItem.UsesSizes ? menuItem.Sizes : null,
             Price = menuItem.Price,
-            DiscountPrice = menuItem.DiscountPrice,
+            Pricing = pricing,
+            SizePrices = MenuPricing.ForSizes(menuItem),
+            DiscountPrice = pricing?.Discount is not null ? pricing.FinalPrice : menuItem.DiscountPrice,
             DisplayOrder = menuItem.DisplayOrder,
             Name = localizedContent.Name,
             Description = localizedContent.Description,

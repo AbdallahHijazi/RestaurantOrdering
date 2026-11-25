@@ -14,7 +14,7 @@ import { LocaleService } from '../../../../core/localization/locale';
 import { PublicCartService } from '../../data-access/public-cart.service';
 import { cartLineDisplayName, cartLineKey, type PublicCartLineItem } from '../../models/public-cart.models';
 import type { PublicRestaurantOrderSettings } from '../../models/public-menu.models';
-import { displayUnitPrice, estimateOrderTotals } from '../../utils/order-estimate.util';
+import { displayUnitPrice, estimateItemSavings, estimateOrderTotals } from '../../utils/order-estimate.util';
 import { ORDER_TYPE_PICKUP } from '../../models/public-menu.models';
 import { MOCK_IMAGE_FALLBACK } from '../../data-access/public-menu-mock.data';
 import { IconButton } from '../../../../shared/ui/icon-button/icon-button';
@@ -40,6 +40,8 @@ export class PublicCartDrawer {
   protected readonly localeService = inject(LocaleService);
   protected readonly ui = this.localeService.ui;
   private readonly brokenImages = signal<Record<string, true>>({});
+
+  protected readonly itemSavings = computed(() => estimateItemSavings(this.cart.cartItems()));
 
   protected readonly estimate = computed(() =>
     estimateOrderTotals(this.cart.cartItems(), this.orderSettings(), ORDER_TYPE_PICKUP),

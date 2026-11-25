@@ -546,6 +546,9 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("Discount")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal?>("DiscountPrice")
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
@@ -581,7 +584,13 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("RestaurantId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("SizeDiscountMode")
+                        .HasColumnType("int");
+
                     b.Property<string>("Sizes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UniformDiscount")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -854,6 +863,17 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("AppliedDiscountType")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("AppliedDiscountValue")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal?>("BaseUnitPrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -899,6 +919,10 @@ namespace RestaurantOrdering.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.Property<decimal>("TotalPrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal?>("UnitDiscountAmount")
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
 

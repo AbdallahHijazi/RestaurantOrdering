@@ -14,6 +14,8 @@ public class PublicMenuItemDto
     public string? DescriptionEn { get; init; }
     public bool UsesSizes { get; init; }
     public IReadOnlyList<MenuItemSize>? Sizes { get; init; }
+    public MenuPrice? Pricing { get; init; }
+    public IReadOnlyDictionary<Guid, MenuPrice>? SizePrices { get; init; }
     public decimal Price { get; init; }
     public decimal? DiscountPrice { get; init; }
     public int DisplayOrder { get; init; }

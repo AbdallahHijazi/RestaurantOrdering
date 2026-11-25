@@ -69,9 +69,9 @@ public sealed class CreatePublicOrderCommandValidator : AbstractValidator<Create
             .WithMessage(
                 $"An order cannot contain more than {PublicOrderLimits.MaxItemLines} item lines.")
             .Must(items =>
-                items.Select(i => i.MenuItemId).Distinct().Count() == items.Count)
+                items.Select(i => (i.MenuItemId, i.MenuItemSizeId)).Distinct().Count() == items.Count)
             .WithMessage(
-                "Each menu item may only appear once per order. Combine quantities on a single line.");
+                "Each menu item and size combination may only appear once per order. Combine quantities on a single line.");
 
         RuleForEach(x => x.Items).ChildRules(item =>
         {

@@ -501,9 +501,40 @@
               <label><input type="radio" formControlName="usesSizes" [value]="true" /> {{ locale.uiText('sizeMultiple') }}</label>
             </div>
           </fieldset>
+          <ng-template #discountFields let-group let-uniform="uniform">
+            <div class="item-pricing__discount" [formGroup]="group">
+              <label>
+                {{ locale.uiText('menuDiscount') }}
+                <select [formControlName]="uniform ? 'uniformType' : 'discountType'">
+                  @if (!uniform) { <option [ngValue]="0">{{ locale.uiText('menuDiscountNone') }}</option> }
+                  <option [ngValue]="1">{{ locale.uiText('menuDiscountPercentage') }}</option>
+                  <option [ngValue]="2">{{ locale.uiText('menuDiscountFixed') }}</option>
+                  @if (!uniform) { <option [ngValue]="3">{{ locale.uiText('menuDiscountSale') }}</option> }
+                </select>
+              </label>
+              @if (group.get(uniform ? 'uniformType' : 'discountType').value; as type) {
+                <label>
+                  {{ locale.uiText(type === 1 ? 'menuDiscountPercentValue' : 'menuDiscountValue') }}
+                  <input type="number" min="0" [attr.max]="type === 1 ? 100 : null" step="0.01" data-testid="menu-discount-value"
+                    [formControlName]="uniform ? 'uniformValue' : 'discountValue'" />
+                </label>
+              }
+            </div>
+          </ng-template>
           @if (itemForm.controls.usesSizes.value) {
             <fieldset class="item-pricing">
               <legend>{{ locale.uiText('sizeMultiple') }}</legend>
+              <label>
+                {{ locale.uiText('menuDiscount') }}
+                <select formControlName="sizeDiscountMode">
+                  <option [ngValue]="0">{{ locale.uiText('menuDiscountNone') }}</option>
+                  <option [ngValue]="1">{{ locale.uiText('menuDiscountUniform') }}</option>
+                  <option [ngValue]="2">{{ locale.uiText('menuDiscountIndividual') }}</option>
+                </select>
+              </label>
+              @if (itemForm.controls.sizeDiscountMode.value === 1) {
+                <ng-container *ngTemplateOutlet="discountFields; context: { $implicit: itemForm, uniform: true }" />
+              }
               @for (row of itemSizes.controls; track row; let index = $index) {
                 <div class="item-pricing__row" [formGroup]="row">
                   <label>
@@ -525,6 +556,15 @@
                   <button type="button" appIconButton icon="x" variant="danger"
                     [label]="locale.uiText('sizeRemove')" (click)="removeSize(index)"></button>
                 </div>
+                @if (itemForm.controls.sizeDiscountMode.value === 2) {
+                  <ng-container *ngTemplateOutlet="discountFields; context: { $implicit: row, uniform: false }" />
+                }
+                @if (itemForm.controls.sizeDiscountMode.value) {
+                  @let discount = sizeDiscountInputs(row.getRawValue());
+                  @if (discountPreview(row.controls.price.value, discount[0], discount[1]); as preview) {
+                    <small class="item-pricing__preview">{{ preview }}</small>
+                  }
+                }
               }
               <div class="item-pricing__actions">
                 <button type="button" appIconButton icon="plus" [label]="locale.uiText('sizeAdd')" (click)="addSize()"></button>
@@ -545,12 +585,12 @@
               {{ locale.uiText('adminMenuFormPrice') }}
               <input type="number" min="0" step="0.01" formControlName="price" />
             </label>
-            <label>
-              {{ locale.uiText('adminMenuFormDiscountPrice') }}
-              <input type="number" min="0" step="0.01" formControlName="discountPrice" />
-            </label>
-            @if (itemForm.hasError('discountGreaterThanPrice')) {
-              <p class="menu-management-field-error">{{ locale.uiText('adminMenuDiscountInvalid') }}</p>
+            <ng-container *ngTemplateOutlet="discountFields; context: { $implicit: itemForm, uniform: false }" />
+            @if (itemForm.controls.discountType.value) {
+              @if (discountPreview(itemForm.controls.price.value, itemForm.controls.discountType.value,
+                  itemForm.controls.discountValue.value); as preview) {
+                <small class="item-pricing__preview">{{ preview }}</small>
+              }
             }
           }
           @if (sizeValidationVisible() && sizeValidationError(); as error) {

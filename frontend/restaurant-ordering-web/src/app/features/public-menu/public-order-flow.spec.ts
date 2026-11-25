@@ -152,7 +152,7 @@ describe('Public order flow', () => {
     expect(submit).toBeFalsy();
   });
 
-  it('blocks submit below minimum order', async () => {
+  it('shows the estimated minimum warning while allowing authoritative price validation', async () => {
     const fixture = TestBed.createComponent(PublicCheckoutPanel);
     fixture.componentRef.setInput('open', true);
     fixture.componentRef.setInput('slug', 'restaurant-a');
@@ -169,7 +169,8 @@ describe('Public order flow', () => {
     const submit = fixture.nativeElement.querySelector(
       '.public-checkout__primary',
     ) as HTMLButtonElement;
-    expect(submit.disabled).toBe(true);
+    expect(submit.disabled).toBe(false);
+    expect(fixture.nativeElement.textContent).toContain(TestBed.inject(LocaleService).uiText('publicCheckoutMinimumOrder'));
   });
 
   it('shows estimated totals in checkout', async () => {
@@ -182,7 +183,7 @@ describe('Public order flow', () => {
     expect(fixture.nativeElement.textContent).toContain('Estimated total');
   });
 
-  it('submits request without financial fields', async () => {
+  it('sends the expected unit price for confirmation without submitting calculated totals', async () => {
     const fixture = TestBed.createComponent(PublicCheckoutPanel);
     const ordersApi = TestBed.inject(PublicOrdersApiService);
     fixture.componentRef.setInput('open', true);
@@ -209,6 +210,7 @@ describe('Public order flow', () => {
       items: [
         {
           menuItemId: item.id,
+          expectedUnitPrice: 28,
           quantity: 1,
           notes: null,
         },
@@ -236,6 +238,36 @@ describe('Public order flow', () => {
       createdAt: '2026-06-04T12:00:00Z',
       items: [],
     });
+  });
+
+  it('updates the price and waits for a second explicit confirmation after a price conflict', () => {
+    const fixture = TestBed.createComponent(PublicCheckoutPanel);
+    fixture.componentRef.setInput('open', true);
+    fixture.componentRef.setInput('slug', 'restaurant-a');
+    fixture.componentRef.setInput('orderSettings', settings);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component['guestName'].set('Guest');
+    component['guestPhone'].set('+966500000000');
+    const url = `${API_BASE_URL}/api/v1/public/restaurants/restaurant-a/orders`;
+
+    component['submit']();
+    const stale = httpMock.expectOne(url);
+    expect(stale.request.body.items[0].expectedUnitPrice).toBe(28);
+    stale.flush({ updatedPrices: [{ menuItemId: item.id, menuItemSizeId: null, basePrice: 35, finalPrice: 0 }] },
+      { status: 409, statusText: 'Conflict' });
+
+    httpMock.expectNone(url);
+    expect(component['errorMessage']()).toBe(TestBed.inject(LocaleService).uiText('menuPricesChanged'));
+    expect(component['estimate']().subtotal).toBe(0);
+    expect(component['itemSavings']()).toBe(35);
+    expect(cart.quantityFor(item.id)).toBe(1);
+
+    component['submit']();
+    const confirmed = httpMock.expectOne(url);
+    expect(confirmed.request.body.items[0].expectedUnitPrice).toBe(0);
+    expect(confirmed.request.body.idempotencyKey).not.toBe(stale.request.body.idempotencyKey);
+    confirmed.flush({}, { status: 400, statusText: 'Bad Request' });
   });
 
   it('does not send duplicate menu item ids', () => {

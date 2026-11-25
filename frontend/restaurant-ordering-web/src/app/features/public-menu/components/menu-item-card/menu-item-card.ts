@@ -8,7 +8,7 @@ import {
   PUBLIC_CART_MAX_QUANTITY,
   type PublicMenuItem,
 } from '../../models/public-menu.models';
-import { hasValidDiscount } from '../../utils/menu-item-price.util';
+import { menuItemPrice } from '../../utils/menu-item-price.util';
 
 @Component({
   selector: 'app-menu-item-card',
@@ -89,29 +89,27 @@ export class MenuItemCard {
 
   protected readonly startingPrice = computed(() => {
     const options = this.item().sizes?.filter((size) => size.isAvailable) ?? [];
-    return options.length ? Math.min(...options.map((size) => size.price)) : null;
+    return options.length ? Math.min(...options.map((size) => menuItemPrice(this.item(), size).finalPrice)) : null;
   });
 
-  protected readonly displayPrice = computed(() =>
-    this.localeService.formatCurrency(
-      this.item().usesSizes ? (this.selectedSize()?.price ?? this.startingPrice() ?? 0) : this.item().price,
-      this.currencyCode(),
-      this.countryCode(),
-    ),
-  );
+  protected readonly pricing = computed(() => menuItemPrice(this.item(), this.selectedSize()));
+
+  protected readonly displayPrice = computed(() => this.formatPrice(
+    this.item().usesSizes && !this.selectedSize()
+      ? this.startingPrice() ?? 0
+      : this.pricing().basePrice,
+  ));
 
   protected readonly displaySalePrice = computed(() => {
-    const item = this.item();
-    if (item.usesSizes || !hasValidDiscount(item.price, item.discountPrice)) {
-      return null;
-    }
-
-    return this.localeService.formatCurrency(
-      item.discountPrice,
-      this.currencyCode(),
-      this.countryCode(),
-    );
+    const { basePrice, finalPrice } = this.pricing();
+    return (!this.item().usesSizes || this.selectedSize()) && finalPrice < basePrice
+      ? this.formatPrice(finalPrice)
+      : null;
   });
+
+  private formatPrice(price: number): string {
+    return this.localeService.formatCurrency(price, this.currencyCode(), this.countryCode());
+  }
 
   protected readonly imageSrc = computed(() => {
     if (this.imageFailed()) {

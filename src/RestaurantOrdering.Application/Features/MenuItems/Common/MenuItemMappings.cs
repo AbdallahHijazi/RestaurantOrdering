@@ -12,33 +12,42 @@ public static class MenuItemMappings
         string? imageUrl = null,
         MenuItemTranslation? arTranslation = null,
         MenuItemTranslation? enTranslation = null,
-        PublicLocalizedContent? primaryContent = null) => new()
+        PublicLocalizedContent? primaryContent = null)
     {
-        Id = menuItem.Id,
-        RestaurantId = menuItem.RestaurantId,
-        CategoryId = menuItem.CategoryId,
-        ImageFileId = menuItem.ImageFileId,
-        ImageUrl = imageUrl,
-        NameAr = PublishedTranslationDualRead.ResolveRequired(
-            arTranslation?.Name, arTranslation?.PublishedSourceVersion, menuItem.ContentVersion, menuItem.NameAr),
-        NameEn = PublishedTranslationDualRead.ResolveOptional(
-            enTranslation?.Name, enTranslation?.PublishedSourceVersion, menuItem.ContentVersion, menuItem.NameEn),
-        DescriptionAr = PublishedTranslationDualRead.ResolveOptional(
-            arTranslation?.Description, arTranslation?.PublishedSourceVersion, menuItem.ContentVersion, menuItem.DescriptionAr),
-        DescriptionEn = PublishedTranslationDualRead.ResolveOptional(
-            enTranslation?.Description, enTranslation?.PublishedSourceVersion, menuItem.ContentVersion, menuItem.DescriptionEn),
-        UsesSizes = menuItem.UsesSizes,
-        Sizes = menuItem.Sizes,
-        Price = menuItem.Price,
-        DiscountPrice = menuItem.DiscountPrice,
-        DisplayOrder = menuItem.DisplayOrder,
-        IsAvailable = menuItem.IsAvailable,
-        IsActive = menuItem.IsActive,
-        CreatedAt = menuItem.CreatedAt,
-        UpdatedAt = menuItem.UpdatedAt,
-        PrimaryName = primaryContent?.Name,
-        PrimaryDescription = primaryContent?.Description,
-        PrimaryLocale = primaryContent?.ResolvedLocale,
-        PrimaryFallbackApplied = primaryContent?.FallbackApplied ?? false
-    };
+        var pricing = menuItem.UsesSizes ? null : MenuPricing.ForItem(menuItem);
+        return new MenuItemDto
+        {
+            Id = menuItem.Id,
+            RestaurantId = menuItem.RestaurantId,
+            CategoryId = menuItem.CategoryId,
+            ImageFileId = menuItem.ImageFileId,
+            ImageUrl = imageUrl,
+            NameAr = PublishedTranslationDualRead.ResolveRequired(
+                arTranslation?.Name, arTranslation?.PublishedSourceVersion, menuItem.ContentVersion, menuItem.NameAr),
+            NameEn = PublishedTranslationDualRead.ResolveOptional(
+                enTranslation?.Name, enTranslation?.PublishedSourceVersion, menuItem.ContentVersion, menuItem.NameEn),
+            DescriptionAr = PublishedTranslationDualRead.ResolveOptional(
+                arTranslation?.Description, arTranslation?.PublishedSourceVersion, menuItem.ContentVersion, menuItem.DescriptionAr),
+            DescriptionEn = PublishedTranslationDualRead.ResolveOptional(
+                enTranslation?.Description, enTranslation?.PublishedSourceVersion, menuItem.ContentVersion, menuItem.DescriptionEn),
+            UsesSizes = menuItem.UsesSizes,
+            Sizes = menuItem.Sizes,
+            Price = menuItem.Price,
+            Pricing = pricing,
+            SizePrices = MenuPricing.ForSizes(menuItem),
+            Discount = menuItem.Discount,
+            SizeDiscountMode = menuItem.SizeDiscountMode,
+            UniformDiscount = menuItem.UniformDiscount,
+            DiscountPrice = pricing?.Discount is not null ? pricing.FinalPrice : menuItem.DiscountPrice,
+            DisplayOrder = menuItem.DisplayOrder,
+            IsAvailable = menuItem.IsAvailable,
+            IsActive = menuItem.IsActive,
+            CreatedAt = menuItem.CreatedAt,
+            UpdatedAt = menuItem.UpdatedAt,
+            PrimaryName = primaryContent?.Name,
+            PrimaryDescription = primaryContent?.Description,
+            PrimaryLocale = primaryContent?.ResolvedLocale,
+            PrimaryFallbackApplied = primaryContent?.FallbackApplied ?? false
+        };
+    }
 }

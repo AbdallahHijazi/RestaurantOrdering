@@ -1,4 +1,4 @@
-import type { MenuItemSize } from '../../../shared/models/menu-item-size';
+import type { MenuItemSize, MenuPrice } from '../../../shared/models/menu-item-size';
 
 import type {
   AdminUiLocale,
@@ -57,6 +57,8 @@ export interface PublicMenuItem {
   description?: string | null;
   price: number;
   discountPrice?: number | null;
+  pricing?: MenuPrice | null;
+  sizePrices?: Record<string, MenuPrice> | null;
   imageUrl?: string | null;
   isAvailable: boolean;
   isPopular?: boolean;

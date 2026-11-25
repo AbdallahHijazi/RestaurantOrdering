@@ -1,3 +1,5 @@
+import type { UpdatedOrderPrice } from './public-order.dto';
+import { menuItemPrice } from '../utils/menu-item-price.util';
 import { Injectable, computed, signal } from '@angular/core';
 import { cartLineKey, type PublicCartLineItem, type PublicCartSnapshot } from '../models/public-cart.models';
 import type { MenuItemSize } from '../../../shared/models/menu-item-size';
@@ -25,7 +27,9 @@ function isValidLine(raw: unknown): raw is PublicCartLineItem {
       line.menuItemSizeId.length > 0 && typeof line.sizeName === 'string')) &&
     (typeof line.nameAr === 'string' || typeof line.name === 'string') &&
     typeof line.price === 'number' &&
-    Number.isFinite(line.price) &&
+    Number.isFinite(line.price) && line.price >= 0 &&
+    (line.discountPrice == null || (Number.isFinite(line.discountPrice) &&
+      line.discountPrice >= 0 && line.discountPrice <= line.price)) &&
     typeof line.quantity === 'number' &&
     Number.isInteger(line.quantity) &&
     line.quantity >= PUBLIC_CART_MIN_QUANTITY &&
@@ -65,6 +69,7 @@ export interface PublicTableSession {
 function createCartLineFromItem(
   item: PublicMenuItem, quantity: number, size?: MenuItemSize,
 ): PublicCartLineItem {
+  const { basePrice, finalPrice } = menuItemPrice(item, size);
   return {
     menuItemId: item.id,
     ...(size ? { menuItemSizeId: size.id, sizeName: size.name } : {}),
@@ -73,8 +78,8 @@ function createCartLineFromItem(
     nameEn: item.nameEn,
     resolvedLocale: item.resolvedLocale ?? null,
     imageUrl: item.imageUrl,
-    price: size?.price ?? item.price,
-    discountPrice: size ? null : item.discountPrice,
+    price: basePrice,
+    discountPrice: finalPrice < basePrice ? finalPrice : null,
     quantity,
     notes: null,
   };
@@ -173,8 +178,16 @@ export class PublicCartService {
       if (index < 0) return [...lines, { ...line, quantity: clamped }];
 
       return lines.map((existing, current) => current === index
-        ? { ...line, quantity: clamped, notes: existing.notes, name: line.name ?? existing.name ?? null,
-            resolvedLocale: line.resolvedLocale ?? existing.resolvedLocale ?? null }
+        ? {
+            ...line,
+            // Keep the quoted price until the server explicitly reports a price change.
+            price: existing.price,
+            discountPrice: existing.discountPrice,
+            quantity: clamped,
+            notes: existing.notes,
+            name: line.name ?? existing.name ?? null,
+            resolvedLocale: line.resolvedLocale ?? existing.resolvedLocale ?? null,
+          }
         : existing);
     });
     this.persist();
@@ -216,6 +229,17 @@ export class PublicCartService {
         cartLineKey(line.menuItemId, line.menuItemSizeId) === key ? { ...line, notes: trimmed } : line,
       ),
     );
+    this.persist();
+  }
+
+  applyPriceUpdates(prices: readonly UpdatedOrderPrice[]): void {
+    const byLine = new Map(prices.map((price) => [cartLineKey(price.menuItemId, price.menuItemSizeId), price]));
+    this.items.update((lines) => lines.map((line) => {
+      const updated = byLine.get(cartLineKey(line.menuItemId, line.menuItemSizeId));
+      return updated
+        ? { ...line, price: updated.basePrice, discountPrice: updated.finalPrice < updated.basePrice ? updated.finalPrice : null }
+        : line;
+    }));
     this.persist();
   }
 

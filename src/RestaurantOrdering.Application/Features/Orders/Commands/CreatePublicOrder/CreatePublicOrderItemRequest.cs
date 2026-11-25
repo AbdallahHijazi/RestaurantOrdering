@@ -4,4 +4,5 @@ public sealed record CreatePublicOrderItemRequest(
     Guid MenuItemId,
     int Quantity,
     string? Notes,
-    Guid? MenuItemSizeId = null);
+    Guid? MenuItemSizeId = null,
+    decimal? ExpectedUnitPrice = null);

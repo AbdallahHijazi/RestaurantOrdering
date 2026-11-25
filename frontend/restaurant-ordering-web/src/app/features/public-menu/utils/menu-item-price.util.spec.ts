@@ -5,12 +5,13 @@ describe('menu-item-price.util', () => {
   it('accepts valid discounts only', () => {
     expect(hasValidDiscount(20, 15)).toBe(true);
     expect(hasValidDiscount(20, 20)).toBe(false);
-    expect(hasValidDiscount(20, 0)).toBe(false);
+    expect(hasValidDiscount(20, 0)).toBe(true);
     expect(hasValidDiscount(20, null)).toBe(false);
   });
 
   it('returns the discounted unit price when valid', () => {
     expect(effectiveUnitPrice(20, 15)).toBe(15);
+    expect(effectiveUnitPrice(20, 0)).toBe(0);
     expect(effectiveUnitPrice(20, null)).toBe(20);
   });
 });

@@ -1,4 +1,4 @@
-import type { MenuItemSize } from '../../../shared/models/menu-item-size';
+import type { MenuDiscount, MenuItemSize, MenuPrice, SizeDiscountMode } from '../../../shared/models/menu-item-size';
 
 /** Backend contract: CategoryDto */
 export interface AdminCategory {
@@ -39,6 +39,11 @@ export interface SaveCatalogCategoryRequest {
 
 /** Backend contract: MenuItemDto */
 export interface AdminMenuItem {
+  discount?: MenuDiscount | null;
+  sizeDiscountMode?: SizeDiscountMode;
+  uniformDiscount?: MenuDiscount | null;
+  pricing?: MenuPrice | null;
+  sizePrices?: Record<string, MenuPrice> | null;
   usesSizes?: boolean;
   sizes?: readonly MenuItemSize[] | null;
   id: string;
@@ -80,6 +85,9 @@ export interface SaveMenuItemRequest {
 
 /** Backend contract: CreateCatalogMenuItemRequest / UpdateCatalogMenuItemRequest */
 export interface SaveCatalogMenuItemRequest {
+  discount?: MenuDiscount | null;
+  sizeDiscountMode?: SizeDiscountMode;
+  uniformDiscount?: MenuDiscount | null;
   usesSizes?: boolean;
   sizes?: readonly (Omit<MenuItemSize, 'id'> & { id?: string | null })[];
   categoryId: string;

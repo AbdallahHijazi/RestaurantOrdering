@@ -1,3 +1,7 @@
+import { NgTemplateOutlet } from '@angular/common';
+import { formatOrderAmount } from '../../../../shared/orders/order-money.util';
+import { RestaurantProfileApiService } from '../../restaurant-profile/data-access/restaurant-profile-api';
+import { discountRule, previewMenuPrice } from './menu-discount-preview';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectorRef,
@@ -12,10 +16,8 @@ import {
 import { ModalShell } from '../../../../shared/components/order-modal-shell/order-modal-shell';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
-  AbstractControl,
   NonNullableFormBuilder,
   ReactiveFormsModule,
-  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { finalize, forkJoin, of, switchMap, type Observable } from 'rxjs';
@@ -62,12 +64,14 @@ type ModalKind = 'category' | 'item' | 'deleteCategory' | 'deleteItem' | null;
 type AvailabilityFilter = 'all' | 'available' | 'unavailable';
 
 
-import type { MenuItemSize } from '../../../../shared/models/menu-item-size';
+import type { MenuDiscountType, MenuItemSize, SizeDiscountMode } from '../../../../shared/models/menu-item-size';
 import { ErrorState } from '../../../../shared/ui/error-state/error-state';
 
 @Component({
   selector: 'app-menu-management-page',
-  imports: [ErrorState, 
+  imports: [
+    ErrorState,
+    NgTemplateOutlet,
     ReactiveFormsModule,
     ModalShell,
     MenuManagementMealCard,
@@ -85,6 +89,8 @@ import { ErrorState } from '../../../../shared/ui/error-state/error-state';
 export class MenuManagementPage {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly menuService = inject(AdminMenuService);
+  private readonly profileApi = inject(RestaurantProfileApiService);
+  private readonly currencyCode = signal<string | null>(null);
   private readonly localeApi = inject(LocaleApiService);
   private readonly directionService = inject(DirectionService);
   private readonly destroyRef = inject(DestroyRef);
@@ -185,12 +191,15 @@ export class MenuManagementPage {
       usesSizes: [false],
       confirmSinglePrice: [false],
       price: [0, [Validators.required, Validators.min(0)]],
-      discountPrice: [null as number | null],
+      discountType: [0 as MenuDiscountType | 0],
+      discountValue: [null as number | null],
+      sizeDiscountMode: [0 as SizeDiscountMode],
+      uniformType: [1 as MenuDiscountType],
+      uniformValue: [null as number | null],
       displayOrder: [0, [Validators.required, Validators.min(0)]],
       isAvailable: [true],
       isActive: [true],
     },
-    { validators: [discountNotGreaterThanPriceValidator] },
   );
 
   protected readonly searchQuery = signal('');
@@ -290,6 +299,12 @@ export class MenuManagementPage {
       .subscribe((value) => this.categoryNameDraft.set(value));
     this.loadLocaleSettings();
     this.loadCategories();
+    const restaurantId = this.menuService.getRestaurantId();
+    if (restaurantId) {
+      this.profileApi.getSettings(restaurantId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({ next: (settings) => this.currencyCode.set(settings.currencyCode), error: () => {} });
+    }
   }
 
   protected catalogPrimaryNotice(): string {
@@ -769,11 +784,6 @@ export class MenuManagementPage {
       .replace('{total}', String(total));
   }
 
-  protected hasMeaningfulDiscount(item: AdminMenuItem): boolean {
-    const discount = item.discountPrice;
-    return discount != null && discount > 0 && discount < item.price;
-  }
-
   protected availabilityLabel(item: AdminMenuItem): string {
     if (item.isAvailable) {
       return this.locale.uiText('adminMenuAvailableNow');
@@ -824,6 +834,8 @@ export class MenuManagementPage {
       id: [size?.id ?? null as string | null],
       name: [size?.name ?? ''],
       price: [size?.price ?? null as number | null],
+      discountType: [(size?.discount?.type ?? 0) as MenuDiscountType | 0],
+      discountValue: [size?.discount?.value ?? null as number | null],
       isAvailable: [size?.isAvailable ?? true],
       displayOrder: [displayOrder],
     });
@@ -851,8 +863,11 @@ export class MenuManagementPage {
   protected sizeValidationError(): string | null {
     const raw = this.itemForm.getRawValue();
     if (!raw.usesSizes) {
-      return this.editingItem()?.usesSizes && !raw.confirmSinglePrice
-        ? this.locale.uiText('sizeConfirmConversion') : null;
+      if (this.editingItem()?.usesSizes && !raw.confirmSinglePrice) {
+        return this.locale.uiText('sizeConfirmConversion');
+      }
+      return previewMenuPrice(raw.price, raw.discountType, raw.discountValue)
+        ? null : this.locale.uiText('menuDiscountInvalid');
     }
 
     const sizes = this.itemSizes.getRawValue();
@@ -866,10 +881,34 @@ export class MenuManagementPage {
           !Number.isInteger(size.displayOrder) || size.displayOrder < 0 || size.displayOrder > 2147483647) {
         return this.locale.uiText('sizeInvalid');
       }
+      const [type, value] = this.sizeDiscountInputs(size);
+      if (!previewMenuPrice(size.price, type, value)) {
+        return this.locale.uiText('menuDiscountInvalid');
+      }
       names.add(name);
     }
     return raw.isAvailable && raw.isActive && !sizes.some((size) => size.isAvailable)
       ? this.locale.uiText('sizeAvailabilityRequired') : null;
+  }
+
+  protected sizeDiscountInputs(size: { discountType: MenuDiscountType | 0; discountValue: number | null }): [MenuDiscountType | 0, number | null] {
+    const { sizeDiscountMode, uniformType, uniformValue } = this.itemForm.getRawValue();
+    switch (sizeDiscountMode) {
+      case 1: return [uniformType, uniformValue];
+      case 2: return [size.discountType, size.discountValue];
+      default: return [0, null];
+    }
+  }
+
+  protected discountPreview(base: number | null, type: MenuDiscountType | 0, value: number | null): string {
+    const price = previewMenuPrice(base, type, value);
+    if (!price) return '';
+    const currency = this.currencyCode();
+    const format = (amount: number) => currency ? this.locale.formatCurrency(amount, currency) : formatOrderAmount(amount);
+    return this.locale.uiText('menuDiscountPreview')
+      .replace('{base}', format(price.basePrice))
+      .replace('{discount}', format(price.discountAmount))
+      .replace('{final}', format(price.finalPrice));
   }
 
   protected openCreateItem(): void {
@@ -888,7 +927,6 @@ export class MenuManagementPage {
       name: '',
       description: '',
       price: 0,
-      discountPrice: null,
       displayOrder: this.menuItems().length + 1,
       isAvailable: true,
       isActive: true,
@@ -929,7 +967,11 @@ export class MenuManagementPage {
       description: resolved.content.description,
       usesSizes: item.usesSizes ?? false,
       price: item.price,
-      discountPrice: item.discountPrice ?? null,
+      discountType: item.discount?.type ?? (item.discountPrice != null ? 3 : 0),
+      discountValue: item.discount?.value ?? item.discountPrice ?? null,
+      sizeDiscountMode: item.sizeDiscountMode ?? 0,
+      uniformType: item.uniformDiscount?.type ?? 1,
+      uniformValue: item.uniformDiscount?.value ?? null,
       displayOrder: item.displayOrder,
       isAvailable: item.isAvailable,
       isActive: item.isActive,
@@ -1439,10 +1481,16 @@ export class MenuManagementPage {
       description: raw.description.trim() || null,
       ...(raw.usesSizes || this.editingItem()?.usesSizes ? { usesSizes: raw.usesSizes } : {}),
       sizes: raw.usesSizes
-        ? this.itemSizes.getRawValue().map((size) => ({ ...size, price: size.price! }))
+        ? this.itemSizes.getRawValue().map(({ discountType, discountValue, ...size }) => ({
+            ...size, price: size.price!, discount: discountRule(discountType, discountValue),
+          }))
         : undefined,
       price: raw.usesSizes ? (this.editingItem()?.price ?? 0) : raw.price,
-      discountPrice: raw.usesSizes ? (this.editingItem()?.discountPrice ?? null) : raw.discountPrice,
+      discountPrice: raw.usesSizes ? (this.editingItem()?.discountPrice ?? null) : null,
+      ...(raw.usesSizes
+        ? { sizeDiscountMode: raw.sizeDiscountMode,
+            uniformDiscount: raw.sizeDiscountMode === 1 ? discountRule(raw.uniformType, raw.uniformValue) : null }
+        : { discount: discountRule(raw.discountType, raw.discountValue) }),
       displayOrder: raw.displayOrder,
       isAvailable: raw.isAvailable,
       isActive: raw.isActive,
@@ -1460,7 +1508,8 @@ export class MenuManagementPage {
       name: primary.name,
       description: primary.description || null,
       price: item.price,
-      discountPrice: item.discountPrice ?? null,
+      discountPrice: item.discount ? null : item.discountPrice ?? null,
+      discount: item.discount,
       displayOrder: item.displayOrder,
       isAvailable: item.isAvailable,
       isActive: item.isActive,
@@ -1520,25 +1569,4 @@ export class MenuManagementPage {
 
     return this.locale.uiText('adminMenuErrorGeneric');
   }
-}
-
-function discountNotGreaterThanPriceValidator(
-  control: AbstractControl,
-): ValidationErrors | null {
-  const price = control.get('price')?.value;
-  const discount = control.get('discountPrice')?.value;
-
-  if (discount === null || discount === undefined || discount === '') {
-    return null;
-  }
-
-  if (typeof discount === 'number' && discount < 0) {
-    return { discountInvalid: true };
-  }
-
-  if (typeof price === 'number' && typeof discount === 'number' && discount > price) {
-    return { discountGreaterThanPrice: true };
-  }
-
-  return null;
 }

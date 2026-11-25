@@ -89,7 +89,10 @@ public sealed class AdminCatalogController : ControllerBase
             request.IsAvailable,
             request.IsActive,
             request.UsesSizes,
-            request.Sizes);
+            request.Sizes,
+            request.Discount,
+            request.SizeDiscountMode,
+            request.UniformDiscount);
 
         var result = await _sender.Send(command, cancellationToken);
         return StatusCode(StatusCodes.Status201Created, result);
@@ -118,7 +121,10 @@ public sealed class AdminCatalogController : ControllerBase
             request.IsAvailable,
             request.IsActive,
             request.UsesSizes,
-            request.Sizes);
+            request.Sizes,
+            request.Discount,
+            request.SizeDiscountMode,
+            request.UniformDiscount);
 
         var result = await _sender.Send(command, cancellationToken);
         return Ok(result);

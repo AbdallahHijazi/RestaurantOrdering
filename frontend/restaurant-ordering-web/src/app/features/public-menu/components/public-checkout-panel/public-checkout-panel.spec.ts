@@ -113,7 +113,7 @@ describe('PublicCheckoutPanel', () => {
     const summary = fixture.nativeElement.querySelector('[data-testid="public-checkout-summary"]');
     expect(summary.textContent).toContain('Family');
     expect(fixture.componentInstance['buildRequest']().items).toEqual([
-      { menuItemId: item.id, menuItemSizeId: 'family-size', quantity: 2, notes: null },
+      { menuItemId: item.id, menuItemSizeId: 'family-size', quantity: 2, notes: null, expectedUnitPrice: 30 },
     ]);
   });
 

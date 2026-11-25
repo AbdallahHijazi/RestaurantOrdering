@@ -23,6 +23,13 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
         builder.Property(m => m.DescriptionEn)
             .HasMaxLength(500);
 
+        builder.Property(m => m.Discount).HasConversion(
+            rule => JsonSerializer.Serialize(rule, (JsonSerializerOptions?)null),
+            json => JsonSerializer.Deserialize<MenuDiscount>(json, (JsonSerializerOptions?)null));
+        builder.Property(m => m.UniformDiscount).HasConversion(
+            rule => JsonSerializer.Serialize(rule, (JsonSerializerOptions?)null),
+            json => JsonSerializer.Deserialize<MenuDiscount>(json, (JsonSerializerOptions?)null));
+
         builder.Property(m => m.Sizes)
             .HasConversion(
                 sizes => JsonSerializer.Serialize(sizes, (JsonSerializerOptions?)null),

@@ -33,6 +33,7 @@ public static class PublicOrderRequestFingerprint
             Append(item.MenuItemId.ToString("N"));
             Append(item.Quantity.ToString(inv));
             Append(item.Notes);
+            if (item.ExpectedUnitPrice is decimal expected) Append(expected.ToString("G29", inv));
             if (item.MenuItemSizeId is { } sizeId)
             {
                 Append(sizeId.ToString("N"));

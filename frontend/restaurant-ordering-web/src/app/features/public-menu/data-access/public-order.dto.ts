@@ -20,6 +20,7 @@ export interface CreatePublicOrderApiRequest {
 export interface CreatePublicOrderItemApiRequest {
   menuItemId: string;
   menuItemSizeId?: string;
+  expectedUnitPrice?: number;
   quantity: number;
   notes?: string | null;
 }
@@ -53,4 +54,11 @@ export interface PublicOrderConfirmationItemApiDto {
   quantity: number;
   totalPrice: number;
   notes?: string | null;
+}
+
+export interface UpdatedOrderPrice {
+  menuItemId: string;
+  menuItemSizeId: string | null;
+  basePrice: number;
+  finalPrice: number;
 }

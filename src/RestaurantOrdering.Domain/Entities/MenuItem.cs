@@ -14,6 +14,9 @@ public class MenuItem : AuditableEntity, ISoftDelete
     public bool UsesSizes { get; set; }
     public IReadOnlyList<MenuItemSize>? Sizes { get; set; }
     public decimal Price { get; set; }
+    public MenuDiscount? Discount { get; set; }
+    public SizeDiscountMode SizeDiscountMode { get; set; }
+    public MenuDiscount? UniformDiscount { get; set; }
     public decimal? DiscountPrice { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsAvailable { get; set; } = true;

@@ -386,19 +386,49 @@ describe('MenuManagementPage', () => {
     fixture.detectChanges();
 
     setInputValue('input[formcontrolname="price"]', '10');
-    setInputValue('input[formcontrolname="discountPrice"]', '20');
+    const form = fixture.componentInstance['itemForm'];
+    form.controls.discountType.setValue(3);
+    fixture.detectChanges();
+    setInputValue('[data-testid="menu-discount-value"]', '20');
+    fixture.componentInstance['submitItem']();
     fixture.detectChanges();
 
     expect(document.body.textContent).toContain(
-      TestBed.inject(LocaleService).uiText('adminMenuDiscountInvalid'),
+      TestBed.inject(LocaleService).uiText('menuDiscountInvalid'),
     );
   });
 
-  it('does not show discount label when discount is zero', () => {
+  it('previews a percentage discount in restaurant currency and submits the configured rule', () => {
+    fixture.nativeElement.querySelector('[data-testid="menu-add-item-button"]').click();
+    fixture.detectChanges();
+    const form = fixture.componentInstance['itemForm'];
+    form.controls.discountType.setValue(1);
+    fixture.detectChanges();
+    setInputValue('input[formcontrolname="name"]', 'Discount verification');
+    setInputValue('input[formcontrolname="price"]', '10');
+    setInputValue('[data-testid="menu-discount-value"]', '25');
+    fixture.detectChanges();
+
+    const locale = TestBed.inject(LocaleService);
+    const preview = document.body.querySelector('.item-pricing__preview');
+    expect(preview?.textContent).toContain(locale.formatCurrency(10, 'EUR'));
+    expect(preview?.textContent).toContain(locale.formatCurrency(2.5, 'EUR'));
+    expect(preview?.textContent).toContain(locale.formatCurrency(7.5, 'EUR'));
+
+    fixture.componentInstance['submitItem']();
+    const request = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/catalog/menu-items`,
+    );
+    expect(request.request.body).toMatchObject({ price: 10, discountPrice: null, discount: { type: 1, value: 25 } });
+    request.flush({ ...sampleItem(), price: 10, discountPrice: 7.5, discount: { type: 1, value: 25 } });
+  });
+
+  it('shows zero as the current price when the discount makes the item free', () => {
     reloadItems([{ ...sampleItem(), discountPrice: 0 }]);
     expect(
       fixture.nativeElement.querySelector(`[data-testid="menu-item-${ITEM_ID}"] .meal-card__price-original`),
-    ).toBeNull();
+    ).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.meal-card__price strong').textContent).toContain('0.00');
   });
 
   it('centers meal code and category badge content', () => {
@@ -1029,6 +1059,8 @@ describe('MenuManagementPage', () => {
   });
 
   function flushInitialRequests(): void {
+    httpMock.expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/settings`)
+      .flush({ currencyCode: 'EUR' });
     httpMock
       .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/locales`)
       .flush({

@@ -1,4 +1,5 @@
 using MediatR;
+using RestaurantOrdering.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using RestaurantOrdering.Application.Common.Exceptions;
 using RestaurantOrdering.Application.Common.Interfaces;
@@ -86,8 +87,11 @@ public sealed class UpdateMenuItemCommandHandler
         menuItem.NameEn = nameEn;
         menuItem.DescriptionAr = descriptionAr;
         menuItem.DescriptionEn = descriptionEn;
+        var discount = !menuItem.UsesSizes && menuItem.Discount is not null &&
+            request.DiscountPrice == MenuPricing.ForItem(menuItem).FinalPrice ? menuItem.Discount : null;
         menuItem.Price = request.Price;
         menuItem.DiscountPrice = request.DiscountPrice;
+        MenuDiscountConfiguration.Apply(menuItem, discount, null, null);
         menuItem.DisplayOrder = request.DisplayOrder;
         menuItem.IsAvailable = request.IsAvailable;
         menuItem.IsActive = request.IsActive;

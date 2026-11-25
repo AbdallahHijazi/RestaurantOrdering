@@ -159,6 +159,7 @@ public sealed class CreatePublicOrderCommandHandler
         var utcNow = _dateTimeService.UtcNow;
         var orderItems = new List<OrderItem>();
         decimal subtotal = 0;
+        var changedPrices = new List<UpdatedOrderPrice>();
 
         foreach (var requestItem in request.Items)
         {
@@ -188,7 +189,12 @@ public sealed class CreatePublicOrderCommandHandler
                 throw new ConflictException("Select an available size for this menu item.");
             }
 
-            var unitPrice = size?.Price ?? menuItem.DiscountPrice ?? menuItem.Price;
+            var pricing = MenuPricing.ForItem(menuItem, size);
+            var unitPrice = pricing.FinalPrice;
+            if (requestItem.ExpectedUnitPrice is decimal expected && expected != unitPrice)
+            {
+                changedPrices.Add(new UpdatedOrderPrice(menuItem.Id, size?.Id, pricing.BasePrice, unitPrice));
+            }
             var totalPrice = unitPrice * requestItem.Quantity;
             subtotal += totalPrice;
 
@@ -202,11 +208,20 @@ public sealed class CreatePublicOrderCommandHandler
                 DisplayedItemName = localizedItem.Name,
                 DisplayedLocale = localizedItem.ResolvedLocale,
                 UnitPrice = unitPrice,
+                BaseUnitPrice = pricing.BasePrice,
+                UnitDiscountAmount = pricing.DiscountAmount,
+                AppliedDiscountType = pricing.Discount?.Type,
+                AppliedDiscountValue = pricing.Discount?.Value,
                 Quantity = requestItem.Quantity,
                 TotalPrice = totalPrice,
                 Notes = TrimToOptional(requestItem.Notes),
                 CreatedAt = utcNow
             });
+        }
+
+        if (changedPrices.Count > 0)
+        {
+            throw new OrderPricesChangedException(changedPrices);
         }
 
         if (subtotal < settings.MinimumOrderAmount)

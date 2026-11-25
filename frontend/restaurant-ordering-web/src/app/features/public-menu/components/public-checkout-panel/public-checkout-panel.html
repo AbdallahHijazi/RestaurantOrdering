@@ -211,7 +211,7 @@
                 @if (line.sizeName) {
                   <div class="public-checkout__summary-row">
                     <span><bdi>{{ sizedLineName(line) }}</bdi> ? {{ line.quantity }}</span>
-                    <strong><bdi dir="ltr">{{ formatMoney(line.price * line.quantity) }}</bdi></strong>
+                    <strong><bdi dir="ltr">{{ formatMoney(displayUnitPrice(line) * line.quantity) }}</bdi></strong>
                   </div>
                 }
               }
@@ -221,6 +221,12 @@
                   <bdi dir="ltr">{{ formatMoney(estimate().subtotal) }}</bdi>
                 </strong>
               </div>
+              @if (itemSavings() > 0) {
+                <div class="public-checkout-panel__summary-row">
+                  <span>{{ ui().menuItemSavings }}</span>
+                  <strong><bdi dir="ltr">{{ formatMoney(itemSavings()) }}</bdi></strong>
+                </div>
+              }
               @if (showTax()) {
                 <div class="public-checkout__summary-row">
                   <span>{{ ui().publicCheckoutEstimatedTax }}</span>

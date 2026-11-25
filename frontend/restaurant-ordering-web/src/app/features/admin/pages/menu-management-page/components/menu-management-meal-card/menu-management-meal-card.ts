@@ -60,9 +60,16 @@ export class MenuManagementMealCard {
     );
   }
 
+  protected startingPrice(item: AdminMenuItem): number | null {
+    const prices = (item.sizes ?? [])
+      .filter((size) => size.isAvailable)
+      .map((size) => item.sizePrices?.[size.id]?.finalPrice ?? size.price);
+    return prices.length ? Math.min(...prices) : null;
+  }
+
   protected hasMeaningfulDiscount(item: AdminMenuItem): boolean {
     const discount = item.discountPrice;
-    return discount != null && discount > 0 && discount < item.price;
+    return !item.usesSizes && discount != null && discount >= 0 && discount < item.price;
   }
 
   protected availabilityLabel(item: AdminMenuItem): string {

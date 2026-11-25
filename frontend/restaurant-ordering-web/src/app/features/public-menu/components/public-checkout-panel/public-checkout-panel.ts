@@ -26,7 +26,7 @@ import {
   type PublicOrderType,
   type PublicRestaurantOrderSettings,
 } from '../../models/public-menu.models';
-import { estimateOrderTotals } from '../../utils/order-estimate.util';
+import { displayUnitPrice, estimateItemSavings, estimateOrderTotals } from '../../utils/order-estimate.util';
 import { isValidCustomerPhone } from '../../../../shared/utils/customer-phone.util';
 import { IconButton } from '../../../../shared/ui/icon-button/icon-button';
 
@@ -91,6 +91,8 @@ export class PublicCheckoutPanel {
     return settings.isPickupEnabled || settings.isDeliveryEnabled;
   });
 
+  protected readonly itemSavings = computed(() => estimateItemSavings(this.cart.cartItems()));
+
   protected readonly estimate = computed(() =>
     estimateOrderTotals(this.cart.cartItems(), this.orderSettings(), this.orderType()),
   );
@@ -145,6 +147,7 @@ export class PublicCheckoutPanel {
   }
 
   protected readonly cartLineKey = cartLineKey;
+  protected readonly displayUnitPrice = displayUnitPrice;
 
   protected sizedLineName(line: PublicCartLineItem): string {
     return cartLineDisplayName(line,
@@ -184,10 +187,6 @@ export class PublicCheckoutPanel {
     }
 
     if (this.isPreviewMode()) {
-      return false;
-    }
-
-    if (this.belowMinimum()) {
       return false;
     }
 
@@ -242,6 +241,11 @@ export class PublicCheckoutPanel {
       },
       error: (failure: PublicOrderSubmitFailure) => {
         this.submitting.set(false);
+        if (failure.updatedPrices?.length) {
+          this.cart.applyPriceUpdates(failure.updatedPrices);
+          this.errorMessage.set(this.ui().menuPricesChanged);
+          return;
+        }
         this.errorMessage.set(this.resolveErrorMessage(failure));
 
         if (failure.type === 'not-found') {
@@ -280,6 +284,7 @@ export class PublicCheckoutPanel {
         menuItemId: line.menuItemId,
         ...(line.menuItemSizeId ? { menuItemSizeId: line.menuItemSizeId } : {}),
         quantity: line.quantity,
+        expectedUnitPrice: displayUnitPrice(line),
         notes: line.notes?.trim() || null,
       })),
     };
@@ -326,11 +331,6 @@ export class PublicCheckoutPanel {
 
     if (!isValidCustomerPhone(this.guestPhone())) {
       this.errorMessage.set(this.ui().publicCheckoutGuestPhoneInvalid);
-      return false;
-    }
-
-    if (this.belowMinimum()) {
-      this.errorMessage.set(this.ui().publicCheckoutMinimumOrder);
       return false;
     }
 
