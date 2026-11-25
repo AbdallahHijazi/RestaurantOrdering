@@ -1,9 +1,8 @@
-.staff-management-page{--staff-line:var(--restaurant-border);--staff-text:var(--restaurant-text);--staff-muted:var(--restaurant-muted-text);--staff-dark:var(--restaurant-accent);--staff-green:var(--restaurant-success);--staff-green-soft:var(--restaurant-success-soft);--staff-terracotta:var(--restaurant-accent);--staff-terracotta-soft:var(--restaurant-accent-soft);--staff-red:var(--restaurant-danger);--staff-red-soft:var(--restaurant-danger-soft);--staff-amber:var(--restaurant-warning);--staff-amber-soft:var(--restaurant-warning-soft);--staff-shadow:var(--restaurant-shadow-sm);--staff-shadow-md:var(--restaurant-shadow-md);position:relative;isolation:isolate;min-height:100%;padding:clamp(1.25rem,2vw,2rem) 0 clamp(2rem,4vw,4rem);color:var(--staff-text);background:var(--restaurant-background);overflow:hidden}
+.staff-management-page{--staff-line:var(--restaurant-border);--staff-text:var(--restaurant-text);--staff-muted:var(--restaurant-muted-text);--staff-dark:var(--restaurant-accent);--staff-green:var(--restaurant-success);--staff-green-soft:var(--restaurant-success-soft);--staff-terracotta:var(--restaurant-accent);--staff-terracotta-soft:var(--restaurant-accent-soft);--staff-red:var(--restaurant-danger);--staff-red-soft:var(--restaurant-danger-soft);--staff-amber:var(--restaurant-warning);--staff-amber-soft:var(--restaurant-warning-soft);--staff-shadow:var(--restaurant-shadow-sm);--staff-shadow-md:var(--restaurant-shadow-md);position:relative;isolation:isolate;min-height:100%;--staff-section-gap:clamp(1rem,1.8vw,1.5rem);padding:0 0 clamp(2rem,4vw,4rem);color:var(--staff-text);background:var(--restaurant-background);overflow:hidden}
 .staff-management-shell{max-width:none;margin-inline:auto}
-.staff-management-success{margin:0 0 1rem;padding:.75rem 1rem;border-radius:.75rem;background:var(--staff-green-soft);color:var(--staff-green);font-weight:700}
-.staff-management-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;margin-block-end:1.5rem}
+.staff-management-head{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;margin-block-end:var(--staff-section-gap)}
 .staff-management-title h1{margin:0;font-family:var(--font-display);font-size: var(--fs-page-title);font-weight:800;letter-spacing:-.02em}
-.staff-management-title p{margin:.75rem 0 0;color:var(--staff-muted);font-size: var(--fs-card);line-height:1.7;max-width:42rem}
+.staff-management-title p{margin:.5rem 0 0;color:var(--staff-muted);font-size: var(--fs-card);line-height:1.7;max-width:42rem}
 .staff-management-primary,.staff-management-secondary{font:inherit;cursor:pointer;border-radius:.9375rem;transition:transform .24s cubic-bezier(.22,1,.36,1),box-shadow .24s,filter .24s}
 .staff-management-primary{min-height:3.125rem;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding-inline:1.25rem;border:1px solid var(--restaurant-accent-border);color:var(--restaurant-primary-button-text);background-color:var(--restaurant-olive);background-image:var(--restaurant-primary-button-bg);font-weight:800;box-shadow:var(--restaurant-primary-button-shadow)}
 .staff-management-primary svg{width:1.25rem;height:1.25rem;display:block}
@@ -33,14 +32,25 @@
 .staff-management-state--error{border-color:var(--restaurant-danger);background:var(--staff-red-soft)}
 .staff-management-skeleton-toolbar{height:3.25rem;margin:1rem 1.125rem;border-radius:999px;background:var(--restaurant-surface-muted)}
 .staff-management-skeleton-table{height:12rem;margin:0 1.125rem 1.125rem;border-radius:1rem;background:var(--restaurant-surface-muted)}
-.staff-management-modal-form{display:grid;grid-template-columns:1fr 1fr;gap:.875rem;min-width:0}
+.staff-management-modal-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;min-width:0}
 .staff-management-modal-form--single{grid-template-columns:1fr}
-.staff-management-field{display:grid;gap:.4375rem}
+.staff-management-field{display:grid;gap:.4375rem;min-width:0}
 .staff-management-field--full{grid-column:1/-1}
-.staff-management-field span{font-size: var(--fs-secondary);font-weight:800;color:var(--restaurant-muted-text)}
-.staff-management-field input{height:2.875rem;padding-inline:.75rem;border:1px solid var(--staff-line);border-radius:.75rem;background:var(--restaurant-surface-soft);color:var(--staff-text);outline:none;font:inherit;width:100%}
-.staff-management-field input:focus{border-color:var(--staff-terracotta);box-shadow:0 0 0 4px var(--restaurant-accent-soft)}
-.staff-management-modal-meta{margin:0 0 .5rem;color:var(--staff-muted)}
-.staff-management-modal-error{margin:.5rem 0 0;color:var(--staff-red);font-size:var(--fs-secondary)}
+.staff-management-field span{font-size:var(--fs-secondary);font-weight:700;color:var(--restaurant-text)}
+/* Editable fields sit on a brighter surface than the dialog with a strong border, so they never read as disabled. */
+.staff-management-field input{width:100%;height:2.75rem;padding-inline:.875rem;border:1.5px solid var(--restaurant-border-strong);border-radius:var(--radius-md);background:var(--restaurant-surface-elevated);color:var(--restaurant-text);outline:none;font:inherit;transition:border-color var(--restaurant-motion-normal) var(--restaurant-ease-standard),box-shadow var(--restaurant-motion-normal) var(--restaurant-ease-standard),background-color var(--restaurant-motion-normal) var(--restaurant-ease-standard)}
+.staff-management-field input::placeholder{color:var(--restaurant-muted-text);opacity:.8}
+.staff-management-field input:hover:not(:disabled):not([readonly]):not(:focus){border-color:color-mix(in srgb,var(--restaurant-accent) 55%,var(--restaurant-border-strong))}
+.staff-management-field input:focus{border-color:var(--staff-terracotta);box-shadow:0 0 0 4px color-mix(in srgb,var(--staff-terracotta) 22%,transparent)}
+.staff-management-field input.ng-invalid.ng-touched{border-color:var(--staff-red);box-shadow:0 0 0 3px color-mix(in srgb,var(--staff-red) 14%,transparent)}
+.staff-management-field input:disabled,.staff-management-field input[readonly]{border-style:dashed;border-color:var(--staff-line);background:var(--restaurant-surface-muted);color:var(--staff-muted);cursor:not-allowed}
+.staff-management-identity{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .75rem;margin:0 0 1rem;padding:.75rem .875rem;border:1px solid var(--staff-line);border-radius:var(--radius-md);background:var(--restaurant-surface-soft)}
+.staff-management-identity strong{font-size:var(--fs-body);font-weight:800;color:var(--staff-text)}
+.staff-management-identity__email{color:var(--staff-muted);font-size:var(--fs-secondary);overflow-wrap:anywhere}
+.staff-management-identity__chip{margin-inline-start:auto;padding:.2rem .625rem;border-radius:999px;background:var(--staff-terracotta-soft);color:var(--restaurant-accent-strong);font-size:var(--fs-small);font-weight:800}
+.staff-management-modal-meta{margin:0 0 .75rem;color:var(--staff-muted);line-height:1.6}
+.staff-management-modal-error{margin:.75rem 0 0;padding:.625rem .75rem;border-radius:var(--radius-md);background:var(--staff-red-soft);color:var(--staff-red);font-size:var(--fs-secondary);font-weight:700;line-height:1.5;animation:staff-error-in var(--restaurant-motion-normal) var(--restaurant-ease-standard) backwards}
+@keyframes staff-error-in{from{opacity:0;transform:translate3d(0,calc(var(--restaurant-motion-distance-sm) * -1),0)}}
+@media (max-width:36rem){}
 @media (max-width:65.625rem){.staff-management-head{align-items:stretch;flex-direction:column}.staff-management-primary{width:100%}.staff-management-workspace-top{align-items:stretch;flex-direction:column}.staff-management-search{max-width:none}.staff-management-filter{flex:1;min-width:0}.staff-management-modal-form{grid-template-columns:1fr}.staff-management-field--full{grid-column:auto}}
 @media (prefers-reduced-motion:reduce){.staff-management-page *{animation-duration:.01ms!important;transition-duration:.01ms!important}}

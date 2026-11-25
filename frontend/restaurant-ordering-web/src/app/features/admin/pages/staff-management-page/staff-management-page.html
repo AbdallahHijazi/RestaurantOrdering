@@ -1,9 +1,13 @@
 <section class="staff-management-page" data-testid="staff-management-page">
   <div class="staff-management-shell">
-    @if (successMessage()) {
-      <p class="staff-management-success" role="status" data-testid="staff-success-message">
-        {{ successMessage() }}
-      </p>
+    @if (successMessage(); as message) {
+      <!-- Shared compact floating toast (same component and 2s lifetime as Menu Management). -->
+      <app-floating-notification-pill
+        data-testid="staff-success-message"
+        [message]="message"
+        [closeLabel]="locale.uiText('notificationClose')"
+        (dismissed)="dismissSuccess()"
+      />
     }
 
     <header class="staff-management-head">
@@ -44,17 +48,14 @@
       }
 
       @case ('error') {
-        <div class="staff-management-state staff-management-state--error" data-testid="staff-error-state">
-          <h2>{{ locale.uiText('staffListErrorTitle') }}</h2>
-          <p>{{ listErrorMessage() }}</p>
-          <button
-            appIconButton
-            icon="refresh"
-            data-testid="staff-retry"
-            [label]="locale.uiText('staffRetry')"
-            (click)="loadStaff()"
-          ></button>
-        </div>
+        <app-error-state
+          data-testid="staff-error-state"
+          [title]="locale.uiText('staffListErrorTitle')"
+          [message]="listErrorMessage()"
+          [retryLabel]="locale.uiText('staffRetry')"
+          retryTestId="staff-retry"
+          (retry)="loadStaff()"
+        />
       }
 
       @case ('ready') {
@@ -146,208 +147,244 @@
   [titleId]="modalTitleId()"
   [testId]="modalTestId()"
   [blockCloseWhileBusy]="false"
+  [style.--modal-dialog-max-width]="modalWidth()"
   (closed)="dismissModal()"
 >
-  @if (modalKind()) {
-    @if (modalKind() === 'create') {
-      <form
-        id="staff-create-form"
-        class="staff-management-modal-form"
-        [formGroup]="createForm"
-        (ngSubmit)="submitCreate()"
-      >
-        <label class="staff-management-field staff-management-field--full" for="staff-create-full-name">
-          <span>{{ locale.uiText('staffFormFullName') }}</span>
-          <input id="staff-create-full-name" type="text" formControlName="fullName" />
-        </label>
-        <label class="staff-management-field" for="staff-create-email">
-          <span>{{ locale.uiText('staffFormEmail') }}</span>
-          <input id="staff-create-email" type="email" formControlName="email" autocomplete="email" />
-        </label>
-        <label class="staff-management-field" for="staff-create-phone">
-          <span>{{ locale.uiText('staffFormPhone') }}</span>
-          <input id="staff-create-phone" type="tel" formControlName="phoneNumber" />
-        </label>
-        <label class="staff-management-field staff-management-field--full" for="staff-create-password">
-          <span>{{ locale.uiText('staffFormPassword') }}</span>
-          <input
-            id="staff-create-password"
-            type="password"
-            formControlName="password"
-            autocomplete="new-password"
-          />
-        </label>
-        <div class="staff-management-field staff-management-field--full">
-          <app-staff-management-select
-            formControlName="role"
-            [options]="roleSelectOptions()"
-            [label]="locale.uiText('staffFormRole')"
-            testId="staff-create-role-select"
-          />
-        </div>
-      </form>
+  <!--
+    Body blocks (multiple roots are fine: they all go to the default slot).
+    The footers below are separate top-level @if blocks with ONE root each: Angular only projects an
+    @if into a named slot ([orderModalFooter]) when the block has a single root element. Nesting them in
+    the body block (as before) dropped the buttons into the body instead of the dialog footer.
+  -->
+  @if (modalKind() === 'create') {
+    <form
+      id="staff-create-form"
+      class="staff-management-modal-form"
+      [formGroup]="createForm"
+      (ngSubmit)="submitCreate()"
+    >
+      <label class="staff-management-field staff-management-field--full" for="staff-create-full-name">
+        <span>{{ locale.uiText('staffFormFullName') }}</span>
+        <input id="staff-create-full-name" type="text" formControlName="fullName" autocomplete="name" />
+      </label>
+      <label class="staff-management-field" for="staff-create-email">
+        <span>{{ locale.uiText('staffFormEmail') }}</span>
+        <input
+          id="staff-create-email"
+          type="email"
+          dir="ltr"
+          formControlName="email"
+          autocomplete="email"
+          [attr.aria-invalid]="createForm.controls.email.invalid && createForm.controls.email.touched"
+        />
+      </label>
+      <label class="staff-management-field" for="staff-create-phone">
+        <span>{{ locale.uiText('staffFormPhone') }}</span>
+        <input id="staff-create-phone" type="tel" dir="ltr" formControlName="phoneNumber" autocomplete="tel" />
+      </label>
+      <label class="staff-management-field" for="staff-create-password">
+        <span>{{ locale.uiText('staffFormPassword') }}</span>
+        <input
+          id="staff-create-password"
+          type="password"
+          dir="ltr"
+          formControlName="password"
+          autocomplete="new-password"
+          [attr.aria-invalid]="createForm.controls.password.invalid && createForm.controls.password.touched"
+        />
+      </label>
+      <div class="staff-management-field">
+        <app-staff-management-select
+          formControlName="role"
+          [options]="roleSelectOptions()"
+          [label]="locale.uiText('staffFormRole')"
+          testId="staff-create-role-select"
+        />
+      </div>
+    </form>
 
-      @if (createErrorMessage()) {
-        <p class="staff-management-modal-error" role="alert">{{ createErrorMessage() }}</p>
-      }
-
-      <app-staff-modal-actions orderModalFooter>
-        <button
-          appIconButton
-          type="submit"
-          class="staff-modal-actions__save"
-          icon="check"
-          variant="primary"
-          form="staff-create-form"
-          data-testid="staff-create-submit"
-          [label]="locale.uiText('staffCreateSubmit')"
-          [loading]="createSubmitting()"
-          [disabled]="createSubmitting()"
-        ></button>
-        <button
-          appIconButton
-          class="staff-modal-actions__cancel"
-          icon="x"
-          [label]="locale.uiText('staffCancel')"
-          (click)="closeCreateModal()"
-        ></button>
-      </app-staff-modal-actions>
+    @if (createForm.invalid && createForm.touched) {
+      <p class="staff-management-modal-error" role="alert">{{ locale.uiText('staffErrorValidation') }}</p>
     }
-
-    @if (modalKind() === 'changeRole' && selectedStaff(); as member) {
-      <p class="staff-management-modal-meta">
-        <strong>{{ displayName(member) }}</strong>
-      </p>
-      <p class="staff-management-modal-meta">
-        {{ locale.uiText('staffCurrentRole') }}:
-        <span>{{ roleLabel(member.role) }}</span>
-      </p>
-
-      <form
-        id="staff-change-role-form"
-        class="staff-management-modal-form staff-management-modal-form--single"
-        [formGroup]="changeRoleForm"
-        (ngSubmit)="submitChangeRole()"
-      >
-        <div class="staff-management-field staff-management-field--full">
-          <app-staff-management-select
-            formControlName="role"
-            [options]="roleSelectOptions()"
-            [label]="locale.uiText('staffNewRole')"
-            testId="staff-change-role-select"
-          />
-        </div>
-      </form>
-
-      @if (changeRoleErrorMessage()) {
-        <p class="staff-management-modal-error" role="alert">{{ changeRoleErrorMessage() }}</p>
-      }
-
-      <app-staff-modal-actions orderModalFooter>
-        <button
-          appIconButton
-          type="submit"
-          class="staff-modal-actions__save"
-          icon="check"
-          variant="primary"
-          form="staff-change-role-form"
-          data-testid="staff-change-role-submit"
-          [label]="locale.uiText('staffChangeRoleSubmit')"
-          [loading]="changeRoleSubmitting()"
-          [disabled]="changeRoleSubmitting()"
-        ></button>
-        <button
-          appIconButton
-          class="staff-modal-actions__cancel"
-          icon="x"
-          [label]="locale.uiText('staffCancel')"
-          (click)="closeChangeRoleModal()"
-        ></button>
-      </app-staff-modal-actions>
+    @if (createErrorMessage()) {
+      <p class="staff-management-modal-error" role="alert">{{ createErrorMessage() }}</p>
     }
+  }
 
-    @if (modalKind() === 'edit' && selectedStaff(); as member) {
-      <p class="staff-management-modal-meta">
-        <strong>{{ member.email }}</strong>
-      </p>
+  @if (modalKind() === 'changeRole' && selectedStaff(); as member) {
+    <div class="staff-management-identity">
+      <strong>{{ displayName(member) }}</strong>
+      <span class="staff-management-identity__chip">
+        {{ locale.uiText('staffCurrentRole') }}: {{ roleLabel(member.role) }}
+      </span>
+    </div>
 
-      <form
-        id="staff-edit-form"
-        class="staff-management-modal-form"
-        [formGroup]="editForm"
-        (ngSubmit)="submitEdit()"
-      >
-        <label class="staff-management-field staff-management-field--full" for="staff-edit-full-name">
-          <span>{{ locale.uiText('staffFormFullName') }}</span>
-          <input id="staff-edit-full-name" type="text" formControlName="fullName" />
-        </label>
-        <label class="staff-management-field staff-management-field--full" for="staff-edit-phone">
-          <span>{{ locale.uiText('staffFormPhone') }}</span>
-          <input id="staff-edit-phone" type="tel" formControlName="phoneNumber" />
-        </label>
-      </form>
+    <form
+      id="staff-change-role-form"
+      class="staff-management-modal-form staff-management-modal-form--single"
+      [formGroup]="changeRoleForm"
+      (ngSubmit)="submitChangeRole()"
+    >
+      <div class="staff-management-field staff-management-field--full">
+        <app-staff-management-select
+          formControlName="role"
+          [options]="roleSelectOptions()"
+          [label]="locale.uiText('staffNewRole')"
+          testId="staff-change-role-select"
+        />
+      </div>
+    </form>
 
-      @if (editErrorMessage()) {
-        <p class="staff-management-modal-error" role="alert">{{ editErrorMessage() }}</p>
-      }
-
-      <app-staff-modal-actions orderModalFooter>
-        <button
-          appIconButton
-          type="submit"
-          class="staff-modal-actions__save"
-          icon="check"
-          variant="primary"
-          form="staff-edit-form"
-          data-testid="staff-edit-submit"
-          [label]="locale.uiText('actionSave')"
-          [loading]="editSubmitting()"
-          [disabled]="editSubmitting()"
-        ></button>
-        <button
-          appIconButton
-          class="staff-modal-actions__cancel"
-          icon="x"
-          [label]="locale.uiText('staffCancel')"
-          (click)="closeEditModal()"
-        ></button>
-      </app-staff-modal-actions>
+    @if (changeRoleErrorMessage()) {
+      <p class="staff-management-modal-error" role="alert">{{ changeRoleErrorMessage() }}</p>
     }
+  }
 
-    @if (modalKind() === 'status' && selectedStaff(); as member) {
-      <p class="staff-management-modal-meta">
-        <strong>{{ displayName(member) }}</strong>
-      </p>
-      <p class="staff-management-modal-meta" data-testid="staff-status-confirm-text">
-        {{
-          locale.uiText(member.isActive ? 'staffDeactivateConfirm' : 'staffActivateConfirm')
-        }}
-      </p>
+  @if (modalKind() === 'edit' && selectedStaff(); as member) {
+    <div class="staff-management-identity">
+      <strong>{{ displayName(member) }}</strong>
+      <span class="staff-management-identity__email" dir="ltr">{{ member.email }}</span>
+    </div>
 
-      @if (statusErrorMessage()) {
-        <p class="staff-management-modal-error" role="alert">{{ statusErrorMessage() }}</p>
-      }
+    <form
+      id="staff-edit-form"
+      class="staff-management-modal-form"
+      [formGroup]="editForm"
+      (ngSubmit)="submitEdit()"
+    >
+      <label class="staff-management-field" for="staff-edit-full-name">
+        <span>{{ locale.uiText('staffFormFullName') }}</span>
+        <input id="staff-edit-full-name" type="text" formControlName="fullName" autocomplete="name" />
+      </label>
+      <label class="staff-management-field" for="staff-edit-phone">
+        <span>{{ locale.uiText('staffFormPhone') }}</span>
+        <input id="staff-edit-phone" type="tel" dir="ltr" formControlName="phoneNumber" autocomplete="tel" />
+      </label>
+    </form>
 
-      <app-staff-modal-actions orderModalFooter>
-        <button
-          appIconButton
-          icon="check"
-          [variant]="member.isActive ? 'danger' : 'primary'"
-          data-testid="staff-status-confirm"
-          [label]="locale.uiText(member.isActive ? 'actionDeactivate' : 'actionActivate')"
-          [showLabel]="true"
-          [loading]="statusSubmitting()"
-          [disabled]="statusSubmitting()"
-          (click)="confirmStatusChange()"
-        ></button>
-        <button
-          appIconButton
-          class="staff-modal-actions__cancel"
-          icon="x"
-          [label]="locale.uiText('staffCancel')"
-          (click)="closeStatusModal()"
-        ></button>
-      </app-staff-modal-actions>
+    @if (editForm.invalid && editForm.touched) {
+      <p class="staff-management-modal-error" role="alert">{{ locale.uiText('staffErrorValidation') }}</p>
     }
+    @if (editErrorMessage()) {
+      <p class="staff-management-modal-error" role="alert">{{ editErrorMessage() }}</p>
+    }
+  }
+
+  @if (modalKind() === 'status' && selectedStaff(); as member) {
+    <div class="staff-management-identity">
+      <strong>{{ displayName(member) }}</strong>
+      <span class="staff-management-identity__email" dir="ltr">{{ member.email }}</span>
+    </div>
+    <p class="staff-management-modal-meta" data-testid="staff-status-confirm-text">
+      {{ locale.uiText(member.isActive ? 'staffDeactivateConfirm' : 'staffActivateConfirm') }}
+    </p>
+
+    @if (statusErrorMessage()) {
+      <p class="staff-management-modal-error" role="alert">{{ statusErrorMessage() }}</p>
+    }
+  }
+
+  <!-- Footers: Cancel first, primary last, so the primary sits at the inline-end in both RTL and LTR. -->
+  @if (modalKind() === 'create') {
+    <app-staff-modal-actions orderModalFooter>
+      <button
+        appIconButton
+        class="staff-modal-actions__cancel"
+        icon="x"
+        [showLabel]="true"
+        [label]="locale.uiText('staffCancel')"
+        (click)="closeCreateModal()"
+      ></button>
+      <button
+        appIconButton
+        class="staff-modal-actions__save"
+        type="submit"
+        icon="check"
+        variant="primary"
+        [showLabel]="true"
+        form="staff-create-form"
+        data-testid="staff-create-submit"
+        [label]="locale.uiText('staffCreateSubmit')"
+        [loading]="createSubmitting()"
+        [disabled]="createSubmitting()"
+      ></button>
+    </app-staff-modal-actions>
+  }
+
+  @if (modalKind() === 'changeRole') {
+    <app-staff-modal-actions orderModalFooter>
+      <button
+        appIconButton
+        class="staff-modal-actions__cancel"
+        icon="x"
+        [showLabel]="true"
+        [label]="locale.uiText('staffCancel')"
+        (click)="closeChangeRoleModal()"
+      ></button>
+      <button
+        appIconButton
+        class="staff-modal-actions__save"
+        type="submit"
+        icon="check"
+        variant="primary"
+        [showLabel]="true"
+        form="staff-change-role-form"
+        data-testid="staff-change-role-submit"
+        [label]="locale.uiText('staffChangeRoleSubmit')"
+        [loading]="changeRoleSubmitting()"
+        [disabled]="changeRoleSubmitting()"
+      ></button>
+    </app-staff-modal-actions>
+  }
+
+  @if (modalKind() === 'edit') {
+    <app-staff-modal-actions orderModalFooter>
+      <button
+        appIconButton
+        class="staff-modal-actions__cancel"
+        icon="x"
+        [showLabel]="true"
+        [label]="locale.uiText('staffCancel')"
+        (click)="closeEditModal()"
+      ></button>
+      <button
+        appIconButton
+        class="staff-modal-actions__save"
+        type="submit"
+        icon="check"
+        variant="primary"
+        [showLabel]="true"
+        form="staff-edit-form"
+        data-testid="staff-edit-submit"
+        [label]="locale.uiText('actionSave')"
+        [loading]="editSubmitting()"
+        [disabled]="editSubmitting()"
+      ></button>
+    </app-staff-modal-actions>
+  }
+
+  @if (modalKind() === 'status') {
+    <app-staff-modal-actions orderModalFooter>
+      <button
+        appIconButton
+        class="staff-modal-actions__cancel"
+        icon="x"
+        [showLabel]="true"
+        [label]="locale.uiText('staffCancel')"
+        (click)="closeStatusModal()"
+      ></button>
+      <button
+        appIconButton
+        class="staff-modal-actions__save"
+        icon="check"
+        [variant]="selectedStaff()?.isActive ? 'danger' : 'primary'"
+        data-testid="staff-status-confirm"
+        [label]="locale.uiText(selectedStaff()?.isActive ? 'actionDeactivate' : 'actionActivate')"
+        [showLabel]="true"
+        [loading]="statusSubmitting()"
+        [disabled]="statusSubmitting()"
+        (click)="confirmStatusChange()"
+      ></button>
+    </app-staff-modal-actions>
   }
 </app-modal-shell>

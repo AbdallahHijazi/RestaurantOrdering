@@ -471,7 +471,7 @@ describe('StaffManagementPage', () => {
     expect(component.createForm.controls.role.value).toBe(ApplicationRoles.KitchenManager);
   });
 
-  it('shows icon-only modal footer actions with localized accessible names (UX-008)', () => {
+  it('shows labelled modal footer actions (icon + visible text) with localized accessible names (UX-008)', () => {
     flushList([]);
     root().querySelector<HTMLButtonElement>('[data-testid="staff-add-button"]')?.click();
     fixture.detectChanges();
@@ -487,10 +487,45 @@ describe('StaffManagementPage', () => {
     expect(saveButton.getAttribute('title')).toBe(locale.uiText('staffCreateSubmit'));
     expect(saveButton.querySelector('svg')).toBeTruthy();
     expect(cancelButton.querySelector('svg')).toBeTruthy();
-    expect(saveButton.textContent?.trim()).toBe('');
-    expect(cancelButton.textContent?.trim()).toBe('');
-    expect(saveButton.compareDocumentPosition(cancelButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(Number.parseFloat(getComputedStyle(saveButton).minHeight)).toBeGreaterThanOrEqual(44);
+    expect(saveButton.textContent?.trim()).toBe(locale.uiText('staffCreateSubmit'));
+    expect(cancelButton.textContent?.trim()).toBe(locale.uiText('staffCancel'));
+    expect(saveButton.classList.contains('app-icon-btn--with-label')).toBe(true);
+    // Cancel first, primary last: the primary sits at the inline-end in both RTL and LTR.
+    expect(cancelButton.compareDocumentPosition(saveButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // The buttons live in the dialog footer, not in its body.
+    expect(footer.closest('.modal-dialog__footer')).toBeTruthy();
+    expect(document.body.querySelector('.modal-dialog__body app-staff-modal-actions')).toBeNull();
+  });
+
+  it('shows a compact floating toast (shared pill) instead of a full-width banner', () => {
+    flushList([sampleUsers[0]!]);
+    (fixture.componentInstance as unknown as { successMessage: { set(v: string): void } }).successMessage.set('Saved');
+    fixture.detectChanges();
+
+    const toast = root().querySelector('[data-testid="staff-success-message"]');
+    expect(toast?.tagName.toLowerCase()).toBe('app-floating-notification-pill');
+    expect(toast?.textContent).toContain('Saved');
+    expect(root().querySelector('.staff-management-success')).toBeNull();
+
+    toast?.querySelector<HTMLButtonElement>('.floating-notification-pill__close')?.click();
+    fixture.detectChanges();
+    expect(root().querySelector('[data-testid="staff-success-message"]')).toBeNull();
+  });
+
+  it('sizes each dialog independently and marks invalid fields only after interaction', () => {
+    flushList([]);
+    root().querySelector<HTMLButtonElement>('[data-testid="staff-add-button"]')?.click();
+    fixture.detectChanges();
+    const shell = document.body.querySelector('app-modal-shell') as HTMLElement;
+    expect(shell.style.getPropertyValue('--modal-dialog-max-width')).toBe('34rem');
+
+    const email = document.body.querySelector('#staff-create-email') as HTMLInputElement;
+    expect(email.getAttribute('dir')).toBe('ltr');
+    expect(email.classList.contains('ng-touched')).toBe(false);
+    document.body.querySelector<HTMLButtonElement>('[data-testid="staff-create-submit"]')?.click();
+    fixture.detectChanges();
+    expect(email.classList.contains('ng-invalid') && email.classList.contains('ng-touched')).toBe(true);
+    expect(document.body.querySelector('.staff-management-modal-error')).toBeTruthy();
   });
 
   it('shows change role modal footer with icon save and cancel actions', () => {

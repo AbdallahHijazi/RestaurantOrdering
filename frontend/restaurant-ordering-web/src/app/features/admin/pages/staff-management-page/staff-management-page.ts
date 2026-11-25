@@ -31,15 +31,18 @@ import {
 } from './components/staff-management-select/staff-management-select';
 import { StaffModalActions } from './components/staff-modal-actions/staff-modal-actions';
 import { IconButton } from '../../../../shared/ui/icon-button/icon-button';
+import { FloatingNotificationPill } from '../../../../shared/ui/floating-notification-pill/floating-notification-pill';
 
 type PageState = 'loading' | 'ready' | 'error' | 'missing-context';
 type ModalKind = 'create' | 'changeRole' | 'edit' | 'status' | null;
 type StaffFilterValue = 'all' | AssignableStaffRole;
 type StatusFilterValue = 'all' | 'active' | 'inactive';
 
+import { ErrorState } from '../../../../shared/ui/error-state/error-state';
+
 @Component({
   selector: 'app-staff-management-page',
-  imports: [ReactiveFormsModule, ModalShell, StaffManagementRoster, StaffManagementStats, StaffManagementSelect, StaffModalActions, IconButton],
+  imports: [ErrorState, ReactiveFormsModule, ModalShell, StaffManagementRoster, StaffManagementStats, StaffManagementSelect, StaffModalActions, IconButton, FloatingNotificationPill],
   templateUrl: './staff-management-page.html',
   styleUrl: './staff-management-page.scss',
 })
@@ -366,6 +369,22 @@ export class StaffManagementPage {
         },
         error: (error) => this.statusErrorMessage.set(this.mapMutationError(error)),
       });
+  }
+
+  protected dismissSuccess(): void {
+    this.successMessage.set(null);
+  }
+
+  /** Per-dialog width (the shell default of 44rem is far too wide for a 2-5 field form). */
+  protected modalWidth(): string {
+    switch (this.modalKind()) {
+      case 'create':
+        return '34rem';
+      case 'edit':
+        return '30rem';
+      default:
+        return '28rem';
+    }
   }
 
   protected modalTitleId(): string {
