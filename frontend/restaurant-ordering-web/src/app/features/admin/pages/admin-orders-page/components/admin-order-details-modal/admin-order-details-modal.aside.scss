@@ -11,9 +11,11 @@
 .order-details-modal__timeline-item--current h3{color:var(--restaurant-success)}
 .order-details-modal__timeline-item--cancelled h3{color:var(--restaurant-danger)}
 .order-details-modal__timeline-time,.order-details-modal__timeline-hint{margin:.25rem 0 0;font-size: var(--fs-small);color:var(--restaurant-muted-text)}
-.order-details-modal__status-actions{margin-block-start:1.5rem;padding:1rem;border:1px solid var(--restaurant-border);border-radius:1rem;background:var(--restaurant-surface-soft)}
+.order-details-modal__status-actions{margin-block-start:1.25rem;padding:.875rem 1rem 1rem;border:1px solid var(--restaurant-border-strong);border-radius:1rem;background:var(--restaurant-surface-soft);animation:order-details-actions-in var(--restaurant-motion-normal) var(--restaurant-ease-standard) backwards}
+@keyframes order-details-actions-in{from{opacity:0;transform:translate3d(0,var(--restaurant-motion-distance-sm),0)}}
 .order-details-modal__status-actions h3{margin:0 0 .75rem;font-size: var(--fs-secondary);font-weight:800;color:var(--order-modal-slate-800)}
 .order-details-modal__status-buttons{display:flex;flex-wrap:wrap;gap:.5rem}
+.order-details-modal__status-buttons>button{flex:1 1 auto}
 .order-details-modal__status-btn{border:1px solid var(--order-modal-border-slate);border-radius:.75rem;padding:.5rem .875rem;background:var(--order-modal-surface);color:var(--order-modal-slate-800);font:inherit;font-size: var(--fs-secondary);font-weight:700;cursor:pointer;transition:transform .24s ease,box-shadow .24s ease}
 .order-details-modal__status-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:var(--restaurant-shadow-sm)}
 .order-details-modal__status-btn--success{border-color:color-mix(in srgb,var(--restaurant-success) 45%,transparent);background:var(--restaurant-success-soft);color:var(--restaurant-success)}

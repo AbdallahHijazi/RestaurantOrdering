@@ -715,6 +715,7 @@ export type UiTextKey =
   | 'adminOrdersCancelConfirmTitle'
   | 'adminOrdersCancelConfirmMessage'
   | 'adminOrdersCancelConfirmDismiss'
+  | 'adminOrdersCancelConfirmSubmit'
   | 'adminOrdersDetailsTitle'
   | 'adminOrdersCloseDetails'
   | 'adminOrdersDetailsLoading'
@@ -1567,6 +1568,7 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminOrdersCancelConfirmTitle: 'تأكيد الإلغاء',
     adminOrdersCancelConfirmMessage: 'هل تريد إلغاء هذا الطلب؟',
     adminOrdersCancelConfirmDismiss: 'تراجع',
+    adminOrdersCancelConfirmSubmit: 'إلغاء الطلب',
     adminOrdersDetailsTitle: 'تفاصيل الطلب',
     adminOrdersCloseDetails: 'إغلاق التفاصيل',
     adminOrdersDetailsLoading: 'جاري تحميل التفاصيل…',
@@ -2430,6 +2432,7 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
     adminOrdersCancelConfirmTitle: 'Confirm cancellation',
     adminOrdersCancelConfirmMessage: 'Do you want to cancel this order?',
     adminOrdersCancelConfirmDismiss: 'Keep order',
+    adminOrdersCancelConfirmSubmit: 'Cancel order',
     adminOrdersDetailsTitle: 'Order details',
     adminOrdersCloseDetails: 'Close details',
     adminOrdersDetailsLoading: 'Loading details…',

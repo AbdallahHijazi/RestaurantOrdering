@@ -4,6 +4,7 @@ import {
   DestroyRef,
   HostListener,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -21,6 +22,7 @@ import {
   type OrderSummary,
 } from '../../../kitchen/data-access/kitchen-orders.models';
 import { AdminOrdersService } from '../../data-access/admin-orders.service';
+import { FloatingNotificationPill } from '../../../../shared/ui/floating-notification-pill/floating-notification-pill';
 import { AdminOrdersSelect } from './components/admin-orders-select/admin-orders-select';
 import {
   AdminOrderDetailsModal,
@@ -63,9 +65,17 @@ const STATUS_FILTERS: readonly { key: StatusFilter; status: OrderStatus | null }
   { key: OrderStatus.Cancelled, status: OrderStatus.Cancelled },
 ];
 
+import { ErrorState } from '../../../../shared/ui/error-state/error-state';
+
 @Component({
   selector: 'app-admin-orders-page',
-  imports: [IconButton, OrderModalShell, AdminOrderDetailsModal, AdminOrdersSelect],
+  imports: [ErrorState, 
+    IconButton,
+    OrderModalShell,
+    AdminOrderDetailsModal,
+    AdminOrdersSelect,
+    FloatingNotificationPill,
+  ],
   templateUrl: './admin-orders-page.html',
   styleUrls: ['./admin-orders-page.shell.scss', './admin-orders-page.cards.scss'],
 })
@@ -83,6 +93,9 @@ export class AdminOrdersPage {
   protected readonly listError = signal<string | null>(null);
   protected readonly refreshing = signal(false);
   protected readonly feedbackMessage = signal<string | null>(null);
+  protected readonly feedbackTone = signal<'success' | 'error'>('success');
+  /** Advanced (type / guest) filters live in a collapsible section; status chips and search stay visible. */
+  protected readonly extraFiltersOpen = signal(false);
   protected readonly activeFilter = signal<StatusFilter>('all');
   protected readonly searchQuery = signal('');
   protected readonly typeFilter = signal<OrderTypeFilter>('all');
@@ -148,10 +161,33 @@ export class AdminOrdersPage {
     hasActiveFilters(this.listFilters()),
   );
 
+  /** How many of the advanced filters are narrowing the list (badge on the toggle). */
+  protected readonly activeExtraFilterCount = computed(
+    () => (this.typeFilter() !== 'all' ? 1 : 0) + (this.guestFilter() !== 'all' ? 1 : 0),
+  );
+
   private listSubscription: Subscription | null = null;
   private searchDebounceHandle: ReturnType<typeof setTimeout> | null = null;
 
+  private cancelDialogTrigger: HTMLElement | null = null;
+
   constructor() {
+    // Cancel dialog focus management: land on the safe action (Dismiss), give focus back on close.
+    effect(() => {
+      if (this.pendingCancelOrder()) {
+        this.cancelDialogTrigger = document.activeElement as HTMLElement | null;
+        queueMicrotask(() =>
+          document
+            .querySelector<HTMLElement>('[data-testid="admin-orders-cancel-confirm"] [data-autofocus]')
+            ?.focus(),
+        );
+      } else if (this.cancelDialogTrigger) {
+        const trigger = this.cancelDialogTrigger;
+        this.cancelDialogTrigger = null;
+        queueMicrotask(() => trigger.isConnected && trigger.focus?.());
+      }
+    });
+
     this.destroyRef.onDestroy(() => {
       this.clearSearchDebounce();
       this.listSubscription?.unsubscribe();
@@ -170,6 +206,41 @@ export class AdminOrdersPage {
     if (this.detailsOpen()) {
       this.closeDetails();
     }
+  }
+
+  protected showFeedback(message: string, tone: 'success' | 'error'): void {
+    this.feedbackTone.set(tone);
+    this.feedbackMessage.set(message);
+  }
+
+  /** Keeps Tab inside the (modal) cancel dialog: it only has two buttons. */
+  protected trapCancelDialogFocus(event: KeyboardEvent): void {
+    if (event.key !== 'Tab') {
+      return;
+    }
+    const buttons = Array.from(
+      (event.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>('button:not(:disabled)'),
+    );
+    const first = buttons[0];
+    const last = buttons[buttons.length - 1];
+    if (!first || !last) {
+      return;
+    }
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  protected dismissFeedback(): void {
+    this.feedbackMessage.set(null);
+  }
+
+  protected toggleExtraFilters(): void {
+    this.extraFiltersOpen.update((open) => !open);
   }
 
   protected loadOrders(resetPage = true): void {
@@ -356,7 +427,7 @@ export class AdminOrdersPage {
       next: () => this.loadingMore.set(false),
       error: () => {
         this.loadingMore.set(false);
-        this.feedbackMessage.set(this.locale.uiText('adminOrdersLoadMoreError'));
+        this.showFeedback(this.locale.uiText('adminOrdersLoadMoreError'), 'error');
       },
     });
   }
@@ -456,15 +527,12 @@ export class AdminOrdersPage {
           },
         ];
       case OrderStatus.Ready:
+        // Ready -> Completed is the only action offered here (product decision). The API still accepts
+        // Ready -> Cancelled; Completed and Cancelled are terminal and offer nothing.
         return [
           {
             labelKey: 'adminOrdersActionComplete',
             newStatus: OrderStatus.Completed,
-          },
-          {
-            labelKey: 'adminOrdersActionCancel',
-            newStatus: OrderStatus.Cancelled,
-            destructive: true,
           },
         ];
       default:
@@ -550,7 +618,7 @@ export class AdminOrdersPage {
           }
 
           this.setUpdating(order.id, false);
-          this.feedbackMessage.set(this.locale.uiText('adminOrdersStatusUpdateSuccess'));
+          this.showFeedback(this.locale.uiText('adminOrdersStatusUpdateSuccess'), 'success');
 
           if (this.selectedOrderId() === order.id) {
             this.loadDetails(order.id);
@@ -597,29 +665,29 @@ export class AdminOrdersPage {
   private handleTransitionError(error: unknown): void {
     if (error instanceof HttpErrorResponse) {
       if (error.status === 409) {
-        this.feedbackMessage.set(this.locale.uiText('adminOrdersErrorConflict'));
+        this.showFeedback(this.locale.uiText('adminOrdersErrorConflict'), 'error');
         this.loadOrders(true);
         return;
       }
 
       if (error.status === 403) {
-        this.feedbackMessage.set(this.locale.uiText('adminOrdersErrorForbidden'));
+        this.showFeedback(this.locale.uiText('adminOrdersErrorForbidden'), 'error');
         return;
       }
 
       if (error.status === 404) {
-        this.feedbackMessage.set(this.locale.uiText('adminOrdersErrorNotFound'));
+        this.showFeedback(this.locale.uiText('adminOrdersErrorNotFound'), 'error');
         this.loadOrders(true);
         return;
       }
 
       if (error.status === 429) {
-        this.feedbackMessage.set(this.locale.uiText('adminOrdersErrorTooManyRequests'));
+        this.showFeedback(this.locale.uiText('adminOrdersErrorTooManyRequests'), 'error');
         return;
       }
     }
 
-    this.feedbackMessage.set(this.locale.uiText('adminOrdersErrorGeneric'));
+    this.showFeedback(this.locale.uiText('adminOrdersErrorGeneric'), 'error');
   }
 
   private mapListError(error: unknown): string {

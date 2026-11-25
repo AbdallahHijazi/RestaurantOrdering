@@ -62,93 +62,116 @@
       <div class="order-details-modal__body" data-testid="admin-orders-details-body">
         <div class="order-details-modal__layout">
         <div class="order-details-modal__main">
-          <div class="order-details-modal__info-grid">
-            <div>
+          <!-- ONE coherent information section: order number (hero) + a balanced grid with the rest. -->
+          <section class="order-details-modal__info" data-testid="admin-order-details-info">
+            <div class="order-details-modal__info-hero">
               <span class="order-details-modal__info-label">
                 {{ locale.uiText('adminOrdersColNumber') }}
               </span>
-              <span class="order-details-modal__order-number" data-testid="admin-order-details-number">
+              <span
+                class="order-details-modal__order-number"
+                dir="ltr"
+                data-testid="admin-order-details-number"
+              >
                 {{ order.orderNumber }}
               </span>
             </div>
-            <div>
-              <span class="order-details-modal__info-label">
-                {{ locale.uiText('adminOrdersColType') }}
-              </span>
-              <span
-                class="order-details-modal__type"
-                [class.order-details-modal__type--delivery]="order.orderType === OrderType.Delivery"
-                data-testid="admin-order-details-type"
-              >
-                @if (order.orderType === OrderType.Delivery) {
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path
-                      fill="currentColor"
-                      d="M18 18.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM4.5 18.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM19 7h-3V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v8h2a3.5 3.5 0 0 1 7 0h2.05a3.5 3.5 0 0 1 6.9 1H19V7Z"
-                    />
-                  </svg>
-                } @else {
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path
-                      fill="currentColor"
-                      d="M6 2h12l4 5v13a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm10 2H8v4h8V4Zm-8 6v8h12v-8H6Z"
-                    />
-                  </svg>
-                }
-                {{ orderTypeLabel(order.orderType, order.tableName) }}
-              </span>
-            </div>
-            <div>
-              <span class="order-details-modal__info-label">
-                {{ locale.uiText('adminOrdersColGuest') }}
-              </span>
-              <span data-testid="admin-order-details-guest">
-                {{ order.guestName?.trim() || '—' }}
-              </span>
-            </div>
-            <div>
-              <span class="order-details-modal__info-label">
-                {{ locale.uiText('adminOrdersColCreatedAt') }}
-              </span>
-              <span class="order-details-modal__datetime" data-testid="admin-order-details-created">
-                {{ formatCreatedAt(order.createdAt) }}
-              </span>
-            </div>
-            @if (order.tableName?.trim()) {
+
+            <div class="order-details-modal__info-grid">
               <div>
                 <span class="order-details-modal__info-label">
-                  {{ locale.uiText('adminOrdersTableLabel') }}
+                  {{ locale.uiText('adminOrdersColType') }}
                 </span>
-                <span data-testid="admin-order-details-table">{{ order.tableName }}</span>
+                <span
+                  class="order-details-modal__type"
+                  [class.order-details-modal__type--delivery]="order.orderType === OrderType.Delivery"
+                  data-testid="admin-order-details-type"
+                >
+                  @if (order.orderType === OrderType.Delivery) {
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path
+                        fill="currentColor"
+                        d="M18 18.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM4.5 18.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM19 7h-3V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v8h2a3.5 3.5 0 0 1 7 0h2.05a3.5 3.5 0 0 1 6.9 1H19V7Z"
+                      />
+                    </svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path
+                        fill="currentColor"
+                        d="M6 2h12l4 5v13a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm10 2H8v4h8V4Zm-8 6v8h12v-8H6Z"
+                      />
+                    </svg>
+                  }
+                  {{ orderTypeLabel(order.orderType, order.tableName) }}
+                </span>
               </div>
-            }
-            @if (order.guestPhone?.trim()) {
+              <div>
+                <span class="order-details-modal__info-label">
+                  {{ locale.uiText('adminOrdersColGuest') }}
+                </span>
+                <span
+                  class="order-details-modal__info-value"
+                  [class.order-details-modal__info-value--empty]="!order.guestName?.trim()"
+                  data-testid="admin-order-details-guest"
+                >
+                  {{ order.guestName?.trim() || '—' }}
+                </span>
+              </div>
               <div>
                 <span class="order-details-modal__info-label">
                   {{ locale.uiText('adminOrdersColPhone') }}
                 </span>
-                <span class="order-details-modal__phone" data-testid="admin-order-details-phone">
-                  {{ order.guestPhone }}
+                <span
+                  class="order-details-modal__info-value order-details-modal__phone"
+                  [class.order-details-modal__info-value--empty]="!order.guestPhone?.trim()"
+                  dir="ltr"
+                  data-testid="admin-order-details-phone"
+                >
+                  {{ order.guestPhone?.trim() || '—' }}
                 </span>
               </div>
-            }
-            @if (showDeliveryAddress(order)) {
-              <div class="order-details-modal__info-span">
+              <div>
                 <span class="order-details-modal__info-label">
-                  {{ locale.uiText('adminOrdersFieldDeliveryAddress') }}
+                  {{ locale.uiText('adminOrdersColCreatedAt') }}
                 </span>
-                <span data-testid="admin-order-details-address">{{ order.deliveryAddress }}</span>
+                <span
+                  class="order-details-modal__info-value order-details-modal__datetime"
+                  dir="ltr"
+                  data-testid="admin-order-details-created"
+                >
+                  {{ formatCreatedAt(order.createdAt) }}
+                </span>
               </div>
-            }
-            @if (order.notes?.trim()) {
+              @if (order.tableName?.trim()) {
+                <div>
+                  <span class="order-details-modal__info-label">
+                    {{ locale.uiText('adminOrdersTableLabel') }}
+                  </span>
+                  <span class="order-details-modal__info-value" data-testid="admin-order-details-table">{{ order.tableName }}</span>
+                </div>
+              }
+              @if (showDeliveryAddress(order)) {
+                <div class="order-details-modal__info-span">
+                  <span class="order-details-modal__info-label">
+                    {{ locale.uiText('adminOrdersFieldDeliveryAddress') }}
+                  </span>
+                  <span class="order-details-modal__info-value" data-testid="admin-order-details-address">{{ order.deliveryAddress }}</span>
+                </div>
+              }
               <div class="order-details-modal__info-span">
                 <span class="order-details-modal__info-label">
                   {{ locale.uiText('adminOrdersFieldNotes') }}
                 </span>
-                <span>{{ order.notes }}</span>
+                <span
+                  class="order-details-modal__info-value order-details-modal__notes"
+                  [class.order-details-modal__info-value--empty]="!order.notes?.trim()"
+                  data-testid="admin-order-details-notes"
+                >
+                  {{ order.notes?.trim() || '—' }}
+                </span>
               </div>
-            }
-          </div>
+            </div>
+          </section>
 
           <section class="order-details-modal__items">
             <h2 class="order-details-modal__section-title">
@@ -309,7 +332,7 @@
                   <button
                     appIconButton
                     [icon]="action.destructive ? 'x' : (action.newStatus === OrderStatus.Preparing ? 'play' : 'check')"
-                    [variant]="action.destructive ? 'danger' : (action.newStatus === OrderStatus.Completed ? 'success' : 'primary')"
+                    [variant]="action.destructive ? 'danger' : 'primary'"
                     [showLabel]="true"
                     [label]="locale.uiText(action.labelKey)"
                     [disabled]="updating()"

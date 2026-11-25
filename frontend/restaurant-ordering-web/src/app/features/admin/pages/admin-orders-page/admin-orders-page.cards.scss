@@ -1,54 +1,11 @@
 .orders-management-page__view-switcher {
   display: inline-flex;
   align-items: center;
-  gap: 0.15rem;
-  padding: 0.15rem;
-  border: 1px solid var(--orders-line);
-  border-radius: 0.45rem;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--orders-line-strong);
+  border-radius: var(--radius-md);
   background: var(--restaurant-surface-soft);
-  direction: rtl;
-}
-.orders-management-page__view-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  min-height: 2.15rem;
-  padding-inline: 0.65rem;
-  border: 1px solid transparent;
-  border-radius: 0.55rem;
-  background: transparent;
-  color: var(--orders-muted);
-  font: inherit;
-  font-size: var(--fs-small);
-  font-weight: 800;
-  cursor: pointer;
-  white-space: nowrap;
-  transition:
-    background 160ms ease,
-    color 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease;
-}
-.orders-management-page__view-button svg {
-  inline-size: 1rem;
-  block-size: 1rem;
-  flex: 0 0 auto;
-}
-.orders-management-page__view-button:hover {
-  border-color: var(--orders-line-strong);
-  color: var(--orders-charcoal);
-}
-.orders-management-page__view-button--active {
-  border-color: var(--restaurant-accent);
-  background: var(--restaurant-accent);
-  color: var(--restaurant-text-on-accent);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--restaurant-shadow-ink) 10%, transparent);
-}
-.orders-management-page__view-button--active:hover {
-  border-color: var(--restaurant-accent-strong);
-  background: var(--restaurant-accent-strong);
-  color: var(--restaurant-text-on-accent);
 }
 .orders-management-page__table-wrap {
   width: 100%;
@@ -146,9 +103,9 @@
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  min-height: 1.7rem;
-  padding-inline: 0.6rem;
-  border: 1px solid transparent;
+  min-height: 1.75rem;
+  padding-inline: 0.7rem;
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
   border-radius: var(--restaurant-radius-pill);
   font-size: var(--fs-small);
   font-weight: 800;
@@ -283,52 +240,30 @@
 .orders-management-page__card {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.875rem;
   min-width: 0;
-  padding: 1rem;
-  border: 1px solid var(--orders-line);
-  border-radius: 0.9rem;
+  padding: 1rem 1.125rem;
+  border: 1px solid var(--orders-line-strong);
+  border-radius: var(--restaurant-radius-lg);
   background: var(--orders-surface);
-  box-shadow: 0 2px 10px color-mix(in srgb, var(--restaurant-shadow-ink) 3%, transparent);
-  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  box-shadow: var(--restaurant-shadow-xs);
+  transition:
+    border-color var(--restaurant-motion-normal) var(--restaurant-ease-standard),
+    box-shadow var(--restaurant-motion-normal) var(--restaurant-ease-standard);
 }
-.orders-management-page__card:hover {
-  transform: translateY(-1px);
-  border-color: var(--orders-line-strong);
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--restaurant-shadow-ink) 6%, transparent);
+/* Emphasis by border + soft elevation only (no movement): the card never shifts under the pointer. */
+.orders-management-page__card:hover,
+.orders-management-page__card:focus-within {
+  border-color: color-mix(in srgb, var(--orders-accent) 45%, var(--orders-line-strong));
+  box-shadow: var(--restaurant-shadow-sm);
 }
-.orders-management-page__card-head {
-  min-width: 0;
-}
-.orders-management-page__card-main {
-  display: grid;
-  gap: 0.8rem;
-  min-width: 0;
-}
-.orders-management-page__card-topline,
-.orders-management-page__card-meta-row,
-.orders-management-page__card-total {
+.orders-management-page__card-head,
+.orders-management-page__card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-}
-.orders-management-page__card-topline {
-  align-items: flex-start;
-}
-.orders-management-page__card-number {
   min-width: 0;
-  color: var(--orders-charcoal);
-  font-family: var(--restaurant-font-mono);
-  font-size: var(--fs-body);
-  font-weight: 900;
-  letter-spacing: 0.01em;
-  overflow-wrap: anywhere;
-}
-.orders-management-page__card-meta-row {
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  color: var(--orders-muted);
 }
 .orders-management-page__card-time {
   color: var(--orders-muted);
@@ -336,16 +271,57 @@
   font-weight: 600;
   white-space: nowrap;
 }
-.orders-management-page__card-guest-row {
+.orders-management-page__card-content {
   display: grid;
-  gap: 0.2rem;
+  gap: 0.625rem;
   min-width: 0;
-  padding-block-start: 0.15rem;
+}
+.orders-management-page__card-number {
+  margin: 0;
+  color: var(--orders-charcoal);
+  font-family: var(--restaurant-font-mono);
+  font-size: var(--fs-card);
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  overflow-wrap: anywhere;
+  text-align: start;
+  unicode-bidi: isolate;
+  justify-self: start;
+}
+/* The order type is a supporting detail: a small tinted icon chip + label, not a hero graphic. */
+.orders-management-page__card-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  color: var(--orders-charcoal);
+  font-size: var(--fs-secondary);
+  font-weight: 700;
+}
+.orders-management-page__card-type-icon {
+  display: inline-grid;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--orders-accent);
+  background: var(--orders-accent-soft);
+}
+.orders-management-page__card-type-icon svg {
+  inline-size: 0.9375rem;
+  block-size: 0.9375rem;
+}
+.orders-management-page__card-field {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
 }
 .orders-management-page__card-label {
   color: var(--orders-muted);
   font-size: var(--fs-small);
-  font-weight: 800;
+  font-weight: 700;
 }
 .orders-management-page__card-guest {
   margin: 0;
@@ -354,24 +330,26 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--orders-charcoal);
-  font-size: var(--fs-secondary);
+  font-size: var(--fs-body);
   font-weight: 700;
+  line-height: 1.5;
 }
+/* Footer is pinned to the card bottom, so total + action line up across cards of any content length. */
 .orders-management-page__card-footer {
-  display: grid;
-  gap: 0.75rem;
   margin-block-start: auto;
   padding-block-start: 0.75rem;
   border-block-start: 1px solid var(--orders-line);
 }
 .orders-management-page__card-total {
-  color: var(--orders-muted);
-  font-size: var(--fs-small);
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
 }
 .orders-management-page__card-total strong {
   color: var(--orders-charcoal);
-  font-size: var(--fs-body);
-  font-weight: 900;
+  font-size: var(--fs-card);
+  font-weight: 800;
+  line-height: 1.3;
 }
 .orders-management-page__details-btn {
   width: 100%;
@@ -379,7 +357,11 @@
 .orders-management-page__confirm {
   position: fixed;
   inset: 0;
-  z-index: 70;
+  /* Above the shared order modal (the dialog is opened from inside it), below tooltips/toasts. */
+  z-index: calc(var(--z-modal-dialog) + 1);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
 }
 .orders-management-page__confirm-backdrop {
   position: absolute;
@@ -389,32 +371,78 @@
   padding: 0;
   background: var(--restaurant-console-backdrop);
   cursor: pointer;
+  animation: orders-confirm-backdrop-in var(--restaurant-motion-fast) var(--restaurant-ease-standard) backwards;
 }
 .orders-management-page__confirm-panel {
   position: relative;
   z-index: 1;
-  width: min(calc(100% - 2rem), 24rem);
-  margin: 15vh auto 0;
-  padding: 1.1rem 1.25rem;
-  border: 1px solid var(--orders-line);
-  border-radius: 0.9rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.75rem 0.875rem;
+  inline-size: min(100%, 24rem);
+  padding: 1.125rem 1.25rem 1rem;
+  border: 1px solid var(--orders-line-strong);
+  border-radius: var(--restaurant-radius-lg);
   background: var(--orders-surface);
   box-shadow: var(--restaurant-shadow-md);
+  text-align: start;
+  animation: orders-confirm-panel-in var(--restaurant-motion-normal) var(--restaurant-ease-standard) backwards;
+}
+.orders-management-page__confirm-icon {
+  display: inline-grid;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--orders-red);
+  background: var(--orders-red-soft);
+}
+.orders-management-page__confirm-icon svg {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+}
+.orders-management-page__confirm-copy {
+  min-inline-size: 0;
+}
+.orders-management-page__confirm-panel h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-card);
+  line-height: 1.3;
+}
+.orders-management-page__confirm-panel p {
+  margin: 0.25rem 0 0;
+  color: var(--orders-muted);
+  font-size: var(--fs-secondary);
+  line-height: 1.55;
 }
 .orders-management-page__confirm-actions {
+  grid-column: 1 / -1;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  margin-top: 1rem;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0;
 }
-.orders-management-page__danger {
-  min-height: 2.45rem;
-  padding-inline: 0.9rem;
-  border: 1px solid color-mix(in srgb, var(--restaurant-danger) 35%, transparent);
-  border-radius: 0.65rem;
-  background: var(--orders-red-soft);
-  color: var(--orders-red);
-  font-weight: 800;
+/* The destructive confirmation is a solid danger button: unmistakable next to the neutral dismiss. */
+.orders-management-page__confirm-actions .button-danger {
+  border-color: var(--restaurant-danger);
+  background: var(--restaurant-danger);
+  color: var(--restaurant-text-on-accent);
+}
+.orders-management-page__confirm-actions .button-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--restaurant-danger) 86%, var(--restaurant-text));
+}
+@keyframes orders-confirm-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes orders-confirm-panel-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--restaurant-motion-distance-md), 0) scale(0.985);
+  }
 }
 @media (max-width: 72rem) {
   .orders-management-page__grid,
@@ -447,7 +475,6 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .orders-management-page__view-button,
   .orders-management-page__card,
   .orders-management-page__details-btn,
   .orders-management-page__primary,

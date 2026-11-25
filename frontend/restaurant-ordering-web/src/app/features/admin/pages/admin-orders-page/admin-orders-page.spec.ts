@@ -259,51 +259,167 @@ describe('AdminOrdersPage', () => {
     expect(pickup).not.toContain('T-12');
   });
 
-  it('renders additional filters toolbar with visible icon and aligned controls', () => {
+  it('keeps status chips, search and the advanced toggle in one toolbar; advanced filters are collapsible and inert while closed', () => {
     fixture.detectChanges();
     flushList([]);
 
-    const row = root().querySelector('.orders-management-page__extra-filters-row') as HTMLElement;
-    const label = root().querySelector('[data-testid="admin-orders-extra-filters-label"]') as HTMLElement;
-    const icon = label?.querySelector('.orders-management-page__extra-filters-icon') as SVGElement | null;
-    const typeTrigger = root().querySelector('[data-testid="admin-orders-type-filter"]') as HTMLElement;
-    const clearButton = root().querySelector('[data-testid="admin-orders-clear-filters"]') as HTMLButtonElement;
-    const resultCount = root().querySelector('[data-testid="admin-orders-result-count"]') as HTMLElement;
+    const toolbar = root().querySelector('.orders-management-page__filters') as HTMLElement;
+    const toggle = root().querySelector('[data-testid="admin-orders-extra-filters-toggle"]') as HTMLButtonElement;
+    const extra = root().querySelector('[data-testid="admin-orders-extra-filters"]') as HTMLElement;
+    const clear = root().querySelector('[data-testid="admin-orders-clear-filters"]') as HTMLButtonElement;
 
-    expect(row).toBeTruthy();
-    expect(row.contains(label)).toBe(true);
-    expect(row.contains(typeTrigger)).toBe(true);
-    expect(row.contains(clearButton)).toBe(true);
-    expect(row.contains(resultCount)).toBe(true);
-    expect(root().querySelector('.orders-management-page__extra-filters-title')).toBeNull();
+    expect(toolbar.contains(root().querySelector('[data-testid="admin-orders-filters"]'))).toBe(true);
+    expect(toolbar.contains(root().querySelector('[data-testid="admin-orders-search"]'))).toBe(true);
+    expect(toolbar.contains(toggle) && toolbar.contains(clear)).toBe(true);
+    expect(toggle.querySelector('svg')).toBeTruthy();
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(extra.hasAttribute('inert')).toBe(true);
+    expect(extra.classList.contains('orders-management-page__extra--open')).toBe(false);
 
-    expect(getComputedStyle(row).display).toBe('flex');
-    expect(getComputedStyle(label).display).toBe('inline-flex');
-    expect(getComputedStyle(label).width).not.toBe('100%');
-    expect(getComputedStyle(label).flexGrow).toBe('0');
+    toggle.click();
+    fixture.detectChanges();
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(extra.hasAttribute('inert')).toBe(false);
+    expect(extra.classList.contains('orders-management-page__extra--open')).toBe(true);
+    expect(extra.contains(root().querySelector('[data-testid="admin-orders-type-filter"]'))).toBe(true);
+    expect(extra.contains(root().querySelector('[data-testid="admin-orders-guest-filter"]'))).toBe(true);
 
-    expect(icon).toBeTruthy();
-    expect(icon?.getAttribute('aria-hidden')).toBe('true');
-    expect(icon?.getAttribute('focusable')).toBe('false');
-    expect(icon?.querySelectorAll('path').length).toBeGreaterThanOrEqual(6);
+    toggle.click();
+    fixture.detectChanges();
+    expect(extra.hasAttribute('inert')).toBe(true);
+  });
 
-    const iconCss = Array.from(document.styleSheets)
-      .flatMap((sheet) => {
-        try {
-          return Array.from(sheet.cssRules).map((rule) => rule.cssText);
-        } catch {
-          return [];
-        }
-      })
-      .join('\n');
-    expect(iconCss).toContain('orders-management-page__extra-filters-icon');
-    expect(iconCss).toContain('20px');
-    expect(iconCss).toContain('stroke: var(--restaurant-text)');
-    expect(iconCss).toContain('height: 46px');
-    expect(iconCss).toContain('align-self: center');
+  it('uses table-rows and grid icons with aria-pressed and switches view', () => {
+    fixture.detectChanges();
+    flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
 
-    expect(['0px', '']).toContain(getComputedStyle(clearButton).marginTop);
-    expect(getComputedStyle(resultCount).marginInlineStart).toBe('auto');
+    const table = root().querySelector('[data-testid="admin-orders-view-table"]') as HTMLButtonElement;
+    const cards = root().querySelector('[data-testid="admin-orders-view-cards"]') as HTMLButtonElement;
+    expect(table.getAttribute('aria-pressed')).toBe('true');
+    expect(cards.getAttribute('aria-pressed')).toBe('false');
+    // Different, recognisable glyphs: table rows (3 paths) vs 2x2 grid (4 paths).
+    expect(table.querySelectorAll('path').length).toBe(3);
+    expect(cards.querySelectorAll('path').length).toBe(4);
+    expect(table.hasAttribute('title')).toBe(false);
+
+    cards.click();
+    fixture.detectChanges();
+    expect(cards.getAttribute('aria-pressed')).toBe('true');
+    expect(table.getAttribute('aria-pressed')).toBe('false');
+    expect(root().querySelector('.orders-management-page__grid')).toBeTruthy();
+  });
+
+  it('offers only lifecycle-valid actions per status: Ready -> Complete only, terminal states none', () => {
+    fixture.detectChanges();
+    flushList([]);
+    const page = fixture.componentInstance as unknown as {
+      actionsForStatus(status: OrderStatus): { newStatus: OrderStatus; destructive?: boolean }[];
+    };
+    const targets = (status: OrderStatus) => page.actionsForStatus(status).map((a) => a.newStatus);
+
+    expect(targets(OrderStatus.New)).toEqual([OrderStatus.Preparing, OrderStatus.Cancelled]);
+    expect(targets(OrderStatus.Preparing)).toEqual([OrderStatus.Ready, OrderStatus.Cancelled]);
+    expect(targets(OrderStatus.Ready)).toEqual([OrderStatus.Completed]);
+    expect(targets(OrderStatus.Completed)).toEqual([]);
+    expect(targets(OrderStatus.Cancelled)).toEqual([]);
+  });
+
+  it('hides the whole Update Status panel when an order has no valid action', () => {
+    fixture.detectChanges();
+    flushList([createSummary('order-done', OrderStatus.Completed, 'A-200')]);
+    root().querySelector<HTMLButtonElement>('[data-testid="admin-order-details-order-done"]')!.click();
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders/order-done`)
+      .flush(createDetails('order-done', OrderStatus.Completed));
+    fixture.detectChanges();
+
+    expect(document.body.querySelector('[data-testid="admin-order-details-status-actions"]')).toBeNull();
+    expect(document.body.querySelector('[data-testid^="admin-order-modal-action-"]')).toBeNull();
+  });
+
+  it('shows the order information as one section with all six facts and graceful placeholders', () => {
+    fixture.detectChanges();
+    flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
+    root().querySelector<HTMLButtonElement>('[data-testid="admin-order-details-order-new"]')!.click();
+    httpMock
+      .expectOne(`${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders/order-new`)
+      .flush({ ...createDetails('order-new', OrderStatus.New), guestPhone: null, notes: null });
+    fixture.detectChanges();
+
+    const info = document.body.querySelector('[data-testid="admin-order-details-info"]') as HTMLElement;
+    expect(info).toBeTruthy();
+    for (const id of ['number', 'type', 'guest', 'phone', 'created', 'notes']) {
+      expect(info.querySelector(`[data-testid="admin-order-details-${id}"]`)).toBeTruthy();
+    }
+    expect(info.querySelector('[data-testid="admin-order-details-phone"]')?.textContent?.trim()).toBe('—');
+    expect(info.querySelector('[data-testid="admin-order-details-notes"]')?.textContent?.trim()).toBe('—');
+    expect(info.querySelector('[data-testid="admin-order-details-phone"]')?.getAttribute('dir')).toBe('ltr');
+    expect(info.querySelector('[data-testid="admin-order-details-number"]')?.getAttribute('dir')).toBe('ltr');
+  });
+
+  it('shows status feedback as the shared compact toast, with error tone for failures', () => {
+    fixture.detectChanges();
+    flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
+    const page = fixture.componentInstance as unknown as {
+      showFeedback(message: string, tone: 'success' | 'error'): void;
+    };
+
+    page.showFeedback('Saved', 'success');
+    fixture.detectChanges();
+    let toast = root().querySelector('[data-testid="admin-orders-feedback"]') as HTMLElement;
+    expect(toast.tagName.toLowerCase()).toBe('app-floating-notification-pill');
+    expect(toast.querySelector('.floating-notification-pill--error')).toBeNull();
+    expect(root().querySelector('.orders-management-page__feedback')).toBeNull();
+
+    page.showFeedback('Failed', 'error');
+    fixture.detectChanges();
+    toast = root().querySelector('[data-testid="admin-orders-feedback"]') as HTMLElement;
+    expect(toast.querySelector('.floating-notification-pill--error')).toBeTruthy();
+
+    toast.querySelector<HTMLButtonElement>('.floating-notification-pill__close')?.click();
+    fixture.detectChanges();
+    expect(root().querySelector('[data-testid="admin-orders-feedback"]')).toBeNull();
+  });
+
+  it('cancel confirmation is an accessible alertdialog and never cancels without explicit confirmation', () => {
+    fixture.detectChanges();
+    flushList([createSummary('order-new', OrderStatus.New, 'A-100')]);
+    const page = fixture.componentInstance as unknown as {
+      requestAction(order: OrderSummary, action: { labelKey: string; newStatus: OrderStatus; destructive?: boolean }): void;
+    };
+    page.requestAction(createSummary('order-new', OrderStatus.New, 'A-100'), {
+      labelKey: 'adminOrdersActionCancel',
+      newStatus: OrderStatus.Cancelled,
+      destructive: true,
+    });
+    fixture.detectChanges();
+
+    const dialog = root().querySelector('[role="alertdialog"]') as HTMLElement;
+    expect(dialog).toBeTruthy();
+    expect(dialog.getAttribute('aria-modal')).toBe('true');
+    expect(document.getElementById(dialog.getAttribute('aria-labelledby')!)?.textContent?.trim()).toBeTruthy();
+    expect(document.getElementById(dialog.getAttribute('aria-describedby')!)?.textContent?.trim()).toBeTruthy();
+    httpMock.expectNone((request) => request.method === 'PATCH');
+
+    // Escape / dismiss close it without any request.
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+    expect(root().querySelector('[role="alertdialog"]')).toBeNull();
+    httpMock.expectNone((request) => request.method === 'PATCH');
+
+    // Only the explicit confirm button sends the cancellation.
+    page.requestAction(createSummary('order-new', OrderStatus.New, 'A-100'), {
+      labelKey: 'adminOrdersActionCancel',
+      newStatus: OrderStatus.Cancelled,
+      destructive: true,
+    });
+    fixture.detectChanges();
+    root().querySelector<HTMLButtonElement>('[data-testid="admin-orders-cancel-confirm-submit"]')!.click();
+    const req = httpMock.expectOne(
+      `${API_BASE_URL}/api/v1/admin/restaurants/${RESTAURANT_ID}/orders/order-new/status`,
+    );
+    expect(req.request.body).toEqual({ newStatus: OrderStatus.Cancelled });
+    req.flush(createSummary('order-new', OrderStatus.Cancelled, 'A-100'));
   });
 
   it('supports additional filters, derived guest options, clear filters, and result count', () => {
@@ -346,38 +462,38 @@ describe('AdminOrdersPage', () => {
     expect((root().querySelector<HTMLInputElement>('[data-testid="admin-orders-search"]'))!.value).toBe('');
   });
 
-  it('renders production cards with type-first hierarchy, labels, meta corner, total, and details flow', () => {
+  it('renders order cards as header (status + time) / body (number, type, guest) / footer (total + details)', () => {
     fixture.detectChanges();
     flushList([createSummary('order-new', OrderStatus.New, 'ORD-7F29134F948B4E60', OrderType.Delivery, 'Abdallah Hijazi')]);
 
+    // The default view is the table; switch to cards.
+    root().querySelector<HTMLButtonElement>('[data-testid="admin-orders-view-cards"]')!.click();
+    fixture.detectChanges();
     expect(root().querySelector('[data-testid="admin-orders-table"]')).toBeNull();
     expect(root().querySelector('[data-testid="admin-orders-cards"]')).toBeTruthy();
 
     const card = root().querySelector('[data-testid="admin-order-card-order-new"]') as HTMLElement;
+    const head = card.querySelector('.orders-management-page__card-head') as HTMLElement;
     const content = card.querySelector('.orders-management-page__card-content') as HTMLElement;
-    const type = card.querySelector('.orders-management-page__card-type') as HTMLElement;
+    const footer = card.querySelector('.orders-management-page__card-footer') as HTMLElement;
     const number = card.querySelector('.orders-management-page__card-number') as HTMLElement;
     const guest = card.querySelector('.orders-management-page__card-guest') as HTMLElement;
-    const labels = card.querySelectorAll('.orders-management-page__card-label');
-    const meta = card.querySelector('[data-testid="admin-order-card-meta-order-new"]') as HTMLElement;
-    const status = meta.querySelector('.orders-management-page__card-status') as HTMLElement;
-    const time = meta.querySelector('.orders-management-page__card-time') as HTMLElement;
-    const contentChildren = Array.from(content.children);
+    const icon = card.querySelector('.orders-management-page__card-type-icon svg') as SVGElement;
 
+    expect(Array.from(card.children)).toEqual([head, content, footer]);
+    expect(head.querySelector('.orders-management-page__status-badge')?.getAttribute('data-status')).toBe(
+      String(OrderStatus.New),
+    );
+    expect(head.querySelector('time.orders-management-page__card-time')).toBeTruthy();
     expect(card.textContent).toContain('#7F29134F');
     expect(card.textContent).toContain('Abdallah Hijazi');
-    expect(labels.length).toBe(2);
-    expect(contentChildren[0]).toBe(type);
-    expect(contentChildren[1].classList.contains('orders-management-page__card-field')).toBe(true);
-    expect(contentChildren[2].classList.contains('orders-management-page__card-field')).toBe(true);
     expect(number.tagName.toLowerCase()).toBe('h3');
-    expect(guest.tagName.toLowerCase()).toBe('p');
-    expect(Number(getComputedStyle(number).fontWeight)).toBeGreaterThan(Number(getComputedStyle(guest).fontWeight));
-    expect(getComputedStyle(guest).fontSize).not.toBe(getComputedStyle(number).fontSize);
-    expect(meta.contains(status)).toBe(true);
-    expect(meta.contains(time)).toBe(true);
-    expect(getComputedStyle(meta).flexDirection).toBe('column');
-    expect(getComputedStyle(meta).marginInlineStart).toBe('auto');
+    expect(number.getAttribute('dir')).toBe('ltr');
+    expect(guest.getAttribute('title')).toBe('Abdallah Hijazi');
+    // The type icon is a small supporting glyph inside a chip, never a hero graphic.
+    expect(icon.closest('.orders-management-page__card-type-icon')).toBeTruthy();
+    expect(footer.querySelector('.orders-management-page__card-total bdi')?.getAttribute('dir')).toBe('ltr');
+    expect(footer.contains(card.querySelector('[data-testid="admin-order-details-order-new"]'))).toBe(true);
     expect(card.querySelector('.orders-management-page__avatar')).toBeNull();
 
     root().querySelector<HTMLButtonElement>('[data-testid="admin-order-details-order-new"]')?.click();
