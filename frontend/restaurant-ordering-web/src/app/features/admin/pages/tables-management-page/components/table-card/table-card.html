@@ -62,53 +62,82 @@
     }
   </div>
 
-  <div class="table-card__actions">
+  <!--
+    One compact toolbar: [edit · print · download] [activate/deactivate] ...... [regenerate · archive].
+    Same six actions as before; the two destructive ones are grouped at the end and styled as danger.
+  -->
+  <div
+    class="table-card__actions"
+    role="toolbar"
+    [attr.aria-label]="table().name"
+  >
     @if (!table().isArchived) {
-      <button
-        appIconButton
-        variant="primary"
-        icon="edit"
-        [label]="locale.uiText('tablesActionEdit')"
-        [attr.data-testid]="'table-edit-' + table().id"
-        (click)="edit.emit(table())"
-      ></button>
-      <button
-        appIconButton
-        icon="print"
-        [label]="locale.uiText('tablesActionPrint')"
-        [attr.data-testid]="'table-print-' + table().id"
-        (click)="print.emit(table())"
-      ></button>
-      <button
-        appIconButton
-        icon="download"
-        [label]="locale.uiText('tablesActionDownloadQr')"
-        [attr.data-testid]="'table-download-qr-' + table().id"
-        (click)="downloadQr.emit(table())"
-      ></button>
-      <button
-        appIconButton
-        icon="power"
-        [label]="table().isActive ? locale.uiText('tablesActionDeactivate') : locale.uiText('tablesActionActivate')"
-        [attr.data-testid]="'table-toggle-status-' + table().id"
-        (click)="toggleStatus.emit(table())"
-      ></button>
-      <button
-        appIconButton
-        variant="danger"
-        icon="refresh"
-        [label]="locale.uiText('tablesActionRegenerateToken')"
-        [attr.data-testid]="'table-regenerate-' + table().id"
-        (click)="regenerateToken.emit(table())"
-      ></button>
+      <div class="table-card__group" role="group">
+        <button
+          appIconButton
+          size="sm"
+          variant="primary"
+          icon="pencil"
+          [tooltip]="true"
+          [label]="locale.uiText('tablesActionEdit')"
+          [attr.data-testid]="'table-edit-' + table().id"
+          (click)="edit.emit(table())"
+        ></button>
+        <button
+          appIconButton
+          size="sm"
+          icon="print"
+          [tooltip]="true"
+          [label]="locale.uiText('tablesActionPrint')"
+          [attr.data-testid]="'table-print-' + table().id"
+          (click)="print.emit(table())"
+        ></button>
+        <button
+          appIconButton
+          size="sm"
+          icon="download"
+          [tooltip]="true"
+          [label]="locale.uiText('tablesActionDownloadQr')"
+          [attr.data-testid]="'table-download-qr-' + table().id"
+          (click)="downloadQr.emit(table())"
+        ></button>
+      </div>
+      <span class="table-card__divider" aria-hidden="true"></span>
+      <div class="table-card__group" role="group">
+        <button
+          appIconButton
+          size="sm"
+          icon="power"
+          [tooltip]="true"
+          [label]="table().isActive ? locale.uiText('tablesActionDeactivate') : locale.uiText('tablesActionActivate')"
+          [attr.data-testid]="'table-toggle-status-' + table().id"
+          (click)="toggleStatus.emit(table())"
+        ></button>
+      </div>
     }
-    <button
-      appIconButton
-      [variant]="table().isArchived ? 'primary' : 'danger'"
-      [icon]="table().isArchived ? 'restore' : 'archive'"
-      [label]="table().isArchived ? locale.uiText('actionRestore') : locale.uiText('actionArchive')"
-      [attr.data-testid]="'table-archive-' + table().id"
-      (click)="archive.emit(table())"
-    ></button>
+    <div class="table-card__group table-card__group--end" role="group">
+      @if (!table().isArchived) {
+        <button
+          appIconButton
+          size="sm"
+          variant="danger"
+          icon="refresh"
+          [tooltip]="true"
+          [label]="locale.uiText('tablesActionRegenerateToken')"
+          [attr.data-testid]="'table-regenerate-' + table().id"
+          (click)="regenerateToken.emit(table())"
+        ></button>
+      }
+      <button
+        appIconButton
+        size="sm"
+        [variant]="table().isArchived ? 'primary' : 'danger'"
+        [icon]="table().isArchived ? 'restore' : 'archive'"
+        [tooltip]="true"
+        [label]="table().isArchived ? locale.uiText('actionRestore') : locale.uiText('actionArchive')"
+        [attr.data-testid]="'table-archive-' + table().id"
+        (click)="archive.emit(table())"
+      ></button>
+    </div>
   </div>
 </article>

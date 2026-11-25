@@ -10,8 +10,12 @@
   --tables-shadow: var(--restaurant-shadow-sm);
   --tables-shadow-md: var(--restaurant-shadow-md);
 
+  /* The layout shell already provides the gap under the navigation; no extra top padding here
+     (same rhythm as Menu Management). */
+  --tables-section-gap: clamp(1rem, 1.8vw, 1.5rem);
+
   min-height: 100%;
-  padding: clamp(1.25rem, 2.5vw, 2.25rem) 0 clamp(2.5rem, 5vw, 4.5rem);
+  padding: 0 0 clamp(2.5rem, 5vw, 4.5rem);
   overflow: hidden;
   color: var(--tables-text);
   background: var(--restaurant-background);
@@ -28,7 +32,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  margin-block-end: 1.25rem;
+  margin-block-end: var(--tables-section-gap);
 }
 
 .tables-management-head__actions {
@@ -336,9 +340,10 @@
   }
 }
 
-@media (min-width: 78rem) {
+/* Wide screens: four cards per row (3 columns left them stretched and unbalanced). */
+@media (min-width: 96rem) {
   .tables-management-grid {
-    grid-template-columns: repeat(auto-fill, minmax(clamp(22rem, 17vw, 34rem), 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 

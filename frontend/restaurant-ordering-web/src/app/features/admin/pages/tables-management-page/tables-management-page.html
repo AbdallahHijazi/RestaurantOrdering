@@ -56,16 +56,13 @@
       }
 
       @case ('error') {
-        <div class="tables-management-state tables-management-state--error" data-testid="tables-error-state">
-          <h2>{{ locale.uiText('tablesListErrorTitle') }}</h2>
-          <p>{{ listErrorMessage() }}</p>
-          <button
-            appIconButton
-            icon="refresh"
-            [label]="locale.uiText('tablesRetry')"
-            (click)="loadTables()"
-          ></button>
-        </div>
+        <app-error-state
+          data-testid="tables-error-state"
+          [title]="locale.uiText('tablesListErrorTitle')"
+          [message]="listErrorMessage()"
+          [retryLabel]="locale.uiText('tablesRetry')"
+          (retry)="loadTables()"
+        />
       }
 
       @case ('ready') {

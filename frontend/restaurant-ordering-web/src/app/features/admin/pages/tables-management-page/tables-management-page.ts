@@ -47,9 +47,11 @@ interface PrintEntry {
   menuUrl: string;
 }
 
+import { ErrorState } from '../../../../shared/ui/error-state/error-state';
+
 @Component({
   selector: 'app-tables-management-page',
-  imports: [
+  imports: [ErrorState, 
     ReactiveFormsModule,
     ModalShell,
     StaffModalActions,
