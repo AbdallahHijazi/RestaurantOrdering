@@ -1,12 +1,24 @@
-<section class="error-state" role="alert">
-  <h2>{{ resolveTitle(locale(), title()) }}</h2>
-  <p>{{ resolveMessage(locale(), message()) }}</p>
+<section class="app-error-state" role="alert">
+  <span class="app-error-state__icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" focusable="false">
+      <path fill="currentColor" d="M12 2 1 21h22L12 2Zm0 6 1 7h-2l1-7Zm0 10a1.25 1.25 0 1 0 0-2.5A1.25 1.25 0 0 0 12 18Z" />
+    </svg>
+  </span>
+  <h2 class="app-error-state__title">{{ resolvedTitle() }}</h2>
+  @if (resolvedMessage(); as message) {
+    <p class="app-error-state__message">{{ message }}</p>
+  }
   @if (showRetry()) {
     <button
       appIconButton
-  class="error-state__retry"
+      class="app-error-state__retry"
       icon="refresh"
-      [label]="locale()?.locale() === 'ar' ? 'إعادة المحاولة' : 'Try again'"
+      variant="primary"
+      [showLabel]="true"
+      [label]="resolvedRetryLabel()"
+      [loading]="retrying()"
+      [disabled]="retrying()"
+      [attr.data-testid]="retryTestId()"
       (click)="retry.emit()"
     ></button>
   }

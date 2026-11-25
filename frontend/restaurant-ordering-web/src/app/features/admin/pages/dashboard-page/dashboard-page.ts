@@ -28,9 +28,11 @@ const RECENT_ORDERS_COUNT = 5;
 
 type LoadState = 'loading' | 'ready' | 'error';
 
+import { ErrorState } from '../../../../shared/ui/error-state/error-state';
+
 @Component({
   selector: 'app-dashboard-page',
-  imports: [RouterLink, IconButton],
+  imports: [ErrorState, RouterLink, IconButton],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
 })

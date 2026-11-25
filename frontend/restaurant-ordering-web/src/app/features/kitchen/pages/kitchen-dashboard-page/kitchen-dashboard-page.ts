@@ -47,9 +47,11 @@ const EMPTY_COLUMN: ColumnState = {
   loadingMore: false,
 };
 
+import { ErrorState } from '../../../../shared/ui/error-state/error-state';
+
 @Component({
   selector: 'app-kitchen-dashboard-page',
-  imports: [IconButton, OrderModalShell, LanguageSwitcher],
+  imports: [ErrorState, IconButton, OrderModalShell, LanguageSwitcher],
   templateUrl: './kitchen-dashboard-page.html',
   styleUrl: './kitchen-dashboard-page.scss',
 })

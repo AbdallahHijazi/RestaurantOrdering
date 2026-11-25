@@ -279,7 +279,7 @@ describe('MenuPage', () => {
     await settle(fixture);
     const root = fixture.nativeElement as HTMLElement;
     expect(root.textContent).toContain('تعذر تحميل القائمة حاليًا');
-    expect(root.querySelector('.error-state__retry')).toBeTruthy();
+    expect(root.querySelector('.app-error-state__retry')).toBeTruthy();
   });
 
   it('switches visible menu content by clicking the language switcher (DOM)', async () => {

@@ -305,7 +305,7 @@ describe('RestaurantLivePreview', () => {
     fixture.detectChanges();
 
     (
-      fixture.nativeElement.querySelector('.error-state__retry') as HTMLButtonElement
+      fixture.nativeElement.querySelector('.app-error-state__retry') as HTMLButtonElement
     ).click();
 
     expect(refresh).toHaveBeenCalled();

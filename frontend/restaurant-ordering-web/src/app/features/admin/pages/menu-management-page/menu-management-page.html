@@ -52,11 +52,13 @@
       }
 
       @case ('error') {
-        <div class="menu-management-state menu-management-state--error" data-testid="menu-error-state">
-          <h2>{{ locale.uiText('adminMenuListErrorTitle') }}</h2>
-          <p>{{ listErrorMessage() }}</p>
-          <button appIconButton icon="refresh" [label]="locale.uiText('adminMenuRetry')" (click)="loadCategories()"></button>
-        </div>
+        <app-error-state
+          data-testid="menu-error-state"
+          [title]="locale.uiText('adminMenuListErrorTitle')"
+          [message]="listErrorMessage()"
+          [retryLabel]="locale.uiText('adminMenuRetry')"
+          (retry)="loadCategories()"
+        />
       }
 
       @case ('ready') {
@@ -316,10 +318,13 @@
             }
 
             @case ('error') {
-              <div class="menu-management-state menu-management-state--error" data-testid="menu-items-error">
-                <p>{{ itemsErrorMessage() }}</p>
-                <button appIconButton icon="refresh" [label]="locale.uiText('adminMenuRetry')" (click)="loadMenuItems()"></button>
-              </div>
+              <app-error-state
+                [compact]="true"
+                data-testid="menu-items-error"
+                [title]="itemsErrorMessage()"
+                [retryLabel]="locale.uiText('adminMenuRetry')"
+                (retry)="loadMenuItems()"
+              />
             }
 
             @case ('ready') {

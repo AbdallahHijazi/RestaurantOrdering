@@ -63,10 +63,11 @@ type AvailabilityFilter = 'all' | 'available' | 'unavailable';
 
 
 import type { MenuItemSize } from '../../../../shared/models/menu-item-size';
+import { ErrorState } from '../../../../shared/ui/error-state/error-state';
 
 @Component({
   selector: 'app-menu-management-page',
-  imports: [
+  imports: [ErrorState, 
     ReactiveFormsModule,
     ModalShell,
     MenuManagementMealCard,

@@ -66,13 +66,13 @@
     }
 
     @case ('error') {
-      <section class="kitchen-page__state" data-testid="kitchen-board-error">
-        <h2>{{ locale.uiText('kitchenBoardErrorTitle') }}</h2>
-        <p>{{ boardError() }}</p>
-        <button type="button" class="kitchen-page__primary-btn" (click)="loadBoard()">
-          {{ locale.uiText('kitchenRetry') }}
-        </button>
-      </section>
+      <app-error-state
+        data-testid="kitchen-board-error"
+        [title]="locale.uiText('kitchenBoardErrorTitle')"
+        [message]="boardError()"
+        [retryLabel]="locale.uiText('kitchenRetry')"
+        (retry)="loadBoard()"
+      />
     }
 
     @case ('ready') {

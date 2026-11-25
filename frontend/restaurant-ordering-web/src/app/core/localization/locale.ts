@@ -163,6 +163,9 @@ export class LocaleService {
 export type UiTextKey =
   | 'loading'
   | 'errorTitle'
+  | 'errorLoadTitle'
+  | 'errorLoadDescription'
+  | 'errorRetry'
   | 'errorGeneric'
   | 'notFoundTitle'
   | 'notFoundMessage'
@@ -998,6 +1001,9 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
   ar: {
     loading: 'جاري تحميل القائمة…',
     errorTitle: 'تعذر تحميل القائمة',
+    errorLoadTitle: 'تعذر تحميل البيانات',
+    errorLoadDescription: 'حدث خطأ أثناء تحميل البيانات. حاول مرة أخرى.',
+    errorRetry: 'إعادة المحاولة',
     errorGeneric: 'حدث خطأ أثناء تحميل البيانات. يرجى المحاولة لاحقًا.',
     notFoundTitle: 'المطعم غير موجود',
     notFoundMessage: 'لم نتمكن من العثور على مطعم بهذا الرابط.',
@@ -1854,6 +1860,9 @@ const UI_TEXT: Record<AdminUiLocale, Record<UiTextKey, string>> = {
   en: {
     loading: 'Loading menu…',
     errorTitle: 'Unable to load menu',
+    errorLoadTitle: 'Unable to load data',
+    errorLoadDescription: 'Something went wrong while loading. Please try again.',
+    errorRetry: 'Try again',
     errorGeneric: 'Something went wrong while loading data. Please try again later.',
     notFoundTitle: 'Restaurant not found',
     notFoundMessage: 'We could not find a restaurant for this link.',

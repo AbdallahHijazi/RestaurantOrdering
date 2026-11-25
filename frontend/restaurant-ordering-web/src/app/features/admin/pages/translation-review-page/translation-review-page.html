@@ -105,17 +105,14 @@
     }
 
     @case ('error') {
-      <section class="translation-review-page__state" data-testid="translation-review-error">
-        <h3>{{ locale.uiText('translationReviewListErrorTitle') }}</h3>
-        <p>{{ listError() }}</p>
-        <button
-          appIconButton
-          icon="refresh"
-          [label]="locale.uiText('translationReviewRetryLoad')"
-          data-testid="translation-review-retry-load"
-          (click)="retryLoad()"
-        ></button>
-      </section>
+      <app-error-state
+        data-testid="translation-review-error"
+        [title]="locale.uiText('translationReviewListErrorTitle')"
+        [message]="listError()"
+        [retryLabel]="locale.uiText('translationReviewRetryLoad')"
+        retryTestId="translation-review-retry-load"
+        (retry)="retryLoad()"
+      />
     }
 
     @case ('ready') {

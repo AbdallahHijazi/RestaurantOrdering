@@ -54,9 +54,11 @@ const STATUS_FILTERS: readonly StatusFilterValue[] = [
   'Pending',
 ];
 
+import { ErrorState } from '../../../../shared/ui/error-state/error-state';
+
 @Component({
   selector: 'app-translation-review-page',
-  imports: [IconButton, FormsModule, OrderModalShell, TranslationReviewDetailModal],
+  imports: [ErrorState, IconButton, FormsModule, OrderModalShell, TranslationReviewDetailModal],
   templateUrl: './translation-review-page.html',
   styleUrl: './translation-review-page.scss',
 })

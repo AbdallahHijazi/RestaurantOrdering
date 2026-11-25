@@ -36,18 +36,15 @@
 
   <!-- Load failure: never shown as zero statistics -->
   @if (statsState() === 'error') {
-    <div class="admin-dashboard__alert" role="alert" data-testid="dashboard-stats-error">
-      <span>{{ localeService.uiText('adminDashboardLoadError') }}</span>
-
-      <button
-        appIconButton
-        icon="refresh"
-        [label]="localeService.uiText('adminDashboardRetry')"
-        data-testid="dashboard-stats-retry"
-        [disabled]="loading()"
-        (click)="refresh()"
-      ></button>
-    </div>
+    <app-error-state
+      [compact]="true"
+      data-testid="dashboard-stats-error"
+      [title]="localeService.uiText('adminDashboardLoadError')"
+      [retryLabel]="localeService.uiText('adminDashboardRetry')"
+      retryTestId="dashboard-stats-retry"
+      [retrying]="loading()"
+      (retry)="refresh()"
+    />
   }
 
 
@@ -159,17 +156,14 @@
 
       } @else if (ordersState() === 'error') {
 
-        <div class="orders-card__empty" role="alert" data-testid="dashboard-orders-error">
-          <strong>{{ localeService.uiText('adminDashboardOrdersLoadError') }}</strong>
-
-          <button
-            appIconButton
-            icon="refresh"
-            [label]="localeService.uiText('adminDashboardRetry')"
-            data-testid="dashboard-orders-retry"
-            (click)="refresh()"
-          ></button>
-        </div>
+        <app-error-state
+          [compact]="true"
+          data-testid="dashboard-orders-error"
+          [title]="localeService.uiText('adminDashboardOrdersLoadError')"
+          [retryLabel]="localeService.uiText('adminDashboardRetry')"
+          retryTestId="dashboard-orders-retry"
+          (retry)="refresh()"
+        />
 
       } @else if (!orders().length) {
 
@@ -353,17 +347,14 @@
           <div class="activity-card__placeholder">{{ localeService.uiText('adminDashboardOrdersLoading') }}</div>
         }
         @case ('error') {
-          <div class="activity-card__placeholder" role="alert" data-testid="dashboard-activity-error">
-            <span>{{ localeService.uiText('adminDashboardActivityLoadError') }}</span>
-            <button
-              appIconButton
-              size="sm"
-              icon="refresh"
-              [label]="localeService.uiText('adminDashboardRetry')"
-              data-testid="dashboard-activity-retry"
-              (click)="refresh()"
-            ></button>
-          </div>
+          <app-error-state
+            [compact]="true"
+            data-testid="dashboard-activity-error"
+            [title]="localeService.uiText('adminDashboardActivityLoadError')"
+            [retryLabel]="localeService.uiText('adminDashboardRetry')"
+            retryTestId="dashboard-activity-retry"
+            (retry)="refresh()"
+          />
         }
         @default {
           @if (!activityHasOrders()) {
