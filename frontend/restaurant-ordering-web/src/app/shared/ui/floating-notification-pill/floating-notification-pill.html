@@ -2,6 +2,7 @@
   class="floating-notification-pill"
   [class.floating-notification-pill--error]="tone() === 'error'"
   [class.floating-notification-pill--warning]="tone() === 'warning'"
+  [class.floating-notification-pill--leaving]="leaving()"
   [attr.role]="tone() === 'error' ? 'alert' : 'status'"
   [attr.aria-live]="tone() === 'error' ? 'assertive' : 'polite'"
   aria-atomic="true"

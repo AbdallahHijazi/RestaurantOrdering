@@ -47,6 +47,15 @@
   pointer-events: auto;
 
   animation: floating-notification-pill-in 180ms ease-out;
+  transition:
+    opacity var(--restaurant-motion-fast) var(--restaurant-ease-exit),
+    transform var(--restaurant-motion-fast) var(--restaurant-ease-exit);
+}
+
+/* Last 200ms before the host dismisses it: leave smoothly instead of vanishing. */
+.floating-notification-pill--leaving {
+  opacity: 0;
+  transform: translateY(-0.5rem);
 }
 
 .floating-notification-pill__icon {

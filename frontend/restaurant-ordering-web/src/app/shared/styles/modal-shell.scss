@@ -54,7 +54,26 @@
   backdrop-filter: blur(4px);
 }
 
+/* Entrance only (backwards fill): nothing lingers, so no residual transform/stacking context. */
+.modal-overlay {
+  animation: modal-overlay-in var(--restaurant-motion-fast) var(--restaurant-ease-standard) backwards;
+}
+
+@keyframes modal-overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-dialog-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--restaurant-motion-distance-md), 0) scale(0.985);
+  }
+}
+
 .modal-dialog {
+  animation: modal-dialog-in var(--restaurant-motion-normal) var(--restaurant-ease-standard) backwards;
   position: relative;
   z-index: var(--z-modal-dialog);
   display: flex;

@@ -4,6 +4,7 @@ import {
   effect,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { IconButton } from '../icon-button/icon-button';
 
@@ -21,6 +22,8 @@ export class FloatingNotificationPill {
   readonly closeLabel = input.required<string>();
   readonly tone = input<FloatingNotificationTone>('success');
   readonly dismissed = output<void>();
+  /** True during the last moments of the toast's life: drives the exit fade (state, so a new message restarts it). */
+  protected readonly leaving = signal(false);
 
   constructor() {
     effect((onCleanup) => {
@@ -30,11 +33,14 @@ export class FloatingNotificationPill {
         return;
       }
 
+      this.leaving.set(false);
+      const leaveTimer = window.setTimeout(() => this.leaving.set(true), 1800);
       const timer = window.setTimeout(() => {
         this.dismissed.emit();
       }, 2000);
 
       onCleanup(() => {
+        window.clearTimeout(leaveTimer);
         window.clearTimeout(timer);
       });
     });
